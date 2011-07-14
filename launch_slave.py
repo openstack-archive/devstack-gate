@@ -24,7 +24,7 @@ apt-get install -y --force-yes git rubygems
 gem install puppet
 git clone git://github.com/openstack/openstack-ci-puppet.git
 cd openstack-ci-puppet
-puppet apply --modulepath=`pwd`/modules manifests/slave.pp
+/var/lib/gems/1.8/bin/puppet apply --modulepath=`pwd`/modules manifests/slave.pp
 """)
 
 # a task that first installs the ssh key, and then runs the script
