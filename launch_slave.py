@@ -11,6 +11,10 @@ except:
   print "Node Name required!"
   sys.exit(1)
 
+node_manifest = "slave"
+if len(sys.argv) > 2:
+  node_manifest = sys.argv[2]
+
 Driver = get_driver(Provider.RACKSPACE)
 conn = Driver(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
 
@@ -24,8 +28,8 @@ apt-get install -y --force-yes git rubygems
 gem install --no-rdoc --no-ri puppet
 git clone git://github.com/openstack/openstack-ci-puppet.git
 cd openstack-ci-puppet
-/var/lib/gems/1.8/bin/puppet apply --modulepath=`pwd`/modules manifests/slave.pp
-""")
+/var/lib/gems/1.8/bin/puppet apply --modulepath=`pwd`/modules manifests/%s.pp
+""" % node_manifest)
 
 # a task that first installs the ssh key, and then runs the script
 msd = MultiStepDeployment([sd, script])
