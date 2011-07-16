@@ -8,7 +8,16 @@ then
 	exit 1
 fi
 
-RECORDFILE=$HOME/tarballversions
+VERSIONDIR="$HOME/versions"
+RECORDFILE="$VERSIONDIR/tarballversions"
+
+if [ ! -d "$VERSIONDIR" ]
+then
+	bzr co bzr://jenkins.openstack.org/ "$VERSIONDIR"
+else
+	( cd $VERSIONDIR ; bzr up )
+fi
+
 SEPARATOR=${SEPARATOR:-'~'}
 revno=$(bzr revno)
 datestamp="$(date +%Y%m%d)"
@@ -19,6 +28,8 @@ then
 	exit 0
 fi
 echo "$PROJECT $revno" '>>' "$RECORDFILE"
+cat "$RECORDFILE" | sort > "$RECORDFILE"
+( cd $VERSIONDIR ; bzr up ;  bzr commit -m"Added $PROJECT $snapshotversion" )
 
 python setup.py sdist
 tarball=$(echo dist/*.tar.gz)
