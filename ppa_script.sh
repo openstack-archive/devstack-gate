@@ -64,7 +64,8 @@ do
 		buildno=$(($buildno + 1))
 	else
 		echo "$PROJECT $pkgversion" >> "$PKGRECORDFILE"
-		cat "$PKGRECORDFILE" | sort > "$PKGRECORDFILE"
+		sort "$PKGRECORDFILE" > "$PKGRECORDFILE".tmp
+                mv "$PKGRECORDFILE".tmp "$PKGRECORDFILE"
 		( cd $VERSIONDIR ;
 		 bzr up ;
 		 bzr commit -m"Added $PROJECT $snapshotversion" )

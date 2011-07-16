@@ -106,9 +106,7 @@ fi
 
 
 snapshotversion=$(find_next_version)
-echo "$PROJECT $snapshotversion" >> "$RECORDFILE"
-cat "$RECORDFILE" | sort > "$RECORDFILE"
-( cd $VERSIONDIR ; bzr up ;  bzr commit -m"Added $PROJECT $snapshotversion" )
+
 
 # Should be ~ if tarball version is the one we're working *toward*. (By far preferred!)
 # Should be + if tarball version is already released and we're moving forward after it.
@@ -122,3 +120,8 @@ tarball=$(echo dist/*.tar.gz)
 
 echo mv "$tarball" "dist/$(basename $tarball .tar.gz)${SEPARATOR}${snapshotversion}.tar.gz"
 mv "$tarball" "dist/$(basename $tarball .tar.gz)${SEPARATOR}${snapshotversion}.tar.gz"
+
+echo "$PROJECT $revno" >> "$RECORDFILE"
+sort "$RECORDFILE" > "$RECORDFILE".tmp
+mv "$RECORDFILE".tmp "$RECORDFILE"
+
