@@ -9,11 +9,19 @@ then
 fi
 
 HUDSON=http://localhost:8080/
-PKGRECORDFILE=$HOME/binpkgversions
+VERSIONDIR=$HOME/versions
+PKGRECORDFILE=$VERSIONDIR/binpkgversions
 JENKINS_TARBALL_JOB=${JENKINS_TARBALL_JOB:-$PROJECT-tarball}
 BZR_BRANCH=${BZR_BRANCH:-lp:~openstack-ubuntu-packagers/$PROJECT/ubuntu}
 PPAS=${PPAS:-ppa:$PROJECT-core/trunk}
 PACKAGING_REVNO=${PACKAGING_REVNO:--1}
+
+if [ ! -d "$VERSIONDIR" ]
+then
+        bzr co bzr://jenkins.openstack.org/ "$VERSIONDIR"
+else
+        ( cd $VERSIONDIR ; bzr up )
+fi
 
 # Clean up after previous build
 rm -rf build dist.zip
@@ -64,6 +72,10 @@ do
 		buildno=$(($buildno + 1))
 	else
 		echo "$PROJECT $pkgversion" >> "$PKGRECORDFILE"
+		cat "$PKGRECORDFILE" | sort > "$PKGRECORDFILE"
+		( cd $VERSIONDIR ;
+		 bzr up ;
+		 bzr commit -m"Added $PROJECT $snapshotversion" )
 		break
 	fi
 done
