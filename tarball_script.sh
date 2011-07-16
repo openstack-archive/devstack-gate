@@ -94,8 +94,8 @@ then
 	exit 1
 fi
 
-VERSIONSDIR="$HOME/versions"
-RECORDFILE="$VERSIONSDIR/tarballversions"
+VERSIONDIR="$HOME/versions"
+RECORDFILE="$VERSIONDIR/tarballversions"
 
 if [ ! -d "$VERSIONDIR" ]
 then
