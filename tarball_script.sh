@@ -5,7 +5,7 @@ set -e
 find_next_version() {
     datestamp="${datestamp:-$(date +%Y%m%d)}"
     index=1
-    MILESTONEDIR="${MILESTONEDIR:-$HOME/milestone}"
+    MILESTONEDIR="${MILESTONEDIR:-$HOME/versions/milestone}"
     BRANCH=${BRANCH:-trunk}
 
     milestonefile="${MILESTONEDIR}/${PROJECT}-${BRANCH}"
