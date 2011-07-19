@@ -11,9 +11,16 @@ except:
   print "Node Name required!"
   sys.exit(1)
 
+
 node_manifest = "slave"
 if len(sys.argv) > 2:
   node_manifest = sys.argv[2]
+
+files={}
+for key in ("slave_private_key", "slave_gpg_key"):
+  if os.path.exists(key):
+    with open(key, "r") as private_key:
+      files["/root/%s" % key] = private_key.read()
 
 Driver = get_driver(Provider.RACKSPACE)
 conn = Driver(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
@@ -43,7 +50,8 @@ image = [img for img in conn.list_images() if img.id == '76'][0]
 
 
 # deploy_node takes the same base keyword arguments as create_node.
-node = conn.deploy_node(name=node_name, image=image, size=size, deploy=msd)
+node = conn.deploy_node(name=node_name, image=image, size=size, deploy=msd,
+                        ex_files=files)
 
 with open("%s.node.sh" % node_name,"w") as node_file:
   node_file.write("ipAddr=%s\n" % node.public_ip[0])
