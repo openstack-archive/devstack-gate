@@ -52,8 +52,10 @@ for (k,v) in groups.items():
     cur.execute("select max(s) from account_group_id")
     group_id = cur.fetchall()[0][0]
 
+    group_uuid = uuid.uuid4()
+
     cur.execute("""insert into account_groups (group_id, owner_group_id, name, description, group_uuid) values
-    (%s, %s,%s,%s, %s)""", (group_id, group_id, k,v,str(uuid.uuid1().hex)))
+    (%s, %s,%s,%s, %s)""", (group_id, group_id, k,v, group_uuid.hex))
     cur.execute("""insert into account_group_names (group_id, name) values
     (%s, %s)""",
     (group_id, k))
