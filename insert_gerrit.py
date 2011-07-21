@@ -49,7 +49,7 @@ for (k,v) in groups.items():
     group_ids[k] = cur.fetchall()[0][0]
   else:
     cur.execute("""insert into account_group_id (s) values (NULL)""");
-    cur.execute("select s from account_group_id")
+    cur.execute("select max(s) from account_group_id")
     group_id = cur.fetchall()[0][0]
 
     cur.execute("""insert into account_groups (group_id, owner_group_id, name, description, group_uuid) values
@@ -81,7 +81,7 @@ for (k,v) in users.items():
   else:
 
     cur.execute("""insert into account_id (s) values (NULL)""");
-    cur.execute("select s from account_id")
+    cur.execute("select max(s) from account_id")
     account_id = cur.fetchall()[0][0]
 
     cur.execute("""insert into accounts (account_id, full_name, preferred_email) values
