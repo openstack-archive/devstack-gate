@@ -52,10 +52,17 @@ for (k,v) in groups.items():
     cur.execute("select max(s) from account_group_id")
     group_id = cur.fetchall()[0][0]
 
+    # Match the 40-char 'uuid' that java is producing
     group_uuid = uuid.uuid4()
+    second_uuid = uuid.uuid4()
+    full_uuid = "%s%s" % (group_uuid.hex, second_uuid.hex[:8])
 
-    cur.execute("""insert into account_groups (group_id, owner_group_id, name, description, group_uuid) values
-    (%s, %s,%s,%s, %s)""", (group_id, group_id, k,v, group_uuid.hex))
+    cur.execute("""insert into account_groups
+                   (group_id, group_type, owner_group_id,
+                    name, description, group_uuid)
+                   values
+                   (%s, 'INTERNAL', 1, %s, %s, %s)""",
+                (group_id, k,v, full_uuid))
     cur.execute("""insert into account_group_names (group_id, name) values
     (%s, %s)""",
     (group_id, k))
