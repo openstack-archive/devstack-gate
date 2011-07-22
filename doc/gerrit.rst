@@ -368,7 +368,7 @@ Launchpad Sync
 **************
 
 The launchpad user sync process consists of two scripts which are in
-openstack/openstack-ci on github: sync_launchpad_users.py and
+openstack/openstack-ci on github: sync_launchpad_gerrit.py and
 insert_gerrit.py.
 
 Both scripts should be run as gerrit2 on review.openstack.org
@@ -381,22 +381,22 @@ insert_gerrit.py reads the pickle file and applies it to the MySQL database.
 The gerrit caches must then be flushed.
 
 Depends
--------
+=======
 ::
 
   apt-get install python-mysqldb python-openid python-launchpadlib
 
 Keys
-----
+====
 
 The key for the launchpad sync user is in ~/.ssh/launchpad_rsa.
 
 Running
--------
+=======
 ::
 
   cd openstack-ci
   git pull
-  python sync_launchpad_users.py
+  python sync_launchpad_gerrit.py
   python insert_gerrit.py
   ssh -i /home/gerrit2/.ssh/launchpadsync_rsa -p29418 review.openstack.org gerrit flush-caches
