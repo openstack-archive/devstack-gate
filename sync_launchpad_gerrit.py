@@ -8,7 +8,8 @@ import pickle
 
 
 cachedir="~/.launchpadlib/cache"
-launchpad = Launchpad.login_with('Sync Users', LPNET_SERVICE_ROOT, cachedir)
+launchpad = Launchpad.login_anonymously("Gerrit User Sync", "production",
+                                        cachedir)
 
 def get_type(in_type):
   if in_type == "RSA":
