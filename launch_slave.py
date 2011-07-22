@@ -17,7 +17,7 @@ if len(sys.argv) > 2:
   node_manifest = sys.argv[2]
 
 files={}
-for key in ("slave_private_key", "slave_gpg_key"):
+for key in ("slave_private_key", "slave_gpg_key", "slave_tarmac_key"):
   if os.path.exists(key):
     with open(key, "r") as private_key:
       files["/root/%s" % key] = private_key.read()
@@ -29,8 +29,6 @@ conn = Driver(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
 sd = SSHKeyDeployment(open(os.path.expanduser("~/.ssh/id_rsa.pub")).read())
 # a simple script to install puppet post boot, can be much more complicated.
 script = ScriptDeployment("""
-perl -ple 's,main,main universe,' -i /etc/apt/sources.list
-apt-get update
 apt-get install -y --force-yes git rubygems
 gem install --no-rdoc --no-ri puppet
 git clone git://github.com/openstack/openstack-ci-puppet.git
