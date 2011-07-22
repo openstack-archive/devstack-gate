@@ -1,4 +1,4 @@
-import sys, subprocess
+import os, sys, subprocess
 from launchpadlib.launchpad import Launchpad
 from launchpadlib.uris import LPNET_SERVICE_ROOT
 from openid.consumer import consumer
@@ -8,8 +8,14 @@ import pickle
 
 
 cachedir="~/.launchpadlib/cache"
+credentials="~/.launchpadlib/creds"
+
+if not os.path.exists("~/.launchpadlib"):
+  os.makedirs("~/.launchpadlib")
+
 launchpad = Launchpad.login_anonymously("Gerrit User Sync", "production",
-                                        cachedir)
+                                        cachedir,
+                                        credentials_file=credentials)
 
 def get_type(in_type):
   if in_type == "RSA":
