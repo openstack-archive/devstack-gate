@@ -393,7 +393,7 @@ The key for the launchpad sync user is in ~/.ssh/launchpad_rsa. Connecting
 to Launchpad requires oauth authentication - so the first time
 sync_launchpad_gerrit.py is run, it will display a URL. Open this URL in a
 browser and log in to launchpad as the hudson-openstack user. Subsequent
-runs with cache the credentials.
+runs will run with cached credentials.
 
 Running
 =======
