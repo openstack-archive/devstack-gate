@@ -22,6 +22,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+   jenkins
    gerrit
 
 Indices and tables
