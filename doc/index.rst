@@ -24,6 +24,7 @@ Contents:
 
    jenkins
    gerrit
+   tarmac
 
 Indices and tables
 ==================
