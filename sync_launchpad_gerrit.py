@@ -23,7 +23,7 @@ teams_todo = [
   "burrow-core",
   "glance",
   "glance-core",
-  "keystone-team",
+  "keystone",
   "keystone-core",
   "openstack",
   "openstack-admins",
