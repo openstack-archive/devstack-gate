@@ -29,6 +29,7 @@ conn = Driver(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
 sd = SSHKeyDeployment(open(os.path.expanduser("~/.ssh/id_rsa.pub")).read())
 # a simple script to install puppet post boot, can be much more complicated.
 script = ScriptDeployment("""
+apt-get update
 apt-get install -y --force-yes git rubygems
 gem install --no-rdoc --no-ri puppet
 git clone git://github.com/openstack/openstack-ci-puppet.git
