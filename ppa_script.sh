@@ -1,9 +1,4 @@
 #!/bin/sh
-# This needs to always run on the Jenkins master because it does signing and
-# uploading, which would be monstrously difficult (at this point) to do on a 
-# slave. At some point, perhaps we can get key management done differently
-# and rework this - but for now it's not really a burden to have this stuff
-# on the master (you don't need build depends to make a source package)
 
 set -e
 
@@ -71,6 +66,9 @@ do
 		echo "$PROJECT $pkgversion" >> "$PKGRECORDFILE"
 		sort "$PKGRECORDFILE" > "$PKGRECORDFILE".tmp
                 mv "$PKGRECORDFILE".tmp "$PKGRECORDFILE"
+		( cd $VERSIONDIR ;
+		 bzr up ;
+		 bzr commit -m"Added $PROJECT $snapshotversion" )
 		break
 	fi
 done
