@@ -40,6 +40,7 @@ conn = Driver(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
 sd = SSHKeyDeployment(open(os.path.expanduser("~/.ssh/id_rsa.pub")).read())
 # a simple script to install puppet post boot, can be much more complicated.
 script = ScriptDeployment("""
+perl -ple 's/main/main universe/' -i /etc/apt/sources.list
 apt-get update
 apt-get -y --force-yes upgrade
 apt-get install -y --force-yes git rubygems
