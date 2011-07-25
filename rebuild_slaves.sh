@@ -1,4 +1,15 @@
-for slave in burrow libburrow burrow-java glance keystone openstack-ci; do
+for slave in \
+  burrow \
+  burrow-java \
+  dashboard \
+  glance \
+  keystone \
+  libburrow \
+  nova \
+  manuals \
+  openstack-ci \
+  swift
+do
   source ${slave}.slave.openstack.org.node.sh
   cloudservers delete ${nodeId}
   python launch_slave.py ${slave}.slave.openstack.org `echo ${slave} | tr - _`

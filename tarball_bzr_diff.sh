@@ -2,12 +2,13 @@
 
 retval=0
 
-STATEPATH=${JENKINS_HOME:-$HOME}
+STATEPATH=${HOME}/versions
 BNT=in_bzr_but_not_in_tarball.txt
 TNB=in_tarball_but_not_in_bzr.txt
 BNTSAVED=$STATEPATH/$BNT.saved
 TNBSAVED=$STATEPATH/$TNB.saved
 
+(cd $STATEPATH ; bzr up)
 bzr ls -R . --versioned | sort > bzr.lst
 tar tzf nova-*.tar.gz  | cut -f2- -d/ | grep -v ^$ | sort -g > tarball.lst
 rm -rf dist dist.zip
@@ -19,6 +20,7 @@ if [ "$1" = "ack" ]
 then
         cp $BNT $BNTSAVED
         cp $TNB $TNBSAVED
+        ( cd $STATEPATH ; bzr commit "Ran ack" )
         exit 0
 fi
 
@@ -54,4 +56,5 @@ fi
 
 echo '</body></html>' >> html/report.html
 
+( cd $STATEPATH ; bzr commit "Finished bzr diff" )
 exit $retval
