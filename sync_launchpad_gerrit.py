@@ -13,9 +13,8 @@ credentials="~/.launchpadlib/creds"
 if not os.path.exists("~/.launchpadlib"):
   os.makedirs("~/.launchpadlib")
 
-launchpad = Launchpad.login_anonymously("Gerrit User Sync", "production",
-                                        cachedir,
-                                        credentials_file=credentials)
+launchpad = Launchpad.login_with('Gerrit User Sync', LPNET_SERVICE_ROOT,
+                                 cachedir, credentials_file=credentials)
 
 def get_type(in_type):
   if in_type == "RSA":
