@@ -124,7 +124,7 @@ class Gerrit(threading.Thread):
             self.ircbot.send(msg)
 
             if (approval['type'] == 'CRVW' and approval['value'] == '-2' and
-                'x-crvw-minus-1' in self.events):
+                'x-crvw-minus-2' in self.events):
                 msg = 'A change to %s has been rejected: %s  %s' % (
                 data['change']['project'], 
                 data['change']['subject'],
