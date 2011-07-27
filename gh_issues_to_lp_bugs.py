@@ -32,6 +32,9 @@ for issue_state in ("open", "closed"):
         these_issues = simplejson.load(issue_json)
         issues.extend(these_issues['issues'])
 
+users = {}
+with open("gh_to_lp_users.json", "r") as users_json:
+    users = simplejson.load(users_json)
 
 outfile_name = "%s_%s_lp_bugs.xml" % (team, project)
 bugs_outfile = codecs.open(outfile_name, "w", "utf-8-sig")
@@ -42,7 +45,8 @@ bugs_outfile.write("""<?xml version="1.0"?>
 for issue in issues:
     issue['body'] = escape(issue['body'])
     issue['title'] = escape(issue['title'])
-    issue['lower_user'] = issue['user'].lower()
+    issue['lower_user'] = users.get(issue['user'], issue['user'].lower())
+
     if issue['state'] == "open":
         issue['status'] = "CONFIRMED"
     else:
@@ -92,7 +96,8 @@ for issue in issues:
         for bad_time in ('updated_at', 'created_at'):
             comment[bad_time] = fix_bad_time(comment[bad_time])
         comment['body'] = escape(comment['body'])
-        comment['lower_user'] = comment['user'].lower()
+        comment['lower_user'] = users.get(comment['user'],
+                                          comment['user'].lower())
         try:
             bugs_outfile.write("""
   <comment>
