@@ -1,0 +1,97 @@
+default namespace = "https://launchpad.net/xmlns/2006/bugs"
+
+start = lpbugs
+
+# Data types
+
+boolean = "True" | "False"
+lpname = xsd:string { pattern = "[a-z0-9][a-z0-9\+\.\-]*" }
+cvename = xsd:string { pattern = "(19|20)[0-9][0-9]-[0-9][0-9][0-9][0-9]" }
+
+# XXX: jamesh 2006-04-11 bug=105401:
+# These status and importance values need to be kept in sync with the
+# rest of Launchpad.  However, there are not yet any tests for this.
+#     https://bugs.launchpad.net/bugs/105401
+status = (
+  "NEW"          |
+  "INCOMPLETE"   |
+  "INVALID"      |
+  "WONTFIX"      |
+  "CONFIRMED"    |
+  "TRIAGED"      |
+  "INPROGRESS"   |
+  "FIXCOMMITTED" |
+  "FIXRELEASED"  |
+  "UNKNOWN")
+importance = (
+  "UNKNOWN"   |
+  "CRITICAL"  |
+  "HIGH"      |
+  "MEDIUM"    |
+  "LOW"       |
+  "WISHLIST"  |
+  "UNDECIDED")
+
+# Content model for a person element.  The element content is the
+# person's name.  For successful bug import, an email address must be
+# provided.
+person = (
+  attribute name { lpname }?,
+  attribute email { text }?,
+  text)
+
+lpbugs = element launchpad-bugs { bug* }
+
+bug = element bug {
+  attribute id { xsd:integer } &
+  element private { boolean }? &
+  element security_related { boolean }? &
+  element duplicateof { xsd:integer }? &
+  element datecreated { xsd:dateTime } &
+  element nickname { lpname }? &
+  # The following will likely be renamed summary in a future version.
+  element title { text } &
+  element description { text } &
+  element reporter { person } &
+  element status { status } &
+  element importance { importance } &
+  element milestone { lpname }? &
+  element assignee { person }? &
+  element urls {
+    element url { attribute href { xsd:anyURI }, text }*
+  }? &
+  element cves {
+    element cve { cvename }*
+  }? &
+  element tags {
+    element tag { lpname }*
+  }? &
+  element bugwatches {
+    element bugwatch { attribute href { xsd:anyURI } }*
+  }? &
+  element subscriptions {
+    element subscriber { person }*
+  }? &
+  comment+
+}
+
+# A bug has one or more comments.  The first comment duplicates the
+# reporter, datecreated, title, description of the bug.
+comment = element comment {
+  element sender { person } &
+  element date { xsd:dateTime } &
+  element title { text }? &
+  element text { text } &
+  attachment*
+}
+
+# A bug attachment.  Attachments are associated with a bug comment.
+attachment = element attachment {
+  attribute href { xsd:anyURI }? &
+  element type { "PATCH" | "UNSPECIFIED" }? &
+  element filename { text }? &
+  # The following will likely be renamed summary in a future version.
+  element title { text }? &
+  element mimetype { text }? &
+  element contents { xsd:base64Binary }
+}
