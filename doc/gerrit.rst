@@ -173,9 +173,7 @@ Update etc/gerrit.config::
     match = "([Bb]ug\\s+#?)(\\d+)"
     link = https://code.launchpad.net/bugs/$2
 
-install /home/gerrit2/review_site/hooks/change-merged
-
-::
+Set Gerrit to start on boot::
 
   ln -snf /home/gerrit2/review_site/bin/gerrit.sh /etc/init.d/gerrit
   update-rc.d gerrit defaults 90 10
@@ -265,6 +263,177 @@ With the jenkins public key, as a gerrit admin user::
   cat jenkins.pub | ssh -p29418 review.openstack.org gerrit create-account --ssh-key - --full-name Jenkins jenkins
 
 Create "CI Systems" group in gerrit, make jenkins a member
+
+
+Launchpad Sync
+==============
+
+The launchpad user sync process consists of two scripts which are in
+openstack/openstack-ci on github: sync_launchpad_gerrit.py and
+insert_gerrit.py.
+
+Both scripts should be run as gerrit2 on review.openstack.org
+
+sync_launchpad_users.py runs and creates a python pickle file, users.pickle,
+with all of the user and group information. This is a long process. (12
+minutes)
+
+insert_gerrit.py reads the pickle file and applies it to the MySQL database.
+The gerrit caches must then be flushed.
+
+Depends
+-------
+::
+
+  apt-get install python-mysqldb python-openid python-launchpadlib
+
+Keys
+----
+
+The key for the launchpad sync user is in ~/.ssh/launchpad_rsa. Connecting
+to Launchpad requires oauth authentication - so the first time
+sync_launchpad_gerrit.py is run, it will display a URL. Open this URL in a
+browser and log in to launchpad as the hudson-openstack user. Subsequent
+runs will run with cached credentials.
+
+Running
+-------
+::
+
+  cd openstack-ci
+  git pull
+  python sync_launchpad_gerrit.py
+  python insert_gerrit.py
+  ssh -i /home/gerrit2/.ssh/launchpadsync_rsa -p29418 review.openstack.org gerrit flush-caches
+
+Gerrit IRC Bot
+==============
+
+Installation
+------------
+
+Ensure there is an up-to-date checkout of openstack-ci in ~gerrit2.
+
+::
+
+  apt-get install python-irclib python-daemon
+  cp ~gerrit2/openstack-ci/gerritbot.init /etc/init.d
+  chmod a+x /etc/init.d/gerritbot
+  update-rc.d gerritbot defaults
+  su - gerrit2
+  ssh-keygen -f /home/gerrit2/.ssh/gerritbot_rsa
+
+As a Gerrit admin, create a user for gerritbot::
+
+  cat ~gerrit2/.ssh/gerritbot_rsa | ssh -p29418 gerrit.openstack.org gerrit create-account --ssh-key - --full-name GerritBot gerritbot
+
+Configure gerritbot, including which events should be announced::
+
+  cat <<EOF >~gerrit2/gerritbot.config
+  [ircbot]
+  nick=NICNAME
+  pass=PASSWORD
+  server=irc.freenode.net
+  channel=openstack-dev
+  port=6667
+  
+  [gerrit]
+  user=gerritbot
+  key=/home/gerrit2/.ssh/gerritbot_rsa
+  host=review.openstack.org
+  port=29418
+  events=patchset-created, change-merged, x-vrif-minus-1, x-crvw-minus-2
+  EOF
+
+Register an account with NickServ on FreeNode, and put the account and
+password in the config file.
+
+::
+
+  sudo /etc/init.d/gerritbot start
+
+Launchpad Bug Integration
+=========================
+
+In addition to the hyperlinks provided by the regex in gerrit.config,
+we use a Gerrit hook to update Launchpad bugs when changes referencing
+them are applied.
+
+Installation
+------------
+
+Ensure an up-to-date checkout of openstack-ci is in ~gerrit2.
+
+::
+
+  apt-get install python-pyme
+  cp ~gerrit2/gerrit-hooks/change-merged ~gerrit2/review_site/hooks/
+
+Create a GPG and register it with Launchpad::
+
+  gerrit2@gerrit:~$ gpg --gen-key
+  gpg (GnuPG) 1.4.11; Copyright (C) 2010 Free Software Foundation, Inc.
+  This is free software: you are free to change and redistribute it.
+  There is NO WARRANTY, to the extent permitted by law.
+  
+  Please select what kind of key you want:
+     (1) RSA and RSA (default)
+     (2) DSA and Elgamal
+     (3) DSA (sign only)
+     (4) RSA (sign only)
+  Your selection? 
+  RSA keys may be between 1024 and 4096 bits long.
+  What keysize do you want? (2048) 
+  Requested keysize is 2048 bits
+  Please specify how long the key should be valid.
+           0 = key does not expire
+        <n>  = key expires in n days
+        <n>w = key expires in n weeks
+        <n>m = key expires in n months
+        <n>y = key expires in n years
+  Key is valid for? (0) 
+  Key does not expire at all
+  Is this correct? (y/N) y
+  
+  You need a user ID to identify your key; the software constructs the user ID
+  from the Real Name, Comment and Email Address in this form:
+      "Heinrich Heine (Der Dichter) <heinrichh@duesseldorf.de>"
+  
+  Real name: Openstack Gerrit
+  Email address: review@openstack.org
+  Comment: 
+  You selected this USER-ID:
+      "Openstack Gerrit <review@openstack.org>"
+  
+  Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit? o
+  You need a Passphrase to protect your secret key.
+  
+  gpg: gpg-agent is not available in this session
+  You don't want a passphrase - this is probably a *bad* idea!
+  I will do it anyway.  You can change your passphrase at any time,
+  using this program with the option "--edit-key".
+  
+  We need to generate a lot of random bytes. It is a good idea to perform
+  some other action (type on the keyboard, move the mouse, utilize the
+  disks) during the prime generation; this gives the random number
+  generator a better chance to gain enough entropy.
+  
+  gpg: /home/gerrit2/.gnupg/trustdb.gpg: trustdb created
+  gpg: key 382ACA7F marked as ultimately trusted
+  public and secret key created and signed.
+  
+  gpg: checking the trustdb
+  gpg: 3 marginal(s) needed, 1 complete(s) needed, PGP trust model
+  gpg: depth: 0  valid:   1  signed:   0  trust: 0-, 0q, 0n, 0m, 0f, 1u
+  pub   2048R/382ACA7F 2011-07-26
+          Key fingerprint = 21EF 7F30 C281 F61F 44CD  EC48 7424 9762 382A CA7F
+  uid                  Openstack Gerrit <review@openstack.org>
+  sub   2048R/95F6FA4A 2011-07-26
+  
+  gerrit2@gerrit:~$ gpg --send-keys --keyserver keyserver.ubuntu.com 382ACA7F
+  gpg: sending key 382ACA7F to hkp server keyserver.ubuntu.com
+
+Log into the Launchpad account and add the GPG key to the account.
 
 Adding New Projects
 *******************
@@ -364,43 +533,3 @@ Set permissions as follows::
     label code review -2/+2: foo-core
     submit: foo-core
 
-Launchpad Sync
-**************
-
-The launchpad user sync process consists of two scripts which are in
-openstack/openstack-ci on github: sync_launchpad_gerrit.py and
-insert_gerrit.py.
-
-Both scripts should be run as gerrit2 on review.openstack.org
-
-sync_launchpad_users.py runs and creates a python pickle file, users.pickle,
-with all of the user and group information. This is a long process. (12
-minutes)
-
-insert_gerrit.py reads the pickle file and applies it to the MySQL database.
-The gerrit caches must then be flushed.
-
-Depends
-=======
-::
-
-  apt-get install python-mysqldb python-openid python-launchpadlib
-
-Keys
-====
-
-The key for the launchpad sync user is in ~/.ssh/launchpad_rsa. Connecting
-to Launchpad requires oauth authentication - so the first time
-sync_launchpad_gerrit.py is run, it will display a URL. Open this URL in a
-browser and log in to launchpad as the hudson-openstack user. Subsequent
-runs will run with cached credentials.
-
-Running
-=======
-::
-
-  cd openstack-ci
-  git pull
-  python sync_launchpad_gerrit.py
-  python insert_gerrit.py
-  ssh -i /home/gerrit2/.ssh/launchpadsync_rsa -p29418 review.openstack.org gerrit flush-caches
