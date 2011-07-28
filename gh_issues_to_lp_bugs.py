@@ -60,7 +60,7 @@ for issue in issues:
   <title>%(title)s</title>
 
   <description>%(body)s</description>
-  <reporter name="%(lower_user)s">%(user)s</reporter>
+  <reporter name="%(lower_user)s" email="noreply@openstack.org">%(user)s</reporter>
   <status>%(status)s</status>
   <importance>HIGH</importance>
 
@@ -74,7 +74,7 @@ for issue in issues:
 
     bugs_outfile.write("""
   <comment>
-    <sender name="%(lower_user)s">%(user)s</sender>
+    <sender name="%(lower_user)s" email="noreply@openstack.org">%(user)s</sender>
     <date>%(created_at)s</date>
     <title>%(title)s</title>
     <text>%(body)s</text>
@@ -101,7 +101,7 @@ for issue in issues:
         try:
             bugs_outfile.write("""
   <comment>
-    <sender name="%(lower_user)s">%(user)s</sender>
+    <sender name="%(lower_user)s" email="noreply@openstack.org">%(user)s</sender>
     <date>%(created_at)s</date>
     <text>%(body)s</text>
   </comment>""" % comment)
