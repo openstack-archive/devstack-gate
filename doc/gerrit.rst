@@ -249,7 +249,7 @@ Gerrit Replication to GitHub
 
   cat <<EOF >review_site/etc/replication.config
   [remote "github"]
-  url = git@github.com:${name}.git
+  url = git@github.com:\$\{name\}.git
   EOF
 
 Jenkins / Gerrit Integration
@@ -264,6 +264,31 @@ With the jenkins public key, as a gerrit admin user::
 
 Create "CI Systems" group in gerrit, make jenkins a member
 
+Create a Gerrit Git Prep Job in Jenkins
+---------------------------------------
+
+When gating trunk with Jenkins, we want to test changes as they will
+appear once merged by Gerrit, but the gerrit trigger plugin will, by
+default, test them as submitted.  If HEAD moves on while the change is
+under review, it may end up getting merged with HEAD, and we want to
+test the result.
+
+To do that, make sure the "Hudson Template Project plugin" is
+installed, then set up a new job called "Gerrit Git Prep", and add a
+shell command build step (no other configuration)::
+
+  #!/bin/sh -x
+  git checkout $GERRIT_BRANCH
+  git reset --hard remotes/origin/$GERRIT_BRANCH
+  git merge FETCH_HEAD
+  CODE=$?
+  if [ ${CODE} -ne 0 ]; then
+    git reset --hard remotes/origin/$GERRIT_BRANCH
+    exit ${CODE}
+  fi
+
+Later, we will configure Jenkins jobs that we want to behave this way
+to use this build step.
 
 Launchpad Sync
 ==============
@@ -480,6 +505,12 @@ In jenkins, under source code management:
 
   * plain openstack/project
   * path **
+
+* Select "Add build step" under "Build"
+
+  * select "Use builders from another project"
+  * Template Project: "Gerrit Git Prep"
+  * make sure this build step is the first in the sequence
 
 Create a Project in GitHub
 ==========================
