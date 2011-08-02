@@ -2,6 +2,7 @@ import os
 import sys
 import uuid
 import os
+import subprocess
 
 from datetime import datetime
 
@@ -98,6 +99,11 @@ users={}
 groups={}
 groups_in_groups={}
 group_ids={}
+projects = subprocess.check_output(['/usr/bin/ssh', '-p', '29418',
+    '-i', GERRIT_SSH_KEY,
+    '-l', GERRIT_USER, 'localhost',
+    'gerrit', 'ls-projects']).split('\n')
+
 
 for team_todo in teams_todo:
 
@@ -264,14 +270,13 @@ for (k,v) in users.items():
         cur.execute("""insert into account_group_members 
                          (account_id, group_id)
                        values (%s, %s)""", (account_id, group_ids[group]))
-        # TODO: How do we determine that we have a valid project here.
-        # Does it matter?
-        if not group.endswith("-core"):
+        os_project_name = "openstack/%s" % group
+        if os_project_name in projects:
           cur.execute("""insert into account_project_watches
                            (account_id, project_name, filter)
                          values
                            (%s, %s, '*')""",
-                         (account_id, "openstack/%s" % group))
+                         (account_id, os_project_name))
     for group in v['rm_groups']:
       cur.execute("""delete from account_group_members
                      where account_id = %s and group_id = %s""",
