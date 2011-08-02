@@ -1,17 +1,41 @@
-import os, sys, subprocess
-from launchpadlib.launchpad import Launchpad
-from launchpadlib.uris import LPNET_SERVICE_ROOT
-from openid.consumer import consumer
-from openid.cryptutil import randomString
-import MySQLdb
+import os
+import sys
 import uuid
 import os
+import subprocess
+
+from datetime import datetime
 
 import StringIO
 import ConfigParser
 
-GERRIT_CONFIG = os.environ.get('GERRIT_CONFIG','/home/gerrit2/review_site/etc/gerrit.config')
-GERRIT_SECURE_CONFIG = os.environ.get('GERRIT_SECURE_CONFIG','/home/gerrit2/review_site/etc/secure.config')
+import MySQLdb
+
+from launchpadlib.launchpad import Launchpad
+from launchpadlib.uris import LPNET_SERVICE_ROOT
+
+from openid.consumer import consumer
+from openid.cryptutil import randomString
+
+GERRIT_USER = os.environ.get('GERRIT_USER', 'gerrit2')
+GERRIT_CONFIG = os.environ.get('GERRIT_CONFIG',
+                                 '/home/gerrit2/review_site/etc/gerrit.config')
+GERRIT_SECURE_CONFIG = os.environ.get('GERRIT_SECURE_CONFIG',
+                                 '/home/gerrit2/review_site/etc/secure.config')
+GERRIT_SSH_KEY = os.environ.get('GERRIT_SSH_KEY',
+                                 '/home/gerrit2/.ssh/launchpadsync_rsa')
+GERRIT_CACHE_DIR = os.path.expanduser(os.environ.get('GERRIT_CACHE_DIR',
+                                '~/.launchpadlib/cache'))
+GERRIT_CREDENTIALS = os.path.expanduser(os.environ.get('GERRIT_CREDENTIALS',
+                                '~/.launchpadlib/creds'))
+GERRIT_BACKUP_PATH = os.environ.get('GERRIT_BACKUP_PATH',
+                                '/home/gerrit2/dbupdates')
+
+for check_path in (os.path.dirname(GERRIT_CACHE_DIR),
+                   os.path.dirname(GERRIT_CREDENTIALS),
+                   GERRIT_BACKUP_PATH):
+  if not os.path.exists(check_path):
+    os.makedirs(check_path)
 
 def get_broken_config(filename):
   """ gerrit config ini files are broken and have leading tabs """
@@ -25,29 +49,34 @@ def get_broken_config(filename):
   c.readfp(fp)
   return c
 
-gerrit_config = get_broken_config(GERRIT_CONFIG)
-secure_config = get_broken_config(GERRIT_SECURE_CONFIG)
-
-cachedir="~/.launchpadlib/cache"
-credentials="~/.launchpadlib/creds"
-
-conn = MySQLdb.connect(user=gerrit_config.get("database","username"),
-                       passwd=secure_config.get("database","password"),
-                       db=gerrit_config.get("database","database"))
-cur = conn.cursor()
-
-
-if not os.path.exists(os.path.expanduser("~/.launchpadlib")):
-  os.makedirs(os.path.expanduser("~/.launchpadlib"))
-
-launchpad = Launchpad.login_with('Gerrit User Sync', LPNET_SERVICE_ROOT,
-                                 cachedir, credentials_file=credentials)
-
 def get_type(in_type):
   if in_type == "RSA":
     return "ssh-rsa"
   else:
     return "ssh-dsa"
+
+gerrit_config = get_broken_config(GERRIT_CONFIG)
+secure_config = get_broken_config(GERRIT_SECURE_CONFIG)
+
+DB_USER = gerrit_config.get("database", "username")
+DB_PASS = secure_config.get("database","password")
+DB_DB = gerrit_config.get("database","database")
+
+db_backup_file = "%s.%s.sql" % (DB_DB, datetime.isoformat(datetime.now()))
+db_backup_path = os.path.join(GERRIT_BACKUP_PATH, db_backup_file)
+retval = os.system("mysqldump --opt -u%s -p%s %s > %s" %
+                     (DB_USER, DB_PASS, DB_DB, db_backup_path))
+if retval != 0:
+  print "Problem taking a db dump, aborting db update"
+  sys.exit(retval)
+
+conn = MySQLdb.connect(user = DB_USER, passwd = DB_PASS, db = DB_DB)
+cur = conn.cursor()
+
+
+launchpad = Launchpad.login_with('Gerrit User Sync', LPNET_SERVICE_ROOT,
+                                 GERRIT_CACHE_DIR,
+                                 credentials_file = GERRIT_CREDENTIALS)
 
 teams_todo = [
   "burrow",
@@ -70,6 +99,11 @@ users={}
 groups={}
 groups_in_groups={}
 group_ids={}
+projects = subprocess.check_output(['/usr/bin/ssh', '-p', '29418',
+    '-i', GERRIT_SSH_KEY,
+    '-l', GERRIT_USER, 'localhost',
+    'gerrit', 'ls-projects']).split('\n')
+
 
 for team_todo in teams_todo:
 
@@ -236,14 +270,13 @@ for (k,v) in users.items():
         cur.execute("""insert into account_group_members 
                          (account_id, group_id)
                        values (%s, %s)""", (account_id, group_ids[group]))
-        # TODO: How do we determine that we have a valid project here.
-        # Does it matter?
-        if not group.endswith("-core"):
+        os_project_name = "openstack/%s" % group
+        if os_project_name in projects:
           cur.execute("""insert into account_project_watches
                            (account_id, project_name, filter)
                          values
                            (%s, %s, '*')""",
-                         (account_id, "openstack/%s" % group))
+                         (account_id, os_project_name))
     for group in v['rm_groups']:
       cur.execute("""delete from account_group_members
                      where account_id = %s and group_id = %s""",
@@ -253,3 +286,5 @@ for (k,v) in users.items():
                         where account_id=%s and project_name=%s""",
                     (account_id, "openstack/%s" % group))
 
+os.system("ssh -i %s -p29418 %s@localhost gerrit flush-caches" %
+          (GERRIT_SSH_KEY, GERRIT_USER))
