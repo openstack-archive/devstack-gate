@@ -491,6 +491,34 @@ As a github openstack admin:
 * Visit the gerrit team admin page
 * Add the new repository to the gerrit team
 
+Migrating a Project from bzr
+============================
+
+Add the bzr PPA and install bzr-fastimport:
+
+  add-apt-repository ppa:bzr/ppa
+  apt-get update
+  apt-get install bzr-fastimport
+
+Doing this from the bzr PPA is important to ensure at least version 0.10 of
+bzr-fastimport.
+
+Clone the git-bzr-ng from termie:
+
+  git clone https://github.com/termie/git-bzr-ng.git
+
+In git-bzr-ng, you'll find a script, git-bzr. Put it somewhere in your path.
+Then, to get a git repo which contains the migrated bzr branch, run:
+
+  git bzr clone lp:${BRANCHNAME} ${LOCATION}
+
+So, for instance, to do glance, you would do:
+
+  git bzr clone lp:glance glance
+
+And you will then have a git repo of glance in the glance dir. This git repo
+is now suitable for uploading in to gerrit to become the new master repo.
+
 .. _acl:
 
 Access Controls
