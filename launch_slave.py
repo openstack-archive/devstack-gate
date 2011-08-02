@@ -48,8 +48,7 @@ gem install --no-rdoc --no-ri puppet
 git clone git://github.com/openstack/openstack-ci-puppet.git
 cd openstack-ci-puppet
 mv /root/slave_*_key modules/jenkins_slave/files/
-ln -sf /root/openstack-ci-puppet/manifests/%s.pp manifests/this.pp
-/var/lib/gems/1.8/bin/puppet apply -l /tmp/manifest.log --modulepath=`pwd`/modules manifests/this.pp
+/var/lib/gems/1.8/bin/puppet apply -l /tmp/manifest.log --modulepath=`pwd`/modules manifests/site.pp
 """ % node_manifest)
 
 # a task that first installs the ssh key, and then runs the script
