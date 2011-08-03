@@ -11,7 +11,7 @@ import ConfigParser
 
 import MySQLdb
 
-GERRIT_USER = os.environ.get('GERRIT_USER', 'gerrit2')
+GERRIT_USER = os.environ.get('GERRIT_USER', 'launchpadsync')
 GERRIT_CONFIG = os.environ.get('GERRIT_CONFIG',
                                  '/home/gerrit2/review_site/etc/gerrit.config')
 GERRIT_SECURE_CONFIG = os.environ.get('GERRIT_SECURE_CONFIG',
