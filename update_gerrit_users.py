@@ -179,36 +179,36 @@ for (k,v) in groups_in_groups.items():
     except MySQLdb.IntegrityError:
       pass
 
-for (k,v) in users.items():
+for (username, user_details) in users.items():
 
   # accounts
   account_id = None
   if cur.execute("""select account_id from account_external_ids where
-    external_id in (%s)""", ("username:%s" % k)):
+    external_id in (%s)""", ("username:%s" % username)):
     account_id = cur.fetchall()[0][0]
     # We have this bad boy - all we need to do is update his group membership
 
   else:
 
     # We need details
-    member = launchpad.people[k]
+    member = launchpad.people[username]
     if not member.is_team:
     
       openid_consumer = consumer.Consumer(dict(id=randomString(16, '0123456789abcdef')), None)
       openid_request = openid_consumer.begin("https://launchpad.net/~%s" % member.name)
-      v['openid_external_id'] = openid_request.endpoint.getLocalID()
+      user_details['openid_external_id'] = openid_request.endpoint.getLocalID()
 
       # Handle username change
       if cur.execute("""select account_id from account_external_ids where
-        external_id in (%s)""", v['openid_external_id']):
+        external_id in (%s)""", user_details['openid_external_id']):
         account_id = cur.fetchall()[0][0]
         cur.execute("""update account_external_ids
                           set external_id=%s
                         where external_id like 'username%%'
                           and account_id = %s""",
-                     ('username:%s' % k, account_id))
+                     ('username:%s' % username, account_id))
       else:
-        v['ssh_keys'] = ["%s %s %s" % (get_type(key.keytype), key.keytext, key.comment) for key in member.sshkeys]
+        user_details['ssh_keys'] = ["%s %s %s" % (get_type(key.keytype), key.keytext, key.comment) for key in member.sshkeys]
 
 
         email = None
@@ -216,7 +216,7 @@ for (k,v) in users.items():
           email = member.preferred_email_address.email
         except ValueError:
           pass
-        v['email'] = email
+        user_details['email'] = email
 
 
         cur.execute("""insert into account_id (s) values (NULL)""");
@@ -224,10 +224,10 @@ for (k,v) in users.items():
         account_id = cur.fetchall()[0][0]
 
         cur.execute("""insert into accounts (account_id, full_name, preferred_email) values
-        (%s, %s, %s)""", (account_id, k, v['email']))
+        (%s, %s, %s)""", (account_id, username, user_details['email']))
 
         # account_ssh_keys
-        for key in v['ssh_keys']:
+        for key in user_details['ssh_keys']:
 
           cur.execute("""select ssh_public_key from account_ssh_keys where
             account_id = %s""", account_id)
@@ -249,21 +249,31 @@ for (k,v) in users.items():
         ## external_id
         if not cur.execute("""select account_id from account_external_ids
                               where account_id = %s and external_id = %s""",
-                           (account_id, v['openid_external_id'])):
+                           (account_id, user_details['openid_external_id'])):
           cur.execute("""insert into account_external_ids
                          (account_id, email_address, external_id)
                          values (%s, %s, %s)""",
-                     (account_id, v['email'], v['openid_external_id']))
+                     (account_id, user_details['email'], user_details['openid_external_id']))
         if not cur.execute("""select account_id from account_external_ids
                               where account_id = %s and external_id = %s""",
-                           (account_id, "username:%s" % k)):
+                           (account_id, "username:%s" % username)):
           cur.execute("""insert into account_external_ids
                          (account_id, external_id) values (%s, %s)""",
-                      (account_id, "username:%s" % k))
+                      (account_id, "username:%s" % username))
+
+        if user_details.get('email', None) is not None:
+          if not cur.execute("""select account_id from account_external_ids
+                                where account_id = %s and external_id = %s""",
+                             (account_id, "mailto:%s" % user_details['email'])):
+            cur.execute("""insert into account_external_ids
+                           (account_id, email_address, external_id)
+                           values (%s, %s, %s)""",
+                        (account_id, user_details['email'], "mailto:%s" %
+                        user_details['email']))
 
   if account_id is not None:
     # account_group_members
-    for group in v['add_groups']:
+    for group in user_details['add_groups']:
       if not cur.execute("""select account_id from account_group_members
                             where account_id = %s and group_id = %s""",
                          (account_id, group_ids[group])):
@@ -277,7 +287,7 @@ for (k,v) in users.items():
                          values
                            (%s, %s, '*')""",
                          (account_id, os_project_name))
-    for group in v['rm_groups']:
+    for group in user_details['rm_groups']:
       cur.execute("""delete from account_group_members
                      where account_id = %s and group_id = %s""",
                   (account_id, group_ids[group]))
