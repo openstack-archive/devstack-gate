@@ -47,7 +47,12 @@ find_next_version() {
         then
             version="${version}~"
         fi
-        revno="${revno:-$(bzr revno)}"
+        if [ -d .git ]
+        then
+            revno="${revno:-$(git log --oneline |  wc -l)}"
+        else
+            revno="${revno:-$(bzr revno)}"
+        fi
         version="$(printf %s%s.%s%d "$version" "$datestamp" "$REVNOPREFIX" "$revno")"
         if grep -q "^$PROJECT $version$" "$RECORDFILE"
         then

@@ -46,8 +46,14 @@ ln -s "${tarball}" "${PROJECT}_${version}.orig.tar.gz"
 echo bzr checkout -r ${PACKAGING_REVNO} --lightweight $BZR_BRANCH $PROJECT-*
 bzr checkout -r ${PACKAGING_REVNO} --lightweight $BZR_BRANCH $PROJECT-*
 cd $PROJECT-*
-PACKAGING_REVNO="$(bzr revno --tree)"
-rm -rf .bzr
+if [ -d .git ]
+then
+    PACKAGING_REVNO="$(git log --oneline | wc -l)"
+    rm -rf .git
+else
+    PACKAGING_REVNO="$(bzr revno --tree)"
+    rm -rf .bzr
+fi
 
 # Please don't change this. It's the only way I'll get notified
 # if an upload fails.
