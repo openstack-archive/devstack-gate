@@ -98,12 +98,12 @@ teams_todo = [
 users={}
 groups={}
 groups_in_groups={}
+group_implies_groups={}
 group_ids={}
 projects = subprocess.check_output(['/usr/bin/ssh', '-p', '29418',
     '-i', GERRIT_SSH_KEY,
     '-l', GERRIT_USER, 'localhost',
     'gerrit', 'ls-projects']).split('\n')
-
 
 for team_todo in teams_todo:
 
@@ -178,6 +178,20 @@ for (k,v) in groups_in_groups.items():
                   (group_ids[k], group_ids[g]))
     except MySQLdb.IntegrityError:
       pass
+
+# Make a list of implied group membership
+for group_id in group_ids.values():
+    total_groups = []
+    groups_todo = [group_id]
+    while len(groups_todo) > 0:
+        current_group = groups_todo.pop()
+        total_groups.append(current_group)
+        cur.execute("""select include_id from account_group_includes 
+                        where group_id = %s""", (current_group))
+        for row in cur.fetchall():
+            if row[0] != 1 and row[0] not in total_groups:
+                groups_todo.append(row[0])
+    group_implies_groups[group_id] = total_groups
 
 for (username, user_details) in users.items():
 
@@ -282,19 +296,29 @@ for (username, user_details) in users.items():
                        values (%s, %s)""", (account_id, group_ids[group]))
         os_project_name = "openstack/%s" % group
         if os_project_name in projects:
-          cur.execute("""insert into account_project_watches
-                           (account_id, project_name, filter)
-                         values
-                           (%s, %s, '*')""",
-                         (account_id, os_project_name))
+          for current_group in group_implies_groups[group_ids[group]]:
+              cur.execute("""insert into account_project_watches
+                           select "Y", "N", "N", g.account_id, %s, ""
+                             from account_group_members g
+                            where g.group_id = %s and g.account_id not in
+                             (select w.account_id from
+                              account_project_watches w
+                              where g.account_id = w.account_id and
+                              w.project_name = %s)""",
+                             (os_project_name, current_group, os_project_name))
     for group in user_details['rm_groups']:
       cur.execute("""delete from account_group_members
                      where account_id = %s and group_id = %s""",
                   (account_id, group_ids[group]))
-      if not group.endswith("-core"):
-        cur.execute("""delete from account_project_watches
-                        where account_id=%s and project_name=%s""",
-                    (account_id, "openstack/%s" % group))
+      groups_todo = [group]
+      for subgroup in groups_in_groups[group]:
+        groups.todo.append(subgroup)
+      for group_to_delete in groups_todo:
+        os_project_name = "openstack/%s" % group_to_delete
+        if os_project_name in projects:
+          cur.execute("""delete from account_project_watches
+                          where account_id=%s and project_name=%s""",
+                      (account_id, os_project_name))
 
 os.system("ssh -i %s -p29418 %s@localhost gerrit flush-caches" %
           (GERRIT_SSH_KEY, GERRIT_USER))

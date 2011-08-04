@@ -81,10 +81,27 @@ cur.execute("select name, group_id from account_groups")
 for (group_name, group_id) in cur.fetchall():
   os_project_name = 'openstack/%s' % group_name
   if os_project_name in projects:
-    cur.execute("""insert into account_project_watches
-                   select "Y", "N", "N", account_id,
-                     %s, "" from account_group_members
-                     where group_id = %s""", (os_project_name, group_id))
+    # Grab all of the groups that are included in this group too.
+    total_groups = []
+    groups_todo = [group_id]
+    while len(groups_todo) > 0:
+        current_group = groups_todo.pop()
+        total_groups.append(current_group)
+        cur.execute("""select include_id from account_group_includes 
+                        where group_id = %s""", (current_group))
+        for row in cur.fetchall():
+            if row[0] != 1 and row[0] not in total_groups:
+                groups_todo.append(row[0])
+    for current_group in total_groups:
+        cur.execute("""insert into account_project_watches
+                     select "Y", "N", "N", g.account_id, %s, ""
+                       from account_group_members g
+                      where g.group_id = %s and g.account_id not in
+                       (select w.account_id from
+                        account_project_watches w
+                        where g.account_id = w.account_id and
+                        w.project_name = %s)""",
+                       (os_project_name, current_group, os_project_name))
 
 os.system("ssh -i %s -p29418 %s@localhost gerrit flush-caches" %
           (GERRIT_SSH_KEY, GERRIT_USER))
