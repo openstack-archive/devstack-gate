@@ -14,11 +14,7 @@ if len(args) == 0:
   sys.exit(1)
 node_name = args[0]
 
-node_manifest = "slave"
 node_type = '76'
-
-if len(args) > 1:
-  node_manifest = args[1]
 
 for (name, value) in option_pairs:
   if name == "--distro":
@@ -49,7 +45,7 @@ git clone git://github.com/openstack/openstack-ci-puppet.git
 cd openstack-ci-puppet
 mv /root/slave_*_key modules/jenkins_slave/files/
 /var/lib/gems/1.8/bin/puppet apply -l /tmp/manifest.log --modulepath=`pwd`/modules manifests/site.pp
-""" % node_manifest)
+""")
 
 # a task that first installs the ssh key, and then runs the script
 msd = MultiStepDeployment([sd, script])
