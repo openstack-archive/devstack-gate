@@ -298,7 +298,7 @@ for (username, user_details) in users.items():
         if os_project_name in projects:
           for current_group in group_implies_groups[group_ids[group]]:
               cur.execute("""insert into account_project_watches
-                           select "Y", "N", "N", g.account_id, %s, ""
+                           select "Y", "N", "N", g.account_id, %s, "*"
                              from account_group_members g
                             where g.group_id = %s and g.account_id not in
                              (select w.account_id from

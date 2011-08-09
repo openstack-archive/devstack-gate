@@ -94,7 +94,7 @@ for (group_name, group_id) in cur.fetchall():
                 groups_todo.append(row[0])
     for current_group in total_groups:
         cur.execute("""insert into account_project_watches
-                     select "Y", "N", "N", g.account_id, %s, ""
+                     select "Y", "N", "N", g.account_id, %s, "*"
                        from account_group_members g
                       where g.group_id = %s and g.account_id not in
                        (select w.account_id from
