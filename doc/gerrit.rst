@@ -522,6 +522,15 @@ As a github openstack admin:
 * Visit the gerrit team admin page
 * Add the new repository to the gerrit team
 
+Pull requests can not be disabled for a project in Github, so instead
+we have a script that runs from cron to close any open pull requests
+with instructions to use Gerrit.  
+
+* Edit openstack/openstack-ci-puppet:site.pp
+
+and add the project to the list of github projects in the gerrit class
+for the gerrit.openstack.org node.
+
 Migrating a Project from bzr
 ============================
 
