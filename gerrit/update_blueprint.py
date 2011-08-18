@@ -58,7 +58,7 @@ DB_USER = GERRIT_CONFIG.get("database", "username")
 DB_PASS = SECURE_CONFIG.get("database","password")
 DB_DB = GERRIT_CONFIG.get("database","database")
 
-def update_spec(launchpad, project, name, subject, link, topic=False):
+def update_spec(launchpad, project, name, subject, link, topic=None):
     # For testing, if a project doesn't match openstack/foo, use
     # the openstack-ci project instead.
     group, project = project.split('/')
@@ -72,7 +72,7 @@ def update_spec(launchpad, project, name, subject, link, topic=False):
     changed = False
     if topic:
         topiclink = '%s/#q,topic:%s,n,z' % (link[:link.find('/',8)],
-                                            name)
+                                            topic)
         if topiclink not in wb:
             wb += "\n\n\nGerrit topic: %(link)s" % dict(link=topiclink)
             changed = True                                               
@@ -99,11 +99,12 @@ def find_specs(launchpad, dbconn, args):
     specs = set([m.group(2) for m in SPEC_RE.finditer(git_log)])
 
     if topic:
-        topic = topic.split('/')[-1]
-        specs |= set([topic])
+        topicspec = topic.split('/')[-1]
+        specs |= set([topicspec])
 
     for spec in specs:
-        update_spec(launchpad, args.project, spec, subject, args.change_url, spec==topic)
+        update_spec(launchpad, args.project, spec, subject, 
+                    args.change_url, topic)
 
 def main():
     parser = argparse.ArgumentParser()
