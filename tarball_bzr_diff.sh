@@ -8,7 +8,13 @@ TNB=in_tarball_but_not_in_bzr.txt
 BNTSAVED=$STATEPATH/$BNT.saved
 TNBSAVED=$STATEPATH/$TNB.saved
 
-(cd $STATEPATH ; bzr up)
+if [ ! -d "$STATEPATH" ]
+then
+  bzr co bzr://jenkins.openstack.org/ "$STATEPATH"
+else
+  (cd $STATEPATH ; bzr up)
+fi
+
 bzr ls -R . --versioned | sort > bzr.lst
 tar tzf nova-*.tar.gz  | cut -f2- -d/ | grep -v ^$ | sort -g > tarball.lst
 rm -rf dist dist.zip
