@@ -126,7 +126,8 @@ tarball=$(echo dist/*.tar.gz)
 echo mv "$tarball" "dist/$(basename $tarball .tar.gz)${SEPARATOR}${snapshotversion}.tar.gz"
 mv "$tarball" "dist/$(basename $tarball .tar.gz)${SEPARATOR}${snapshotversion}.tar.gz"
 
-echo "$PROJECT $revno" >> "$RECORDFILE"
+echo "$PROJECT ${snapshotversion}" >> "$RECORDFILE"
 sort "$RECORDFILE" > "$RECORDFILE".tmp
 mv "$RECORDFILE".tmp "$RECORDFILE"
 
+(cd $VERSIONDIR; bzr commit -m"Added $PROJECT ${snapshotversion}")
