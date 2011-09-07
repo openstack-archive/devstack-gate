@@ -106,6 +106,7 @@ teams_todo = [
   "openstack-admins",
   "openstack-ci",
   "openstack-deploy-core",
+  "openstack-doc-core",
   "lunr-core",
   "nova",
   "nova-core",
