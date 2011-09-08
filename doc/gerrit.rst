@@ -466,24 +466,27 @@ Adding New Projects
 Creating a Project in Gerrit
 ============================
 
-using ssh key of a gerrit admin::
+Using ssh key of a gerrit admin (you)::
 
-  ssh -p 29418 review.openstack.org gerrit create-project --name openstack/project
+  ssh -p 29418 review.openstack.org gerrit create-project --name openstack/PROJECT
 
-Grant the user the following privileges:
+If the project is an API project (eg, image-api), we want it to share
+some extra permissions that are common to all API projects (eg, the
+OpenStack documentation coordinators can approve changes, see
+:ref:`acl`).  Run the following command to reparent the project if it
+is an API project::
 
-* push
-* push merge commit
-* forge committer
-* forge author
-* create reference
+  ssh -p 29418 gerrit.openstack.org gerrit set-project-parent --parent API-Projects openstack/PROJECT
+
+Add yourself to the "Project Bootstrappers" group in Gerrit which will
+give you permissions to push to the repo bypassing code review.
 
 Do the initial push of the project with::
 
-  git push ssh://USERNAME@review.openstack.org:29418/openstack/project.git HEAD:refs/heads/master
+  git push ssh://USERNAME@review.openstack.org:29418/openstack/PROJECT.git HEAD:refs/heads/master
 
-Remove the above privileges, and then set the access controls as
-specified in :ref:`acl`.
+Remove yourself from the "Project Bootstrappers" group, and then set
+the access controls as specified in :ref:`acl`.
 
 Have Jenkins Monitor a Gerrit Project
 =====================================
@@ -564,40 +567,69 @@ is now suitable for uploading in to gerrit to become the new master repo.
 Access Controls
 ***************
 
-Goal:
+High level goals:
 
 #. Anonymous users can read all projects.
 #. All registered users can perform informational code review (+/-1) 
    on any project.
 #. Jenkins can perform verification (blocking or approving: +/-1).
 #. All registered users can create changes.
+#. The OpenStack Release Manager and Jenkins can tag releases (push
+   annotated tags).
 #. Members of $PROJECT-core group can perform full code review 
    (blocking or approving: +/- 2), and submit changes to be merged.
-#. Release group (ttx and jenkins) can push annotated tags.
+#. Members of openstack-release (Release Manager and PTLs) exclusively
+   can perform full code review (blocking or approving: +/- 2), and
+   submit changes to be merged on milestone-proposed branches.
+#. Full code review (+/- 2) of API projects should be available to the
+   -core group of the corresponding implementation project as well as to
+   the OpenStack Documentation Coordinators.
 
-Set permissions as follows::
+To manage API project permissions collectively across projects, API
+projects are reparented to the "API-Projects" meta-project instead of
+"All-Projects".  This causes them to inherit permissions from the
+API-Projects project (which, in turn, inherits from All-Projects).
 
-  admins: openstack-ci-admins
-  all-projects: 
+These permissions try to achieve the high level goals::
+
+  All Projects (metaproject):
     refs/*
-    read: anonymous
-    push annotated tag: release managers, ci tools
-    
-    refs/heads/*
-    label code review -1/+1: registered users
-    label verified -1/+1: ci systems
-    
-    refs/meta/config
-    read: project owners
+      read: anonymous
+      push annotated tag: release managers, ci tools
+      forge author identity: project bootstrappers  
+      forge committer identity: project bootstrappers  
+      push (w/ force push): project bootstrappers  
+      create reference: project bootstrappers, release managers
+      push merge commit: project bootstrappers
 
     refs/for/refs/*
-    push: registered
+      push: registered users
+
+    refs/heads/*
+      label code review -1/+1: registered users
+      label verified -1/+1: ci tools
+      submit: ci tools
+    
+    refs/heads/milestone-proposed
+      label code review -2/+2: openstack-release (exclusive)
+
+    refs/meta/config
+      read: project owners
+
+  API Projects (metaproject):
+    refs/*
+      owner: Administrators
+      forge author identity: openstack-doc-core
+      forge committer identity: openstack-doc-core
+
+    refs/heads/*
+      label code review -2/+2: openstack-doc-core
 
   project foo:
     refs/*
-    owner: Administrators
+      owner: Administrators
+      forge author identity: foo-core
+      forge committer identity: foo-core
 
     refs/heads/*
-    label code review -2/+2: foo-core
-    submit: foo-core
-
+      label code review -2/+2: foo-core
