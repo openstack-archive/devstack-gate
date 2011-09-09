@@ -45,12 +45,21 @@ add_remote()
     project=$2
 
     echo "No remote set, testing ssh://$username@review.openstack.org:29418"
-    if ssh -p29418 -o StrictHostKeyChecking=no $username@review.openstack.org gerrit ls-projects >/dev/null 2>&1
+    if project_list=`ssh -p29418 -o StrictHostKeyChecking=no $username@review.openstack.org gerrit ls-projects 2>/dev/null`
     then
         echo "$username@review.openstack.org:29418 worked."
-        echo "Creating a git remote called gerrit that maps to:"
-        echo "  ssh://$username@review.openstack.org:29418/$project"
-        git remote add gerrit ssh://$username@review.openstack.org:29418/$project
+        if echo $project_list | grep $project >/dev/null
+        then
+            echo "Creating a git remote called gerrit that maps to:"
+            echo "  ssh://$username@review.openstack.org:29418/$project"
+            git remote add gerrit ssh://$username@review.openstack.org:29418/$project
+        else
+            echo "The current project name, $project, is not a known project."
+            echo "Please either reclone from github/gerrit or create a"
+            echo "remote named gerrit that points to the intended project."
+            return 1
+        fi
+
         return 0
     fi
     return 1
