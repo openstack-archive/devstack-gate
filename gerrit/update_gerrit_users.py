@@ -112,6 +112,8 @@ teams_todo = [
   "nova-core",
   "swift",
   "swift-core",
+  "netstack",
+  "netstack-core",
   ]
 
 users={}
