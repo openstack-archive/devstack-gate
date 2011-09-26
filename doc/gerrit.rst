@@ -484,6 +484,7 @@ give you permissions to push to the repo bypassing code review.
 Do the initial push of the project with::
 
   git push ssh://USERNAME@review.openstack.org:29418/openstack/PROJECT.git HEAD:refs/heads/master
+  git push --tags ssh://USERNAME@review.openstack.org:29418/openstack/PROJECT.git
 
 Remove yourself from the "Project Bootstrappers" group, and then set
 the access controls as specified in :ref:`acl`.
