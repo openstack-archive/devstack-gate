@@ -309,24 +309,29 @@ for (username, user_details) in users.items():
   if account_id is not None:
     # account_group_members
     for group in user_details['add_groups']:
-      if not cur.execute("""select account_id from account_group_members
-                            where account_id = %s and group_id = %s""",
-                         (account_id, group_ids[group])):
-        cur.execute("""insert into account_group_members 
-                         (account_id, group_id)
-                       values (%s, %s)""", (account_id, group_ids[group]))
-        os_project_name = "openstack/%s" % group
-        if os_project_name in projects:
-          for current_group in group_implies_groups[group_ids[group]]:
-              cur.execute("""insert into account_project_watches
-                           select "Y", "N", "N", g.account_id, %s, "*"
-                             from account_group_members g
-                            where g.group_id = %s and g.account_id not in
-                             (select w.account_id from
-                              account_project_watches w
-                              where g.account_id = w.account_id and
-                              w.project_name = %s)""",
-                             (os_project_name, current_group, os_project_name))
+      os_project_name = "openstack/%s" % group
+      add_groups = group_implies_groups[group_ids[group]]
+      add_groups.append(group_ids[group])
+      for current_group in add_groups:
+        if not cur.execute("""select account_id from account_group_members
+                              where account_id = %s and group_id = %s""",
+                           (account_id, current_group)):
+          # The current user does not exist in the group. Add it.
+          cur.execute("""insert into account_group_members 
+                           (account_id, group_id)
+                         values (%s, %s)""", (account_id, current_group))
+          if os_project_name.endswith("-core"):
+              os_project_name = os_project_name[:-5]
+          if os_project_name in projects:
+              if not cur.execute("""select account_id
+                                     from account_project_watches
+                                    where account_id = %s
+                                      and project_name = %s""",
+                                   (account_id, os_project_name)):
+                  cur.execute("""insert into account_project_watches
+                                 VALUES
+                                 ("Y", "N", "N", %s, %s, "*")""",
+                                 (account_id, os_project_name))
     for group in user_details['rm_groups']:
       cur.execute("""delete from account_group_members
                      where account_id = %s and group_id = %s""",
