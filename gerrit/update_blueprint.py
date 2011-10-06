@@ -68,7 +68,10 @@ def update_spec(launchpad, project, name, subject, link, topic=None):
     spec = launchpad.projects[project].getSpecification(name=name)
     if not spec: return
 
-    wb = spec.whiteboard.strip()
+    if spec.whiteboard:
+        wb = spec.whiteboard.strip()
+    else:
+        wb = ''
     changed = False
     if topic:
         topiclink = '%s/#q,topic:%s,n,z' % (link[:link.find('/',8)],
