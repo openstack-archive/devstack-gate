@@ -131,10 +131,14 @@ for team_todo in teams_todo:
   team = launchpad.people[team_todo]
   groups[team.name] = team.display_name
 
+  # Attempt to get nested group memberships. ~nova-core, for instance, is a
+  # member of ~nova, so membership in ~nova-core should imply membership in
+  # ~nova
   group_in_group = groups_in_groups.get(team.name, {})
   for subgroup in team.sub_teams:
     group_in_group[subgroup.name] = 1
-    groups_in_groups[team.name] = group_in_group
+  # We should now have a dictionary of the form {'nova': {'nova-core': 1}}
+  groups_in_groups[team.name] = group_in_group
 
   for detail in team.members_details:
 
@@ -158,15 +162,22 @@ for team_todo in teams_todo:
       user['rm_groups'].append(team.name)
     users[login] = user
 
-for (k, v) in groups_in_groups.items():
-  for g in v.keys():
-    if g not in groups.keys():
-      groups[g] = None
+# If we picked up subgroups that were not in our original list of groups
+# make sure they get added
+for (supergroup, subgroups) in groups_in_groups.items():
+  for group in subgroups.keys():
+    if group not in groups.keys():
+      groups[group] = None
 
 # account_groups
-for (k,v) in groups.items():
-  if cur.execute("select group_id from account_groups where name = %s", k):
-    group_ids[k] = cur.fetchall()[0][0]
+# groups is a dict of team name to team display name
+# here, for every group we have in that dict, we're building another dict of
+# group_name to group_id - and if the database doesn't already have the
+# group, we're adding it
+for (group_name, group_display_name) in groups.items():
+  if cur.execute("select group_id from account_groups where name = %s",
+                 group_name):
+    group_ids[group_name] = cur.fetchall()[0][0]
   else:
     cur.execute("""insert into account_group_id (s) values (NULL)""");
     cur.execute("select max(s) from account_group_id")
@@ -182,25 +193,32 @@ for (k,v) in groups.items():
                     name, description, group_uuid)
                    values
                    (%s, 'INTERNAL', 1, %s, %s, %s)""",
-                (group_id, k,v, full_uuid))
+                (group_id, group_name, group_display_name, full_uuid))
     cur.execute("""insert into account_group_names (group_id, name) values
     (%s, %s)""",
-    (group_id, k))
+    (group_id, group_name))
 
-    group_ids[k] = group_id
+    group_ids[group_name] = group_id
 
 # account_group_includes
-for (k,v) in groups_in_groups.items():
-  for g in v.keys():
+# groups_in_groups should be a dict of dicts, where the key is the larger
+# group and the inner dict is a list of groups that are members of the
+# larger group. So {'nova': {'nova-core': 1}}
+for (group_name, subgroups) in groups_in_groups.items():
+  for subgroup_name in subgroups.keys():
     try:
       cur.execute("""insert into account_group_includes
                        (group_id, include_id)
                       values (%s, %s)""",
-                  (group_ids[k], group_ids[g]))
+                  (group_ids[group_name], group_ids[subgroup_name]))
     except MySQLdb.IntegrityError:
       pass
 
 # Make a list of implied group membership
+# building a list which is the opposite of groups_in_group. Here
+# group_implies_groups is a dict keyed by group_id containing a list of
+# group_ids of implied membership. SO: if nova is 1 and nova-core is 2:
+# {'2': [1]}
 for group_id in group_ids.values():
     total_groups = []
     groups_todo = [group_id]
@@ -308,8 +326,11 @@ for (username, user_details) in users.items():
 
   if account_id is not None:
     # account_group_members
+    # user_details['add_groups'] is a list of group names for which the
+    # user is either "Approved" or "Administrator"
     for group in user_details['add_groups']:
       os_project_name = "openstack/%s" % group
+      # if you are in the group nova-core, that should also put you in nova
       add_groups = group_implies_groups[group_ids[group]]
       add_groups.append(group_ids[group])
       for current_group in add_groups:
