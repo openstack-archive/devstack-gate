@@ -34,6 +34,8 @@ from launchpadlib.uris import LPNET_SERVICE_ROOT
 from openid.consumer import consumer
 from openid.cryptutil import randomString
 
+DEBUG = False
+
 GERRIT_USER = os.environ.get('GERRIT_USER', 'launchpadsync')
 GERRIT_CONFIG = os.environ.get('GERRIT_CONFIG',
                                  '/home/gerrit2/review_site/etc/gerrit.config')
@@ -152,14 +154,11 @@ for team_todo in teams_todo:
       user = users[login]
     else:
 
-      user = dict(add_groups=[],
-                  rm_groups=[])
+      user = dict(add_groups=[])
       
     status = detail.status
     if (status == "Approved" or status == "Administrator"):
       user['add_groups'].append(team.name)
-    else:
-      user['rm_groups'].append(team.name)
     users[login] = user
 
 # If we picked up subgroups that were not in our original list of groups
@@ -225,12 +224,30 @@ for group_id in group_ids.values():
     while len(groups_todo) > 0:
         current_group = groups_todo.pop()
         total_groups.append(current_group)
-        cur.execute("""select include_id from account_group_includes 
-                        where group_id = %s""", (current_group))
+        cur.execute("""select group_id from account_group_includes
+                        where include_id = %s""", (current_group))
         for row in cur.fetchall():
             if row[0] != 1 and row[0] not in total_groups:
                 groups_todo.append(row[0])
     group_implies_groups[group_id] = total_groups
+
+if DEBUG:
+    def get_group_name(in_group_id):
+      for (group_name, group_id) in group_ids.items():
+        if group_id == in_group_id:
+          return group_name
+
+    print "groups in groups"
+    for (k,v) in groups_in_groups.items():
+      print k, v
+
+    print "group_imples_groups"
+    for (k, v) in group_implies_groups.items():
+      print get_group_name(k)
+      new_groups=[]
+      for val in v:
+        new_groups.append(get_group_name(val))
+      print "\t", new_groups
 
 for (username, user_details) in users.items():
 
@@ -328,44 +345,61 @@ for (username, user_details) in users.items():
     # account_group_members
     # user_details['add_groups'] is a list of group names for which the
     # user is either "Approved" or "Administrator"
+
+    groups_to_add = []
+    groups_to_watch = {}
+    groups_to_rm = {}
+
     for group in user_details['add_groups']:
-      os_project_name = "openstack/%s" % group
       # if you are in the group nova-core, that should also put you in nova
       add_groups = group_implies_groups[group_ids[group]]
       add_groups.append(group_ids[group])
-      for current_group in add_groups:
-        if not cur.execute("""select account_id from account_group_members
-                              where account_id = %s and group_id = %s""",
-                           (account_id, current_group)):
-          # The current user does not exist in the group. Add it.
-          cur.execute("""insert into account_group_members 
-                           (account_id, group_id)
-                         values (%s, %s)""", (account_id, current_group))
+      for add_group in add_groups:
+        if add_group not in groups_to_add:
+          groups_to_add.append(add_group)
+      # We only want to add watches for direct project membership groups
+      groups_to_watch[group_ids[group]] = group
+
+    # groups_to_add is now the full list of all groups we think the user
+    # should belong to. we want to limit the users groups to this list
+    for group in groups:
+      if group_ids[group] not in groups_to_add:
+        if group not in groups_to_rm.values():
+          groups_to_rm[group_ids[group]] = group
+
+    for group_id in groups_to_add:
+      if not cur.execute("""select account_id from account_group_members
+                            where account_id = %s and group_id = %s""",
+                         (account_id, group_id)):
+        # The current user does not exist in the group. Add it.
+        cur.execute("""insert into account_group_members
+                         (account_id, group_id)
+                       values (%s, %s)""", (account_id, group_id))
+        os_project_name = groups_to_watch.get(group_id, None)
+        if os_project_name is not None:
           if os_project_name.endswith("-core"):
               os_project_name = os_project_name[:-5]
+          os_project_name = "openstack/%s" % os_project_name
           if os_project_name in projects:
-              if not cur.execute("""select account_id
-                                     from account_project_watches
-                                    where account_id = %s
-                                      and project_name = %s""",
-                                   (account_id, os_project_name)):
-                  cur.execute("""insert into account_project_watches
-                                 VALUES
-                                 ("Y", "N", "N", %s, %s, "*")""",
-                                 (account_id, os_project_name))
-    for group in user_details['rm_groups']:
+            if not cur.execute("""select account_id
+                                   from account_project_watches
+                                  where account_id = %s
+                                    and project_name = %s""",
+                                 (account_id, os_project_name)):
+                cur.execute("""insert into account_project_watches
+                               VALUES
+                               ("Y", "N", "N", %s, %s, "*")""",
+                               (account_id, os_project_name))
+
+    for (group_id, group_name) in groups_to_rm.items():
       cur.execute("""delete from account_group_members
                      where account_id = %s and group_id = %s""",
-                  (account_id, group_ids[group]))
-      groups_todo = [group]
-      for subgroup in groups_in_groups[group]:
-        groups.todo.append(subgroup)
-      for group_to_delete in groups_todo:
-        os_project_name = "openstack/%s" % group_to_delete
-        if os_project_name in projects:
-          cur.execute("""delete from account_project_watches
-                          where account_id=%s and project_name=%s""",
-                      (account_id, os_project_name))
+                  (account_id, group_id))
+      os_project_name = "openstack/%s" % group_name
+      if os_project_name in projects:
+        cur.execute("""delete from account_project_watches
+                        where account_id=%s and project_name=%s""",
+                    (account_id, os_project_name))
 
 os.system("ssh -i %s -p29418 %s@localhost gerrit flush-caches" %
           (GERRIT_SSH_KEY, GERRIT_USER))
