@@ -97,26 +97,15 @@ launchpad = Launchpad.login_with('Gerrit User Sync', LPNET_SERVICE_ROOT,
                                  GERRIT_CACHE_DIR,
                                  credentials_file = GERRIT_CREDENTIALS)
 
-teams_todo = [
-  "burrow",
-  "burrow-core",
-  "glance",
-  "glance-core",
-  "keystone",
-  "keystone-core",
-  "openstack",
-  "openstack-admins",
-  "openstack-ci",
-  "openstack-deploy-core",
-  "openstack-doc-core",
-  "lunr-core",
-  "nova",
-  "nova-core",
-  "swift",
-  "swift-core",
-  "quantum",
-  "quantum-core",
-  ]
+def get_sub_teams(team, have_teams):
+    for sub_team in launchpad.people[team].sub_teams:
+        if sub_team.name not in have_teams:
+           have_teams = get_sub_teams(sub_team.name, have_teams)
+    have_teams.append(team)
+    return have_teams
+
+
+teams_todo = get_sub_teams('openstack', [])
 
 users={}
 groups={}
