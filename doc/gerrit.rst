@@ -585,6 +585,9 @@ High level goals:
 #. Full code review (+/- 2) of API projects should be available to the
    -core group of the corresponding implementation project as well as to
    the OpenStack Documentation Coordinators.
+#. Full code review of stable branches should be available to the
+   -core group of the project as well as the openstack-stable-maint
+   group.
 
 To manage API project permissions collectively across projects, API
 projects are reparented to the "API-Projects" meta-project instead of
@@ -613,6 +616,9 @@ These permissions try to achieve the high level goals::
     
     refs/heads/milestone-proposed
       label code review -2/+2: openstack-release (exclusive)
+
+    refs/heads/stable/*
+      label code review -2/+2: opestack-stable-maint
 
     refs/meta/config
       read: project owners
