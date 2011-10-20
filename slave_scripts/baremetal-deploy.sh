@@ -11,8 +11,8 @@ cd `dirname "$0"`
 
 echo "Jenkins: resetting hosts..."
 for host in $HEAD_HOST ${COMPUTE_HOSTS//,/ }; do
-    scp -o lvm-kexec-reset.sh root@$host:/var/tmp/
-    ssh -o root@$host /var/tmp/lvm-kexec-reset.sh
+    scp lvm-kexec-reset.sh root@$host:/var/tmp/
+    ssh root@$host /var/tmp/lvm-kexec-reset.sh
     sudo rm -f /var/log/orchestra/rsyslog/$host/syslog
 done
 
@@ -31,11 +31,19 @@ for host in $HEAD_HOST ${COMPUTE_HOSTS//,/ }; do
     scp -r ~/cache/pip root@$host:/var/cache/pip
 done
 
-echo "Jenkins: Executing build_bm_multi.sh."
-
+echo "Jenkins: Caching images."
 cd ~/devstack
-source ./functions.sh
-cache_images ~/devstack/files
+source stackrc
+for image_url in ${IMAGE_URLS//,/ }; do
+    # Downloads the image (uec ami+aki style), then extracts it.
+    IMAGE_FNAME=`echo "$image_url" | python -c "import sys; print sys.stdin.read().split('/')[-1]"`
+    IMAGE_NAME=`echo "$IMAGE_FNAME" | python -c "import sys; print sys.stdin.read().split('.tar.gz')[0].split('.tgz')[0]"`
+    if [ ! -f files/$IMAGE_FNAME ]; then
+        wget -c $image_url -O files/$IMAGE_FNAME
+    fi
+done
+
+echo "Jenkins: Executing build_bm_multi.sh."
 bash build_bm_multi.sh
 
 for host in $HEAD_HOST ${COMPUTE_HOSTS//,/ }; do
