@@ -15,6 +15,7 @@ key=/path/to/id_rsa
 host=review.example.com
 port=29418
 events=patchset-created, change-merged
+branches=master
 """
 
 import ircbot
@@ -55,10 +56,12 @@ class GerritBot(ircbot.SingleServerIRCBot):
         time.sleep(0.5)
 
 class Gerrit(threading.Thread):
-    def __init__(self, ircbot, events, username, keyfile, server, port=29418):
+    def __init__(self, ircbot, events, branches,
+                 username, keyfile, server, port=29418):
         threading.Thread.__init__(self)
         self.ircbot = ircbot
         self.events = events
+        self.branches = branches
         self.username = username
         self.keyfile = keyfile
         self.server = server
@@ -150,6 +153,9 @@ class Gerrit(threading.Thread):
     def _read(self):
         l = self.proc.stdout.readline()
         data = json.loads(l)
+        # If branches is specified, ignore notifications for other branches
+        if self.branches and data['change']['branch'] not in self.branches:
+            return
         if data['type'] == 'comment-added':
             self.comment_added(data)
         elif data['type'] == 'patchset-created':
@@ -193,6 +199,7 @@ def _main():
                     config.getint('ircbot', 'port'))
     g = Gerrit(bot, 
                config.get('gerrit', 'events'),
+               config.get('gerrit', 'branches'),
                config.get('gerrit', 'user'),
                config.get('gerrit', 'key'),
                config.get('gerrit', 'host'),
