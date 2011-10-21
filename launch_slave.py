@@ -28,6 +28,8 @@ node_size = '3'
 node_type = '76'
 if CLOUD_SERVERS_DRIVER == 'rackspace':
 
+    import clouddns
+
     for (name, value) in option_pairs:
       if name == "--distro":
         if value == "maverick":
@@ -90,6 +92,18 @@ else:
 if CLOUD_SERVERS_DRIVER == 'rackspace':
     node = conn.deploy_node(name=node_name, image=image, size=size, deploy=msd,
                             ex_files=files)
+    dns_ctx = clouddns.connection.Connection(CLOUD_SERVERS_USERNAME,
+                                             CLOUD_SERVERS_API_KEY)
+    domain_name = ".".join(node_name.split(".")[-2:])
+    domain = dns_ctx.get_domain(name=domain_name)
+    try:
+        record = domain.get_record(name=node_name)
+    except:
+        record = None
+    if record is None:
+        domain.create_record(node_name, node.public_ip[0], "A")
+    else:
+        record.update(data=node.public_ip[0])
 else:
     node = conn.create_node(name=node_name, image=image, size=size,
                             ex_keyname=node_name, ex_userdata=launch_script)
