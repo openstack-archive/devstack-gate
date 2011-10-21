@@ -44,7 +44,7 @@ for image_url in ${IMAGE_URLS//,/ }; do
 done
 
 echo "Jenkins: Executing build_bm_multi.sh."
-bash build_bm_multi.sh
+./tools/build_bm_multi.sh
 
 for host in $HEAD_HOST ${COMPUTE_HOSTS//,/ }; do
     cp /var/log/orchestra/rsyslog/$host/syslog $WORKSPACE/logs/$host-syslog.txt
