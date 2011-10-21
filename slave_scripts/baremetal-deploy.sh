@@ -21,6 +21,7 @@ sudo restart rsyslog
 
 # wait for the host to come up (2 ping responses or timeout after 5 minutes)
 echo "Jenkins: Waiting for head host to return after reset..."
+sleep 10
 if ! timeout 300 ./ping.py $HEAD_HOST; then
     echo "Jenkins: ERROR: Head node did not come back up after reset"
     exit 1
