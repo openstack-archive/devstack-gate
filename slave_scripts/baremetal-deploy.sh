@@ -1,8 +1,4 @@
-#!/bin/bash 
-
-set -x
-#HEAD_HOST=${HEAD_HOST:-10.14.247.43}
-#COMPUTE_HOSTS=${COMPUTE_HOSTS:-10.14.247.44,10.14.247.45}
+#!/bin/bash -x
 
 WORKSPACE=`pwd`
 mkdir -p logs
@@ -46,7 +42,3 @@ done
 
 echo "Jenkins: Executing build_bm_multi.sh."
 ./tools/build_bm_multi.sh
-
-for host in $HEAD_HOST ${COMPUTE_HOSTS//,/ }; do
-    cp /var/log/orchestra/rsyslog/$host/syslog $WORKSPACE/logs/$host-syslog.txt
-done
