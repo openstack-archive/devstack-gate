@@ -42,8 +42,8 @@ user will need to re-log in upon changing either team membership on
 Launchpad, or changing that team's authorization in Jenkins for the new
 privileges to take effect.
 
-Deployment Testing
-******************
+Integration Testing
+*******************
 
 TODO: How others can get involved in testing and integrating with
 OpenStack Jenkins.
@@ -60,20 +60,9 @@ physical machines meaning the test environment has access to all of
 the native processor features, and real-world networking, including
 tagged VLANs.
 
-Each trunk commit to an OpenStack project results in a new package
-being built and pushed to the package archive.  Each time the archive
-is updated, the openstack-deploy-rax job creates an OpenStack cluster
-using the puppet configuration in the openstack/openstack-puppet
-repository on GitHub.  When that is complete, the openstack-test-rax
-job runs a test suite against the cluster.
-
-Anyone is welcome to submit patches to the puppet modules to improve
-the installation of OpenStack.  Parameterized variations in
-configuration can also be added to the Puppet configuration and added
-to the Jenkins job(s) that manage the installation and testing.
-
-The Puppet repository is located at
-https://github.com/openstack/openstack-puppet
+Each time the trunk repo is updated, a Jenkins job will deploy an
+OpenStack cluster using devstack and then run the openstack-test-rax
+test suite against the cluster.
 
 Deployment and Testing Process
 ------------------------------
@@ -87,60 +76,155 @@ the process used here effectively snapshots the machines immediately
 after the base OS install and before OpenStack is installed.  LVM
 snapshots and kexec are used to immediately return the cluster to a
 newly installed state without incurring the additional time it would
-take to install from scratch.  The openstack-deploy-rax job invokes
-the process starting at :ref:`rax_openstack_install`.
+take to install from scratch.  The Jenkins testing job invokes the
+process starting at :ref:`rax_openstack_install`.
 
-Operating System Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-The following are the steps executing during the operating system
-installation process.
+Installation Server Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-PXE Boot Servers
-""""""""""""""""
-The servers are all PXE booted with an Ubuntu installation image.
-The Jenkins slave acts as the boot server.
+The CI team runs the Ubuntu Orchestra server (based on cobbler) on our
+Jenkins slave node to manage the OS installation on the test machines.
+The configuration for the Orchestra server is kept in the CI team's
+puppet modules.  If you want to set up your own system, Orchestra is
+not required, any system capable of performing the following steps is
+suitable.  However, if you want to stand up a test system as quickly
+and simply as possible, you may find it easiest to base your system on
+the one the CI team uses.  You may use the puppet modules yourself, or
+follow the instructions below.
 
-Install Using Preseed File
-""""""""""""""""""""""""""
-Install Ubuntu Maverick with site-local preseed file.  The preseed
-file does the following:
+The CI team's Orchestra configuration module is at:
 
-* Configures site-specific network info
-* Configures site-specific root password
-* Creates an LVM configuration that does not use the whole disk
-* Adds a late-command that sets up a post-install script
+https://github.com/openstack/openstack-ci-puppet/tree/master/modules/orchestra
 
-Run the Post-Install Script
-"""""""""""""""""""""""""""
+Install Orchestra
+"""""""""""""""""
 
-At the end of the OS installation, before the first boot into the new
-system, the post-install script does the following:
+Install Ubuntu 11.10 (Oneiric) and Orchestra::
 
-* Configures rsyslog to use TCP to stream log entries to the Jenkins
-  slave and cache those entries when the network is unavailable.
-* Stages (but does not run) the "install" script that installs
-  Puppet and kicks off the OpenStack installation process.
-* Stages (but does not run) the "reset" script that resets the machine
-  to the state it should be in immediately before starting the
-  OpenStack installation and kicks off the "install" script.
-* Stages (but does not run) the "idle" script that reboots the
-  machines into a state where they are not performing any activity.
-* Stages the "firstboot" script and configures it to be run by
-  rc.local during the next boot.
+  sudo apt-get install ubuntu-orchestra-server ipmitool
 
-The operating system installation then completes by booting into the
-new system where the "firstboot" script is run.
+The install process will prompt you to enter a password for Cobbler.
+Have one ready and keep it in a safe place.  The procedure here will
+not use it, but if you later want to use the Cobbler web interface,
+you will need it.
 
-Run the Firstboot Script
-""""""""""""""""""""""""
+Configure Orchestra
+"""""""""""""""""""
 
-On the first boot, the following happens:
+Install the following files on the Orchestra server so that it deploys
+machines with our LVM/kexec test framework.
 
-* Installs kexec for fast rebooting.
-* rc.local is modified so that firstboot will not run on subsequent
-  reboots.
-* Renames the "root" LVM volume to "orig_root" and creates a snapshot of
-  the volume named "root".
+We update the dnsmasq.conf cobbler template to add
+"dhcp-ignore=tag:!known", and some site-specific network
+configuration::
+
+  wget https://raw.github.com/openstack/openstack-ci-puppet/master/modules/orchestra/files/dnsmasq.template \
+  -O /etc/cobbler/dnsmasq.template
+
+Our servers need a kernel module blacklisted in order to boot
+correctly.  If you don't need to blacklist any modules, you should
+either create an empty file here, or remove the reference to this file
+from the preseed file later::
+
+  wget https://raw.github.com/openstack/openstack-ci-puppet/master/modules/orchestra/files/openstack_module_blacklist \
+  -O /var/lib/cobbler/snippets/openstack_module_blacklist
+
+This cobbler snippet uses cloud-init to set up the LVM/kexec
+environment and configures TCP syslogging to the installation
+server/Jenkins slave::
+
+  wget https://raw.github.com/openstack/openstack-ci-puppet/master/modules/orchestra/files/openstack_cloud_init \
+  -O /var/lib/cobbler/snippets/openstack_cloud_init
+
+This snippet holds the mysql root password that will be configured at
+install time.  It's currently a static string, but you could
+dynamically write this file, or simply replace it with something more
+secure::
+
+  wget https://raw.github.com/openstack/openstack-ci-puppet/master/modules/orchestra/files/openstack_mysql_password \
+  -O /var/lib/cobbler/snippets/openstack_mysql_password
+
+This preseed file manages the OS install on the test nodes.  It
+includes the snippets installed above::
+
+  wget https://raw.github.com/openstack/openstack-ci-puppet/master/modules/orchestra/files/openstack-test.preseed \
+  -O /var/lib/cobbler/kickstarts/openstack-test.preseed
+
+The following sudoers configuration is needed to allow Jenkins to
+control cobbler, remove syslog files from the test hosts before
+starting new tests, and restart rsyslog::
+
+  wget https://raw.github.com/openstack/openstack-ci-puppet/master/modules/orchestra/files/orchestra-jenkins-sudoers -O /etc/sudoers.d/orchestra-jenkins
+
+Replace the Orchestra rsyslog config file with a simpler one that logs
+all information from remote hosts in one file per host::
+
+  wget https://raw.github.com/openstack/openstack-ci-puppet/master/modules/orchestra/files/99-orchestra.conf -O /etc/rsyslog.d/99-orchestra.conf
+
+Make sure the syslog directories exist and restart rsyslog::
+
+  mkdir -p /var/log/orchestra/rsyslog/
+  chown -R syslog.syslog /var/log/orchestra/
+  restart rsyslog
+
+Add an "OpenStack Test" system profile to cobbler that uses the
+preseed file above::
+
+  cobbler profile add \
+  --name=natty-x86_64-ostest \
+  --parent=natty-x86_64 \
+  --kickstart=/var/lib/cobbler/kickstarts/openstack-test.preseed \
+  --kopts="priority=critical locale=en_US"
+
+Add each of your systems to cobbler with a command similar to this
+(you may need different kernel options)::
+
+  cobbler system add \
+  --name=baremetal1 \
+  --hostname=baremetal1 \
+  --profile=natty-x86_64-ostest \
+  --mac=00:11:22:33:44:55 \
+  --power-type=ipmitool \
+  --power-user=IPMI_USERNAME \
+  --power-pass=IPMI_PASS \
+  --power-address=IPMI_IP_ADDR \
+  --ip-address=SYSTEM_IP_ADDRESS \
+  --subnet=SYSTEM_SUBNET \
+  --kopts="netcfg/choose_interface=auto netcfg/dhcp_timeout=60 auto=true priority=critical"
+
+When complete, have cobbler write out its configuration files::
+
+  cobbler sync
+
+Set Up Jenkins Jobs
+"""""""""""""""""""
+
+We have Jenkins jobs to handle all of the tasks after the initial
+Orchestra configuration so that we can easily run them at any time.
+This includes the OS installation on the test nodes, even though we
+don't run that often because the state is preserved in an LVM
+snapshot, we may want to change the configuration used and make a new
+snapshot.  In that case we just need to trigger the Jenkins job again.
+
+The Jenkins job that kicks off the operating system installation calls
+the "baremetal-os-install.sh" script from the openstack-ci repo:
+
+  https://github.com/openstack/openstack-ci/blob/master/slave_scripts/baremetal-os-install.sh
+
+That script instructs cobbler to install the OS on each of the test
+nodes.
+
+To speed up the devstack installation and avoid excessive traffic to
+the pypi server, we build a PIP package cache on the installation
+server.  That is also an infrequent task that we configure as a
+jenkins job.  That calls:
+
+  https://github.com/openstack/openstack-ci/blob/master/slave_scripts/update-pip-cache.sh
+
+That builds a PIP package cache that the test script later copies to
+the test servers for use by devstack.
+
+Run those two jobs, and once complete, the test nodes are ready to go.
 
 This is the end of the operating system installation, and the system
 is currently in the pristine state that will be used by the test
@@ -151,55 +235,52 @@ procedure (which is stored in the LVM volume "orig_root").
 OpenStack Installation
 ~~~~~~~~~~~~~~~~~~~~~~
 
-When the openstack-deploy-rax job runs, it does the following, each
-time starting from the pristine state arrived at the end of the
-previous section.
+When the deployment and integration test job runs, it does the
+following, each time starting from the pristine state arrived at the
+end of the previous section.
 
-Run the Reset Script on the Infrastructure Node
-"""""""""""""""""""""""""""""""""""""""""""""""
+Reset the Test Nodes
+""""""""""""""""""""
 
-The "reset" script does the following:
+The Jenkins deployment and test job first runs the deployment script:
 
-* Remove the "last_root" LVM volume if it exists.
-* Rename the "root" LVM volume to "last_root".
-* Create a snapshot of "orig_root" named "root".
-* Configure rc.local to run the "install" script (previously staged
-  during the operating system installation) on the next boot.
-* Reboot.
+  https://github.com/openstack/openstack-ci/blob/master/slave_scripts/baremetal-deploy.sh
+
+Which invokes the following script on each host to reset it to the
+pristine state:
+
+  https://github.com/openstack/openstack-ci/blob/master/slave_scripts/lvm-kexec-reset.sh
 
 Because kexec is in use, resetting the environment and rebooting into
-the pristine state takes only about 6 seconds.
+the pristine state takes only about 3 seconds.
 
-Run the Idle Script on All Other Nodes
-""""""""""""""""""""""""""""""""""""""
+The deployment script then removes the syslog files from the previous
+run and restarts rsyslog to re-open them.  Once the first test host
+finishes booting and brings up its network, OpenStack installation
+starts.
 
-On any node where Jenkins is not ready to start the installation but
-the node may still be running OpenStack infrastructure that might
-interfere with the new installation, the "idle" script is run to
-reboot into the pristine environment without triggering the OpenStack
-install.  Later, Jenkins will run the "reset" script on these nodes to
-start their OpenStack installation.  The "idle" script does the
-following:
+Run devstack on the Test Nodes
+""""""""""""""""""""""""""""""
 
-* Remove the "last_root" LVM volume if it exists.
-* Rename the "root" LVM volume to "last_root".
-* Create a snapshot of "orig_root" named "root".
-* Reboot.
+Devstack's build_bm_multi script is run, which invokes devstack on
+each of the test nodes.  First on the "head" node which runs all of
+the OpenStack services for the remaining "compute" nodes.
 
-Run the Install Script
-""""""""""""""""""""""
+Run Test Suite
+""""""""""""""
 
-On each node, the "install" script is invoked by rc.local after the
-reboot triggered by the "reset" script.  It does the following:
-
-* Install puppet, and configure it to use the puppetmaster server.
-* Run Puppet.
-
-Puppet handles the entirety of the OpenStack installation according to
-the configuration described in the openstack/opestack-puppet repository.
+Once devstack is complete, the test suite is run.  All logs from the
+test nodes should be sent via syslog to the Jenkins slave, and at the
+end of the test, the logs are archived with the Job for developers to
+inspect in case of problems.
 
 Cluster Configuration
 ---------------------
+
+Here are the configuration parameters of the CI team's test cluster.
+The cluster is currently divided into three mini-clusters so that
+independent Jenkins jobs can run in parallel on the different
+clusters.
 
 VLANs
 ~~~~~
@@ -224,29 +305,38 @@ VPN.
 +-----------+--------------+---------------+
 | Server    | Primary IP   | Management IP |
 +===========+==============+===============+
-|driver1    | 10.14.247.36 | 10.14.247.46  |
+|deploy-rax | 10.14.247.36 | 10.14.247.46  |
 +-----------+--------------+---------------+
-|baremetal01| 10.14.247.37 | 10.14.247.47  |
+|baremetal1 | 10.14.247.37 | 10.14.247.47  |
 +-----------+--------------+---------------+
-|baremetal02| 10.14.247.38 | 10.14.247.48  |
+|baremetal2 | 10.14.247.38 | 10.14.247.48  |
 +-----------+--------------+---------------+
-|baremetal03| 10.14.247.39 | 10.14.247.49  |
+|baremetal3 | 10.14.247.39 | 10.14.247.49  |
 +-----------+--------------+---------------+
-|baremetal04| 10.14.247.40 | 10.14.247.50  |
+|baremetal4 | 10.14.247.40 | 10.14.247.50  |
++-----------+--------------+---------------+
+|baremetal5 | 10.14.247.41 | 10.14.247.51  |
++-----------+--------------+---------------+
+|baremetal6 | 10.14.247.42 | 10.14.247.52  |
++-----------+--------------+---------------+
+|baremetal7 | 10.14.247.43 | 10.14.247.53  |
++-----------+--------------+---------------+
+|baremetal8 | 10.14.247.44 | 10.14.247.54  |
++-----------+--------------+---------------+
+|baremetal9 | 10.14.247.45 | 10.14.247.55  |
 +-----------+--------------+---------------+
 
-driver1
-  The deployment server and Jenkins slave.  It will deploy the servers
-  (currently using djeep and puppet).  It is also the puppetmaster
-  server, and it is where the test framework will run.  It should not
-  run any OpenStack components, but we can install libraries or
-  anything else needed to run tests.
+deploy-rax
+  The deployment server and Jenkins slave.  It deploys the servers
+  using Orchestra and Devstack, and runs the test framework.  It
+  should not run any OpenStack components, but we can install
+  libraries or anything else needed to run tests.
 
-baremetal01
-  Configured with the 'nova-infra' role from the puppet recipes.  It
-  runs MySQL and glance, and other components needed to run a nova
-  cluster.
+baremetal1, baremetal4, baremetal7
+  Configured as "head" nodes to run nova, mysql, and glance.  Each one
+  is the head node of a three node cluster including the two compute
+  nodes following it
 
-baremetal02-04
-  Configured with the 'nova' role, they are the compute nodes.
+baremetal2-3, baremtal5-6, baremetal8-9
+  Configured as compute nodes for each of the three mini-clusters.
 
