@@ -23,42 +23,22 @@ find_next_version() {
         milestonever="$(cat ${milestonefile})"
     fi
 
-    if false  # Because we only need this madness if we're using git, that's why!
+    version="$milestonever"
+    if [ -n "$version" ]
     then
-        while true
-        do
-            version="$milestonever"
-            if [ -n "$version" ]
-            then
-                version="${version}~"
-            fi
-            version="$(printf %s%s.%s%d "${version}" "$datestamp" "$REVNOPREFIX" "$index")"
-            if grep -q "^$PROJECT $version$" "$RECORDFILE"
-            then
-                echo "$version of $PROJECT already exists. Bumping index." >&2
-                index="$(($index + 1))"
-            else
-                break
-            fi
-        done
+        version="${version}~"
+    fi
+    if [ -d .git ]
+    then
+        revno="${revno:-$(git log --oneline |  wc -l)}"
     else
-        version="$milestonever"
-        if [ -n "$version" ]
-        then
-            version="${version}~"
-        fi
-        if [ -d .git ]
-        then
-            revno="${revno:-$(git log --oneline |  wc -l)}"
-        else
-            revno="${revno:-$(bzr revno)}"
-        fi
-        version="$(printf %s%s.%s%d "$version" "$datestamp" "$REVNOPREFIX" "$revno")"
-        if grep -q "^$PROJECT $version$" "$RECORDFILE"
-        then
-            echo "$version of $PROJECT already exists. Bailing out." >&2
-            exit 1
-        fi
+        revno="${revno:-$(bzr revno)}"
+    fi
+    version="$(printf %s%s.%s%d "$version" "$datestamp" "$REVNOPREFIX" "$revno")"
+    if grep -q "^$PROJECT $version$" "$RECORDFILE"
+    then
+        echo "$version of $PROJECT already exists. Bailing out." >&2
+        exit 1
     fi
 
     printf "%s" "$version"
@@ -118,13 +98,26 @@ snapshotversion=$(find_next_version)
 SEPARATOR=${SEPARATOR:-'~'}
 
 rm -f dist/*.tar.gz
-python setup.py sdist
+if [ -f setup.py ] ; then
+    python setup.py sdist
+    # There should only be one, so this should be safe.
+    tarball=$(echo dist/*.tar.gz)
 
-# There should only be one, so this should be safe.
-tarball=$(echo dist/*.tar.gz)
-
-echo mv "$tarball" "dist/$(basename $tarball .tar.gz)${SEPARATOR}${snapshotversion}.tar.gz"
-mv "$tarball" "dist/$(basename $tarball .tar.gz)${SEPARATOR}${snapshotversion}.tar.gz"
+    echo mv "$tarball" "dist/$(basename $tarball .tar.gz)${SEPARATOR}${snapshotversion}.tar.gz"
+    mv "$tarball" "dist/$(basename $tarball .tar.gz)${SEPARATOR}${snapshotversion}.tar.gz"
+else
+    # This handles the horizon case until we get it refactored
+    upcoming_version=`cat ${VERSIONDIR}/upcoming_version`
+    projectversion=${PROJECT}-${upcoming_version}${SEPARATOR}${snapshotversion}
+    projectversion=${PROJECT}-${upcoming_version}
+    mkdir ${projectversion}
+    mv * .??* ${projectversion}
+    if [ -d ${projectversion}/.git ] ; then
+        mv ${projectversion}/.git .
+    fi
+    mkdir dist
+    tar cvfz dist/${projectversion} ${projectversion}${SEPARATOR}${snapshotversion}.tar.gz
+fi
 
 echo "$PROJECT ${snapshotversion}" >> "$RECORDFILE"
 sort "$RECORDFILE" > "$RECORDFILE".tmp
