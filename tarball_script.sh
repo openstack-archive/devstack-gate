@@ -111,7 +111,11 @@ else
     projectversion=${PROJECT}-${upcoming_version}${SEPARATOR}${snapshotversion}
     projectversion=${PROJECT}-${upcoming_version}
     mkdir ${projectversion}
-    mv * .??* ${projectversion}
+    for f in * .??* ; do
+        if [ "${f}" != "${projectversion}" ] ; then
+            mv "$f" ${projectversion}
+        fi
+    done
     if [ -d ${projectversion}/.git ] ; then
         mv ${projectversion}/.git .
     fi
