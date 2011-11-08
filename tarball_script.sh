@@ -120,7 +120,7 @@ else
         mv ${projectversion}/.git .
     fi
     mkdir dist
-    tar cvfz dist/${projectversion} ${projectversion}${SEPARATOR}${snapshotversion}.tar.gz
+    tar cvfz dist/${projectversion}${SEPARATOR}${snapshotversion}.tar.gz ${projectversion}
 fi
 
 echo "$PROJECT ${snapshotversion}" >> "$RECORDFILE"
