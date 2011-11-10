@@ -99,7 +99,7 @@ SEPARATOR=${SEPARATOR:-'~'}
 
 rm -f dist/*.tar.gz
 if [ -f setup.py ] ; then
-    python setup.py sdist
+    tools/with_venv.sh python setup.py sdist
     # There should only be one, so this should be safe.
     tarball=$(echo dist/*.tar.gz)
 

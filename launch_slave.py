@@ -2,6 +2,8 @@ from libcloud.base import NodeImage, NodeSize, NodeLocation
 from libcloud.types import Provider
 from libcloud.providers import get_driver
 from libcloud.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
+from libcloud.dns.types import Provider as DnsProvider
+from libcloud.dns.providers import get_driver as dns_get_driver
 import os, sys
 import getopt
 
@@ -16,7 +18,8 @@ CLOUD_SERVERS_PATH = os.environ.get('CLOUD_SERVERS_PATH', None)
 if len(args) == 0:
   print "Node Name required!"
   sys.exit(1)
-node_name = args[0]
+host_name = args[0]
+node_name = "%s.slave.openstack.org" % host_name
 
 files={}
 for key in ("slave_private_key", "slave_gpg_key", "slave_tarmac_key"):
@@ -27,8 +30,6 @@ for key in ("slave_private_key", "slave_gpg_key", "slave_tarmac_key"):
 node_size = '3'
 node_type = '76'
 if CLOUD_SERVERS_DRIVER == 'rackspace':
-
-    import clouddns
 
     for (name, value) in option_pairs:
       if name == "--distro":
@@ -93,18 +94,19 @@ else:
 if CLOUD_SERVERS_DRIVER == 'rackspace':
     node = conn.deploy_node(name=node_name, image=image, size=size, deploy=msd,
                             ex_files=files)
-    dns_ctx = clouddns.connection.Connection(CLOUD_SERVERS_USERNAME,
-                                             CLOUD_SERVERS_API_KEY)
+    dns_provider = dns_get_driver(DnsProvider.RACKSPACE_US)
+    dns_ctx = dns_provider(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
+
     domain_name = ".".join(node_name.split(".")[-2:])
-    domain = dns_ctx.get_domain(name=domain_name)
-    try:
-        record = domain.get_record(name=node_name)
-    except:
-        record = None
-    if record is None:
-        domain.create_record(node_name, node.public_ip[0], "A")
-    else:
-        record.update(data=node.public_ip[0])
+    domain = [z for z in dns_ctx.list_zones() if z.domain == 'openstack.org'][0]
+
+    records = [z for z in domain.list_records() if z == node_name]
+    if len(records) == 0:
+        # In a fit of terrible interface design, the second param needs to
+        # be the key for "A". Assinine.
+        domain.create_record(node_name, 0, node.public_ip[0])
+    else:   
+        records[0].update(data=node.public_ip[0])
 else:
     node = conn.create_node(name=node_name, image=image, size=size,
                             ex_keyname=node_name, ex_userdata=launch_script)
