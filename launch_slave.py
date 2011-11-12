@@ -3,6 +3,7 @@ from libcloud.types import Provider
 from libcloud.providers import get_driver
 from libcloud.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
 from libcloud.dns.types import Provider as DnsProvider
+from libcloud.dns.types import RecordType
 from libcloud.dns.providers import get_driver as dns_get_driver
 import os, sys
 import getopt
@@ -102,9 +103,7 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
 
     records = [z for z in domain.list_records() if z == node_name]
     if len(records) == 0:
-        # In a fit of terrible interface design, the second param needs to
-        # be the key for "A". Assinine.
-        domain.create_record(node_name, 0, node.public_ip[0])
+        domain.create_record(node_name, RecordType.A, node.public_ip[0])
     else:   
         records[0].update(data=node.public_ip[0])
 else:
