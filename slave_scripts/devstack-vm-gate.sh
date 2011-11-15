@@ -21,6 +21,8 @@
 
 set -o xtrace
 
+if [[ ! -e devstack ]]; then
+    git clone https://github.com/jeblair/devstack.git
 fi
 if [[ ! -e python-novaclient ]]; then
     git clone https://github.com/rackspace/python-novaclient.git
