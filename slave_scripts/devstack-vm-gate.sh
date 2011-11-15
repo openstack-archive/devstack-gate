@@ -22,6 +22,9 @@
 HOSTNAME=devstack-$GERRIT_CHANGE_NUMBER-$GERRIT_PATCHSET_NUMBER-$BUILD_NUMBER.slave.openstack.org
 PROJECTS="nova glance keystone"
 
+WORKSPACE=$(cd $(dirname "$0") && pwd)
+CI_SCRIPT_DIR=$WORKSPACE/openstack-ci
+
 if [[ ! -e devstack ]]; then
     git clone https://github.com/jeblair/devstack.git
 fi
