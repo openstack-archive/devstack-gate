@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -xe
 
 # Gate commits to several projects on a VM running those projects
 # configured by devstack.
@@ -19,7 +19,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -o xtrace
+HOSTNAME=devstack-$GERRIT_CHANGE_NUMBER-$GERRIT_PATCHSET_NUMBER-$BUILD_NUMBER.slave.openstack.org
+PROJECTS="nova glance keystone"
 
 if [[ ! -e devstack ]]; then
     git clone https://github.com/jeblair/devstack.git
