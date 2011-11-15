@@ -20,7 +20,7 @@
 # limitations under the License.
 
 HOSTNAME=devstack-$GERRIT_CHANGE_NUMBER-$GERRIT_PATCHSET_NUMBER-$BUILD_NUMBER.slave.openstack.org
-PROJECTS="nova glance keystone"
+PROJECTS="openstack/nova openstack/glance openstack/keystone"
 
 WORKSPACE=$(cd $(dirname "$0") && pwd)
 CI_SCRIPT_DIR=$WORKSPACE/openstack-ci
