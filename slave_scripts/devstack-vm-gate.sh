@@ -20,17 +20,10 @@
 # limitations under the License.
 
 HOSTNAME=devstack-$GERRIT_CHANGE_NUMBER-$GERRIT_PATCHSET_NUMBER-$BUILD_NUMBER.slave.openstack.org
-PROJECTS="openstack/nova openstack/glance openstack/keystone"
+PROJECTS="openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack-dev/devstack"
 
 CI_SCRIPT_DIR=$(cd $(dirname "$0") && pwd)
 cd $WORKSPACE
-
-if [[ ! -e devstack ]]; then
-    git clone https://github.com/jeblair/devstack.git
-fi
-if [[ ! -e python-novaclient ]]; then
-    git clone https://github.com/rackspace/python-novaclient.git
-fi
 
 for PROJECT in $PROJECTS
 do
@@ -42,9 +35,15 @@ do
     fi
     cd $SHORT_PROJECT
     
+    BRANCH=$GERRIT_BRANCH
+
+    # See if this project has this branch, if not, use master
     git remote update
-    git checkout $GERRIT_BRANCH
-    git reset --hard remotes/origin/$GERRIT_BRANCH
+    if ! git branch -a |grep remotes/origin/$GERRIT_BRANCH>/dev/null; then
+	BRANCH=master
+    fi
+    git checkout $BRANCH
+    git reset --hard remotes/origin/$BRANCH
 
     if [[ $GERRIT_PROJECT == $PROJECT ]]; then
 	echo "  Merging proposed change"
@@ -52,7 +51,7 @@ do
 	git merge FETCH_HEAD
     else
 	echo "  Updating from origin"
-	git pull --ff-only origin $GERRIT_BRANCH
+	git pull --ff-only origin $BRANCH
     fi
     cd $WORKSPACE
 done
