@@ -99,7 +99,12 @@ SEPARATOR=${SEPARATOR:-'~'}
 
 rm -f dist/*.tar.gz
 if [ -f setup.py ] ; then
-    tools/with_venv.sh python setup.py sdist
+    # swift has no virtualenv information in its tree.
+    if [ -d .*-venv ] ; then
+        tools/with_venv.sh python setup.py sdist
+    else
+        python setup.py sdist
+    fi
     # There should only be one, so this should be safe.
     tarball=$(echo dist/*.tar.gz)
 
