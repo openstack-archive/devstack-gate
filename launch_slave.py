@@ -14,7 +14,12 @@ CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
 CLOUD_SERVERS_HOST = os.environ.get('CLOUD_SERVERS_HOST', None)
 CLOUD_SERVERS_PATH = os.environ.get('CLOUD_SERVERS_PATH', None)
 
-(option_pairs, args) = getopt.getopt(sys.argv[1:], [], ["distro="])
+(option_pairs, args) = getopt.getopt(sys.argv[1:], '', ["image=", "nodns"])
+
+DNS = True
+for o,v in option_pairs:
+    if o=='--nodns': 
+      DNS = False
 
 if len(args) == 0:
   print "Node Name required!"
@@ -24,27 +29,23 @@ node_name = "%s.slave.openstack.org" % host_name
 
 files={}
 for key in ("slave_private_key", "slave_gpg_key", "slave_tarmac_key"):
-  if os.path.exists(key):
-    with open(key, "r") as private_key:
-      files["/root/%s" % key] = private_key.read()
+    if os.path.exists(key):
+        with open(key, "r") as private_key:
+            files["/root/%s" % key] = private_key.read()
 
 node_size = '3'
-node_type = '76'
+image_name = 'Ubuntu 11.04'
 if CLOUD_SERVERS_DRIVER == 'rackspace':
-
     for (name, value) in option_pairs:
-      if name == "--distro":
-        if value == "maverick":
-          node_type = '69'
-        if value == "natty":
-          node_type = '76'
+        if name == "--image":
+            image_name = value
 
     Driver = get_driver(Provider.RACKSPACE)
     conn = Driver(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
     images = conn.list_images()
 
     size = [sz for sz in conn.list_sizes() if sz.id == node_size][0]
-    image = [img for img in conn.list_images() if img.id == node_type][0]
+    image = [img for img in conn.list_images() if img.name == image_name][0]    
 
 elif CLOUD_SERVERS_DRIVER == 'eucalyptus':
     node_type = 'ami-0000037e'
@@ -88,28 +89,26 @@ else:
             private_key.write(key_material + '\n')
         os.chmod(private_key_path, 0600)
 
-
-
 # deploy_node takes the same base keyword arguments as create_node.
-
 if CLOUD_SERVERS_DRIVER == 'rackspace':
     node = conn.deploy_node(name=node_name, image=image, size=size, deploy=msd,
                             ex_files=files)
-    dns_provider = dns_get_driver(DnsProvider.RACKSPACE_US)
-    dns_ctx = dns_provider(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
+    if DNS:
+        dns_provider = dns_get_driver(DnsProvider.RACKSPACE_US)
+        dns_ctx = dns_provider(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
+        
+        domain_name = ".".join(node_name.split(".")[-2:])
+        domain = [z for z in dns_ctx.list_zones() if z.domain == 'openstack.org'][0]
 
-    domain_name = ".".join(node_name.split(".")[-2:])
-    domain = [z for z in dns_ctx.list_zones() if z.domain == 'openstack.org'][0]
-
-    records = [z for z in domain.list_records() if z == node_name]
-    if len(records) == 0:
-        domain.create_record(node_name, RecordType.A, node.public_ip[0])
-    else:   
-        records[0].update(data=node.public_ip[0])
+        records = [z for z in domain.list_records() if z == node_name]
+        if len(records) == 0:
+            domain.create_record(node_name, RecordType.A, node.public_ip[0])
+        else:   
+            records[0].update(data=node.public_ip[0])
 else:
     node = conn.create_node(name=node_name, image=image, size=size,
                             ex_keyname=node_name, ex_userdata=launch_script)
 
 with open("%s.node.sh" % node_name,"w") as node_file:
-  node_file.write("ipAddr=%s\n" % node.public_ip[0])
-  node_file.write("nodeId=%s\n" % node.id)
+    node_file.write("ipAddr=%s\n" % node.public_ip[0])
+    node_file.write("nodeId=%s\n" % node.id)
