@@ -22,9 +22,6 @@ from libcloud.base import NodeImage, NodeSize, NodeLocation
 from libcloud.types import Provider
 from libcloud.providers import get_driver
 from libcloud.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
-from libcloud.dns.types import Provider as DnsProvider
-from libcloud.dns.types import RecordType
-from libcloud.dns.providers import get_driver as dns_get_driver
 import libcloud
 import os, sys
 import getopt
@@ -64,18 +61,6 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
     # A private method, Tomaz Muraus says he's thinking of making it public
     node = conn._wait_until_running(node=node, wait_period=3,
                                     timeout=600)
-
-    dns_provider = dns_get_driver(DnsProvider.RACKSPACE_US)
-    dns_ctx = dns_provider(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
-
-    domain_name = ".".join(node_name.split(".")[-2:])
-    domain = [z for z in dns_ctx.list_zones() if z.domain == 'openstack.org'][0]
-
-    records = [z for z in domain.list_records() if z == node_name]
-    if len(records) == 0:
-        domain.create_record(node_name, RecordType.A, node.public_ip[0])
-    else:
-        records[0].update(data=node.public_ip[0])
 
 print "Node ID:", node.id
 print "Node IP:", node.public_ip[0]

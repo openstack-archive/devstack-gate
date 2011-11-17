@@ -25,9 +25,6 @@ from libcloud.base import NodeImage, NodeSize, NodeLocation
 from libcloud.types import Provider
 from libcloud.providers import get_driver
 from libcloud.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
-from libcloud.dns.types import Provider as DnsProvider
-from libcloud.dns.types import RecordType
-from libcloud.dns.providers import get_driver as dns_get_driver
 import libcloud
 
 import vmdatabase
@@ -45,17 +42,6 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
 def delete(machine):
     node = [n for n in conn.list_nodes() if n.id==str(machine['id'])][0]
     node_name = machine['name']
-
-    dns_provider = dns_get_driver(DnsProvider.RACKSPACE_US)
-    dns_ctx = dns_provider(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
-
-    domain_name = ".".join(node_name.split(".")[-2:])
-    domain = [z for z in dns_ctx.list_zones() if z.domain == 'openstack.org'][0]
-
-    records = [z for z in domain.list_records() if z == node_name]
-    if records:
-        records[0].delete()
-
     node.destroy()
 
     db.delMachine(machine['id'])
