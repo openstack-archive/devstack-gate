@@ -29,6 +29,7 @@ git remote update
 git pull --ff-only origin
 
 cd $WORKSPACE
-cat devstack/files/apts/* | grep NOPRIME | cut -d\# -f1 > devstack-debs
+cat devstack/files/apts/* | grep -v NOPRIME | cut -d\# -f1 > devstack-debs
+cat devstack/files/pips/* > devstack-pips
 
-$CI_SCRIPT_DIR/devstack-vm-update-image.py $WORKSPACE/devstack-debs
+$CI_SCRIPT_DIR/devstack-vm-update-image.py $WORKSPACE/devstack-debs $WORKSPACE/devstack-pips

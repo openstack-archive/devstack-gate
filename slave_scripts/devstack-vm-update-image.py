@@ -30,7 +30,7 @@ import sys
 import os
 import commands
 import time
-from paramiko import SSHClient
+import paramiko
 
 CLOUD_SERVERS_DRIVER = os.environ.get('CLOUD_SERVERS_DRIVER','rackspace')
 CLOUD_SERVERS_USERNAME = os.environ['CLOUD_SERVERS_USERNAME']
@@ -39,7 +39,8 @@ CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
 SERVER_NAME = 'devstack-oneiric.template.openstack.org'
 IMAGE_NAME = 'devstack-oneiric'
 
-debs = ' '.join(open(sys.argv[0]).read().split('\n'))
+debs = ' '.join(open(sys.argv[1]).read().split('\n'))
+pips = ' '.join(open(sys.argv[2]).read().split('\n'))
 
 if CLOUD_SERVERS_DRIVER == 'rackspace':
     Driver = get_driver(Provider.RACKSPACE)
@@ -58,12 +59,14 @@ else:
     raise Exception ("Driver not supported")
 
 ip = node.public_ip[0]
-client = SSHClient()
+client = paramiko.SSHClient()
 client.load_system_host_keys()
+client.set_missing_host_key_policy(paramiko.WarningPolicy())
 client.connect(ip)
 
 def run(action, x):
     stdin, stdout, stderr = client.exec_command(x)
+    print x
     ret = stdout.channel.recv_exit_status()
     print stdout.read()
     print stderr.read()
@@ -72,6 +75,7 @@ def run(action, x):
 
 run('update package list', 'sudo apt-get update')
 run('install packages', 'sudo DEBIAN_FRONTEND=noninteractive apt-get --option "Dpkg::Options::=--force-confold" --assume-yes install %s' % debs)
+run('install pips', 'sudo pip install %s' % pips)
 run('upgrade server', 'sudo apt-get -y dist-upgrade')
 run('stop mysql', 'sudo /etc/init.d/mysql stop')
 run('stop rabbitmq', 'sudo /etc/init.d/rabbitmq-server stop')

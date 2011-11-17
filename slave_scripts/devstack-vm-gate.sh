@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash -x
 
 # Gate commits to several projects on a VM running those projects
 # configured by devstack.
@@ -42,8 +42,11 @@ do
     if ! git branch -a |grep remotes/origin/$GERRIT_BRANCH>/dev/null; then
 	BRANCH=master
     fi
+    git reset --hard
+    git clean -x -f
     git checkout $BRANCH
     git reset --hard remotes/origin/$BRANCH
+    git clean -x -f
 
     if [[ $GERRIT_PROJECT == $PROJECT ]]; then
 	echo "  Merging proposed change"
@@ -59,8 +62,21 @@ done
 python $CI_SCRIPT_DIR/devstack-vm-launch.py || exit $?
 . $HOSTNAME.node.sh
 rm $HOSTNAME.node.sh
-scp -C -q $CI_SCRIPT_DIR/devstack-vm-gate-host.sh $ipAddr:
+
+scp -C $CI_SCRIPT_DIR/devstack-vm-gate-host.sh $ipAddr:
+RETVAL=$?
+if [ $RETVAL != 0 ]; then
+    echo "Deleting host"
+    python $CI_SCRIPT_DIR/devstack-vm-delete.py
+fi
+
 scp -C -q -r $WORKSPACE/ $ipAddr:workspace
+RETVAL=$?
+if [ $RETVAL != 0 ]; then
+    echo "Deleting host"
+    python $CI_SCRIPT_DIR/devstack-vm-delete.py
+fi
+
 ssh $ipAddr ./devstack-vm-gate-host.sh
 RETVAL=$?
 if [ $RETVAL = 0 ]; then
@@ -69,4 +85,5 @@ if [ $RETVAL = 0 ]; then
 else
     echo "Giving host to developer"
     python $CI_SCRIPT_DIR/devstack-vm-give.py
+    exit $RETVAL
 fi
