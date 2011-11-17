@@ -18,58 +18,76 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from libcloud.base import NodeImage, NodeSize, NodeLocation
+from libcloud.types import Provider
+from libcloud.providers import get_driver
+from libcloud.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
+from libcloud.dns.types import Provider as DnsProvider
+from libcloud.dns.types import RecordType
+from libcloud.dns.providers import get_driver as dns_get_driver
+import libcloud
 import sys
 import os
-import openstack.compute
 import commands
 import time
+from paramiko import SSHClient
 
-USERNAME = os.environ['CLOUD_SERVERS_USERNAME']
-API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
+CLOUD_SERVERS_DRIVER = os.environ.get('CLOUD_SERVERS_DRIVER','rackspace')
+CLOUD_SERVERS_USERNAME = os.environ['CLOUD_SERVERS_USERNAME']
+CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
 
-SERVER_NAME = 'devstack-oneiric.slave.openstack.org'
+SERVER_NAME = 'devstack-oneiric.template.openstack.org'
 IMAGE_NAME = 'devstack-oneiric'
 
-compute = openstack.compute.Compute(username=USERNAME, apikey=API_KEY, 
-                                    cloud_api='RACKSPACE')
+debs = ' '.join(open(sys.argv[0]).read().split('\n'))
 
-print "Searching for %s server" % SERVER_NAME
-node = compute.servers.find(name=SERVER_NAME)
-print "Searching for %s image" % IMAGE_NAME
-try:
-    image = compute.images.find(name=IMAGE_NAME)
-except openstack.compute.exceptions.NotFound:
-    image = None
+if CLOUD_SERVERS_DRIVER == 'rackspace':
+    Driver = get_driver(Provider.RACKSPACE)
+    conn = Driver(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
+    
+    print "Searching for %s server" % SERVER_NAME
+    node = [n for n in conn.list_nodes() if n.name==SERVER_NAME][0]
 
-stat, out = commands.getstatusoutput("ssh %s sudo apt-get -y dist-upgrade" % 
-                                     node.public_ip)
-if stat: 
-    print out
-    raise Exception("Unable to upgrade server")
-stat, out = commands.getstatusoutput("ssh %s sudo /etc/init.d/mysql stop" % 
-                                     node.public_ip)
-if stat: 
-    print out
-    raise Exception("Unable to stop mysql")
-stat, out = commands.getstatusoutput("ssh %s sudo /etc/init.d/rabbitmq-server stop" % 
-                                     node.public_ip)
-if stat: 
-    print out
-    raise Exception("Unable to stop rabbitmq")
+    print "Searching for %s image" % IMAGE_NAME
+    image = [img for img in conn.list_images() if img.name==IMAGE_NAME]
+    if image: 
+        image = image[0]
+    else: 
+        image = None
+else:
+    raise Exception ("Driver not supported")
+
+ip = node.public_ip[0]
+client = SSHClient()
+client.load_system_host_keys()
+client.connect(ip)
+
+def run(action, x):
+    stdin, stdout, stderr = client.exec_command(x)
+    ret = stdout.channel.recv_exit_status()
+    print stdout.read()
+    print stderr.read()
+    if ret:
+        raise Exception("Unable to %s" % action)
+
+run('update package list', 'sudo apt-get update')
+run('install packages', 'sudo DEBIAN_FRONTEND=noninteractive apt-get --option "Dpkg::Options::=--force-confold" --assume-yes install %s' % debs)
+run('upgrade server', 'sudo apt-get -y dist-upgrade')
+run('stop mysql', 'sudo /etc/init.d/mysql stop')
+run('stop rabbitmq', 'sudo /etc/init.d/rabbitmq-server stop')
 
 if image:
-    image.delete()
-image = compute.images.create(name=IMAGE_NAME, server=node)
+    conn.ex_delete_image(image)
 
-last_status = None
+image = conn.ex_save_image(node=node, name=IMAGE_NAME)
+
+last_extra = None
 while True:
-    if image.status != last_status:
-        print 
-        print time.ctime(), image.status,
-        last_status = image.status
-    if image.status == u'ACTIVE':
+    image = [img for img in conn.list_images(ex_only_active=False) 
+             if img.name==IMAGE_NAME][0]
+    if image.extra != last_extra:
+        print image.extra['status'], image.extra['progress']
+    if image.extra['status'] == 'ACTIVE': 
         break
-    sys.stdout.write('.')
-    sys.stdout.flush()
-    time.sleep(1)
-    image = compute.images.get(image.id)
+    last_extra = image.extra
+    time.sleep(2)
