@@ -579,9 +579,10 @@ High level goals:
    annotated tags).
 #. Members of $PROJECT-core group can perform full code review 
    (blocking or approving: +/- 2), and submit changes to be merged.
-#. Members of openstack-release (Release Manager and PTLs) exclusively
-   can perform full code review (blocking or approving: +/- 2), and
-   submit changes to be merged on milestone-proposed branches.
+#. Members of openstack-release (Release Manager and PTLs), and
+   $PROJECT-drivers (PTL and release minded people) exclusively can
+   perform full code review (blocking or approving: +/- 2), and submit
+   changes to be merged on milestone-proposed branches.
 #. Full code review (+/- 2) of API projects should be available to the
    -core group of the corresponding implementation project as well as to
    the OpenStack Documentation Coordinators.
@@ -640,6 +641,9 @@ These permissions try to achieve the high level goals::
 
     refs/heads/*
       label code review -2/+2: foo-core
+
+    refs/heads/milestone-proposed
+      label code review -2/+2: foo-drivers
 
 Renaming a Project
 ******************
