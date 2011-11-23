@@ -617,9 +617,12 @@ These permissions try to achieve the high level goals::
     
     refs/heads/milestone-proposed
       label code review -2/+2: openstack-release (exclusive)
+      owner: openstack-release
 
     refs/heads/stable/*
-      label code review -2/+2: opestack-stable-maint
+      label code review -2/+2: opestack-stable-maint (exclusive)
+      forge author identity: openstack-stable-maint
+      forge committer identity: openstack-stable-maint
 
     refs/meta/config
       read: project owners
