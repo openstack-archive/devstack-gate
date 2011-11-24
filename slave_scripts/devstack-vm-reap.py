@@ -40,10 +40,13 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
     conn = Driver(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
 
 def delete(machine):
-    node = [n for n in conn.list_nodes() if n.id==str(machine['id'])][0]
-    node_name = machine['name']
+    node = [n for n in conn.list_nodes() if n.id==str(machine['id'])]
+    if not node:
+        print '  Machine id %s not found' % machine['id']
+        db.delMachine(machine['id'])
+        return
+    node = node[0]
     node.destroy()
-
     db.delMachine(machine['id'])
 
 now = time.time()
