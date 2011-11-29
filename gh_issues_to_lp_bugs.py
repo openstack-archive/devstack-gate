@@ -66,11 +66,11 @@ for issue in issues:
 
   """ % issue)
 
-    if len(issue['labels']) > 0:
-        bugs_outfile.write("<tags>\n")
-        for label in issue['labels']:
-            bugs_outfile.write("<tag>%s</tag>\n" % label.lower())
-        bugs_outfile.write("</tags>\n")
+    bugs_outfile.write("<tags>\n")
+    bugs_outfile.write("<tag>%s</tag>\n" %  project)
+    for label in issue['labels']:
+        bugs_outfile.write("<tag>%s</tag>\n" % label.lower())
+    bugs_outfile.write("</tags>\n")
 
     bugs_outfile.write("""
   <comment>
