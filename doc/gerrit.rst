@@ -640,3 +640,52 @@ These permissions try to achieve the high level goals::
 
     refs/heads/*
       label code review -2/+2: foo-core
+
+Renaming a Project
+******************
+
+Renaming a project is not automated and is disruptive to developers,
+so it should be avoided.  Allow for an hour of downtime for the
+project in question, and about 10 minutes of downtime for all of
+Gerrit.  All Gerrit changes, merged and open, will carry over, so
+in-progress changes do not need to be merged before the move.
+
+To rename a project:
+
+#. Make it inacessible by editing the Access pane.  Add a "read" ACL
+   for "Administrators", and mark it "exclusive".  Be sure to save
+   changes.
+
+#. Update the database::
+
+     update account_project_watches
+     set project_name = "openstack/OLD"
+     where project_name = "openstack/NEW";
+ 
+     update changes
+     set dest_project_name = "openstack/OLD"
+     where dest_project_name = "openstack/NEW";
+
+#. Wait for Jenkins to be idle (or take it offline)
+
+#. Stop Gerrit and move the Git repository::
+
+     /etc/init.d/gerrit stop
+     cd /home/gerrit2/review_site/git/openstack/
+     mv OLD.git/ NEW.git
+     /etc/init.d/gerrit start
+
+#. (Bring Jenkins online if need be)
+
+#. Rename the project in GitHub
+
+#. Update Jenkins jobs te reference the new name.  Rename the jobs
+   themselves as appropriate
+
+#. Remove the read access ACL you set in the first step from project
+
+#. Submit a change that updates .gitreview with the new location of the
+   project
+
+Developers will either need to re-clone a new copy of the repository,
+or manually update their remotes.
