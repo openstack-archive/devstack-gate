@@ -20,6 +20,11 @@
 # limitations under the License.
 
 set -o errexit
+
+# Remove any crontabs left over from the image
+sudo crontab -u root -r || /bin/true
+sudo crontab -u jenkins -r || /bin/true
+
 cd workspace
 
 DEST=/opt/stack
