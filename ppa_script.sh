@@ -82,7 +82,7 @@ do
 	fi
 done
 dch -b --force-distribution --v "${pkgversion}" "Automated PPA build. Packaging revision: ${PACKAGING_REVNO}." -D $series
-dpkg-buildpackage -rfakeroot -S -sa -k32EE128C
+dpkg-buildpackage -rfakeroot -S -sa -nc -k32EE128C
 if ! [ "$DO_UPLOAD" = "no" ]
 then
 	for ppa in $PPAS
