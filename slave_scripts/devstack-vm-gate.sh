@@ -22,6 +22,9 @@
 HOSTNAME=devstack-$GERRIT_CHANGE_NUMBER-$GERRIT_PATCHSET_NUMBER-$BUILD_NUMBER.slave.openstack.org
 PROJECTS="openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack-dev/devstack"
 
+# Set this to 1 to always keep the host around
+ALWAYS_KEEP=${ALWAYS_KEEP:-0}
+
 CI_SCRIPT_DIR=$(cd $(dirname "$0") && pwd)
 cd $WORKSPACE
 
@@ -79,7 +82,7 @@ fi
 
 ssh $ipAddr ./devstack-vm-gate-host.sh
 RETVAL=$?
-if [ $RETVAL = 0 ]; then
+if [ $RETVAL = 0 ] && [ $ALWAYS_KEEP = 0 ]; then
     echo "Deleting host"
     python $CI_SCRIPT_DIR/devstack-vm-delete.py
 else
