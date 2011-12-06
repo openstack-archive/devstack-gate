@@ -86,7 +86,7 @@ if [ $RETVAL = 0 ] && [ $ALWAYS_KEEP = 0 ]; then
     echo "Deleting host"
     python $CI_SCRIPT_DIR/devstack-vm-delete.py
 else
-    echo "Giving host to developer"
-    python $CI_SCRIPT_DIR/devstack-vm-give.py
+    #echo "Giving host to developer"
+    #python $CI_SCRIPT_DIR/devstack-vm-give.py
     exit $RETVAL
 fi

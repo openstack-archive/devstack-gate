@@ -35,6 +35,10 @@ CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
 
 db = vmdatabase.VMDatabase()
 
+print 'Known machines (start):'
+for machine in db.getMachines():
+  print machine
+
 if CLOUD_SERVERS_DRIVER == 'rackspace':
     Driver = get_driver(Provider.RACKSPACE)
     conn = Driver(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
@@ -51,6 +55,11 @@ def delete(machine):
 
 now = time.time()
 for machine in db.getMachines():
-  if now-machine['created'] > 24*60*60:
-    print 'Deleting', machine['name']
-    delete(machine)
+    if now-machine['created'] > 24*60*60:
+        print 'Deleting', machine['name']
+        delete(machine)
+
+print
+print 'Known machines (end):'
+for machine in db.getMachines():
+  print machine
