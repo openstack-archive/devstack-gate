@@ -77,6 +77,7 @@ run('update package list', 'sudo apt-get update')
 run('install packages', 'sudo DEBIAN_FRONTEND=noninteractive apt-get --option "Dpkg::Options::=--force-confold" --assume-yes install %s' % debs)
 run('install pips', 'sudo pip install %s' % pips)
 run('upgrade server', 'sudo apt-get -y dist-upgrade')
+run('run puppet', 'sudo bash -c "cd /root/openstack-ci-puppet && /usr/bin/git pull -q && /var/lib/gems/1.8/bin/puppet apply -l /tmp/manifest.log --modulepath=/root/openstack-ci-puppet/modules manifests/site.pp"')
 run('stop mysql', 'sudo /etc/init.d/mysql stop')
 run('stop rabbitmq', 'sudo /etc/init.d/rabbitmq-server stop')
 
