@@ -616,11 +616,15 @@ These permissions try to achieve the high level goals::
       submit: ci tools
     
     refs/heads/milestone-proposed
-      label code review -2/+2: openstack-release (exclusive)
+      label code review (exclusive):
+        -2/+2 openstack-release
+        -1/+1 registered users
       owner: openstack-release
 
     refs/heads/stable/*
-      label code review -2/+2: opestack-stable-maint (exclusive)
+      label code review (exclusive):
+        -2/+2 opestack-stable-maint
+        -1/+1 registered users
       forge author identity: openstack-stable-maint
       forge committer identity: openstack-stable-maint
 
