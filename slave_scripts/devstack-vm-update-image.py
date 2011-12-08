@@ -50,11 +50,8 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
     node = [n for n in conn.list_nodes() if n.name==SERVER_NAME][0]
 
     print "Searching for %s image" % IMAGE_NAME
-    image = [img for img in conn.list_images() if img.name==IMAGE_NAME]
-    if image: 
-        image = image[0]
-    else: 
-        image = None
+    images = [img for img in conn.list_images() 
+              if img.name.startswith(IMAGE_NAME)]
 else:
     raise Exception ("Driver not supported")
 
@@ -81,8 +78,10 @@ run('run puppet', 'sudo bash -c "cd /root/openstack-ci-puppet && /usr/bin/git pu
 run('stop mysql', 'sudo /etc/init.d/mysql stop')
 run('stop rabbitmq', 'sudo /etc/init.d/rabbitmq-server stop')
 
-if image:
+for image in images:
     conn.ex_delete_image(image)
+
+IMAGE_NAME = IMAGE_NAME+'-'+str(int(time.time()))
 
 image = conn.ex_save_image(node=node, name=IMAGE_NAME)
 

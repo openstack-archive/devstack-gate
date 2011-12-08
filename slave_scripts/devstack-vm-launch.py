@@ -52,7 +52,10 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
     sizes = [sz for sz in conn.list_sizes() if sz.ram >= MIN_RAM]
     sizes.sort(lambda a,b: cmp(a.ram, b.ram))
     size = sizes[0]
-    image = [img for img in conn.list_images() if img.name==IMAGE_NAME][0]
+    images = [img for img in conn.list_images() 
+              if img.name.startswith(IMAGE_NAME)]
+    images.sort()
+    image = images[-1]
 else:
     raise Exception ("Driver not supported")
 
