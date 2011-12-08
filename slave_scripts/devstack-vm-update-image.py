@@ -79,7 +79,11 @@ run('stop mysql', 'sudo /etc/init.d/mysql stop')
 run('stop rabbitmq', 'sudo /etc/init.d/rabbitmq-server stop')
 
 for image in images:
-    conn.ex_delete_image(image)
+    print 'Deleting image', image
+    try: 
+        conn.ex_delete_image(image)
+    except Exception, e:
+        print e
 
 IMAGE_NAME = IMAGE_NAME+'-'+str(int(time.time()))
 
