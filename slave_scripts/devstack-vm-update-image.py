@@ -41,6 +41,7 @@ IMAGE_NAME = 'devstack-oneiric'
 
 debs = ' '.join(open(sys.argv[1]).read().split('\n'))
 pips = ' '.join(open(sys.argv[2]).read().split('\n'))
+filedir = sys.argv[3]
 
 if CLOUD_SERVERS_DRIVER == 'rackspace':
     Driver = get_driver(Provider.RACKSPACE)
@@ -70,6 +71,16 @@ def run(action, x):
     if ret:
         raise Exception("Unable to %s" % action)
 
+def scp(source, dest):
+    print 'copy', source, dest
+    ftp = client.open_sftp()
+    ftp.put(source, dest)
+    ftp.close()
+
+run('make file cache directory', 'mkdir -p files')
+for fn in os.listdir(filedir):
+    source = os.path.join(filedir, fn)
+    scp(source, 'files/%s'%fn)
 run('update package list', 'sudo apt-get update')
 run('install packages', 'sudo DEBIAN_FRONTEND=noninteractive apt-get --option "Dpkg::Options::=--force-confold" --assume-yes install %s' % debs)
 run('install pips', 'sudo pip install %s' % pips)

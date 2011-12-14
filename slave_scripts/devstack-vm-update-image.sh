@@ -32,4 +32,16 @@ cd $WORKSPACE
 cat devstack/files/apts/* | grep -v NOPRIME | cut -d\# -f1 > devstack-debs
 cat devstack/files/pips/* > devstack-pips
 
-$CI_SCRIPT_DIR/devstack-vm-update-image.py $WORKSPACE/devstack-debs $WORKSPACE/devstack-pips
+source $WORKSPACE/devstack/stackrc
+mkdir -p files
+# Excerpt from devstack that downloads the images
+for image_url in ${IMAGE_URLS//,/ }; do
+    # Downloads the image (uec ami+aki style), then extracts it.
+    IMAGE_FNAME=`echo "$image_url" | python -c "import sys; print sys.stdin.read().split('/')[-1]"`
+    IMAGE_NAME=`echo "$IMAGE_FNAME" | python -c "import sys; print sys.stdin.read().split('.tar.gz')[0].split('.tgz')[0]"`
+    if [ ! -f files/$IMAGE_FNAME ]; then
+        wget -c $image_url -O files/$IMAGE_FNAME
+    fi
+done
+
+$CI_SCRIPT_DIR/devstack-vm-update-image.py $WORKSPACE/devstack-debs $WORKSPACE/devstack-pips $WORKSPACE/files
