@@ -27,6 +27,7 @@ fi
 cd devstack
 git remote update
 git pull --ff-only origin
+git checkout $GERRIT_BRANCH
 
 cd $WORKSPACE
 cat devstack/files/apts/* | grep -v NOPRIME | cut -d\# -f1 > devstack-debs
