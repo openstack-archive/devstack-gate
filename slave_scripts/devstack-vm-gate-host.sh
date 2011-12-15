@@ -51,5 +51,9 @@ ENABLED_SERVICES=g-api,g-reg,key,n-api,n-cpu,n-net,n-sch,mysql,rabbit
 SKIP_EXERCISES=swift
 EOF
 
+# The vm template update job should cache some images in ~/files.
+# Move them to where devstack expects:
+mv ~/files/* /opt/stack/devstack/files
+
 ./stack.sh
 ./exercise.sh
