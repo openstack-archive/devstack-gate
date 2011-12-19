@@ -100,7 +100,7 @@ SEPARATOR=${SEPARATOR:-'~'}
 rm -f dist/*.tar.gz
 if [ -f setup.py ] ; then
     # swift has no virtualenv information in its tree.
-    if [ -d .*-venv -o -d tools/with_venv.sh ] ; then
+    if [ -d .venv -o -f tools/with_venv.sh ] ; then
         tools/with_venv.sh python setup.py sdist
     else
         python setup.py sdist
