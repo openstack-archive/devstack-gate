@@ -25,10 +25,8 @@ through Jenkins can be thought of as having a few discreet components:
 
 The OpenStack Jenkins can be found at http://jenkins.openstack.org
 
-The current system uses :doc:`tarmac` to manage Launchpad Merge
-Proposals for projects using bzr as a version control system. As we add
-projects which are using git, or migrate projects from bzr to git, we are
-using :doc:`gerrit`
+OpenStack uses :doc:`gerrit` to manage code reviews, which in turns calls
+Jenkins to test those reviews.
 
 Authorization
 *************

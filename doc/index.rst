@@ -25,7 +25,6 @@ Contents:
    systems
    jenkins
    gerrit
-   tarmac
 
 Indices and tables
 ==================
