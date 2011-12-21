@@ -49,6 +49,7 @@ SERVICE_TOKEN=111222333444
 ROOTSLEEP=0
 ENABLED_SERVICES=g-api,g-reg,key,n-api,n-cpu,n-net,n-sch,mysql,rabbit
 SKIP_EXERCISES=swift
+SERVICE_HOST=localhost
 EOF
 
 # The vm template update job should cache some images in ~/files.
