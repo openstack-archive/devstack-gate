@@ -53,9 +53,13 @@ Branch:    %s\n''' % (change_url, git_url, submitter, branch)
 def set_in_progress(bugtask, launchpad, uploader, change_url):
     """Set bug In progress with assignee being the uploader"""
 
-    # Retrieve uploader from Launchpad, if possible
-    email = uploader[uploader.rfind("<") + 1:-1]
-    persons = launchpad.people.findPerson(text=email)
+    # Retrieve uploader from Launchpad. Use email as search key if
+    # provided, and only set if there is a clear match.
+    try:
+        searchkey = uploader[uploader.rindex("(") + 1:-1]
+    except ValueError:
+        searchkey = uploader
+    persons = launchpad.people.findPerson(text=searchkey)
     if len(persons) == 1:
         bugtask.assignee = persons[0]
 
