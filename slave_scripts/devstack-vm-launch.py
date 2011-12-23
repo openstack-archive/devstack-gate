@@ -125,7 +125,8 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
                     [NodeState.UNKNOWN,
                      NodeState.REBOOTING,
                      NodeState.TERMINATED]):
-                    print "Node %s is in error" % my_node['id']
+                    print "Node %s is in error %s" % (my_node['id'], 
+                                                      p_node.state)
                     sys.stdout.flush()
                     db.setMachineState(my_node['uuid'], vmdatabase.ERROR)
         time.sleep(3)
