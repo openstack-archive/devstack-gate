@@ -56,7 +56,7 @@ print "%s ready, %s building, need to launch %s" % (len(ready_machines),
                                                     num_to_launch)
 sys.stdout.flush()
 
-if num_to_launch <= 0 && len(building_machines) == 0:
+if num_to_launch <= 0 and len(building_machines) == 0:
     sys.exit(0)
 
 if CLOUD_SERVERS_DRIVER == 'rackspace':
