@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-# Launch a VM for use by devstack.
+# Make sure there are always a certain number of VMs launched and
+# ready for use by devstack.
 
 # Copyright (C) 2011 OpenStack LLC.
 #
@@ -19,6 +20,7 @@
 # limitations under the License.
 
 from libcloud.base import NodeImage, NodeSize, NodeLocation
+from libcloud.compute.types import NodeState
 from libcloud.types import Provider
 from libcloud.providers import get_driver
 from libcloud.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
@@ -32,17 +34,29 @@ import vmdatabase
 CLOUD_SERVERS_DRIVER = os.environ.get('CLOUD_SERVERS_DRIVER','rackspace')
 CLOUD_SERVERS_USERNAME = os.environ['CLOUD_SERVERS_USERNAME']
 CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
-CLOUD_SERVERS_HOST = os.environ.get('CLOUD_SERVERS_HOST', None)
-CLOUD_SERVERS_PATH = os.environ.get('CLOUD_SERVERS_PATH', None)
 IMAGE_NAME = 'devstack-oneiric'
 MIN_RAM = 1024
-
-CHANGE = os.environ['GERRIT_CHANGE_NUMBER']
-PATCH = os.environ['GERRIT_PATCHSET_NUMBER']
-BUILD = os.environ['BUILD_NUMBER']
+MIN_READY_MACHINES = 5
 
 db = vmdatabase.VMDatabase()
-node_name = 'devstack-%s-%s-%s.slave.openstack.org' % (CHANGE, PATCH, BUILD)
+
+ready_machines = [x for x in db.getMachines() 
+                  if x['state'] == vmdatabase.READY]
+building_machines = [x for x in db.getMachines() 
+                     if x['state'] == vmdatabase.BUILDING]
+
+# Count machines that are ready and machines that are building,
+# so that if the provider is very slow, we aren't queueing up tons
+# of machines to be built.
+num_to_launch = MIN_READY_MACHINES - (len(ready_machines) + 
+                                      len(building_machines))
+
+print "%s ready, %s building, need to launch %s" % (len(ready_machines), 
+                                                    len(building_machines), 
+                                                    num_to_launch)
+
+if num_to_launch <= 0:
+    sys.exit(0)
 
 if CLOUD_SERVERS_DRIVER == 'rackspace':
     Driver = get_driver(Provider.RACKSPACE)
@@ -55,22 +69,56 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
     images = [img for img in conn.list_images() 
               if img.name.startswith(IMAGE_NAME)]
     images.sort()
+    if not len(images):
+        raise Exception("No images found")
     image = images[-1]
 else:
     raise Exception ("Driver not supported")
 
 if CLOUD_SERVERS_DRIVER == 'rackspace':
-    node = conn.create_node(name=node_name, image=image, size=size)
-    # A private method, Tomaz Muraus says he's thinking of making it public
-    node = conn._wait_until_running(node=node, wait_period=3,
-                                    timeout=600)
+    last_name = ''
+    for i in range(num_to_launch):
+        while True:
+            node_name = 'devstack-%s.slave.openstack.org' % int(time.time())
+            if node_name != last_name: break
+            time.sleep(1)
+        node = conn.create_node(name=node_name, image=image, size=size)
+        db.addMachine(CLOUD_SERVERS_DRIVER, node.id, IMAGE_NAME, 
+                      node_name, node.public_ip[0], node.uuid)
+        print "Started building node %s:" % node.id
+        print "  name: %s [%s]" % (node_name, node.public_ip[0])
+        print "  uuid: %s" % (node.uuid)
+        print
 
-print "Node ID:", node.id
-print "Node IP:", node.public_ip[0]
-
-db.addMachine(node.id, node_name, node.public_ip[0], CHANGE, PATCH, BUILD)
-
-with open("%s.node.sh" % node_name,"w") as node_file:
-  node_file.write("ipAddr=%s\n" % node.public_ip[0])
-  node_file.write("nodeId=%s\n" % node.id)
-
+    # Wait for nodes
+    # TODO: The vmdatabase is (probably) ready, but this needs reworking to 
+    # actually support multiple providers
+    start = time.time()
+    timeout = 600
+    to_ignore = []
+    while (time.time()-start) < timeout:
+        building_machines = [x for x in db.getMachines() 
+                             if x['state'] == vmdatabase.BUILDING]
+        if not building_machines:
+            print "Finished"
+            break
+        provider_nodes = conn.list_nodes()
+        print "Waiting on %s machines" % len(building_machines)
+        for my_node in building_machines:
+            if my_node['uuid'] in to_ignore: continue
+            p_nodes = [x for x in provider_nodes if x.uuid == my_node['uuid']]
+            if len(p_nodes) != 1:
+                print "Incorrect number of nodes (%s) from provider matching UUID %s" % (len(p_nodes), my_node['uuid'])
+                to_ignore.append(my_node)
+            else:
+                p_node = p_nodes[0]
+                if (p_node.public_ips and p_node.state == NodeState.RUNNING):
+                    print "Node %s is ready" % my_node['id']
+                    db.setMachineState(my_node['uuid'], vmdatabase.READY)
+                if (p_node.public_ips and p_node.state in 
+                    [NodeState.UNKNOWN,
+                     NodeState.REBOOTING,
+                     NodeState.TERMINATED]):
+                    print "Node %s is in error" % my_node['id']
+                    db.setMachineState(my_node['uuid'], vmdatabase.ERROR)
+        time.sleep(3)

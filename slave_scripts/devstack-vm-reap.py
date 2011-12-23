@@ -32,6 +32,7 @@ import vmdatabase
 CLOUD_SERVERS_DRIVER = os.environ.get('CLOUD_SERVERS_DRIVER','rackspace')
 CLOUD_SERVERS_USERNAME = os.environ['CLOUD_SERVERS_USERNAME']
 CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
+MACHINE_LIFETIME = 24*60*60 # Amount of time after being used
 
 db = vmdatabase.VMDatabase()
 
@@ -53,18 +54,21 @@ def delete(machine):
     node = [n for n in conn.list_nodes() if n.id==str(machine['id'])]
     if not node:
         print '  Machine id %s not found' % machine['id']
-        db.delMachine(machine['id'])
+        db.delMachine(machine['uuid'])
         return
     node = node[0]
     node.destroy()
-    db.delMachine(machine['id'])
+    db.delMachine(machine['uuid'])
 
 now = time.time()
 for machine in db.getMachines():
-    if REAP_ALL or (now-machine['created'] > 24*60*60):
+    # Normally, reap machines that have sat in their current state
+    # for 24 hours, unless that state is READY.
+    if REAP_ALL or (machine['state']!=vmdatabase.READY and 
+                    now-machine['state_time'] > MACHINE_LIFETIME):
         print 'Deleting', machine['name']
         delete(machine)
-
+        
 print
 print 'Known machines (end):'
 for machine in db.getMachines():

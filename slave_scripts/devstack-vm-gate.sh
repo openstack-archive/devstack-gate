@@ -62,31 +62,29 @@ do
     cd $WORKSPACE
 done
 
-python $CI_SCRIPT_DIR/devstack-vm-launch.py || exit $?
-. $HOSTNAME.node.sh
-rm $HOSTNAME.node.sh
+eval `python $CI_SCRIPT_DIR/devstack-vm-fetch.py` || exit $?
 
-scp -C $CI_SCRIPT_DIR/devstack-vm-gate-host.sh $ipAddr:
+scp -C $CI_SCRIPT_DIR/devstack-vm-gate-host.sh $NODE_IP_ADDR:
 RETVAL=$?
 if [ $RETVAL != 0 ]; then
     echo "Deleting host"
-    python $CI_SCRIPT_DIR/devstack-vm-delete.py
+    python $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
 fi
 
-scp -C -q -r $WORKSPACE/ $ipAddr:workspace
+scp -C -q -r $WORKSPACE/ $NODE_IP_ADDR:workspace
 RETVAL=$?
 if [ $RETVAL != 0 ]; then
     echo "Deleting host"
-    python $CI_SCRIPT_DIR/devstack-vm-delete.py
+    python $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
 fi
 
-ssh $ipAddr ./devstack-vm-gate-host.sh
+ssh $NODE_IP_ADDR ./devstack-vm-gate-host.sh
 RETVAL=$?
 if [ $RETVAL = 0 ] && [ $ALWAYS_KEEP = 0 ]; then
     echo "Deleting host"
-    python $CI_SCRIPT_DIR/devstack-vm-delete.py
+    python $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
 else
     #echo "Giving host to developer"
-    #python $CI_SCRIPT_DIR/devstack-vm-give.py
+    #python $CI_SCRIPT_DIR/devstack-vm-give.py $NODE_UUID
     exit $RETVAL
 fi

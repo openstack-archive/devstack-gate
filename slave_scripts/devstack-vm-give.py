@@ -28,12 +28,9 @@ import tempfile
 
 import vmdatabase
 
-CHANGE = os.environ['GERRIT_CHANGE_NUMBER']
-PATCH = os.environ['GERRIT_PATCHSET_NUMBER']
-BUILD = os.environ['BUILD_NUMBER']
-
+node_uuid = sys.argv[1]
 db = vmdatabase.VMDatabase()
-machine = db.getMachine(CHANGE, PATCH, BUILD)
+machine = db.getMachine(node_uuid)
 
 stat, out = commands.getstatusoutput("ssh -p 29418 review.openstack.org gerrit query --format=JSON change:%s" % os.environ['GERRIT_CHANGE_NUMBER'])
 

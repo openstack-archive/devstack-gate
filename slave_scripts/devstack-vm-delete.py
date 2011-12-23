@@ -33,13 +33,9 @@ CLOUD_SERVERS_DRIVER = os.environ.get('CLOUD_SERVERS_DRIVER','rackspace')
 CLOUD_SERVERS_USERNAME = os.environ['CLOUD_SERVERS_USERNAME']
 CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
 
-CHANGE = os.environ['GERRIT_CHANGE_NUMBER']
-PATCH = os.environ['GERRIT_PATCHSET_NUMBER']
-BUILD = os.environ['BUILD_NUMBER']
-
+node_uuid = sys.argv[1]
 db = vmdatabase.VMDatabase()
-machine = db.getMachine(CHANGE, PATCH, BUILD)
-node_name = machine['name']
+machine = db.getMachine(node_uuid)
 
 if CLOUD_SERVERS_DRIVER == 'rackspace':
     Driver = get_driver(Provider.RACKSPACE)
@@ -47,4 +43,4 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
     node = [n for n in conn.list_nodes() if n.id==str(machine['id'])][0]
     node.destroy()
 
-db.delMachine(machine['id'])
+db.delMachine(node_uuid)
