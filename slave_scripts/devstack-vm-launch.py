@@ -78,6 +78,7 @@ else:
 
 if CLOUD_SERVERS_DRIVER == 'rackspace':
     last_name = ''
+    error_counts = {}
     for i in range(num_to_launch):
         while True:
             node_name = 'devstack-%s.slave.openstack.org' % int(time.time())
@@ -125,8 +126,13 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
                     [NodeState.UNKNOWN,
                      NodeState.REBOOTING,
                      NodeState.TERMINATED]):
-                    print "Node %s is in error %s" % (my_node['id'], 
-                                                      p_node.state)
+                    count = error_counts.get(my_node['id'], 0)
+                    count += 1
+                    error_counts[my_node['id']] = count
+                    print "Node %s is in error %s (%s/5)" % (my_node['id'], 
+                                                             p_node.state,
+                                                             count)
                     sys.stdout.flush()
-                    db.setMachineState(my_node['uuid'], vmdatabase.ERROR)
+                    if count >= 5:
+                        db.setMachineState(my_node['uuid'], vmdatabase.ERROR)
         time.sleep(3)
