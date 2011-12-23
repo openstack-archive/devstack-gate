@@ -26,5 +26,5 @@ node = db.getMachineForUse()
 if not node:
     raise Exception("No ready nodes")
 
-print "NODE_IP_ADDR=%s\n" % node['ip']
-print "NODE_UUID=%s\n" % node['uuid']
+print "NODE_IP_ADDR=%s" % node['ip']
+print "NODE_UUID=%s" % node['uuid']

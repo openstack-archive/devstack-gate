@@ -81,7 +81,7 @@ class VMDatabase(object):
         ret = None
         for m in self.getMachines():
             if m['state']==READY:
-                self.setMachineState(m['id'], USED)
+                self.setMachineState(m['uuid'], USED)
                 ret = m
                 break
         self.conn.execute("commit")
