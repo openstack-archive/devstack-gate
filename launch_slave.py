@@ -65,7 +65,7 @@ apt-get install -y --force-yes git rubygems
 gem install --no-rdoc --no-ri --version=1.6.0 facter
 gem install --no-rdoc --no-ri --version=2.7.1 puppet
 cd /root
-git clone git://github.com/openstack/openstack-ci-puppet.git
+git clone https://review.openstack.org/p/openstack/openstack-ci-puppet.git
 cd openstack-ci-puppet
 mv /root/slave_*_key modules/jenkins_slave/files/
 /var/lib/gems/1.8/bin/puppet apply -l /tmp/manifest.log --modulepath=`pwd`/modules manifests/site.pp

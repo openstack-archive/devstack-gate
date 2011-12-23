@@ -22,7 +22,7 @@ perl -ple 's,main,main universe,' -i /etc/apt/sources.list
 apt-get update
 apt-get install -y --force-yes git rubygems
 gem install --no-rdoc --no-ri puppet
-git clone git://github.com/openstack/openstack-ci-puppet.git
+git clone https://review.openstack.org/p/openstack/openstack-ci-puppet.git
 cd openstack-ci-puppet
 /var/lib/gems/1.8/bin/puppet apply --modulepath=`pwd`/modules manifests/site.pp
 """)
