@@ -54,7 +54,9 @@ EOF
 
 # The vm template update job should cache some images in ~/files.
 # Move them to where devstack expects:
-mv ~/files/* /opt/stack/devstack/files
+if ls ~/cache/files/*; then
+    mv ~/cache/files/* /opt/stack/devstack/files
+fi
 
 ./stack.sh
 ./exercise.sh
