@@ -131,7 +131,6 @@ def ssh(action, x):
     for x in stdout:
         output += x
         sys.stdout.write(x)
-        sys.stdout.flush()
     ret = stdout.channel.recv_exit_status()
     print stderr.read()
     if ret:
@@ -185,6 +184,7 @@ for image in images:
 
 IMAGE_NAME = IMAGE_NAME+'-'+str(int(time.time()))
 
+print 'Saving image'
 image = conn.ex_save_image(node=node, name=IMAGE_NAME)
 
 last_extra = None

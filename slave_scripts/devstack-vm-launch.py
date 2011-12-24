@@ -54,7 +54,6 @@ num_to_launch = MIN_READY_MACHINES - (len(ready_machines) +
 print "%s ready, %s building, need to launch %s" % (len(ready_machines), 
                                                     len(building_machines), 
                                                     num_to_launch)
-sys.stdout.flush()
 
 if num_to_launch <= 0 and len(building_machines) == 0:
     sys.exit(0)
@@ -91,7 +90,6 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
         print "  name: %s [%s]" % (node_name, node.public_ip[0])
         print "  uuid: %s" % (node.uuid)
         print
-        sys.stdout.flush()
 
     # Wait for nodes
     # TODO: The vmdatabase is (probably) ready, but this needs reworking to 
@@ -104,23 +102,19 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
                              if x['state'] == vmdatabase.BUILDING]
         if not building_machines:
             print "Finished"
-            sys.stdout.flush()
             break
         provider_nodes = conn.list_nodes()
         print "Waiting on %s machines" % len(building_machines)
-        sys.stdout.flush()
         for my_node in building_machines:
             if my_node['uuid'] in to_ignore: continue
             p_nodes = [x for x in provider_nodes if x.uuid == my_node['uuid']]
             if len(p_nodes) != 1:
                 print "Incorrect number of nodes (%s) from provider matching UUID %s" % (len(p_nodes), my_node['uuid'])
-                sys.stdout.flush()
                 to_ignore.append(my_node)
             else:
                 p_node = p_nodes[0]
                 if (p_node.public_ips and p_node.state == NodeState.RUNNING):
                     print "Node %s is ready" % my_node['id']
-                    sys.stdout.flush()
                     db.setMachineState(my_node['uuid'], vmdatabase.READY)
                 if (p_node.public_ips and p_node.state in 
                     [NodeState.UNKNOWN,
@@ -132,7 +126,6 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
                     print "Node %s is in error %s (%s/5)" % (my_node['id'], 
                                                              p_node.state,
                                                              count)
-                    sys.stdout.flush()
                     if count >= 5:
                         db.setMachineState(my_node['uuid'], vmdatabase.ERROR)
         time.sleep(3)

@@ -62,29 +62,31 @@ do
     cd $WORKSPACE
 done
 
-eval `python $CI_SCRIPT_DIR/devstack-vm-fetch.py` || exit $?
+eval `$CI_SCRIPT_DIR/devstack-vm-fetch.py` || exit $?
 
 scp -C $CI_SCRIPT_DIR/devstack-vm-gate-host.sh $NODE_IP_ADDR:
 RETVAL=$?
 if [ $RETVAL != 0 ]; then
     echo "Deleting host"
-    python $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
+    $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
+    exit $RETVAL
 fi
 
 scp -C -q -r $WORKSPACE/ $NODE_IP_ADDR:workspace
 RETVAL=$?
 if [ $RETVAL != 0 ]; then
     echo "Deleting host"
-    python $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
+    $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
+    exit $RETVAL
 fi
 
 ssh $NODE_IP_ADDR ./devstack-vm-gate-host.sh
 RETVAL=$?
 if [ $RETVAL = 0 ] && [ $ALWAYS_KEEP = 0 ]; then
     echo "Deleting host"
-    python $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
+    $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
 else
     #echo "Giving host to developer"
-    #python $CI_SCRIPT_DIR/devstack-vm-give.py $NODE_UUID
+    #$CI_SCRIPT_DIR/devstack-vm-give.py $NODE_UUID
     exit $RETVAL
 fi
