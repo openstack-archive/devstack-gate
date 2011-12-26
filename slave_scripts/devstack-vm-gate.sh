@@ -19,7 +19,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-HOSTNAME=devstack-$GERRIT_CHANGE_NUMBER-$GERRIT_PATCHSET_NUMBER-$BUILD_NUMBER.slave.openstack.org
 PROJECTS="openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack-dev/devstack openstack/openstack-ci"
 
 # Set this to 1 to always keep the host around
