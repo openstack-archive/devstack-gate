@@ -182,6 +182,15 @@ Set Gerrit to start on boot::
   GERRIT_SITE=/home/gerrit2/review_site
   EOF
 
+Add "Approved" review type to gerrit::
+
+  mysql -u root -p
+  use reviewdb;
+  insert into approval_categories values ('Approved', 'A', 2, 'MaxNoBlock', 'N', 'APRV');
+  insert into approval_category_values values ('No score', 'APRV', 0);    
+  insert into approval_category_values values ('Approved', 'APRV', 1);
+  update approval_category_values set name = "Looks good to me (core reviewer)" where name="Looks good to me, approved";
+
 Install Apache
 --------------
 ::
@@ -500,12 +509,17 @@ In jenkins, under source code management:
   * click "advanced"
 
     * refspec: $GERRIT_REFSPEC
+    * branches: origin/$GERRIT_BRANCH
     * click "advanced"
 
       * choosing stragety: gerrit trigger
 
-
 * select gerrit event under build triggers:
+
+  * Trigger on Comment Added
+
+    * Approval Category: APRV
+    * Approval Value: 1
 
   * plain openstack/project
   * path **
@@ -611,20 +625,28 @@ These permissions try to achieve the high level goals::
       push: registered users
 
     refs/heads/*
-      label code review -1/+1: registered users
-      label verified -1/+1: ci tools
+      label code review: 
+        -1/+1: registered users
+        -2/+2: project bootstrappers
+      label verified:
+        -1/+1: ci tools
+        -1/+1: project bootstrappers
+      label approved 0/+1: project bootstrappers
       submit: ci tools
+      submit: project bootstrappers
     
     refs/heads/milestone-proposed
       label code review (exclusive):
         -2/+2 openstack-release
         -1/+1 registered users
+      label approved (exclusive): 0/+1: openstack-release
       owner: openstack-release
 
     refs/heads/stable/*
       label code review (exclusive):
         -2/+2 opestack-stable-maint
         -1/+1 registered users
+      label approved (exclusive): 0/+1: opestack-stable-maint
       forge author identity: openstack-stable-maint
       forge committer identity: openstack-stable-maint
 
@@ -639,6 +661,7 @@ These permissions try to achieve the high level goals::
 
     refs/heads/*
       label code review -2/+2: openstack-doc-core
+      label approved 0/+1: openstack-doc-core
 
   project foo:
     refs/*
@@ -648,9 +671,11 @@ These permissions try to achieve the high level goals::
 
     refs/heads/*
       label code review -2/+2: foo-core
+      label approved 0/+1: foo-core
 
     refs/heads/milestone-proposed
       label code review -2/+2: foo-drivers
+      label approved 0/+1: foo-drivers
 
 Renaming a Project
 ******************
