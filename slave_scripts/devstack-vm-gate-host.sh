@@ -50,6 +50,7 @@ ROOTSLEEP=0
 ENABLED_SERVICES=g-api,g-reg,key,n-api,n-cpu,n-net,n-sch,mysql,rabbit
 SKIP_EXERCISES=swift,volumes
 SERVICE_HOST=127.0.0.1
+SYSLOG=True
 EOF
 
 # The vm template update job should cache some images in ~/files.
@@ -57,6 +58,11 @@ EOF
 if ls ~/cache/files/*; then
     mv ~/cache/files/* /opt/stack/devstack/files
 fi
+
+# Start with a fresh syslog
+sudo stop rsyslog
+sudo mv /var/log/syslog /var/log/syslog-pre-devstack
+sudo start rsyslog
 
 ./stack.sh
 ./exercise.sh

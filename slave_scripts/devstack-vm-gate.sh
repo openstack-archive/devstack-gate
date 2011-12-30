@@ -26,6 +26,7 @@ ALWAYS_KEEP=${ALWAYS_KEEP:-0}
 
 CI_SCRIPT_DIR=$(cd $(dirname "$0") && pwd)
 cd $WORKSPACE
+mkdir -p logs
 
 for PROJECT in $PROJECTS
 do
@@ -81,9 +82,13 @@ fi
 
 ssh $NODE_IP_ADDR ./devstack-vm-gate-host.sh
 RETVAL=$?
+# No matter what, archive logs
+scp -C -q $NODE_IP_ADDR:/var/log/syslog $WORKSPACE/logs/
+# Now check whether the run was a success
 if [ $RETVAL = 0 ] && [ $ALWAYS_KEEP = 0 ]; then
     echo "Deleting host"
     $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
+    exit $RETVAL
 else
     #echo "Giving host to developer"
     #$CI_SCRIPT_DIR/devstack-vm-give.py $NODE_UUID
