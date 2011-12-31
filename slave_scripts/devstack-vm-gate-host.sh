@@ -62,6 +62,8 @@ fi
 # Start with a fresh syslog
 sudo stop rsyslog
 sudo mv /var/log/syslog /var/log/syslog-pre-devstack
+sudo touch /var/log/syslog
+sudo chmod a+r /var/log/syslog
 sudo start rsyslog
 
 ./stack.sh
