@@ -63,6 +63,8 @@ fi
 sudo stop rsyslog
 sudo mv /var/log/syslog /var/log/syslog-pre-devstack
 sudo touch /var/log/syslog
+sudo chown /var/log/syslog --ref /var/log/syslog-pre-devstack
+sudo chmod /var/log/syslog --ref /var/log/syslog-pre-devstack
 sudo chmod a+r /var/log/syslog
 sudo start rsyslog
 
