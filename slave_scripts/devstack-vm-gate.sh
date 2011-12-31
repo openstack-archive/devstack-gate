@@ -27,6 +27,7 @@ ALWAYS_KEEP=${ALWAYS_KEEP:-0}
 CI_SCRIPT_DIR=$(cd $(dirname "$0") && pwd)
 cd $WORKSPACE
 mkdir -p logs
+rm -f logs/*
 
 for PROJECT in $PROJECTS
 do
