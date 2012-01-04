@@ -21,11 +21,9 @@
 import os, sys, time
 import getopt
 
-from libcloud.base import NodeImage, NodeSize, NodeLocation
-from libcloud.types import Provider
-from libcloud.providers import get_driver
-from libcloud.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
-import libcloud
+from libcloud.compute.base import NodeImage, NodeSize, NodeLocation
+from libcloud.compute.types import Provider
+from libcloud.compute.providers import get_driver
 
 import vmdatabase
 

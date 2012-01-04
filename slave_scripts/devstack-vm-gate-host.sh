@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # Script that is run on the devstack vm; configures and 
 # invokes devstack.
@@ -58,6 +58,10 @@ EOF
 if ls ~/cache/files/*; then
     mv ~/cache/files/* /opt/stack/devstack/files
 fi
+
+# Move the PIP cache into position:
+sudo mkdir -p /var/cache/pip
+sudo mv ~/cache/pip/* /var/cache/pip
 
 # Start with a fresh syslog
 sudo stop rsyslog

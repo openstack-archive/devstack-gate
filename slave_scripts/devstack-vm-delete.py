@@ -18,11 +18,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from libcloud.base import NodeImage, NodeSize, NodeLocation
-from libcloud.types import Provider
-from libcloud.providers import get_driver
-from libcloud.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
-import libcloud
+from libcloud.compute.base import NodeImage, NodeSize, NodeLocation
+from libcloud.compute.types import Provider
+from libcloud.compute.providers import get_driver
 import os, sys
 import getopt
 import time

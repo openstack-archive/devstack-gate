@@ -19,11 +19,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from libcloud.base import NodeImage, NodeSize, NodeLocation
-from libcloud.compute.types import NodeState
-from libcloud.types import Provider
-from libcloud.providers import get_driver
-from libcloud.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
+from libcloud.compute.base import NodeImage, NodeSize, NodeLocation
+from libcloud.compute.types import Provider, NodeState
+from libcloud.compute.providers import get_driver
+from libcloud.compute.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
+
 import libcloud
 import os, sys
 import getopt
@@ -34,7 +34,8 @@ import vmdatabase
 CLOUD_SERVERS_DRIVER = os.environ.get('CLOUD_SERVERS_DRIVER','rackspace')
 CLOUD_SERVERS_USERNAME = os.environ['CLOUD_SERVERS_USERNAME']
 CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
-IMAGE_NAME = 'devstack-oneiric'
+IMAGE_NAME = os.environ.get('IMAGE_NAME', 'devstack-oneiric')
+
 MIN_RAM = 1024
 MIN_READY_MACHINES = 5
 

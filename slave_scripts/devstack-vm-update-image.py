@@ -38,9 +38,9 @@ CLOUD_SERVERS_USERNAME = os.environ['CLOUD_SERVERS_USERNAME']
 CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
 WORKSPACE = os.environ['WORKSPACE']
 DEVSTACK = os.path.join(WORKSPACE, 'devstack')
-
-SERVER_NAME = 'devstack-oneiric.template.openstack.org'
-IMAGE_NAME = 'devstack-oneiric'
+SERVER_NAME = os.environ.get('SERVER_NAME',
+                             'devstack-oneiric.template.openstack.org')
+IMAGE_NAME = os.environ.get('IMAGE_NAME', 'devstack-oneiric')
 DISTRIBUTION = 'oneiric'
 
 def run_local(cmd, status=False, cwd='.', env={}):

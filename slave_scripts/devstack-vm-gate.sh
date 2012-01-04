@@ -24,7 +24,6 @@ PROJECTS="openstack/nova openstack/glance openstack/keystone openstack/python-no
 # Set this to 1 to always keep the host around
 ALWAYS_KEEP=${ALWAYS_KEEP:-0}
 
-CI_SCRIPT_DIR=$(cd $(dirname "$0") && pwd)
 cd $WORKSPACE
 mkdir -p logs
 rm -f logs/*
@@ -62,6 +61,10 @@ do
     fi
     cd $WORKSPACE
 done
+
+# Set CI_SCRIPT_DIR to point to opestack-ci in the workspace so that
+# we are testing the proposed change from this point forward.
+CI_SCRIPT_DIR=$WORKSPACE/openstack-ci/slave-scripts
 
 eval `$CI_SCRIPT_DIR/devstack-vm-fetch.py` || exit $?
 
