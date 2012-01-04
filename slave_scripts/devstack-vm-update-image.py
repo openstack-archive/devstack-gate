@@ -38,9 +38,12 @@ CLOUD_SERVERS_USERNAME = os.environ['CLOUD_SERVERS_USERNAME']
 CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
 WORKSPACE = os.environ['WORKSPACE']
 DEVSTACK = os.path.join(WORKSPACE, 'devstack')
+PROJECTS = ['openstack/nova', 'openstack/glance', 'openstack/keystone']
 
-SERVER_NAME = 'devstack-oneiric.template.openstack.org'
-IMAGE_NAME = 'devstack-oneiric'
+SERVER_NAME = os.environ.get('SERVER_NAME',
+                             'devstack-oneiric.template.openstack.org')
+IMAGE_NAME = os.environ.get('IMAGE_NAME', 'devstack-oneiric')
+
 DISTRIBUTION = 'oneiric'
 
 def run_local(cmd, status=False, cwd='.', env={}):
@@ -154,9 +157,19 @@ for branch_data in BRANCHES:
         'sudo apt-get -y -d install %s' % ' '.join(branch_data['debs']))
     venv = ssh('get temp dir for venv', 'mktemp -d').strip()
     ssh('create venv', 'virtualenv --no-site-packages %s' % venv)
-    ssh('cache pips for branch %s'%branch_data['name'], 
+    ssh('cache pips for branch %s'%branch_data['name'],
         'source %s/bin/activate && PIP_DOWNLOAD_CACHE=~/cache/pip pip install %s' % (venv, ' '.join(branch_data['pips'])))
     ssh('remove venv', 'rm -fr %s'%venv)
+
+    for project in PROJECTS:
+        venv = ssh('get temp dir for venv', 'mktemp -d').strip()
+        ssh('create project venv', 'virtualenv --no-site-packages %s' % venv)
+        ssh('get pip-requires for %s branch %s'%(project, branch_data['name']),
+            'wget https://raw.github.com/%s/%s/tools/pip-requires -O %s/pip-requires' % (project, branch_data['name'], venv))
+        ssh('cache pips for %s branch %s'%(project, branch_data['name']),
+            'source %s/bin/activate && PIP_DOWNLOAD_CACHE=~/cache/pip pip install -r %s/pip-requires' % (venv, venv))
+        ssh('remove project venv', 'rm -fr %s'%venv)        
+
     for url in branch_data['images']:
         fname = url.split('/')[-1]
         try:
