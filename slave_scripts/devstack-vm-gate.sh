@@ -64,7 +64,7 @@ done
 
 # Set CI_SCRIPT_DIR to point to opestack-ci in the workspace so that
 # we are testing the proposed change from this point forward.
-CI_SCRIPT_DIR=$WORKSPACE/openstack-ci/slave-scripts
+CI_SCRIPT_DIR=$WORKSPACE/openstack-ci/slave_scripts
 
 eval `$CI_SCRIPT_DIR/devstack-vm-fetch.py` || exit $?
 
