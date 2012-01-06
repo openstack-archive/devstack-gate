@@ -614,7 +614,7 @@ These permissions try to achieve the high level goals::
   All Projects (metaproject):
     refs/*
       read: anonymous
-      push annotated tag: release managers, ci tools
+      push annotated tag: release managers, ci tools, project bootstrappers
       forge author identity: project bootstrappers  
       forge committer identity: project bootstrappers  
       push (w/ force push): project bootstrappers  
