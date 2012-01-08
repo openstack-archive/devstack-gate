@@ -544,7 +544,7 @@ Pull requests can not be disabled for a project in Github, so instead
 we have a script that runs from cron to close any open pull requests
 with instructions to use Gerrit.  
 
-* Edit openstack/openstack-ci-puppet:site.pp
+* Edit openstack/openstack-ci-puppet:manifests/site.pp
 
 and add the project to the list of github projects in the gerrit class
 for the gerrit.openstack.org node.
@@ -576,6 +576,22 @@ So, for instance, to do glance, you would do:
 
 And you will then have a git repo of glance in the glance dir. This git repo
 is now suitable for uploading in to gerrit to become the new master repo.
+
+Project Config
+**************
+
+There are a few options which need to be enabled on the project in the Admin
+interface.
+
+* Merge Strategy should be set to "Merge If Necessary"
+* "Automatically resolve conflicts" should be enabled
+* "Require Change-Id in commit message" should be enabled
+* "Require a valid contributor agreement to upload" should be enabled
+
+Optionally, if the PTL agrees to it:
+
+* "Require the first line of the commit to be 50 characters or less" should
+  be enabled.
 
 .. _acl:
 
