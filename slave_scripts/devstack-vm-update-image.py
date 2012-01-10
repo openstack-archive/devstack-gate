@@ -113,8 +113,8 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
     node = [n for n in conn.list_nodes() if n.name==SERVER_NAME][0]
 
     print "Searching for %s image" % IMAGE_NAME
-    images = [img for img in conn.list_images() 
-              if img.name.startswith(IMAGE_NAME)]
+    old_images = [img for img in conn.list_images()
+                  if img.name.startswith(IMAGE_NAME)]
 else:
     raise Exception ("Driver not supported")
 
@@ -175,25 +175,28 @@ try:
 except:
     pass
 
-for image in images:
-    print 'Deleting image', image
-    try: 
-        conn.ex_delete_image(image)
-    except Exception, e:
-        print e
-
 IMAGE_NAME = IMAGE_NAME+'-'+str(int(time.time()))
 
 print 'Saving image'
 image = conn.ex_save_image(node=node, name=IMAGE_NAME)
 
 last_extra = None
+okay = False
 while True:
     image = [img for img in conn.list_images(ex_only_active=False) 
              if img.name==IMAGE_NAME][0]
     if image.extra != last_extra:
         print image.extra['status'], image.extra['progress']
-    if image.extra['status'] == 'ACTIVE': 
+    if image.extra['status'] == 'ACTIVE':
+        okay = True
         break
     last_extra = image.extra
     time.sleep(2)
+
+if okay:
+    for image in old_images:
+        print 'Deleting image', image
+        try:
+            conn.ex_delete_image(image)
+        except Exception, e:
+            print e
