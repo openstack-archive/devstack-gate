@@ -578,7 +578,7 @@ And you will then have a git repo of glance in the glance dir. This git repo
 is now suitable for uploading in to gerrit to become the new master repo.
 
 Project Config
-**************
+==============
 
 There are a few options which need to be enabled on the project in the Admin
 interface.
@@ -741,3 +741,60 @@ To rename a project:
 
 Developers will either need to re-clone a new copy of the repository,
 or manually update their remotes.
+
+Adding A New Project On The Command Line
+****************************************
+
+All of the steps involved in adding a new project to Gerrit can be
+accomplished via the commandline, with the exception of creating a new repo
+on github and adding the jenkins jobs.
+
+First of all, add the .gitreview file to the repo that will be added. Then,
+assuming an ssh config alias of `review` for the gerrit instance, as a person
+in the Project Bootstrappers group::
+
+     ssh review gerrit create-project --name openstack/$PROJECT
+     git review -s
+     git push gerrit HEAD:refs/heads/master
+     git push --tags gerrit
+
+At this point, the branch contents will be in gerrit, and the project config
+settings and ACLs need to be set. These are maintained in a special branch
+inside of git in gerrit. Check out the branch from git::
+
+     git fetch gerrit +refs/meta/*:refs/remotes/gerrit-meta/*
+     git checkout -b config remotes/gerrit-meta/config
+
+There will be two interesting files, `groups` and `project.config`. `groups`
+contains UUIDs and names of groups that will be referenced in
+`project.config`. There is a helper script in the openstack-ci repo called
+`get_group_uuid.py` which will fetch the UUID for a given group. For
+$PROJECT-core and $PROJECT-drivers::
+
+      openstack-ci/gerrit/get_group_uuid.py $GROUP_NAME
+
+And make entries in `groups` for each one of them. Next, edit
+`project.config` to look like::
+
+      [access "refs/*"]
+              owner = group Administrators
+              forgeAuthor = group $PROJECT-core
+              forgeCommitter = group $PROJECT-core
+      [receive]
+              requireChangeId = true
+              requireContributorAgreement = true
+      [submit]
+              mergeContent = true
+      [access "refs/heads/*"]
+              label-Code-Review = -2..+2 group $PROJECT-core
+              label-Approved = +0..+1 group $PROJECT-core
+      [access "refs/heads/milestone-proposed"]
+              label-Code-Review = -2..+2 group $PROJECT-drivers
+              label-Approved = +0..+1 group $PROJECT-drivers
+
+Replace $PROJECT with the name of the project.
+
+Finally, commit the changes and push the config back up to Gerrit::
+
+      git commit -m "Initial project config"
+      git push gerrit HEAD:refs/meta/config
