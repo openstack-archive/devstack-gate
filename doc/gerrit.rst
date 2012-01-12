@@ -631,7 +631,7 @@ These permissions try to achieve the high level goals::
     refs/*
       read: anonymous
       push annotated tag: release managers, ci tools, project bootstrappers
-      forge author identity: project bootstrappers  
+      forge author identity: project bootstrappers, registered users
       forge committer identity: project bootstrappers  
       push (w/ force push): project bootstrappers  
       create reference: project bootstrappers, release managers
@@ -663,8 +663,6 @@ These permissions try to achieve the high level goals::
         -2/+2 opestack-stable-maint
         -1/+1 registered users
       label approved (exclusive): 0/+1: opestack-stable-maint
-      forge author identity: openstack-stable-maint
-      forge committer identity: openstack-stable-maint
 
     refs/meta/config
       read: project owners
@@ -672,8 +670,6 @@ These permissions try to achieve the high level goals::
   API Projects (metaproject):
     refs/*
       owner: Administrators
-      forge author identity: openstack-doc-core
-      forge committer identity: openstack-doc-core
 
     refs/heads/*
       label code review -2/+2: openstack-doc-core
@@ -682,8 +678,6 @@ These permissions try to achieve the high level goals::
   project foo:
     refs/*
       owner: Administrators
-      forge author identity: foo-core
-      forge committer identity: foo-core
 
     refs/heads/*
       label code review -2/+2: foo-core
