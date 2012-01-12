@@ -66,7 +66,8 @@ done
 # we are testing the proposed change from this point forward.
 CI_SCRIPT_DIR=$WORKSPACE/openstack-ci/slave_scripts
 
-eval `$CI_SCRIPT_DIR/devstack-vm-fetch.py` || exit $?
+FETCH_OUTPUT=`$CI_SCRIPT_DIR/devstack-vm-fetch.py` || exit $?
+eval $FETCH_OUTPUT
 
 scp -C $CI_SCRIPT_DIR/devstack-vm-gate-host.sh $NODE_IP_ADDR:
 RETVAL=$?
