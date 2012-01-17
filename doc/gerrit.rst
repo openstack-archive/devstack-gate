@@ -34,12 +34,19 @@ Host Installation
 
 Prepare Host
 ------------
+This sets the host up with the standard OpenStack system
+administration configuration.  Skip this if you're not setting up a
+host for use by the OpenStack project.
+
 ::
 
   apt-get install bzr puppet emacs23-nox
   bzr branch lp:~mordred/+junk/osapuppetconf
   cd osapuppetconf/
   puppet apply --modulepath=`pwd`/modules manifests/site.pp
+
+This sets up the firewall and installs some dependencies for Gerrit::
+
   apt-get install ufw
   ufw enable
   ufw allow from any to any port 22
