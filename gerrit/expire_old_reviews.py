@@ -35,9 +35,8 @@ logger.info('Starting expire reviews')
 logger.info('Connecting to Gerrit')
 
 ssh = paramiko.SSHClient()
-ssh.load_system_host_keys(GERRIT_SSH_KEY)
 ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-ssh.connect('localhost', username=GERRIT_USER, port=29418)
+ssh.connect('localhost', username=GERRIT_USER, key_filename=GERRIT_SSH_KEY, port=29418)
 
 def expire_patch_set(patch_id, patch_subject, has_negative):
   if has_negative:
