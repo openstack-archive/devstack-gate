@@ -58,7 +58,8 @@ elif CLOUD_SERVERS_DRIVER == 'eucalyptus':
                     bandwidth=None, price=None, driver="")
 
 # a simple script to install puppet post boot, can be much more complicated.
-launch_script = """perl -ple 's/main/main universe/' -i /etc/apt/sources.list
+if image_name == 'Ubuntu 11.04':
+    launch_script = """perl -ple 's/main/main universe/' -i /etc/apt/sources.list
 apt-get update
 apt-get -y --force-yes upgrade
 apt-get install -y --force-yes git rubygems
@@ -69,6 +70,17 @@ git clone https://review.openstack.org/p/openstack/openstack-ci-puppet.git
 cd openstack-ci-puppet
 mv /root/slave_*_key modules/jenkins_slave/files/
 /var/lib/gems/1.8/bin/puppet apply -l /tmp/manifest.log --modulepath=`pwd`/modules manifests/site.pp
+"""
+elif image_name == 'Ubuntu 11.10':
+    launch_script = """
+apt-get update
+apt-get -y --force-yes upgrade
+apt-get install -y --force-yes git puppet
+cd /root
+git clone https://review.openstack.org/p/openstack/openstack-ci-puppet.git
+cd openstack-ci-puppet
+mv /root/slave_*_key modules/jenkins_slave/files/
+puppet apply -l /tmp/manifest.log --modulepath=`pwd`/modules manifests/site.pp
 """
 
 # a task that first installs the ssh key, and then runs the script
