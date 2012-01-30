@@ -77,7 +77,7 @@ if [ $RETVAL != 0 ]; then
     exit $RETVAL
 fi
 
-scp -C -q -r $WORKSPACE/ $NODE_IP_ADDR:workspace
+rsync -az $WORKSPACE/ $NODE_IP_ADDR:workspace/
 RETVAL=$?
 if [ $RETVAL != 0 ]; then
     echo "Deleting host"

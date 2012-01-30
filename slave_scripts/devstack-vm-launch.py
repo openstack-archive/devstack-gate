@@ -98,11 +98,13 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
     start = time.time()
     timeout = 600
     to_ignore = []
+    finished = False
     while (time.time()-start) < timeout:
         building_machines = [x for x in db.getMachines() 
                              if x['state'] == vmdatabase.BUILDING]
         if not building_machines:
             print "Finished"
+            finished = True
             break
         provider_nodes = conn.list_nodes()
         print "Waiting on %s machines" % len(building_machines)
@@ -130,3 +132,5 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
                     if count >= 5:
                         db.setMachineState(my_node['uuid'], vmdatabase.ERROR)
         time.sleep(3)
+if not finished:
+    sys.exit(1)
