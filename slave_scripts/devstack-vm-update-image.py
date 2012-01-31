@@ -18,13 +18,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from libcloud.base import NodeImage, NodeSize, NodeLocation
-from libcloud.types import Provider
-from libcloud.providers import get_driver
-from libcloud.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
-from libcloud.dns.types import Provider as DnsProvider
-from libcloud.dns.types import RecordType
-from libcloud.dns.providers import get_driver as dns_get_driver
+from libcloud.compute.base import NodeImage, NodeSize, NodeLocation
+from libcloud.compute.types import Provider
+from libcloud.compute.providers import get_driver
+from libcloud.compute.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
 import libcloud
 import sys
 import os
@@ -42,6 +39,12 @@ SERVER_NAME = os.environ.get('SERVER_NAME',
                              'devstack-oneiric.template.openstack.org')
 IMAGE_NAME = os.environ.get('IMAGE_NAME', 'devstack-oneiric')
 DISTRIBUTION = 'oneiric'
+PROJECTS = ['openstack/nova',
+            'openstack/glance', 
+            'openstack/keystone', 
+            'openstack/python-novaclient',
+            'openstack-dev/devstack',
+            'openstack/openstack-ci']
 
 def run_local(cmd, status=False, cwd='.', env={}):
     print "Running:", cmd
@@ -164,6 +167,13 @@ for branch_data in BRANCHES:
         except:
             ssh('download image %s'%fname,
                 'wget -c %s -O ~/cache/files/%s' % (url, fname))
+
+ssh('clear workspace', 'rm -rf ~/workspace')
+ssh('make workspace', 'mkdir -p ~/workspace')
+for project in PROJECTS:
+    sp = project.split('/')[0]
+    ssh('clone %s'%project,
+        'cd ~/workspace && git clone https://review.openstack.org/p/%s'%project)
 
 # TODO: remove after mysql/rabbitmq are removed from image
 try:
