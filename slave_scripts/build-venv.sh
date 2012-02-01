@@ -16,7 +16,8 @@ do
   mkdir -p jenkins_venvs/$branch
   python tools/install_venv.py
   virtualenv --relocatable .venv
-  tar cvfz jenkins_venvs/$branch/venv.tgz .venv
-  rm -fr .venv
+  pip bundle .cache.bundle -r tools/pip-requires
+  tar cvfz jenkins_venvs/$branch/venv.tgz .venv .cache.bundle
+  rm -fr .venv .cache.bundle
 done
 git checkout master
