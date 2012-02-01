@@ -37,7 +37,9 @@ CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
 IMAGE_NAME = os.environ.get('IMAGE_NAME', 'devstack-oneiric')
 
 MIN_RAM = 1024
-MIN_READY_MACHINES = 5
+MIN_READY_MACHINES = 10 # keep this number of machine in the pool
+ABANDON_TIMEOUT = 900   # assume a machine will never boot if it hasn't
+                        # after this amount of time
 
 db = vmdatabase.VMDatabase()
 
@@ -96,15 +98,13 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
     # TODO: The vmdatabase is (probably) ready, but this needs reworking to 
     # actually support multiple providers
     start = time.time()
-    timeout = 600
     to_ignore = []
-    finished = False
-    while (time.time()-start) < timeout:
+    error = False
+    while True:
         building_machines = [x for x in db.getMachines() 
                              if x['state'] == vmdatabase.BUILDING]
         if not building_machines:
             print "Finished"
-            finished = True
             break
         provider_nodes = conn.list_nodes()
         print "Waiting on %s machines" % len(building_machines)
@@ -119,7 +119,7 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
                 if (p_node.public_ips and p_node.state == NodeState.RUNNING):
                     print "Node %s is ready" % my_node['id']
                     db.setMachineState(my_node['uuid'], vmdatabase.READY)
-                if (p_node.public_ips and p_node.state in 
+                elif (p_node.public_ips and p_node.state in 
                     [NodeState.UNKNOWN,
                      NodeState.REBOOTING,
                      NodeState.TERMINATED]):
@@ -130,7 +130,14 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
                                                              p_node.state,
                                                              count)
                     if count >= 5:
+                        print "Abandoning node %s due to too many errors" % (my_node['id'])
                         db.setMachineState(my_node['uuid'], vmdatabase.ERROR)
+                        error = True
+                else:
+                    if time.time()-my_node['state_time'] >= ABANDON_TIMEOUT:
+                        print "Abandoning node %s due to timeout" % (my_node['id'])
+                        db.setMachineState(my_node['uuid'], vmdatabase.ERROR)
+                        error = True
         time.sleep(3)
-if not finished:
+if error:
     sys.exit(1)
