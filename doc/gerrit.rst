@@ -638,7 +638,7 @@ These permissions try to achieve the high level goals::
     refs/*
       read: anonymous
       push annotated tag: release managers, ci tools, project bootstrappers
-      forge author identity: project bootstrappers, registered users
+      forge author identity: registered users
       forge committer identity: project bootstrappers  
       push (w/ force push): project bootstrappers  
       create reference: project bootstrappers, release managers
@@ -779,8 +779,6 @@ And make entries in `groups` for each one of them. Next, edit
 
       [access "refs/*"]
               owner = group Administrators
-              forgeAuthor = group $PROJECT-core
-              forgeCommitter = group $PROJECT-core
       [receive]
               requireChangeId = true
               requireContributorAgreement = true
