@@ -25,6 +25,7 @@ Contents:
    systems
    jenkins
    gerrit
+   puppet
 
 Indices and tables
 ==================
