@@ -1,10 +1,30 @@
 Puppet Modules
 ==============
 
+Overview
+--------
+
 Much of the OpenStack project infrastructure is deployed and managed using
 puppet.
 The OpenStack CI team manage a number of custom puppet modules outlined in this
 document.
+
+Doc Server
+----------
+
+The doc_server module configures nginx [4]_ to serve the documentation for
+several specified OpenStack projects.  At the moment to add a site to this
+you need to edit ``modules/doc_server/manifests/init.pp`` and add a line as
+follows:
+
+.. code-block:: ruby
+   :linenos:
+
+   doc_server::site { "swift": }
+
+In this example nginx will be configured to serve ``swift.openstack.org``
+from ``/srv/docs/swift`` and ``swift.openstack.org/tarballs/`` from 
+``/srv/tarballs/swift``
 
 Lodgeit
 -------
@@ -52,6 +72,15 @@ run on.  The puppet script will then configure nginx to proxy to that port.
 Finally if an image is given that will be used instead of text inside the h1
 tag of the site.  The images need to be stored in the ``modules/lodgeit/files``
 directory.
+
+Lodgeit Backups
+^^^^^^^^^^^^^^^
+
+The lodgeit module will automatically create a git repository in ``/var/backups/lodgeit_db``.  Inside this every site will have its own SQL file, for example "openstack" will have a file called ``openstack.sql``.  Every day a cron job will update the SQL file (one job per file) and commit it to the git repository.
+
+.. note::
+   Ideally the SQL files would have a row on every line to keep the diffs stored
+   in git small, but ``drizzledump`` does not yet support this.
 
 .. rubric:: Footnotes
 .. [1] `Lodgeit homepage <http://www.pocoo.org/projects/lodgeit/>`_

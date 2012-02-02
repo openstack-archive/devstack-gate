@@ -41,7 +41,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'OpenStack CI'
-copyright = u'2011, Monty Taylor and James Blair'
+copyright = u'2011, Monty Taylor, James Blair and Andrew Hutchings'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -212,5 +212,5 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'openstackci', u'OpenStack CI Documentation',
-     [u'Monty Taylor and James Blair'], 1)
+     [u'Monty Taylor, James Blair and Andrew Hutchings'], 1)
 ]

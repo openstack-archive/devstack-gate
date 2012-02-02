@@ -306,6 +306,19 @@ shell command build step (no other configuration)::
 Later, we will configure Jenkins jobs that we want to behave this way
 to use this build step.
 
+Auto Review Expiry
+==================
+
+Puppet automatically installs a daily cron job called ``expire_old_reviews.py``
+onto the gerrit servers.  This script follows two rules:
+
+ #. If the review hasn't been touched in 2 weeks, mark as abandoned.
+ #. If there is a negative review and it hasn't been touched in 1 week, mark as
+    abandoned.
+
+If your review gets touched by either of these rules it is possible to
+unabandon a review on the gerrit web interface.
+
 Launchpad Sync
 ==============
 
