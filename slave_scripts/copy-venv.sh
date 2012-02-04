@@ -9,6 +9,8 @@ rm -fr jenkins_venvs
 tar xfz venv.tgz
 rm venv.tgz
 if [ -f .cache.bundle ] ; then
+  rm -rf .venv
+  virtualenv --no-site-packages .venv
   pip install --upgrade -E .venv file://`pwd`/.cache.bundle
   rm .cache.bundle
 else
