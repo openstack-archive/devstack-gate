@@ -47,8 +47,8 @@ RABBIT_PASSWORD=secret
 ADMIN_PASSWORD=secret
 SERVICE_TOKEN=111222333444
 ROOTSLEEP=0
-ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,n-sch,mysql,rabbit
-SKIP_EXERCISES=client-env,swift,volumes
+ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,n-vol,n-sch,mysql,rabbit
+SKIP_EXERCISES=client-env,swift
 SERVICE_HOST=127.0.0.1
 SYSLOG=True
 EOF
