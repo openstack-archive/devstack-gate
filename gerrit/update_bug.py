@@ -136,7 +136,7 @@ def process_bugtask(launchpad, bugtask, git_log, args):
 def find_bugs(launchpad, git_log, args):
     """Find bugs referenced in the git log and return related bugtasks"""
 
-    bug_regexp = r'([Bb]ug|[Ll][Pp])\s*[#:]?\s*(\d+)'
+    bug_regexp = r'([Bb]ug|[Ll][Pp])[\s#:]*(\d+)'
     tokens = re.split(bug_regexp, git_log)
 
     # Extract unique bug tasks
