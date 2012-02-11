@@ -28,6 +28,8 @@ import libcloud
 import os, sys
 import getopt
 import time
+import paramiko
+import traceback
 
 import vmdatabase
 
@@ -78,6 +80,20 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
 else:
     raise Exception ("Driver not supported")
 
+def check_ssh(ip):
+    client = paramiko.SSHClient()
+    client.load_system_host_keys()
+    client.set_missing_host_key_policy(paramiko.WarningPolicy())
+    client.connect(ip, timeout=10)
+
+    stdin, stdout, stderr = client.exec_command("echo SSH check succeeded")
+    print stdout.read()
+    print stderr.read()
+    ret = stdout.channel.recv_exit_status()
+    if ret:
+        raise Exception("Echo command failed")
+    return True
+
 if CLOUD_SERVERS_DRIVER == 'rackspace':
     last_name = ''
     error_counts = {}
@@ -106,7 +122,12 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
         if not building_machines:
             print "Finished"
             break
-        provider_nodes = conn.list_nodes()
+        try:
+            provider_nodes = conn.list_nodes()
+        except Exception, e:
+            traceback.print_exc()
+            print "Unable to list nodes"
+            continue
         print "Waiting on %s machines" % len(building_machines)
         for my_node in building_machines:
             if my_node['uuid'] in to_ignore: continue
@@ -117,8 +138,16 @@ if CLOUD_SERVERS_DRIVER == 'rackspace':
             else:
                 p_node = p_nodes[0]
                 if (p_node.public_ips and p_node.state == NodeState.RUNNING):
-                    print "Node %s is ready" % my_node['id']
-                    db.setMachineState(my_node['uuid'], vmdatabase.READY)
+                    print "Node %s is running, testing ssh" % my_node['id']
+                    try:
+                        if check_ssh(p_node.public_ip[0]):
+                            print "Node %s is ready" % my_node['id']
+                            db.setMachineState(my_node['uuid'], vmdatabase.READY)
+                    except Exception, e:
+                        traceback.print_exc()
+                        print "Abandoning node %s due to ssh failure" % (my_node['id'])
+                        db.setMachineState(my_node['uuid'], vmdatabase.ERROR)
+                        error = True
                 elif (p_node.public_ips and p_node.state in 
                     [NodeState.UNKNOWN,
                      NodeState.REBOOTING,
