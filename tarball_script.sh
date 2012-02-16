@@ -86,7 +86,7 @@ if [ ! -d "$VERSIONDIR" ]
 then
 	bzr co bzr://jenkins.openstack.org/ "$VERSIONDIR"
 else
-	( cd $VERSIONDIR ; bzr up )
+	( cd $VERSIONDIR ; bzr up ; bzr revert)
 fi
 
 
@@ -127,6 +127,8 @@ else
     mkdir dist
     tar cvfz dist/${projectversion}${SEPARATOR}${snapshotversion}.tar.gz ${projectversion}
 fi
+
+(cd $VERSIONDIR; bzr up)
 
 echo "$PROJECT ${snapshotversion}" >> "$RECORDFILE"
 sort "$RECORDFILE" > "$RECORDFILE".tmp
