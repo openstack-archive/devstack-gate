@@ -43,6 +43,7 @@ PROJECTS = ['openstack/nova',
             'openstack/glance', 
             'openstack/keystone', 
             'openstack/python-novaclient',
+            'openstack/python-keystoneclient',
             'openstack-dev/devstack',
             'openstack/openstack-ci']
 
