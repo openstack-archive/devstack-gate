@@ -16,7 +16,12 @@ do
   mkdir -p jenkins_venvs/$branch
   python tools/install_venv.py
   virtualenv --relocatable .venv
-  pip bundle .cache.bundle -r tools/pip-requires
+  if [ -e tools/test-requires ]
+  then
+    pip bundle .cache.bundle -r tools/pip-requires -r tools/test-requires 
+  else
+    pip bundle .cache.bundle -r tools/pip-requires
+  fi
   tar cvfz jenkins_venvs/$branch/venv.tgz .venv .cache.bundle
   rm -fr .venv .cache.bundle
 done
