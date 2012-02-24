@@ -79,6 +79,16 @@ then
 	exit 1
 fi
 
+# If there is a bundle file, build a virtualenv from the 
+# bundle we use for tox
+if [ -e ".cache.bundle" ]
+then
+    mv .cache.bundle .cache.pybundle
+    virtualenv --no-site-packages .venv
+    .venv/bin/pip install .cache.pybundle 
+    rm .cache.pybundle
+fi
+
 VERSIONDIR="$HOME/versions"
 RECORDFILE="$VERSIONDIR/tarballversions"
 
