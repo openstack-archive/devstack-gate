@@ -138,12 +138,13 @@ class LaunchpadAction(object):
               users.extend(self.get_team_members(implied_group, gerrit))  
           users.extend(self.get_team_members(name, gerrit))
           continue
-        if users.count(name) == 0:
-          users.append(name)
+        users.append(name)
     # check team for implied teams
     for implied_group in gerrit.get_implied_groups(team):
       if implied_group in self.lp_teams:
         users.extend(self.get_team_members(implied_group, gerrit))
+    # filter out dupes
+    users= list(set(users))
     return users
 
   def get_team_watches(self, team):
@@ -209,7 +210,10 @@ class GerritAction(object):
     stdout= self.run_query(query)
     line= stdout.readline()
     row= json.loads(line)
-    return row['columns']['group_id']
+    if row['type'] == 'row':
+      return row['columns']['group_id']
+    else:
+      return 0
 
   def get_user_id(self, user_name):
     query= "select account_id from account_external_ids where external_id='username:{0}'".format(user_name)
@@ -232,6 +236,23 @@ class GerritAction(object):
         users.append(user)
     return users
 
+  def get_users_from_watches(self, group_name):
+    logger.info('Getting Gerrit users from watch list %s', group_name)
+    users= []
+    if group_name.endswith("-core"):
+      group_name = group_name[:-5]
+    group_name = "openstack/{0}".format(group_name)
+
+    query= "select external_id from account_external_ids join account_project_watches on account_project_watches.account_id=account_external_ids.account_id where account_project_watches.project_name like '{0}' and external_id like 'username%%'".format(group_name)
+    stdout= self.run_query(query)
+    for line in stdout:
+      row= json.loads(line)
+      if row['type'] == 'row':
+        user= row['columns']['external_id'].replace('username:','')
+        users.append(user)
+    return users
+
+
   def get_implied_groups(self, group_name):
     gid= self.get_group_id(group_name)
     groups= []
@@ -247,15 +268,19 @@ class GerritAction(object):
   def add_group(self, group_name, group_display_name):
     logger.info('New group %s (%s)', group_display_name, group)
     query= "insert into account_group_id (s) values (NULL)"
-    self.run_query(query)
+    stdout= self.run_query(query)
+    row= json.loads(stdout.readline())
+    if row['rowCount'] is not 1:
+      print "Could not get a new account group ID"
+      raise
     query= "select max(s) from account_group_id"
     stdout= self.run_query(query)
     row= json.loads(stdout.readline())
     gid= row['columns']['max(s)']
-    full_uuid= "{0}{1}".format(uuid.uuid4(), uuid.uuid4())
-    query= "insert into account_groups (group_id, group_type, owner_group_id, name, description, group_uuid) values ({0}, 'INTERNAL', 1, '{1}', '{2}', '{3}'". format(gid, group_name, group_display_name, full_uuid)
+    full_uuid= "{0}{1}".format(uuid.uuid4().hex, uuid.uuid4().hex[:8])
+    query= "insert into account_groups (group_id, group_type, owner_group_id, name, description, group_uuid) values ({0}, 'INTERNAL', 1, '{1}', '{2}', '{3}')". format(gid, group_name, group_display_name, full_uuid)
     self.run_query(query)
-    query= "insert into account_group_names (group_id, group_name) values ({0}, '{1}'".format(gid, group_name)
+    query= "insert into account_group_names (group_id, name) values ({0}, '{1}')".format(gid, group_name)
     self.run_query(query)
 
   def add_user(self, user_name, user_data):
@@ -304,6 +329,9 @@ class GerritAction(object):
     logger.info("Adding Gerrit user %s to group %s", user_name, group_name)
     uid= self.get_user_id(user_name)
     gid= self.get_group_id(group_name)
+    if gid is 0:
+      print "Trying to add user {0} to non-existent group {1}".format(user_name, group_name)
+      raise
     query= "insert into account_group_members (account_id, group_id) values ({0}, {1})".format(uid, gid)
     self.run_query(query)
 
@@ -388,7 +416,8 @@ for group in lp_groups:
     gerrit.add_user_to_group(user, group)
   # Second find users to attach to watches
   lp_group_watches= lp.get_team_watches(group)
-  group_diff= filter(lambda a: a not in gerrit_group_users, lp_group_watches)
+  gerrit_group_watches= gerrit.get_users_from_watches(group)
+  group_diff= filter(lambda a: a not in gerrit_group_watches, lp_group_watches)
   for user in group_diff:
     gerrit.add_user_to_watch(user, group)
   # Third find users to remove from groups/watches
