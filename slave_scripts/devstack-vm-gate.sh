@@ -46,10 +46,10 @@ do
 	BRANCH=master
     fi
     git reset --hard
-    git clean -x -f
+    git clean -x -f -d -q
     git checkout $BRANCH
     git reset --hard remotes/origin/$BRANCH
-    git clean -x -f
+    git clean -x -f -d -q
 
     if [[ $GERRIT_PROJECT == $PROJECT ]]; then
 	echo "  Merging proposed change"
