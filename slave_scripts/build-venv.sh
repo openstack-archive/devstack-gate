@@ -8,6 +8,9 @@ export PIP_DOWNLOAD_CACHE=~/cache/pip
 rm -fr jenkins_venvs
 mkdir -p jenkins_venvs
 
+# Update the list of remote refs to pick up new branches
+git remote update
+
 # Build a venv for every known branch
 for branch in `git branch -r |grep "origin/"|grep -v HEAD|sed "s/origin\///"`
 do
