@@ -66,6 +66,13 @@ done
 # we are testing the proposed change from this point forward.
 CI_SCRIPT_DIR=$WORKSPACE/openstack-ci/slave_scripts
 
+# Also, if we're testing openstack-ci, re-exec this script once so
+# that we can test the new version of it.
+if [[ $GERRIT_PROJECT == "openstack/openstack-ci" ]] && [[ $RE_EXEC != "true" ]]; then
+    export RE_EXEC="true"
+    exec $CI_SCRIPT_DIR/devstack-vm-gate.sh
+fi
+
 FETCH_OUTPUT=`$CI_SCRIPT_DIR/devstack-vm-fetch.py` || exit $?
 eval $FETCH_OUTPUT
 
