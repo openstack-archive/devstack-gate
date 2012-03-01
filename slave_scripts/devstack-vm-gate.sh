@@ -19,7 +19,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJECTS="openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack-dev/devstack openstack/openstack-ci"
+PROJECTS="openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack-dev/devstack openstack/openstack-ci openstack/horizon"
 
 # Set this to 1 to always keep the host around
 ALWAYS_KEEP=${ALWAYS_KEEP:-0}
