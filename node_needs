@@ -1,2 +1,0 @@
-nova: add-apt-repository ppa:nova-core/trunk ; apt-get update ; apt-get
-build-dep nova
