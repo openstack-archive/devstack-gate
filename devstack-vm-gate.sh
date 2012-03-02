@@ -19,7 +19,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJECTS="openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack-dev/devstack openstack/openstack-ci openstack/horizon"
+PROJECTS="openstack-ci/devstack-gate openstack-dev/devstack openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/horizon"
 
 # Set this to 1 to always keep the host around
 ALWAYS_KEEP=${ALWAYS_KEEP:-0}
@@ -62,25 +62,25 @@ do
     cd $WORKSPACE
 done
 
-# Set CI_SCRIPT_DIR to point to opestack-ci in the workspace so that
+# Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
 # we are testing the proposed change from this point forward.
-CI_SCRIPT_DIR=$WORKSPACE/openstack-ci/slave_scripts
+GATE_SCRIPT_DIR=$WORKSPACE/devstack-gate
 
-# Also, if we're testing openstack-ci, re-exec this script once so
+# Also, if we're testing devstack-gate, re-exec this script once so
 # that we can test the new version of it.
-if [[ $GERRIT_PROJECT == "openstack/openstack-ci" ]] && [[ $RE_EXEC != "true" ]]; then
+if [[ $GERRIT_PROJECT == "openstack/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
     export RE_EXEC="true"
-    exec $CI_SCRIPT_DIR/devstack-vm-gate.sh
+    exec $GATE_SCRIPT_DIR/devstack-vm-gate.sh
 fi
 
-FETCH_OUTPUT=`$CI_SCRIPT_DIR/devstack-vm-fetch.py` || exit $?
+FETCH_OUTPUT=`$GATE_SCRIPT_DIR/devstack-vm-fetch.py` || exit $?
 eval $FETCH_OUTPUT
 
-scp -C $CI_SCRIPT_DIR/devstack-vm-gate-host.sh $NODE_IP_ADDR:
+scp -C $GATE_SCRIPT_DIR/devstack-vm-gate-host.sh $NODE_IP_ADDR:
 RETVAL=$?
 if [ $RETVAL != 0 ]; then
     echo "Deleting host"
-    $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
+    $GATE_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
     exit $RETVAL
 fi
 
@@ -88,7 +88,7 @@ rsync -az --delete $WORKSPACE/ $NODE_IP_ADDR:workspace/
 RETVAL=$?
 if [ $RETVAL != 0 ]; then
     echo "Deleting host"
-    $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
+    $GATE_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
     exit $RETVAL
 fi
 
@@ -99,10 +99,10 @@ scp -C -q $NODE_IP_ADDR:/var/log/syslog $WORKSPACE/logs/syslog.txt
 # Now check whether the run was a success
 if [ $RETVAL = 0 ] && [ $ALWAYS_KEEP = 0 ]; then
     echo "Deleting host"
-    $CI_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
+    $GATE_SCRIPT_DIR/devstack-vm-delete.py $NODE_UUID
     exit $RETVAL
 else
     #echo "Giving host to developer"
-    #$CI_SCRIPT_DIR/devstack-vm-give.py $NODE_UUID
+    #$GATE_SCRIPT_DIR/devstack-vm-give.py $NODE_UUID
     exit $RETVAL
 fi

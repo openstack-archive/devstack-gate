@@ -42,10 +42,11 @@ DISTRIBUTION = 'oneiric'
 PROJECTS = ['openstack/nova',
             'openstack/glance', 
             'openstack/keystone', 
+            'openstack/horizon', 
             'openstack/python-novaclient',
             'openstack/python-keystoneclient',
             'openstack-dev/devstack',
-            'openstack/openstack-ci']
+            'openstack-ci/devstack-gate']
 
 def run_local(cmd, status=False, cwd='.', env={}):
     print "Running:", cmd
