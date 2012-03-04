@@ -41,7 +41,7 @@ class VMDatabase(object):
                                     name text, ip text, uuid text,
                                     state_time int, state int, user text)""")
             del conn
-        self.conn = sqlite3.connect(path, isolation_level = None)
+        self.conn = sqlite3.connect(path, timeout=30, isolation_level=None)
         # This turns the returned rows into objects that are like lists
         # and dicts at the same time:
         self.conn.row_factory = sqlite3.Row
