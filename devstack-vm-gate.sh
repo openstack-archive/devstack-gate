@@ -96,6 +96,8 @@ ssh $NODE_IP_ADDR ./devstack-vm-gate-host.sh
 RETVAL=$?
 # No matter what, archive logs
 scp -C -q $NODE_IP_ADDR:/var/log/syslog $WORKSPACE/logs/syslog.txt
+scp -C -q $NODE_IP_ADDR:/opt/stack/screen-logs/* $WORKSPACE/logs/
+rename 's/\.log$/.txt/' $WORKSPACE/logs/*
 # Now check whether the run was a success
 if [ $RETVAL = 0 ] && [ $ALWAYS_KEEP = 0 ]; then
     echo "Deleting host"

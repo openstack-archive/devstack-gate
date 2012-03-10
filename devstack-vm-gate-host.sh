@@ -51,6 +51,7 @@ ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,n-vol,n-sch,horiz
 SKIP_EXERCISES=boot_from_volume,client-env,swift
 SERVICE_HOST=127.0.0.1
 SYSLOG=True
+SCREEN_LOGDIR=/opt/stack/screen-logs
 EOF
 
 # The vm template update job should cache some images in ~/files.
