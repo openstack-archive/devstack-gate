@@ -52,12 +52,12 @@ do
     git clean -x -f -d -q
 
     if [[ $GERRIT_PROJECT == $PROJECT ]]; then
-	echo "  Merging proposed change"
-	git fetch https://review.openstack.org/p/$PROJECT $GERRIT_REFSPEC
-	git merge FETCH_HEAD
+        echo "  Merging proposed change"
+        git fetch https://review.openstack.org/p/$PROJECT $GERRIT_REFSPEC
+        git merge FETCH_HEAD
     else
-	echo "  Updating from origin"
-	git pull --ff-only origin $BRANCH
+        echo "  Updating from origin"
+        git pull --ff-only origin $BRANCH
     fi
     cd $WORKSPACE
 done
@@ -68,7 +68,7 @@ GATE_SCRIPT_DIR=$WORKSPACE/devstack-gate
 
 # Also, if we're testing devstack-gate, re-exec this script once so
 # that we can test the new version of it.
-if [[ $GERRIT_PROJECT == "openstack/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
+if [[ $GERRIT_PROJECT == "openstack-ci/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
     export RE_EXEC="true"
     exec $GATE_SCRIPT_DIR/devstack-vm-gate.sh
 fi
