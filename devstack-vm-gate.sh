@@ -98,6 +98,9 @@ RETVAL=$?
 scp -C -q $NODE_IP_ADDR:/var/log/syslog $WORKSPACE/logs/syslog.txt
 scp -C -q $NODE_IP_ADDR:/opt/stack/screen-logs/* $WORKSPACE/logs/
 rename 's/\.log$/.txt/' $WORKSPACE/logs/*
+# Remove duplicate logs
+rm $WORKSPACE/logs/*.*.txt
+
 # Now check whether the run was a success
 if [ $RETVAL = 0 ] && [ $ALWAYS_KEEP = 0 ]; then
     echo "Deleting host"
