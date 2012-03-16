@@ -2,7 +2,7 @@
 
 # Fetch a ready VM for use by devstack.
 
-# Copyright (C) 2011 OpenStack LLC.
+# Copyright (C) 2011-2012 OpenStack LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,13 +18,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+
 import vmdatabase
 
+IMAGE_NAME = sys.argv[1]
+
 db = vmdatabase.VMDatabase()
-node = db.getMachineForUse()
+node = db.getMachineForUse(IMAGE_NAME)
 
 if not node:
     raise Exception("No ready nodes")
 
-print "NODE_IP_ADDR=%s" % node['ip']
-print "NODE_UUID=%s" % node['uuid']
+print "NODE_IP_ADDR=%s" % node.ip
+print "NODE_PROVIDER=%s" % node.base_image.provider.name
+print "NODE_ID=%s" % node.id

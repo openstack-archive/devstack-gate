@@ -2,7 +2,7 @@
 
 # Update the VM used in devstack deployments.
 
-# Copyright (C) 2011 OpenStack LLC.
+# Copyright (C) 2011-2012 OpenStack LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-CI_SCRIPT_DIR=$(cd $(dirname "$0") && pwd)
+GATE_SCRIPT_DIR=$(cd $(dirname "$0") && pwd)
 cd $WORKSPACE
 
 if [[ ! -e devstack ]]; then
@@ -29,4 +29,5 @@ git remote update
 git remote prune origin
 cd $WORKSPACE
 
-$CI_SCRIPT_DIR/devstack-vm-update-image.py
+$GATE_SCRIPT_DIR/devstack-vm-update-image.py $1
+

@@ -3,7 +3,7 @@
 # Make sure there are always a certain number of VMs launched and
 # ready for use by devstack.
 
-# Copyright (C) 2011 OpenStack LLC.
+# Copyright (C) 2011-2012 OpenStack LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,154 +19,153 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from libcloud.compute.base import NodeImage, NodeSize, NodeLocation
-from libcloud.compute.types import Provider, NodeState
-from libcloud.compute.providers import get_driver
-from libcloud.compute.deployment import MultiStepDeployment, ScriptDeployment, SSHKeyDeployment
-
-import libcloud
-import os, sys
+import os
+import sys
 import getopt
 import time
 import paramiko
 import traceback
 
 import vmdatabase
+import utils
 
-CLOUD_SERVERS_DRIVER = os.environ.get('CLOUD_SERVERS_DRIVER','rackspace')
-CLOUD_SERVERS_USERNAME = os.environ['CLOUD_SERVERS_USERNAME']
-CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
-IMAGE_NAME = os.environ.get('IMAGE_NAME', 'devstack-oneiric')
+PROVIDER_NAME = sys.argv[1]
+DEVSTACK_GATE_PREFIX = os.environ.get('DEVSTACK_GATE_PREFIX', '')
 
-MIN_RAM = 1024
-MIN_READY_MACHINES = 10 # keep this number of machine in the pool
 ABANDON_TIMEOUT = 900   # assume a machine will never boot if it hasn't
                         # after this amount of time
 
-db = vmdatabase.VMDatabase()
 
-ready_machines = [x for x in db.getMachines() 
-                  if x['state'] == vmdatabase.READY]
-building_machines = [x for x in db.getMachines() 
-                     if x['state'] == vmdatabase.BUILDING]
+def calculate_deficit(provider, base_image):
+    # Count machines that are ready and machines that are building,
+    # so that if the provider is very slow, we aren't queueing up tons
+    # of machines to be built.
+    num_to_launch = base_image.min_ready - (len(base_image.ready_machines) +
+                                            len(base_image.building_machines))
 
-# Count machines that are ready and machines that are building,
-# so that if the provider is very slow, we aren't queueing up tons
-# of machines to be built.
-num_to_launch = MIN_READY_MACHINES - (len(ready_machines) + 
-                                      len(building_machines))
+    # Don't launch more than our provider max
+    num_to_launch = min(provider.max_servers - len(provider.machines),
+                        num_to_launch)
 
-print "%s ready, %s building, need to launch %s" % (len(ready_machines), 
-                                                    len(building_machines), 
-                                                    num_to_launch)
+    # Don't launch less than 0
+    num_to_launch = max(0, num_to_launch)
 
-if num_to_launch <= 0 and len(building_machines) == 0:
-    sys.exit(0)
+    print "Ready nodes:   ", len(base_image.ready_machines)
+    print "Building nodes:", len(base_image.building_machines)
+    print "Provider total:", len(provider.machines)
+    print "Provider max:  ", provider.max_servers
+    print "Need to launch:", num_to_launch
 
-if CLOUD_SERVERS_DRIVER == 'rackspace':
-    Driver = get_driver(Provider.RACKSPACE)
-    conn = Driver(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
-    images = conn.list_images()
+    return num_to_launch
 
-    sizes = [sz for sz in conn.list_sizes() if sz.ram >= MIN_RAM]
-    sizes.sort(lambda a,b: cmp(a.ram, b.ram))
-    size = sizes[0]
-    images = [img for img in conn.list_images() 
-              if img.name.startswith(IMAGE_NAME)]
-    images.sort()
-    if not len(images):
-        raise Exception("No images found")
-    image = images[-1]
-else:
-    raise Exception ("Driver not supported")
 
-def check_ssh(ip):
-    client = paramiko.SSHClient()
-    client.load_system_host_keys()
-    client.set_missing_host_key_policy(paramiko.WarningPolicy())
-    client.connect(ip, timeout=10)
+def launch_node(client, snap_image, image, flavor, last_name):
+    while True:
+        name = '%sdevstack-%s.slave.openstack.org' % (
+            DEVSTACK_GATE_PREFIX, int(time.time()))
+        if name != last_name:
+            break
+        time.sleep(1)
+    create_kwargs = dict(image=image, flavor=flavor, name=name)
+    server = client.servers.create(**create_kwargs)
+    machine = snap_image.base_image.newMachine(name=name,
+                                               external_id=server.id)
+    print "Started building machine %s:" % machine.id
+    print "  name: %s" % (name)
+    print
+    return server, machine
 
-    stdin, stdout, stderr = client.exec_command("echo SSH check succeeded")
-    print stdout.read()
-    print stderr.read()
-    ret = stdout.channel.recv_exit_status()
-    if ret:
-        raise Exception("Echo command failed")
-    return True
 
-if CLOUD_SERVERS_DRIVER == 'rackspace':
+def check_machine(client, machine, error_counts):
+    try:
+        server = client.servers.get(machine.external_id)
+    except:
+        print "Unable to get server detail, will retry"
+        traceback.print_exc()
+        return
+    
+    if server.status == 'ACTIVE':
+        if 'os-floating-ips' in utils.get_extensions(client):
+            utils.add_public_ip(server)
+        ip = utils.get_public_ip(server)
+        if not ip:
+            raise Exception("Unable to find public ip of server")
+        machine.ip = ip
+        print "Machine %s is running, testing ssh" % machine.id
+        if utils.ssh_connect(ip, 'jenkins'):
+            print "Machine %s is ready" % machine.id
+            machine.state = vmdatabase.READY
+            return
+    elif not server.status.startswith('BUILD'):
+        count = error_counts.get(machine.id, 0)
+        count += 1
+        error_counts[machine.id] = count
+        print "Machine %s is in error %s (%s/5)" % (machine.id,
+                                                    server.status,
+                                                    count)
+        if count >= 5:
+            raise Exception("Too many errors querying machine %s" % machine.id)
+        else:
+            if time.time() - machine.state_time >= ABANDON_TIMEOUT:
+                raise Exception("Waited too long for machine %s" % machine.id)
+
+
+def main():
+    db = vmdatabase.VMDatabase()
+
+    provider = db.getProvider(PROVIDER_NAME)
+    print "Working with provider %s" % provider.name
+
+    client = utils.get_client(provider)
+
     last_name = ''
     error_counts = {}
-    for i in range(num_to_launch):
-        while True:
-            node_name = 'devstack-%s.slave.openstack.org' % int(time.time())
-            if node_name != last_name: break
-            time.sleep(1)
-        node = conn.create_node(name=node_name, image=image, size=size)
-        db.addMachine(CLOUD_SERVERS_DRIVER, node.id, IMAGE_NAME, 
-                      node_name, node.public_ip[0], node.uuid)
-        print "Started building node %s:" % node.id
-        print "  name: %s [%s]" % (node_name, node.public_ip[0])
-        print "  uuid: %s" % (node.uuid)
-        print
-
-    # Wait for nodes
-    # TODO: The vmdatabase is (probably) ready, but this needs reworking to 
-    # actually support multiple providers
-    start = time.time()
-    to_ignore = []
     error = False
-    while True:
-        building_machines = [x for x in db.getMachines() 
-                             if x['state'] == vmdatabase.BUILDING]
-        if not building_machines:
-            print "Finished"
-            break
-        try:
-            provider_nodes = conn.list_nodes()
-        except Exception, e:
-            traceback.print_exc()
-            print "Unable to list nodes"
+
+    for base_image in provider.base_images:
+        snap_image = base_image.current_snapshot
+        if not snap_image:
             continue
+        print "Working on image %s" % snap_image.name
+
+        flavor = utils.get_flavor(client, base_image.min_ram)
+        print "Found flavor", flavor
+
+        remote_snap_image = client.images.get(snap_image.external_id)
+        print "Found image", remote_snap_image
+
+        num_to_launch = calculate_deficit(provider, base_image)
+        for i in range(num_to_launch):
+            try:
+                server, machine = launch_node(client, snap_image,
+                                              remote_snap_image, flavor, last_name)
+                last_name = machine.name
+            except:
+                traceback.print_exc()
+                error = True
+
+    while True:
+        building_machines = provider.building_machines
+        if not building_machines:
+            print "No more machines are building, finished."
+            break
+
         print "Waiting on %s machines" % len(building_machines)
-        for my_node in building_machines:
-            if my_node['uuid'] in to_ignore: continue
-            p_nodes = [x for x in provider_nodes if x.uuid == my_node['uuid']]
-            if len(p_nodes) != 1:
-                print "Incorrect number of nodes (%s) from provider matching UUID %s" % (len(p_nodes), my_node['uuid'])
-                to_ignore.append(my_node)
-            else:
-                p_node = p_nodes[0]
-                if (p_node.public_ips and p_node.state == NodeState.RUNNING):
-                    print "Node %s is running, testing ssh" % my_node['id']
-                    try:
-                        if check_ssh(p_node.public_ip[0]):
-                            print "Node %s is ready" % my_node['id']
-                            db.setMachineState(my_node['uuid'], vmdatabase.READY)
-                    except Exception, e:
-                        traceback.print_exc()
-                        print "Abandoning node %s due to ssh failure" % (my_node['id'])
-                        db.setMachineState(my_node['uuid'], vmdatabase.ERROR)
-                        error = True
-                elif (p_node.public_ips and p_node.state in 
-                    [NodeState.UNKNOWN,
-                     NodeState.REBOOTING,
-                     NodeState.TERMINATED]):
-                    count = error_counts.get(my_node['id'], 0)
-                    count += 1
-                    error_counts[my_node['id']] = count
-                    print "Node %s is in error %s (%s/5)" % (my_node['id'], 
-                                                             p_node.state,
-                                                             count)
-                    if count >= 5:
-                        print "Abandoning node %s due to too many errors" % (my_node['id'])
-                        db.setMachineState(my_node['uuid'], vmdatabase.ERROR)
-                        error = True
-                else:
-                    if time.time()-my_node['state_time'] >= ABANDON_TIMEOUT:
-                        print "Abandoning node %s due to timeout" % (my_node['id'])
-                        db.setMachineState(my_node['uuid'], vmdatabase.ERROR)
-                        error = True
+        for machine in building_machines:
+            try:
+                check_machine(client, machine, error_counts)
+            except:
+                traceback.print_exc()
+                print "Abandoning machine %s" % machine.id
+                machine.state = vmdatabase.ERROR
+                error = True
+            db.commit()
+
         time.sleep(3)
-if error:
-    sys.exit(1)
+
+    if error:
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()

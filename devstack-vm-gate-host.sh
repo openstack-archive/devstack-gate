@@ -3,7 +3,7 @@
 # Script that is run on the devstack vm; configures and
 # invokes devstack.
 
-# Copyright (C) 2011 OpenStack LLC.
+# Copyright (C) 2011-2012 OpenStack LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,6 +34,15 @@ if [ ! -w $DEST ]; then
     sudo chown `whoami` $DEST
 fi
 
+# Hpcloud provides no swap, but does have a partition mounted at /mnt 
+# we can use:
+if [ `cat /proc/meminfo | grep SwapTotal | awk '{ print $2; }'` -eq 0 ] &&
+   [ -b /dev/vdb ]; then
+    sudo umount /dev/vdb
+    sudo mkswap /dev/vdb
+    sudo swapon /dev/vdb
+fi
+
 # The workspace has been copied over here by devstack-vm-gate.sh
 mv * /opt/stack
 cd /opt/stack/devstack
@@ -52,6 +61,8 @@ SKIP_EXERCISES=boot_from_volume,client-env,swift
 SERVICE_HOST=127.0.0.1
 SYSLOG=True
 SCREEN_LOGDIR=/opt/stack/screen-logs
+FIXED_RANGE=10.1.0.0/24
+FIXED_NETWORK_SIZE=256
 EOF
 
 # The vm template update job should cache some images in ~/files.

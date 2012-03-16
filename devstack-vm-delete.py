@@ -2,7 +2,7 @@
 
 # Delete a devstack VM.
 
-# Copyright (C) 2011 OpenStack LLC.
+# Copyright (C) 2011-2012 OpenStack LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,27 +18,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from libcloud.compute.base import NodeImage, NodeSize, NodeLocation
-from libcloud.compute.types import Provider
-from libcloud.compute.providers import get_driver
-import os, sys
+import os
+import sys
 import getopt
 import time
 
 import vmdatabase
+import utils
 
-CLOUD_SERVERS_DRIVER = os.environ.get('CLOUD_SERVERS_DRIVER','rackspace')
-CLOUD_SERVERS_USERNAME = os.environ['CLOUD_SERVERS_USERNAME']
-CLOUD_SERVERS_API_KEY = os.environ['CLOUD_SERVERS_API_KEY']
+NODE_ID = sys.argv[1]
 
-node_uuid = sys.argv[1]
-db = vmdatabase.VMDatabase()
-machine = db.getMachine(node_uuid)
 
-if CLOUD_SERVERS_DRIVER == 'rackspace':
-    Driver = get_driver(Provider.RACKSPACE)
-    conn = Driver(CLOUD_SERVERS_USERNAME, CLOUD_SERVERS_API_KEY)
-    node = [n for n in conn.list_nodes() if n.id==str(machine['id'])][0]
-    node.destroy()
+def main():
+    db = vmdatabase.VMDatabase()
+    machine = db.getMachine(NODE_ID)
+    provider = machine.base_image.provider
 
-db.delMachine(node_uuid)
+    client = utils.get_client(provider)
+
+    server = client.servers.get(machine.external_id)
+    utils.delete_server(server)
+    machine.delete()
+
+
+if __name__ == '__main__':
+    main()
