@@ -42,6 +42,8 @@ do
 
     # See if this project has this branch, if not, use master
     git remote update
+    # Ensure that we don't have stale remotes around
+    git remote prune origin
     if ! git branch -a |grep remotes/origin/$GERRIT_BRANCH>/dev/null; then
 	BRANCH=master
     fi

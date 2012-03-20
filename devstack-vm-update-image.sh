@@ -26,6 +26,7 @@ if [[ ! -e devstack ]]; then
 fi
 cd devstack
 git remote update
+git remote prune origin
 cd $WORKSPACE
 
 $CI_SCRIPT_DIR/devstack-vm-update-image.py
