@@ -34,6 +34,9 @@ if [ ! -w $DEST ]; then
     sudo chown `whoami` $DEST
 fi
 
+# Make sure headers for the currently running kernel are installed:
+sudo apt-get install -y --force-yes linux-headers-`uname -r`
+
 # Hpcloud provides no swap, but does have a partition mounted at /mnt 
 # we can use:
 if [ `cat /proc/meminfo | grep SwapTotal | awk '{ print $2; }'` -eq 0 ] &&

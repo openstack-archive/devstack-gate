@@ -153,7 +153,7 @@ def configure_server(server, branches):
     client = SSHClient(utils.get_public_ip(server), 'jenkins')
     client.ssh('make file cache directory', 'mkdir -p ~/cache/files')
     client.ssh('make pip cache directory', 'mkdir -p ~/cache/pip')
-    client.ssh('install build-essential', 'sudo apt-get install -y --force-yes build-essential python-dev')
+    client.ssh('install build-essential', 'sudo apt-get install -y --force-yes build-essential python-dev linux-headers-virtual linux-headers-`uname -r`')
 
     for branch_data in branches:
         client.ssh('cache debs for branch %s' % branch_data['name'],
