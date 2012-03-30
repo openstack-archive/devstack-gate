@@ -71,6 +71,7 @@ def launch_node(client, snap_image, image, flavor, last_name):
     machine = snap_image.base_image.newMachine(name=name,
                                                external_id=server.id)
     print "Started building machine %s:" % machine.id
+    print "    id: %s" % (server.id)
     print "  name: %s" % (name)
     print
     return server, machine

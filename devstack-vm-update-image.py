@@ -189,6 +189,7 @@ def snapshot_server(client, server, name):
         # image = server.create_image(name)
         uuid = server.manager.create_image(server, name)
         image = client.images.get(uuid)
+    print "Waiting for image ID %s" % image.id
     image = utils.wait_for_resource(image)
     return image
 
@@ -211,6 +212,7 @@ def build_image(provider, client, base_image, image, flavor, name, branches, tim
                                              server_external_id=server.id)
     admin_pass = server.adminPass
     try:
+        print "Waiting for server ID %s" % server.id
         server = utils.wait_for_resource(server)
         bootstrap_server(provider, server, admin_pass, key)
         configure_server(server, branches)
