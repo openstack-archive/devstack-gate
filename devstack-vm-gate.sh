@@ -19,16 +19,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/horizon"
+PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/horizon openstack/tempest"
 
 # Set this variable to skip updating the devstack-gate project itself.
 # Useful in development so you can edit scripts in place and run them
 # directly.  Do not set in production.
 # Normally not set, and we do include devstack-gate with the rest of
 # the projects.
-if [ -z $SKIP_DEVSTACK_GATE_PROJECT ]
-then
+if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
     PROJECTS="openstack-ci/devstack-gate $PROJECTS"
+fi
+
+# Set this variable to include tempest in the test run.
+if [ -n "$DEVSTACK_GATE_TEMPEST" ]; then
+    PROJECTS="openstack/tempest $PROJECTS"
 fi
 
 # Set this to 1 to always keep the host around
@@ -104,7 +108,7 @@ if [ $RETVAL != 0 ]; then
     exit $RETVAL
 fi
 
-ssh $NODE_IP_ADDR ./devstack-vm-gate-host.sh
+ssh $NODE_IP_ADDR ./devstack-vm-gate-host.sh $DEVSTACK_GATE_TEMPEST
 RETVAL=$?
 # No matter what, archive logs
 scp -C -q $NODE_IP_ADDR:/var/log/syslog $WORKSPACE/logs/syslog.txt

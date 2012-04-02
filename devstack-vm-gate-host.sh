@@ -21,6 +21,8 @@
 
 set -o errexit
 
+DEVSTACK_GATE_TEMPEST=$1
+
 # Remove any crontabs left over from the image
 sudo crontab -u root -r || /bin/true
 sudo crontab -u jenkins -r || /bin/true
@@ -57,6 +59,7 @@ ASSOCIATE_TIMEOUT=60
 MYSQL_PASSWORD=secret
 RABBIT_PASSWORD=secret
 ADMIN_PASSWORD=secret
+SERVICE_PASSWORD=secret
 SERVICE_TOKEN=111222333444
 ROOTSLEEP=0
 ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,n-vol,n-sch,horizon,mysql,rabbit
@@ -89,3 +92,8 @@ sudo start rsyslog
 
 ./stack.sh
 ./exercise.sh
+if [ -n "$DEVSTACK_GATE_TEMPEST" ]; then
+  ./tools/configure_tempest.sh
+  cd /opt/stack/tempest
+  nosetests -v tempest
+fi
