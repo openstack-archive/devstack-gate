@@ -106,9 +106,9 @@ def check_machine(client, machine, error_counts):
                                                     count)
         if count >= 5:
             raise Exception("Too many errors querying machine %s" % machine.id)
-        else:
-            if time.time() - machine.state_time >= ABANDON_TIMEOUT:
-                raise Exception("Waited too long for machine %s" % machine.id)
+    else:
+        if time.time() - machine.state_time >= ABANDON_TIMEOUT:
+            raise Exception("Waited too long for machine %s" % machine.id)
 
 
 def main():
