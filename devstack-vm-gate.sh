@@ -21,6 +21,14 @@
 
 PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/horizon openstack/tempest"
 
+# Set to 1 to run the Tempest test suite
+DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
+
+# Supply specific tests to Tempest in second argument
+# For example, to execute only the server actions test,
+# you would supply tempest.test.test_server_actions
+DEVSTACK_GATE_TEMPEST_TESTS=${DEVSTACK_GATE_TEMPEST_TESTS:-tempest}
+
 # Set this variable to skip updating the devstack-gate project itself.
 # Useful in development so you can edit scripts in place and run them
 # directly.  Do not set in production.
@@ -31,7 +39,7 @@ if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
 fi
 
 # Set this variable to include tempest in the test run.
-if [ -n "$DEVSTACK_GATE_TEMPEST" ]; then
+if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     PROJECTS="openstack/tempest $PROJECTS"
 fi
 
@@ -116,7 +124,7 @@ if [ $RETVAL != 0 ]; then
     exit $RETVAL
 fi
 
-ssh $NODE_IP_ADDR ./devstack-vm-gate-host.sh $DEVSTACK_GATE_TEMPEST
+ssh $NODE_IP_ADDR ./devstack-vm-gate-host.sh $DEVSTACK_GATE_TEMPEST $DEVSTACK_GATE_TEMPEST_TESTS
 RETVAL=$?
 # No matter what, archive logs
 scp -C -q $NODE_IP_ADDR:/var/log/syslog $WORKSPACE/logs/syslog.txt

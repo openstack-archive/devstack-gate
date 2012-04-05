@@ -23,6 +23,11 @@ set -o errexit
 
 DEVSTACK_GATE_TEMPEST=$1
 
+# Supply specific tests to Tempest in second argument
+# For example, to execute only the server actions test,
+# you would supply tempest.test.test_server_actions
+DEVSTACK_GATE_TEMPEST_TESTS=$2
+
 # Remove any crontabs left over from the image
 sudo crontab -u root -r || /bin/true
 sudo crontab -u jenkins -r || /bin/true
@@ -71,6 +76,12 @@ FIXED_RANGE=10.1.0.0/24
 FIXED_NETWORK_SIZE=256
 EOF
 
+if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
+    # We need to disable ratelimiting when running
+    # Tempest tests since so many requests are executed
+    echo "API_RATE_LIMIT=False" >> localrc
+fi
+
 # The vm template update job should cache some images in ~/files.
 # Move them to where devstack expects:
 if ls ~/cache/files/*; then
@@ -92,8 +103,8 @@ sudo start rsyslog
 
 ./stack.sh
 ./exercise.sh
-if [ -n "$DEVSTACK_GATE_TEMPEST" ]; then
+if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
   ./tools/configure_tempest.sh
   cd /opt/stack/tempest
-  nosetests -v tempest
+  nosetests -sv $DEVSTACK_GATE_TEMPEST_TESTS
 fi
