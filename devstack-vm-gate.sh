@@ -89,12 +89,16 @@ if [[ $GERRIT_PROJECT == "openstack-ci/devstack-gate" ]] && [[ $RE_EXEC != "true
     exec $GATE_SCRIPT_DIR/devstack-vm-gate.sh
 fi
 
-FETCH_OUTPUT=`$GATE_SCRIPT_DIR/devstack-vm-fetch.py oneiric` || exit $?
-eval $FETCH_OUTPUT
+$GATE_SCRIPT_DIR/devstack-vm-fetch.py oneiric > node_info.sh || exit $?
+. node_info.sh
 
 scp -C $GATE_SCRIPT_DIR/devstack-vm-gate-host.sh $NODE_IP_ADDR:
 RETVAL=$?
 if [ $RETVAL != 0 ]; then
+    echo "Recording node run as failure."
+    if [ -n "$RESULT_ID" ]; then
+	$GATE_SCRIPT_DIR/devstack-vm-result.py $RESULT_ID failure
+    fi
     echo "Deleting host"
     $GATE_SCRIPT_DIR/devstack-vm-delete.py $NODE_ID
     exit $RETVAL
@@ -103,6 +107,10 @@ fi
 rsync -az --delete $WORKSPACE/ $NODE_IP_ADDR:workspace/
 RETVAL=$?
 if [ $RETVAL != 0 ]; then
+    echo "Recording node run as failure."
+    if [ -n "$RESULT_ID" ]; then
+	$GATE_SCRIPT_DIR/devstack-vm-result.py $RESULT_ID failure
+    fi
     echo "Deleting host"
     $GATE_SCRIPT_DIR/devstack-vm-delete.py $NODE_ID
     exit $RETVAL
@@ -118,6 +126,16 @@ rename 's/\.log$/.txt/' $WORKSPACE/logs/*
 rm $WORKSPACE/logs/*.*.txt
 
 # Now check whether the run was a success
+if [ -n "$RESULT_ID" ]; then
+    if [ $RETVAL = 0 ]; then
+	echo "Recording node run as success."
+        $GATE_SCRIPT_DIR/devstack-vm-result.py $RESULT_ID success
+    else
+	echo "Recording node run as failure."
+	$GATE_SCRIPT_DIR/devstack-vm-result.py $RESULT_ID failure
+    fi
+fi
+
 if [ $RETVAL = 0 ] && [ $ALWAYS_KEEP = 0 ]; then
     echo "Deleting host"
     $GATE_SCRIPT_DIR/devstack-vm-delete.py $NODE_ID

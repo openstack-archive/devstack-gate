@@ -37,6 +37,11 @@ ERROR = 4
 # Keep this machine indefinitely
 HOLD = 5
 
+# Possible Jenkins results
+RESULT_SUCCESS = 1
+RESULT_FAILURE = 2
+RESULT_TIMEOUT = 3
+
 from sqlalchemy import Table, Column, Boolean, Integer, String, MetaData, ForeignKey, UniqueConstraint, Index, create_engine, and_, or_
 from sqlalchemy.orm import mapper, relation
 from sqlalchemy.orm.session import Session, sessionmaker
@@ -85,6 +90,18 @@ machine_table = Table('machine', metadata,
     Column('user', String(255)),         # Username if ssh keys have been installed, or NULL
     Column('state', Integer),            # One of the above values
     Column('state_time', Integer),       # Time of last state change
+    )
+result_table = Table('result', metadata,
+    Column('id', Integer, primary_key=True),
+    Column('base_image_id', Integer, ForeignKey('base_image.id'), index=True, nullable=False),
+    Column('machine_id', Integer),       # Not a FK so that machines can be deleted
+    Column('jenkins_job_name', String(255)),
+    Column('jenkins_build_number', Integer),
+    Column('gerrit_change_number', Integer),
+    Column('gerrit_patchset_number', Integer),
+    Column('start_time', Integer),       # Time that the job was started
+    Column('end_time', Integer),         # Time the job finished
+    Column('result', Integer),           # Result of job
     )
 
 
@@ -238,6 +255,42 @@ class Machine(object):
         if session:
             session.commit()
 
+    def newResult(self, jenkins_job_name, jenkins_build_number,
+                  gerrit_change_number, gerrit_patchset_number):
+        new = Result(self.id, jenkins_job_name, jenkins_build_number, 
+                     gerrit_change_number, gerrit_patchset_number, time.time())
+        new.base_image = self.base_image
+        session = Session.object_session(self)
+        session.commit()
+        return new
+
+
+class Result(object):
+    def __init__(self, machine_id, jenkins_job_name, jenkins_build_number,
+                 gerrit_change_number, gerrit_patchset_number,
+                 start_time, end_time=None, result=None):
+        self.machine_id = machine_id
+        self.jenkins_job_name = jenkins_job_name
+        self.jenkins_build_number = jenkins_build_number
+        self.gerrit_change_number = gerrit_change_number
+        self.gerrit_patchset_number = gerrit_patchset_number
+        self.start_time = start_time
+        self.end_time = end_time
+        self.result = result
+
+    def setResult(self, result):
+        self.result = result
+        self.end_time = time.time()
+        session = Session.object_session(self)
+        session.commit()
+
+    def delete(self):
+        session = Session.object_session(self)
+        session.delete(self)
+        session.commit()
+
+
+mapper(Result, result_table)
 
 mapper(Machine, machine_table, properties=dict(
         _state=machine_table.c.state,
@@ -255,7 +308,11 @@ mapper(BaseImage, base_image_table, properties=dict(
         machines=relation(Machine,
                           order_by=machine_table.c.state_time,
                           cascade='all, delete-orphan',
-                          backref='base_image')))
+                          backref='base_image'),
+        results=relation(Result,
+                         order_by=result_table.c.start_time,
+                         cascade='all, delete-orphan',
+                         backref='base_image')))
 
 mapper(Provider, provider_table, properties=dict(
         base_images=relation(BaseImage,
@@ -295,6 +352,9 @@ class VMDatabase(object):
 
     def getProvider(self, name):
         return self.session.query(Provider).filter_by(name=name)[0]
+
+    def getResult(self, id):
+        return self.session.query(Result).filter_by(id=id)[0]
 
     def getMachine(self, id):
         return self.session.query(Machine).filter_by(id=id)[0]

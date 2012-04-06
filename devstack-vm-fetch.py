@@ -19,17 +19,32 @@
 # limitations under the License.
 
 import sys
+import os
 
 import vmdatabase
 
 IMAGE_NAME = sys.argv[1]
 
-db = vmdatabase.VMDatabase()
-node = db.getMachineForUse(IMAGE_NAME)
+def main():
+    db = vmdatabase.VMDatabase()
+    node = db.getMachineForUse(IMAGE_NAME)
+    if not node:
+        raise Exception("No ready nodes")
 
-if not node:
-    raise Exception("No ready nodes")
+    job_name = os.environ.get('JOB_NAME', None)
+    build_number = os.environ.get('BUILD_NUMBER', None)
+    gerrit_change = os.environ.get('GERRIT_CHANGE_NUMBER', None)
+    gerrit_patchset = os.environ.get('GERRIT_PATCHSET_NUMBER', None)
+    if job_name and build_number and gerrit_change and gerrit_patchset:
+        result = node.newResult(job_name, build_number, gerrit_change, gerrit_patchset)
+    else:
+        result = None
 
-print "NODE_IP_ADDR=%s" % node.ip
-print "NODE_PROVIDER=%s" % node.base_image.provider.name
-print "NODE_ID=%s" % node.id
+    print "NODE_IP_ADDR=%s" % node.ip
+    print "NODE_PROVIDER=%s" % node.base_image.provider.name
+    print "NODE_ID=%s" % node.id
+    if result:
+        print "RESULT_ID=%s" % result.id
+
+if __name__ == "__main__":
+    main()

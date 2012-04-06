@@ -20,6 +20,7 @@
 
 import unittest
 import vmdatabase
+import time
 
 class testVMDatabase(unittest.TestCase):
 
@@ -216,4 +217,32 @@ class testVMDatabase(unittest.TestCase):
         assert(len(rs_provider.ready_machines)==0)
         assert(len(hp_provider.ready_machines)==0)
         assert(machine==machine2)
+
+    def test_result(self):
+        (rs_machine1, rs_machine2, hp_machine1, hp_machine2) = self.test_add_machine()
+        self.db.print_state()
+
+        machine = self.db.getMachineForUse('oneiric')
+        print 'got machine', machine.name
+        result = machine.newResult('test-job', 82, 1234, 1)
+        time.sleep(2)
+        result.setResult(vmdatabase.RESULT_SUCCESS)
+        self.db.commit()
+
+        orig_result = result
+        for provider in self.db.getProviders():
+            for base_image in provider.base_images:
+                if (base_image.name == orig_result.base_image.name and
+                    base_image.provider.name == orig_result.base_image.provider.name):
+                    assert(len(base_image.results)==1)
+                    for result in base_image.results:
+                        assert(result.end_time > result.start_time)
+                        assert(result.result==vmdatabase.RESULT_SUCCESS)
+                        assert(result.machine_id == machine.id)
+                        assert(result.jenkins_job_name == 'test-job')
+                        assert(result.jenkins_build_number == 82)
+                        assert(result.gerrit_change_number == 1234)
+                        assert(result.gerrit_patchset_number == 1)
+                else:
+                    assert(len(base_image.results)==0)
 
