@@ -19,13 +19,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/tempest openstack/cinder openstack/python-cinderclient openstack/swift openstack/python-swiftclient"
+PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/quantum openstack/tempest openstack/cinder openstack/python-cinderclient openstack/swift openstack/python-swiftclient"
 
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 
 # Set to 1 to run cinder instead of nova volume
 export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-1}
+
+# Set to 1 to run quantum instead of nova network
+export DEVSTACK_GATE_QUANTUM=${DEVSTACK_GATE_QUANTUM:-0}
 
 # Set the virtualization driver to: libvirt, openvz
 export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
@@ -247,7 +250,7 @@ if [[ $ZUUL_PROJECT == "openstack/tempest" ]]; then
 fi
 
 # Run the test
-$GATE_SCRIPT_DIR/devstack-vm-gate.sh
+$GATE_SCRIPT_DIR/devstack-vm-gate.sh $GERRIT_BRANCH
 RETVAL=$?
 
 cleanup_host &> $WORKSPACE/logs/devstack-gate-cleanup-host.txt

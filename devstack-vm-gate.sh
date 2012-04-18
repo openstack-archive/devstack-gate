@@ -23,7 +23,9 @@ set -o errexit
 
 cd $DEST/devstack
 
-ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,n-sch,horizon,mysql,rabbit
+rm -f localrc
+
+ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-sch,horizon,mysql,rabbit
 
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     ENABLED_SERVICES=$ENABLED_SERVICES,tempest
@@ -37,11 +39,19 @@ SKIP_EXERCISES=boot_from_volume,client-env
 
 if [ "$GERRIT_BRANCH" != "stable/diablo" ] && 
    [ "$GERRIT_BRANCH" != "stable/essex" ]; then
-
     if [ "$DEVSTACK_GATE_CINDER" -eq "1" ]; then
 	ENABLED_SERVICES=$ENABLED_SERVICES,cinder,c-api,c-vol,c-sch
     else
 	ENABLED_SERVICES=$ENABLED_SERVICES,n-vol
+    fi
+    if [ "$DEVSTACK_GATE_QUANTUM" -eq "1" ]; then
+	ENABLED_SERVICES=$ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3
+	cat <<EOF >>localrc
+Q_USE_NAMESPACE=False
+LIBVIRT_FIREWALL_DRIVER=nova.virt.firewall.NoopFirewallDriver
+EOF
+    else
+	ENABLED_SERVICES=$ENABLED_SERVICES,n-net
     fi
     ENABLED_SERVICES=$ENABLED_SERVICES,swift
 else
@@ -49,7 +59,7 @@ else
     SKIP_EXERCISES=$SKIP_EXERCISES,swift
 fi
 
-cat <<EOF >localrc
+cat <<EOF >>localrc
 ACTIVE_TIMEOUT=60
 BOOT_TIMEOUT=90
 ASSOCIATE_TIMEOUT=60
