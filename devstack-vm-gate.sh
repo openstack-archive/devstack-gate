@@ -19,7 +19,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/horizon openstack/tempest"
+PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/horizon openstack/tempest"
 
 # Set to 1 to run the Tempest test suite
 DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
