@@ -102,9 +102,10 @@ sudo chmod a+r /var/log/syslog
 sudo start rsyslog
 
 ./stack.sh
-./exercise.sh
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
   ./tools/configure_tempest.sh
   cd /opt/stack/tempest
   nosetests -sv $DEVSTACK_GATE_TEMPEST_TESTS
+else
+    ./exercise.sh
 fi
