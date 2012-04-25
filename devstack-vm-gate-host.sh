@@ -57,6 +57,12 @@ fi
 mv * /opt/stack
 cd /opt/stack/devstack
 
+ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,n-vol,n-sch,horizon,mysql,rabbit
+
+if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
+    ENABLED_SERVICES=$ENABLED_SERVICES,tempest
+fi
+
 cat <<EOF >localrc
 ACTIVE_TIMEOUT=60
 BOOT_TIMEOUT=90
@@ -67,7 +73,7 @@ ADMIN_PASSWORD=secret
 SERVICE_PASSWORD=secret
 SERVICE_TOKEN=111222333444
 ROOTSLEEP=0
-ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,n-vol,n-sch,horizon,mysql,rabbit
+ENABLED_SERVICES=$ENABLED_SERVICES
 SKIP_EXERCISES=boot_from_volume,client-env,swift
 SERVICE_HOST=127.0.0.1
 SYSLOG=True
