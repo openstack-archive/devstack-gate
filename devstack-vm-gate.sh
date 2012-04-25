@@ -132,6 +132,10 @@ scp -C -q $NODE_IP_ADDR:/opt/stack/screen-logs/* $WORKSPACE/logs/
 rename 's/\.log$/.txt/' $WORKSPACE/logs/*
 # Remove duplicate logs
 rm $WORKSPACE/logs/*.*.txt
+# Copy XUnit test results from tempest, if run.
+if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
+  scp -C -q $NODE_IP_ADDR:/opt/stack/tempest/nosetests.xml $WORKSPACE/tempest/
+fi
 
 # Now check whether the run was a success
 if [ -n "$RESULT_ID" ]; then
