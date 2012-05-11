@@ -87,14 +87,16 @@ def get_public_ip(server, version=4):
             if addr.instance_id == server.id:
                 print 'found addr', addr
                 return addr.ip
-    else:
-        print 'no floating ips, addresses:'
-        print server.addresses
-        for addr in server.addresses.get('public', []):
-            if type(addr) == type(u''): # Rackspace/openstack 1.0
-                return addr
-            if addr['version'] == version: #Rackspace/openstack 1.1
-                return addr['addr']
+    print 'no floating ip, addresses:'
+    print server.addresses
+    for addr in server.addresses.get('public', []):
+        if type(addr) == type(u''): # Rackspace/openstack 1.0
+            return addr
+        if addr['version'] == version: #Rackspace/openstack 1.1
+            return addr['addr']
+    for addr in server.addresses.get('private', []):
+        if addr['version'] == version and not addr['addr'].startswith('10.'): #HPcloud
+            return addr['addr']
     return None
 
 def add_public_ip(server):

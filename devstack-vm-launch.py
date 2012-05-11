@@ -86,11 +86,13 @@ def check_machine(client, machine, error_counts):
         return
     
     if server.status == 'ACTIVE':
-        if 'os-floating-ips' in utils.get_extensions(client):
-            utils.add_public_ip(server)
         ip = utils.get_public_ip(server)
+        if not ip and 'os-floating-ips' in utils.get_extensions(client):
+            utils.add_public_ip(server)
+            ip = utils.get_public_ip(server)
         if not ip:
             raise Exception("Unable to find public ip of server")
+
         machine.ip = ip
         print "Machine %s is running, testing ssh" % machine.id
         if utils.ssh_connect(ip, 'jenkins'):

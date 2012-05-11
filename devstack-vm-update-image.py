@@ -121,9 +121,10 @@ def local_prep(distribution):
 
 def bootstrap_server(provider, server, admin_pass, key):
     client = server.manager.api
-    if 'os-floating-ips' in utils.get_extensions(client):
-        utils.add_public_ip(server)
     ip = utils.get_public_ip(server)
+    if not ip and 'os-floating-ips' in utils.get_extensions(client):
+        utils.add_public_ip(server)
+        ip = utils.get_public_ip(server)
     if not ip:
         raise Exception("Unable to find public ip of server")
 
