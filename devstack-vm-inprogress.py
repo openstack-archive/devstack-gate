@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Delete a devstack VM.
+# Remove old devstack VMs that have been given to developers.
 
 # Copyright (C) 2011-2012 OpenStack LLC.
 #
@@ -20,19 +20,39 @@
 
 import os
 import sys
-import getopt
 import time
+import getopt
+import traceback
+import ConfigParser
 
+import myjenkins
 import vmdatabase
 import utils
+import novaclient
 
 NODE_NAME = sys.argv[1]
+DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG', 
+                                             os.path.expanduser('~/devstack-gate-secure.conf'))
+
 
 def main():
     db = vmdatabase.VMDatabase()
 
+    config=ConfigParser.ConfigParser()
+    config.read(DEVSTACK_GATE_SECURE_CONFIG)
+
+    jenkins = myjenkins.Jenkins(config.get('jenkins', 'server'),
+                                config.get('jenkins', 'user'),
+                                config.get('jenkins', 'apikey'))
+    jenkins.get_info()
+
     machine = db.getMachineByJenkinsName(NODE_NAME)
-    machine.state = vmdatabase.DELETE
+    machine.state = vmdatabase.USED
+
+    if machine.jenkins_name:
+        if jenkins.node_exists(machine.jenkins_name):
+            jenkins.disable_node(machine.jenkins_name, "Devstack build started")
+            
 
 if __name__ == '__main__':
     main()

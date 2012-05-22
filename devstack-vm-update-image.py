@@ -73,6 +73,7 @@ def tokenize(fn, tokens, distribution, comment=None):
     for line in open(fn):
         if 'dist:' in line and ('dist:%s' % distribution not in line):
             continue
+        if 'qpid' in line: continue #XXX
         if comment and comment in line:
             line = line[:line.rfind(comment)]
         line = line.strip()
@@ -225,7 +226,8 @@ def build_image(provider, client, base_image, image, flavor, name, branches, tim
         # We made the snapshot, try deleting the server, but it's okay
         # if we fail.  The reap script will find it and try again.
         try:
-            utils.delete_server(server)
+            pass #XXX
+            #utils.delete_server(server)
         except:
             print "Exception encountered deleting server:"
             traceback.print_exc()

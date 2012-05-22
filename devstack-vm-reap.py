@@ -23,13 +23,17 @@ import sys
 import time
 import getopt
 import traceback
+import ConfigParser
 
+import myjenkins
 import vmdatabase
 import utils
 import novaclient
 
 PROVIDER_NAME = sys.argv[1]
 MACHINE_LIFETIME = 24 * 60 * 60  # Amount of time after being used
+DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG', 
+                                             os.path.expanduser('~/devstack-gate-secure.conf'))
 
 if '--all-servers' in sys.argv:
     print "Reaping all known machines"
@@ -44,7 +48,7 @@ else:
     REAP_ALL_IMAGES = False
 
 
-def delete_machine(client, machine):
+def delete_machine(jenkins, client, machine):
     try:
         server = client.servers.get(machine.external_id)
     except novaclient.exceptions.NotFound:
@@ -53,6 +57,10 @@ def delete_machine(client, machine):
 
     if server:
         utils.delete_server(server)
+
+    if machine.jenkins_name:
+        if jenkins.node_exists(machine.jenkins_name):
+            jenkins.delete_node(machine.jenkins_name)
 
     machine.delete()
 
@@ -82,6 +90,14 @@ def delete_image(client, image):
 def main():
     db = vmdatabase.VMDatabase()
 
+    config=ConfigParser.ConfigParser()
+    config.read(DEVSTACK_GATE_SECURE_CONFIG)
+
+    jenkins = myjenkins.Jenkins(config.get('jenkins', 'server'),
+                                config.get('jenkins', 'user'),
+                                config.get('jenkins', 'apikey'))
+    jenkins.get_info()
+
     print 'Known machines (start):'
     db.print_state()
 
@@ -98,11 +114,12 @@ def main():
     for machine in provider.machines:
         # Normally, reap machines that have sat in their current state
         # for 24 hours, unless that state is READY.
-        if REAP_ALL_SERVERS or (machine.state != vmdatabase.READY and
-                                now - machine.state_time > MACHINE_LIFETIME):
+        if (REAP_ALL_SERVERS or (machine.state != vmdatabase.READY and
+                                 now - machine.state_time > MACHINE_LIFETIME) or
+            machine.state == vmdatabase.DELETE):
             print 'Deleting machine', machine.name
             try:
-                delete_machine(client, machine)
+                delete_machine(jenkins, client, machine)
             except:
                 error = True
                 traceback.print_exc()
@@ -136,9 +153,11 @@ def main():
                 continue
             if machine.state == vmdatabase.BUILDING:
                 continue
+            if machine.state == vmdatabase.HOLD:
+                continue
             print 'Deleting machine', machine.name
             try:
-                delete_machine(client, machine)
+                delete_machine(jenkins, client, machine)
                 overcommitment -= 1
             except:
                 error = True

@@ -25,12 +25,16 @@ import getopt
 import time
 import paramiko
 import traceback
+import ConfigParser
 
+import myjenkins
 import vmdatabase
 import utils
 
 PROVIDER_NAME = sys.argv[1]
 DEVSTACK_GATE_PREFIX = os.environ.get('DEVSTACK_GATE_PREFIX', '')
+DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG', 
+                                             os.path.expanduser('~/devstack-gate-secure.conf'))
 
 ABANDON_TIMEOUT = 900   # assume a machine will never boot if it hasn't
                         # after this amount of time
@@ -76,8 +80,21 @@ def launch_node(client, snap_image, image, flavor, last_name):
     print
     return server, machine
 
+def create_jenkins_node(jenkins, machine):
+    name = '%sdevstack-%s-%s-%s' % (DEVSTACK_GATE_PREFIX, machine.base_image.name, 
+                                    machine.base_image.provider.name, machine.id)
+    machine.jenkins_name = name
 
-def check_machine(client, machine, error_counts):
+    jenkins.create_node(name, numExecutors=1, 
+                        nodeDescription='Dynamic single use %s slave for devstack' % machine.base_image.name,
+                        remoteFS='/home/jenkins',
+                        labels='%sdevstack-%s' % (DEVSTACK_GATE_PREFIX, machine.base_image.name),
+                        launcher='hudson.plugins.sshslaves.SSHLauncher',
+                        launcher_params = {'port': 22, 'username': 'jenkins', 
+                                           'privatekey': '/var/lib/jenkins/.ssh/id_rsa',
+                                           'host': machine.ip})
+                       
+def check_machine(jenkins, client, machine, error_counts):
     try:
         server = client.servers.get(machine.external_id)
     except:
@@ -96,6 +113,8 @@ def check_machine(client, machine, error_counts):
         machine.ip = ip
         print "Machine %s is running, testing ssh" % machine.id
         if utils.ssh_connect(ip, 'jenkins'):
+            print "Adding machine %s to Jenkins" % machine.id
+            create_jenkins_node(jenkins, machine)
             print "Machine %s is ready" % machine.id
             machine.state = vmdatabase.READY
             return
@@ -115,6 +134,14 @@ def check_machine(client, machine, error_counts):
 
 def main():
     db = vmdatabase.VMDatabase()
+
+    config=ConfigParser.ConfigParser()
+    config.read(DEVSTACK_GATE_SECURE_CONFIG)
+
+    jenkins = myjenkins.Jenkins(config.get('jenkins', 'server'),
+                                config.get('jenkins', 'user'),
+                                config.get('jenkins', 'apikey'))
+    jenkins.get_info()
 
     provider = db.getProvider(PROVIDER_NAME)
     print "Working with provider %s" % provider.name
@@ -156,7 +183,7 @@ def main():
         print "Waiting on %s machines" % len(building_machines)
         for machine in building_machines:
             try:
-                check_machine(client, machine, error_counts)
+                check_machine(jenkins, client, machine, error_counts)
             except:
                 traceback.print_exc()
                 print "Abandoning machine %s" % machine.id

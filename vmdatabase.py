@@ -36,6 +36,8 @@ USED = 3
 ERROR = 4
 # Keep this machine indefinitely
 HOLD = 5
+# Delete this machine immediately (probably a used machine)
+DELETE = 6
 
 # Possible Jenkins results
 RESULT_SUCCESS = 1
@@ -84,12 +86,13 @@ snapshot_image_table = Table('snapshot_image', metadata,
 machine_table = Table('machine', metadata,
     Column('id', Integer, primary_key=True),
     Column('base_image_id', Integer, ForeignKey('base_image.id'), index=True, nullable=False),
-    Column('external_id', String(255)),  # Provider assigned id for this machine
-    Column('name', String(255)),         # Machine name
-    Column('ip', String(255)),           # Primary IP address
-    Column('user', String(255)),         # Username if ssh keys have been installed, or NULL
-    Column('state', Integer),            # One of the above values
-    Column('state_time', Integer),       # Time of last state change
+    Column('external_id', String(255)),   # Provider assigned id for this machine
+    Column('name', String(255)),          # Machine name
+    Column('jenkins_name', String(255)),  # Jenkins node name
+    Column('ip', String(255)),            # Primary IP address
+    Column('user', String(255)),          # Username if ssh keys have been installed, or NULL
+    Column('state', Integer),             # One of the above values
+    Column('state_time', Integer),        # Time of last state change
     )
 result_table = Table('result', metadata,
     Column('id', Integer, primary_key=True),
@@ -358,6 +361,9 @@ class VMDatabase(object):
 
     def getMachine(self, id):
         return self.session.query(Machine).filter_by(id=id)[0]
+
+    def getMachineByJenkinsName(self, name):
+        return self.session.query(Machine).filter_by(jenkins_name=name)[0]
 
     def getMachineForUse(self, image_name):
         """Atomically find a machine that is ready for use, and update
