@@ -35,6 +35,7 @@ PROVIDER_NAME = sys.argv[1]
 DEVSTACK_GATE_PREFIX = os.environ.get('DEVSTACK_GATE_PREFIX', '')
 DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG', 
                                              os.path.expanduser('~/devstack-gate-secure.conf'))
+SKIP_DEVSTACK_GATE_JENKINS = os.environ.get('SKIP_DEVSTACK_GATE_JENKINS', None)
 
 ABANDON_TIMEOUT = 900   # assume a machine will never boot if it hasn't
                         # after this amount of time
@@ -85,14 +86,15 @@ def create_jenkins_node(jenkins, machine):
                                     machine.base_image.provider.name, machine.id)
     machine.jenkins_name = name
 
-    jenkins.create_node(name, numExecutors=1, 
-                        nodeDescription='Dynamic single use %s slave for devstack' % machine.base_image.name,
-                        remoteFS='/home/jenkins',
-                        labels='%sdevstack-%s' % (DEVSTACK_GATE_PREFIX, machine.base_image.name),
-                        launcher='hudson.plugins.sshslaves.SSHLauncher',
-                        launcher_params = {'port': 22, 'username': 'jenkins', 
-                                           'privatekey': '/var/lib/jenkins/.ssh/id_rsa',
-                                           'host': machine.ip})
+    if jenkins:
+        jenkins.create_node(name, numExecutors=1, 
+                            nodeDescription='Dynamic single use %s slave for devstack' % machine.base_image.name,
+                            remoteFS='/home/jenkins',
+                            labels='%sdevstack-%s' % (DEVSTACK_GATE_PREFIX, machine.base_image.name),
+                            launcher='hudson.plugins.sshslaves.SSHLauncher',
+                            launcher_params = {'port': 22, 'username': 'jenkins', 
+                                               'privatekey': '/var/lib/jenkins/.ssh/id_rsa',
+                                               'host': machine.ip})
                        
 def check_machine(jenkins, client, machine, error_counts):
     try:
@@ -135,13 +137,16 @@ def check_machine(jenkins, client, machine, error_counts):
 def main():
     db = vmdatabase.VMDatabase()
 
-    config=ConfigParser.ConfigParser()
-    config.read(DEVSTACK_GATE_SECURE_CONFIG)
+    if not SKIP_DEVSTACK_GATE_JENKINS:
+        config=ConfigParser.ConfigParser()
+        config.read(DEVSTACK_GATE_SECURE_CONFIG)
 
-    jenkins = myjenkins.Jenkins(config.get('jenkins', 'server'),
-                                config.get('jenkins', 'user'),
-                                config.get('jenkins', 'apikey'))
-    jenkins.get_info()
+        jenkins = myjenkins.Jenkins(config.get('jenkins', 'server'),
+                                    config.get('jenkins', 'user'),
+                                    config.get('jenkins', 'apikey'))
+        jenkins.get_info()
+    else:
+        jenkins = None
 
     provider = db.getProvider(PROVIDER_NAME)
     print "Working with provider %s" % provider.name

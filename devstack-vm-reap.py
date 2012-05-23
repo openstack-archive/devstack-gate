@@ -34,6 +34,7 @@ PROVIDER_NAME = sys.argv[1]
 MACHINE_LIFETIME = 24 * 60 * 60  # Amount of time after being used
 DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG', 
                                              os.path.expanduser('~/devstack-gate-secure.conf'))
+SKIP_DEVSTACK_GATE_JENKINS = os.environ.get('SKIP_DEVSTACK_GATE_JENKINS', None)
 
 if '--all-servers' in sys.argv:
     print "Reaping all known machines"
@@ -58,9 +59,10 @@ def delete_machine(jenkins, client, machine):
     if server:
         utils.delete_server(server)
 
-    if machine.jenkins_name:
-        if jenkins.node_exists(machine.jenkins_name):
-            jenkins.delete_node(machine.jenkins_name)
+    if jenkins:
+        if machine.jenkins_name:
+            if jenkins.node_exists(machine.jenkins_name):
+                jenkins.delete_node(machine.jenkins_name)
 
     machine.delete()
 
@@ -90,13 +92,16 @@ def delete_image(client, image):
 def main():
     db = vmdatabase.VMDatabase()
 
-    config=ConfigParser.ConfigParser()
-    config.read(DEVSTACK_GATE_SECURE_CONFIG)
+    if not SKIP_DEVSTACK_GATE_JENKINS:
+        config=ConfigParser.ConfigParser()
+        config.read(DEVSTACK_GATE_SECURE_CONFIG)
 
-    jenkins = myjenkins.Jenkins(config.get('jenkins', 'server'),
-                                config.get('jenkins', 'user'),
-                                config.get('jenkins', 'apikey'))
-    jenkins.get_info()
+        jenkins = myjenkins.Jenkins(config.get('jenkins', 'server'),
+                                    config.get('jenkins', 'user'),
+                                    config.get('jenkins', 'apikey'))
+        jenkins.get_info()
+    else:
+        jenkins = None
 
     print 'Known machines (start):'
     db.print_state()
