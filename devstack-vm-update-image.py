@@ -183,6 +183,12 @@ def configure_server(server, branches):
         client.ssh('clone %s' % project,
             'cd ~/workspace && git clone https://review.openstack.org/p/%s' % project)
 
+    script = os.environ.get('DEVSTACK_GATE_CUSTOM_SCRIPT', '')
+    if script and os.path.isfile(script):
+        bn = os.path.basename(script)
+        client.scp(script, '/tmp/%s' % bn)
+        client.ssh('run custom script %s' % bn,
+            'chmod +x /tmp/%s && /tmp/%s' % (bn, bn))
 
 def snapshot_server(client, server, name):
     print 'Saving image'
