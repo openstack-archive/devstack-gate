@@ -45,41 +45,38 @@ fi
 
 cd $WORKSPACE
 
-for PROJECT in $PROJECTS
+ORIGINAL_GERRIT_PROJECT=GERRIT_PROJECT
+ORIGINAL_GERRIT_BRANCH=GERRIT_BRANCH
+
+for GERRIT_PROJECT in $PROJECTS
 do
-    echo "Setting up $PROJECT"
-    SHORT_PROJECT=`basename $PROJECT`
+    echo "Setting up $GERRIT_PROJECT"
+    SHORT_PROJECT=`basename $GERRIT_PROJECT`
     if [[ ! -e $SHORT_PROJECT ]]; then
 	echo "  Need to clone"
-	git clone https://review.openstack.org/p/$PROJECT
+	git clone https://review.openstack.org/p/$GERRIT_PROJECT
     fi
     cd $SHORT_PROJECT
     
-    BRANCH=$GERRIT_BRANCH
+    GERRIT_BRANCH=$ORIGINAL_GERRIT_BRANCH
 
     # See if this project has this branch, if not, use master
-    git remote update
+    git remote update || git remote update # attempt to work around bug #925790
     # Ensure that we don't have stale remotes around
     git remote prune origin
     if ! git branch -a |grep remotes/origin/$GERRIT_BRANCH>/dev/null; then
-	BRANCH=master
+	GERRIT_BRANCH=master
     fi
-    git reset --hard
-    git clean -x -f -d -q
-    git checkout $BRANCH
-    git reset --hard remotes/origin/$BRANCH
-    git clean -x -f -d -q
+    
+    export GERRIT_BRANCH
+    export GERRIT_PROJECT
+    /usr/local/jenkins/slave_scripts/gerrit-git-prep.sh review.openstack.org
 
-    if [[ $GERRIT_PROJECT == $PROJECT ]]; then
-        echo "  Merging proposed change"
-        git fetch https://review.openstack.org/p/$PROJECT $GERRIT_REFSPEC
-        git merge FETCH_HEAD
-    else
-        echo "  Updating from origin"
-        git pull --ff-only origin $BRANCH
-    fi
     cd $WORKSPACE
 done
+
+GERRIT_PROJECT=$ORIGINAL_GERRIT_PROJECT
+GERRIT_BRANCH=$ORIGINAL_GERRIT_BRANCH
 
 # Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
 # we are testing the proposed change from this point forward.
