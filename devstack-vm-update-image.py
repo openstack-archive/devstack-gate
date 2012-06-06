@@ -176,12 +176,12 @@ def configure_server(server, branches):
                 client.ssh('download image %s' % fname,
                     'wget -c %s -O ~/cache/files/%s' % (url, fname))
 
-    client.ssh('clear workspace', 'rm -rf ~/workspace')
-    client.ssh('make workspace', 'mkdir -p ~/workspace')
+    client.ssh('clear workspace', 'rm -rf ~/workspace-cache')
+    client.ssh('make workspace', 'mkdir -p ~/workspace-cache')
     for project in PROJECTS:
         sp = project.split('/')[0]
         client.ssh('clone %s' % project,
-            'cd ~/workspace && git clone https://review.openstack.org/p/%s' % project)
+            'cd ~/workspace-cache && git clone https://review.openstack.org/p/%s' % project)
 
     script = os.environ.get('DEVSTACK_GATE_CUSTOM_SCRIPT', '')
     if script and os.path.isfile(script):

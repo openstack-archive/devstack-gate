@@ -45,6 +45,10 @@ fi
 
 cd $WORKSPACE
 
+if [[ -e ~/workspace-cache/nova ]]; then
+    mv ~/workspace-cache/* $WORKSPACE/
+fi
+
 ORIGINAL_GERRIT_PROJECT=GERRIT_PROJECT
 ORIGINAL_GERRIT_BRANCH=GERRIT_BRANCH
 
