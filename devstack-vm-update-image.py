@@ -91,9 +91,10 @@ def local_prep(distribution):
 
         pips = []
         pipdir = os.path.join(DEVSTACK, 'files', 'pips')
-        for fn in os.listdir(pipdir):
-            fn = os.path.join(pipdir, fn)
-            tokenize(fn, pips, distribution)
+        if os.path.exists(pipdir):
+            for fn in os.listdir(pipdir):
+                fn = os.path.join(pipdir, fn)
+                tokenize(fn, pips, distribution)
         branch_data['pips'] = pips
 
         debs = []
@@ -145,9 +146,10 @@ def bootstrap_server(provider, server, admin_pass, key):
     # hpcloud can't reliably set the hostname
     client.ssh("set hostname", "sudo hostname %s" % server.name)
     client.ssh("update apt cache", "sudo apt-get update")
-    client.ssh("upgrading system packages", "sudo apt-get -y --force-yes upgrade")
+    client.ssh("upgrading system packages",
+               'sudo DEBIAN_FRONTEND=noninteractive apt-get --option "Dpkg::Options::=--force-confold" --assume-yes upgrade')
     client.ssh("install git and puppet",
-               "sudo apt-get install -y --force-yes git puppet")
+               'sudo DEBIAN_FRONTEND=noninteractive apt-get --option "Dpkg::Options::=--force-confold" --assume-yes install git puppet')
     client.ssh("clone puppret repo",
                "sudo git clone https://review.openstack.org/p/openstack/openstack-ci-puppet.git /root/openstack-ci-puppet")
     client.ssh("run puppet",
@@ -157,7 +159,7 @@ def configure_server(server, branches):
     client = SSHClient(utils.get_public_ip(server), 'jenkins')
     client.ssh('make file cache directory', 'mkdir -p ~/cache/files')
     client.ssh('make pip cache directory', 'mkdir -p ~/cache/pip')
-    client.ssh('install build-essential', 'sudo apt-get install -y --force-yes build-essential python-dev linux-headers-virtual linux-headers-`uname -r`')
+    client.ssh('install build-essential', 'sudo DEBIAN_FRONTEND=noninteractive apt-get --option "Dpkg::Options::=--force-confold" --assume-yes install build-essential python-dev linux-headers-virtual linux-headers-`uname -r`')
 
     for branch_data in branches:
         client.ssh('cache debs for branch %s' % branch_data['name'],
