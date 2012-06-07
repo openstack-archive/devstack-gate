@@ -162,14 +162,18 @@ def configure_server(server, branches):
     client.ssh('install build-essential', 'sudo DEBIAN_FRONTEND=noninteractive apt-get --option "Dpkg::Options::=--force-confold" --assume-yes install build-essential python-dev linux-headers-virtual linux-headers-`uname -r`')
 
     for branch_data in branches:
-        client.ssh('cache debs for branch %s' % branch_data['name'],
-                   'sudo apt-get -y -d install %s' % ' '.join(branch_data['debs']))
-        venv = client.ssh('get temp dir for venv', 'mktemp -d').strip()
-        client.ssh('create venv', 'virtualenv --no-site-packages %s' % venv)
-        client.ssh('cache pips for branch %s' % branch_data['name'],
-                   'source %s/bin/activate && PIP_DOWNLOAD_CACHE=~/cache/pip pip install %s' %
-                   (venv, ' '.join(branch_data['pips'])))
-        client.ssh('remove venv', 'rm -fr %s' % venv)
+        if branch_data['debs']:
+            client.ssh('cache debs for branch %s' % branch_data['name'],
+                       'sudo apt-get -y -d install %s' % ' '.join(branch_data['debs']))
+
+        if branch_data['pips']:
+            venv = client.ssh('get temp dir for venv', 'mktemp -d').strip()
+            client.ssh('create venv', 'virtualenv --no-site-packages %s' % venv)
+            client.ssh('cache pips for branch %s' % branch_data['name'],
+                       'source %s/bin/activate && PIP_DOWNLOAD_CACHE=~/cache/pip pip install %s' %
+                       (venv, ' '.join(branch_data['pips'])))
+            client.ssh('remove venv', 'rm -fr %s' % venv)
+
         for url in branch_data['images']:
             fname = url.split('/')[-1]
             try:
