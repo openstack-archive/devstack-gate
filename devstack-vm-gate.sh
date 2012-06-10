@@ -62,9 +62,10 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
 fi
 
 ./stack.sh
-./exercise.sh
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
   ./tools/configure_tempest.sh
   cd $DEST/tempest
   nosetests --with-xunit -sv $DEVSTACK_GATE_TEMPEST_TESTS
+else
+  ./exercise.sh
 fi
