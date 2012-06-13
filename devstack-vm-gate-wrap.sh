@@ -43,6 +43,16 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     PROJECTS="openstack/tempest $PROJECTS"
 fi
 
+# HPcloud stopped adding the hostname to /etc/hosts with their
+# precise images.
+
+HOSTNAME=`/bin/hostname`
+if ! grep $HOSTNAME /etc/hosts >/dev/null
+then
+  echo "Need to add hostname to /etc/hosts"
+  sudo bash -c 'echo "127.0.1.1 $HOSTNAME" >>/etc/hosts'
+fi
+
 cd $WORKSPACE
 
 ORIGINAL_GERRIT_PROJECT=GERRIT_PROJECT
