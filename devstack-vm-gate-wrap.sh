@@ -38,11 +38,6 @@ if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
     PROJECTS="openstack-ci/devstack-gate $PROJECTS"
 fi
 
-# Set this variable to include tempest in the test run.
-if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
-    PROJECTS="openstack/tempest $PROJECTS"
-fi
-
 # HPcloud stopped adding the hostname to /etc/hosts with their
 # precise images.
 
