@@ -1,0 +1,8 @@
+# Testing
+coverage # computes code coverage percentages
+mox # mock object framework
+nose # for test discovery and console feedback
+nosexcover
+pylint # static code analysis
+pep8==0.6.1 # checks for PEP8 code style compliance
+unittest2 # backport of unittest lib in python 2.7

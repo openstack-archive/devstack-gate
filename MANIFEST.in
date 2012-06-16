@@ -1,0 +1,7 @@
+include README.md
+include setup.cfg
+include setup.py
+include tox.ini
+graft tests
+graft tools
+global-exclude *.pyc *.sdx *.log *.db *.swp

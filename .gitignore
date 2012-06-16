@@ -1,2 +1,16 @@
 *.pyc
-*~
+*.swp
+vendor
+.ksl-venv
+.venv
+.tox
+devstack_gate.egg-info/
+*.log
+.coverage
+covhtml
+pep8.txt
+nosetests.xml
+*.db
+.DS_Store
+build/
+dist/
