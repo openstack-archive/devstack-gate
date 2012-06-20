@@ -196,6 +196,8 @@ def configure_server(server, branches):
         client.ssh('run custom script %s' % bn,
             'chmod +x /tmp/%s && /tmp/%s' % (bn, bn))
 
+    client.ssh('sync', 'sync && sleep 5')
+
 def snapshot_server(client, server, name):
     print 'Saving image'
     if hasattr(client.images, 'create'): #v1.0
