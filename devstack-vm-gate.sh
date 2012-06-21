@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Script that is run on the devstack vm; configures and
 # invokes devstack.
@@ -21,9 +21,7 @@
 
 set -o errexit
 
-export DEST=$WORKSPACE
-
-cd $DEST/devstack
+cd $WORKSPACE/devstack
 
 ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,n-vol,n-sch,horizon,mysql,rabbit
 
@@ -61,11 +59,15 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     echo "VOLUME_BACKING_FILE_SIZE=4G" >> localrc
 fi
 
+echo "Running devstack"
 ./stack.sh
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
-  ./tools/configure_tempest.sh
-  cd $DEST/tempest
-  nosetests --with-xunit -sv $DEVSTACK_GATE_TEMPEST_TESTS
+    echo "Configuring tempest"
+    ./tools/configure_tempest.sh
+    cd $WORKSPACE/tempest
+    echo "Running tempest"
+    nosetests --with-xunit -sv $DEVSTACK_GATE_TEMPEST_TESTS
 else
-  ./exercise.sh
+    echo "Running devstack exercises"
+    ./exercise.sh
 fi
