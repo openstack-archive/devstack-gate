@@ -5,6 +5,7 @@ import urllib2
 from jenkins import JenkinsException, NODE_TYPE, CREATE_NODE
 
 TOGGLE_OFFLINE = '/computer/%(name)s/toggleOffline?offlineMessage=%(msg)s'
+CONFIG_NODE = '/computer/%(name)s/config.xml'
 
 class Jenkins(jenkins.Jenkins):
     def disable_node(self, name, msg=''):
@@ -34,6 +35,25 @@ class Jenkins(jenkins.Jenkins):
         msg = ''
         self.jenkins_open(urllib2.Request(self.server + TOGGLE_OFFLINE%locals()))
 
+    def get_node_config(self, name):
+        '''
+        Get the configuration for a node.
+        
+        :param name: Jenkins node name, ``str``
+        '''
+        get_config_url = self.server + CONFIG_NODE%locals()
+        return self.jenkins_open(urllib2.Request(get_config_url))
+
+    def reconfig_node(self, name, config_xml):
+        '''
+        Change the configuration for an existing node.
+        
+        :param name: Jenkins node name, ``str``
+        :param config_xml: New XML configuration, ``str``
+        '''
+        headers = {'Content-Type': 'text/xml'}
+        reconfig_url = self.server + CONFIG_NODE%locals()
+        self.jenkins_open(urllib2.Request(reconfig_url, config_xml, headers))
 
     def create_node(self, name, numExecutors=2, nodeDescription=None,
                     remoteFS='/var/lib/jenkins', labels=None, exclusive=False,

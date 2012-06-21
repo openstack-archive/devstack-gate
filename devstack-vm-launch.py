@@ -91,6 +91,7 @@ def create_jenkins_node(jenkins, machine):
                             nodeDescription='Dynamic single use %s slave for devstack' % machine.base_image.name,
                             remoteFS='/home/jenkins',
                             labels='%sdevstack-%s' % (DEVSTACK_GATE_PREFIX, machine.base_image.name),
+                            exclusive=True,
                             launcher='hudson.plugins.sshslaves.SSHLauncher',
                             launcher_params = {'port': 22, 'username': 'jenkins', 
                                                'privatekey': '/var/lib/jenkins/.ssh/id_rsa',

@@ -29,11 +29,13 @@ import myjenkins
 import vmdatabase
 import utils
 import novaclient
+import re
 
 NODE_NAME = sys.argv[1]
 DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG', 
                                              os.path.expanduser('~/devstack-gate-secure.conf'))
 
+LABEL_RE = re.compile(r'<label>.*</label>')
 
 def main():
     db = vmdatabase.VMDatabase()
@@ -51,7 +53,9 @@ def main():
 
     if machine.jenkins_name:
         if jenkins.node_exists(machine.jenkins_name):
-            jenkins.disable_node(machine.jenkins_name, "Devstack build started")
+            config = jenkins.get_node_config(machine.jenkins_name)
+            config = LABEL_RE.sub('<label>devstack-used</label>', config)
+            jenkins.reconfig_node(machine.jenkins_name, config)
             
 
 if __name__ == '__main__':
