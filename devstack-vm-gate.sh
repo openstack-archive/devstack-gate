@@ -35,9 +35,11 @@ fi
 
 if [ "$GERRIT_BRANCH" != "stable/diablo" ] && 
    [ "$GERRIT_BRANCH" != "stable/essex" ]; then
-    ENABLED_SERVICES=$ENABLED_SERVICES,cinder,c-api,c-vol,c-sch
+    ENABLED_SERVICES=$ENABLED_SERVICES,cinder,c-api,c-vol,c-sch,swift
+    SKIP_EXERCISES=boot_from_volume,client-env
 else
     ENABLED_SERVICES=$ENABLED_SERVICES,n-vol
+    SKIP_EXERCISES=boot_from_volume,client-env,swift
 fi
 
 cat <<EOF >localrc
@@ -53,13 +55,14 @@ SWIFT_HASH=1234123412341234
 ROOTSLEEP=0
 ERROR_ON_CLONE=True
 ENABLED_SERVICES=$ENABLED_SERVICES
-SKIP_EXERCISES=boot_from_volume,client-env,swift
+SKIP_EXERCISES=$SKIP_EXERCISES
 SERVICE_HOST=127.0.0.1
 SYSLOG=True
 SCREEN_LOGDIR=$DEST/screen-logs
 FIXED_RANGE=10.1.0.0/24
 FIXED_NETWORK_SIZE=256
 VIRT_DRIVER=$DEVSTACK_GATE_VIRT_DRIVER
+SWIFT_REPLICAS=1
 export OS_NO_CACHE=True
 EOF
 
