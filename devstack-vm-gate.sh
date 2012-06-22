@@ -21,7 +21,9 @@
 
 set -o errexit
 
-cd $WORKSPACE/devstack
+# Important to set DEST so that devstack uses our prepared sources.
+export DEST=$WORKSPACE
+cd $DEST/devstack
 
 ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,n-vol,n-sch,horizon,mysql,rabbit
 
