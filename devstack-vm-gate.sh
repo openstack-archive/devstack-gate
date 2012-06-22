@@ -21,8 +21,6 @@
 
 set -o errexit
 
-# Important to set DEST so that devstack uses our prepared sources.
-export DEST=$WORKSPACE
 cd $DEST/devstack
 
 ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,n-vol,n-sch,horizon,mysql,rabbit
@@ -46,7 +44,7 @@ ENABLED_SERVICES=$ENABLED_SERVICES
 SKIP_EXERCISES=boot_from_volume,client-env,swift
 SERVICE_HOST=127.0.0.1
 SYSLOG=True
-SCREEN_LOGDIR=$WORKSPACE/screen-logs
+SCREEN_LOGDIR=$DEST/screen-logs
 FIXED_RANGE=10.1.0.0/24
 FIXED_NETWORK_SIZE=256
 EOF
@@ -61,15 +59,22 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     echo "VOLUME_BACKING_FILE_SIZE=4G" >> localrc
 fi
 
+# Make the workspace owned by the stack user
+sudo chown -R stack:stack $DEST
+
 echo "Running devstack"
-./stack.sh
+sudo -H -u stack ./stack.sh
+
+echo "Removing sudo privileges for devstack user"
+sudo rm /etc/sudoers.d/50_stack_sh
+
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     echo "Configuring tempest"
-    ./tools/configure_tempest.sh
-    cd $WORKSPACE/tempest
+    sudo -H -u stack ./tools/configure_tempest.sh
+    cd $DEST/tempest
     echo "Running tempest"
-    nosetests --with-xunit -sv $DEVSTACK_GATE_TEMPEST_TESTS
+    sudo -H -u stack nosetests --with-xunit -sv $DEVSTACK_GATE_TEMPEST_TESTS
 else
     echo "Running devstack exercises"
-    ./exercise.sh
+    sudo -H -u stack ./exercise.sh
 fi

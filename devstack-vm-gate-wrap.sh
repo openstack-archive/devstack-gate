@@ -38,6 +38,8 @@ if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
     PROJECTS="openstack-ci/devstack-gate $PROJECTS"
 fi
 
+export DEST=/opt/stack
+
 # Most of the work of this script is done in functions so that we may
 # easily redirect their stdout / stderr to log files.
 
@@ -55,7 +57,9 @@ function setup_workspace {
 	sudo bash -c 'echo "127.0.1.1 $HOSTNAME" >>/etc/hosts'
     fi
 
-    cd $WORKSPACE
+    sudo mkdir -p $DEST
+    sudo chown -R jenkins:jenkins $DEST
+    cd $DEST
 
     ORIGINAL_GERRIT_PROJECT=$GERRIT_PROJECT
     ORIGINAL_GERRIT_BRANCH=$GERRIT_BRANCH
@@ -84,7 +88,7 @@ function setup_workspace {
 	export GERRIT_PROJECT
 	/usr/local/jenkins/slave_scripts/gerrit-git-prep.sh review.openstack.org
 
-	cd $WORKSPACE
+	cd $DEST
     done
 
     GERRIT_PROJECT=$ORIGINAL_GERRIT_PROJECT
@@ -92,7 +96,7 @@ function setup_workspace {
 
     # Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
     # we are testing the proposed change from this point forward.
-    GATE_SCRIPT_DIR=$WORKSPACE/devstack-gate
+    GATE_SCRIPT_DIR=$DEST/devstack-gate
 
     # Disable detailed logging as we return to the main script
     set +o xtrace
@@ -117,7 +121,7 @@ function setup_host {
     # The vm template update job should cache some images in ~/files.
     # Move them to where devstack expects:
     if ls ~/cache/files/*; then
-	mv ~/cache/files/* $WORKSPACE/devstack/files
+	mv ~/cache/files/* $DEST/devstack/files
     fi
 
     # Move the PIP cache into position:
@@ -133,6 +137,15 @@ function setup_host {
     sudo chmod a+r /var/log/syslog
     sudo start rsyslog
 
+    # Create a stack user for devstack to run as, so that we can
+    # revoke sudo permissions from that user when appropriate.
+    sudo useradd -U -s /bin/bash -d $DEST -m stack
+    TEMPFILE=`mktemp`
+    echo "stack ALL=(root) NOPASSWD:ALL" >$TEMPFILE
+    chmod 0440 $TEMPFILE
+    sudo chown root:root $TEMPFILE
+    sudo mv $TEMPFILE /etc/sudoers.d/50_stack_sh
+
     # Disable detailed logging as we return to the main script
     set +o xtrace
 }
@@ -145,13 +158,13 @@ function cleanup_host {
     # No matter what, archive logs
 
     sudo cp /var/log/syslog $WORKSPACE/logs/syslog.txt
-    cp $WORKSPACE/screen-logs/* $WORKSPACE/logs/
+    sudo cp $DEST/screen-logs/* $WORKSPACE/logs/
 
     # Make the devstack localrc available with the logs
-    cp $WORKSPACE/devstack/localrc $WORKSPACE/logs/localrc.txt
+    sudo cp $DEST/devstack/localrc $WORKSPACE/logs/localrc.txt
 
     # Make sure jenkins can read all the logs
-    sudo chown -R jenkins.jenkins $WORKSPACE/logs/
+    sudo chown -R jenkins:jenkins $WORKSPACE/logs/
     sudo chmod a+r $WORKSPACE/logs/
 
     rename 's/\.log$/.txt/' $WORKSPACE/logs/*
