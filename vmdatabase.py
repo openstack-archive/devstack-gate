@@ -44,7 +44,9 @@ RESULT_SUCCESS = 1
 RESULT_FAILURE = 2
 RESULT_TIMEOUT = 3
 
-from sqlalchemy import Table, Column, Boolean, Integer, String, MetaData, ForeignKey, UniqueConstraint, Index, create_engine, and_, or_
+from sqlalchemy import Table, Column, Boolean, Integer, String, \
+                       MetaData, ForeignKey, UniqueConstraint, Index, \
+                       create_engine, and_, or_
 from sqlalchemy.orm import mapper, relation
 from sqlalchemy.orm.session import Session, sessionmaker
 
@@ -52,59 +54,92 @@ metadata = MetaData()
 provider_table = Table('provider', metadata,
     Column('id', Integer, primary_key=True),
     Column('name', String(255), index=True, unique=True),
-    Column('max_servers', Integer),      # Max total number of servers for this provider
-    Column('giftable', Boolean),         # May we give failed vms from this provider to developers?
-    Column('nova_api_version', String(8)),       # 1.0 or 1.1
-    Column('nova_rax_auth', Boolean),            # novaclient doesn't discover this itself
+    # Max total number of servers for this provider
+    Column('max_servers', Integer),
+    # May we give failed vms from this provider to developers?
+    Column('giftable', Boolean),
+    # 1.0 or 1.1
+    Column('nova_api_version', String(8)),
+    # novaclient doesn't discover this itself
+    Column('nova_rax_auth', Boolean),
     Column('nova_username', String(255)),
     Column('nova_api_key', String(255)),
-    Column('nova_auth_url', String(255)),        # Authentication URL
-    Column('nova_project_id', String(255)),      # Project id to use at authn
-    Column('nova_service_type', String(255)),    # endpoint selection: service type (Null for default)
-    Column('nova_service_region', String(255)),  # endpoint selection: service region (Null for default)
-    Column('nova_service_name', String(255)),    # endpoint selection: Endpoint name (Null for default)
+    # Authentication URL
+    Column('nova_auth_url', String(255)),
+    # Project id to use at authn
+    Column('nova_project_id', String(255)),
+    # endpoint selection: service type (Null for default)
+    Column('nova_service_type', String(255)),
+    # endpoint selection: service region (Null for default)
+    Column('nova_service_region', String(255)),
+    # endpoint selection: Endpoint name (Null for default)
+    Column('nova_service_name', String(255)),
     )
 base_image_table = Table('base_image', metadata,
     Column('id', Integer, primary_key=True),
-    Column('provider_id', Integer, ForeignKey('provider.id'), index=True, nullable=False),
-    Column('name', String(255)),         # Image name (oneiric, precise, etc).
-    Column('external_id', String(255)),  # Provider assigned id for this image
-    Column('min_ready', Integer),        # Min number of servers to keep ready for this provider/image
-    Column('min_ram', Integer),          # amount of ram to select for servers with this image
+    Column('provider_id', Integer, ForeignKey('provider.id'),
+    index=True, nullable=False),
+    # Image name (oneiric, precise, etc).
+    Column('name', String(255)),
+    # Provider assigned id for this image
+    Column('external_id', String(255)),
+    # Min number of servers to keep ready for this provider/image
+    Column('min_ready', Integer),
+    # amount of ram to select for servers with this image
+    Column('min_ram', Integer),
     #active?
     )
 snapshot_image_table = Table('snapshot_image', metadata,
     Column('id', Integer, primary_key=True),
     Column('name', String(255)),
-    Column('base_image_id', Integer, ForeignKey('base_image.id'), index=True, nullable=False),
-    Column('version', Integer),          # Version indicator (timestamp)
-    Column('external_id', String(255)),  # Provider assigned id for this image
-    Column('server_external_id', String(255)),  # Provider assigned id of the server used to create the snapshot
-    Column('state', Integer),            # One of the above values
-    Column('state_time', Integer),       # Time of last state change
+    Column('base_image_id', Integer, ForeignKey('base_image.id'),
+    index=True, nullable=False),
+    # Version indicator (timestamp)
+    Column('version', Integer),
+    # Provider assigned id for this image
+    Column('external_id', String(255)),
+    # Provider assigned id of the server used to create the snapshot
+    Column('server_external_id', String(255)),
+    # One of the above values
+    Column('state', Integer),
+    # Time of last state change
+    Column('state_time', Integer),
     )
 machine_table = Table('machine', metadata,
     Column('id', Integer, primary_key=True),
-    Column('base_image_id', Integer, ForeignKey('base_image.id'), index=True, nullable=False),
-    Column('external_id', String(255)),   # Provider assigned id for this machine
-    Column('name', String(255)),          # Machine name
-    Column('jenkins_name', String(255)),  # Jenkins node name
-    Column('ip', String(255)),            # Primary IP address
-    Column('user', String(255)),          # Username if ssh keys have been installed, or NULL
-    Column('state', Integer),             # One of the above values
-    Column('state_time', Integer),        # Time of last state change
+    Column('base_image_id', Integer, ForeignKey('base_image.id'),
+    index=True, nullable=False),
+    # Provider assigned id for this machine
+    Column('external_id', String(255)),
+    # Machine name
+    Column('name', String(255)),
+    # Jenkins node name
+    Column('jenkins_name', String(255)),
+    # Primary IP address
+    Column('ip', String(255)),
+    # Username if ssh keys have been installed, or NULL
+    Column('user', String(255)),
+    # One of the above values
+    Column('state', Integer),
+    # Time of last state change
+    Column('state_time', Integer),
     )
 result_table = Table('result', metadata,
     Column('id', Integer, primary_key=True),
-    Column('base_image_id', Integer, ForeignKey('base_image.id'), index=True, nullable=False),
-    Column('machine_id', Integer),       # Not a FK so that machines can be deleted
+    Column('base_image_id', Integer, ForeignKey('base_image.id'),
+    index=True, nullable=False),
+    # Not a FK so that machines can be deleted
+    Column('machine_id', Integer),
     Column('jenkins_job_name', String(255)),
     Column('jenkins_build_number', Integer),
     Column('gerrit_change_number', Integer),
     Column('gerrit_patchset_number', Integer),
-    Column('start_time', Integer),       # Time that the job was started
-    Column('end_time', Integer),         # Time the job finished
-    Column('result', Integer),           # Result of job
+    # Time that the job was started
+    Column('start_time', Integer),
+    # Time the job finished
+    Column('end_time', Integer),
+    # Result of job
+    Column('result', Integer),
     )
 
 
@@ -208,7 +243,8 @@ class BaseImage(object):
 
 
 class SnapshotImage(object):
-    def __init__(self, name, version, external_id, server_external_id, state=BUILDING):
+    def __init__(self, name, version, external_id, server_external_id,
+                 state=BUILDING):
         self.name = name
         self.version = version
         self.external_id = external_id
@@ -234,7 +270,8 @@ class SnapshotImage(object):
 
 
 class Machine(object):
-    def __init__(self, name, external_id, ip=None, user=None, state=BUILDING):
+    def __init__(self, name, external_id, ip=None, user=None,
+                 state=BUILDING):
         self.name = name
         self.external_id = external_id
         self.ip = ip
@@ -260,7 +297,7 @@ class Machine(object):
 
     def newResult(self, jenkins_job_name, jenkins_build_number,
                   gerrit_change_number, gerrit_patchset_number):
-        new = Result(self.id, jenkins_job_name, jenkins_build_number, 
+        new = Result(self.id, jenkins_job_name, jenkins_build_number,
                      gerrit_change_number, gerrit_patchset_number, time.time())
         new.base_image = self.base_image
         session = Session.object_session(self)
@@ -337,9 +374,11 @@ class VMDatabase(object):
             for base_image in provider.base_images:
                 print '  Base image:', base_image.name
                 for snapshot_image in base_image.snapshot_images:
-                    print '    Snapshot:', snapshot_image.name, snapshot_image.state
+                    print '    Snapshot:', snapshot_image.name, \
+                          snapshot_image.state
                 for machine in base_image.machines:
-                    print '    Machine:', machine.id, machine.name, machine.state, machine.state_time, machine.ip
+                    print '    Machine:', machine.id, machine.name, \
+                          machine.state, machine.state_time, machine.ip
 
     def abort(self):
         self.session.rollback()
