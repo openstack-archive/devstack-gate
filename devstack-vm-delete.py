@@ -28,11 +28,13 @@ import utils
 
 NODE_NAME = sys.argv[1]
 
+
 def main():
     db = vmdatabase.VMDatabase()
 
     machine = db.getMachineByJenkinsName(NODE_NAME)
     machine.state = vmdatabase.DELETE
+
 
 if __name__ == '__main__':
     main()

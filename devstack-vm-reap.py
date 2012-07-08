@@ -32,8 +32,9 @@ import novaclient
 
 PROVIDER_NAME = sys.argv[1]
 MACHINE_LIFETIME = 24 * 60 * 60  # Amount of time after being used
-DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG', 
-                                             os.path.expanduser('~/devstack-gate-secure.conf'))
+DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG',
+                                             os.path.expanduser(
+                                                '~/devstack-gate-secure.conf'))
 SKIP_DEVSTACK_GATE_JENKINS = os.environ.get('SKIP_DEVSTACK_GATE_JENKINS', None)
 
 if '--all-servers' in sys.argv:
@@ -93,7 +94,7 @@ def main():
     db = vmdatabase.VMDatabase()
 
     if not SKIP_DEVSTACK_GATE_JENKINS:
-        config=ConfigParser.ConfigParser()
+        config = ConfigParser.ConfigParser()
         config.read(DEVSTACK_GATE_SECURE_CONFIG)
 
         jenkins = myjenkins.Jenkins(config.get('jenkins', 'server'),
@@ -119,8 +120,9 @@ def main():
     for machine in provider.machines:
         # Normally, reap machines that have sat in their current state
         # for 24 hours, unless that state is READY.
-        if (REAP_ALL_SERVERS or (machine.state != vmdatabase.READY and
-                                 now - machine.state_time > MACHINE_LIFETIME) or
+        if (REAP_ALL_SERVERS or
+            (machine.state != vmdatabase.READY and
+             now - machine.state_time > MACHINE_LIFETIME) or
             machine.state == vmdatabase.DELETE):
             print 'Deleting machine', machine.name
             try:
@@ -135,8 +137,9 @@ def main():
         for snap_image in base_image.snapshot_images:
             # Normally, reap images that have sat in their current state
             # for 24 hours, unless the image is the current snapshot
-            if REAP_ALL_IMAGES or (snap_image != base_image.current_snapshot and
-                                   now - snap_image.state_time > MACHINE_LIFETIME):
+            if REAP_ALL_IMAGES or \
+                (snap_image != base_image.current_snapshot and
+                now - snap_image.state_time > MACHINE_LIFETIME):
                 print 'Deleting image', snap_image.name
                 try:
                     delete_image(client, snap_image)

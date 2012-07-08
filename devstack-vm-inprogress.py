@@ -32,15 +32,17 @@ import novaclient
 import re
 
 NODE_NAME = sys.argv[1]
-DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG', 
-                                             os.path.expanduser('~/devstack-gate-secure.conf'))
+DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG',
+                                             os.path.expanduser(
+                                             '~/devstack-gate-secure.conf'))
 
 LABEL_RE = re.compile(r'<label>.*</label>')
+
 
 def main():
     db = vmdatabase.VMDatabase()
 
-    config=ConfigParser.ConfigParser()
+    config = ConfigParser.ConfigParser()
     config.read(DEVSTACK_GATE_SECURE_CONFIG)
 
     jenkins = myjenkins.Jenkins(config.get('jenkins', 'server'),
@@ -56,7 +58,7 @@ def main():
             config = jenkins.get_node_config(machine.jenkins_name)
             config = LABEL_RE.sub('<label>devstack-used</label>', config)
             jenkins.reconfig_node(machine.jenkins_name, config)
-            
+
 
 if __name__ == '__main__':
     main()

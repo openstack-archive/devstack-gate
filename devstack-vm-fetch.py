@@ -25,6 +25,7 @@ import vmdatabase
 
 IMAGE_NAME = sys.argv[1]
 
+
 def main():
     db = vmdatabase.VMDatabase()
     node = db.getMachineForUse(IMAGE_NAME)
@@ -36,7 +37,10 @@ def main():
     gerrit_change = os.environ.get('GERRIT_CHANGE_NUMBER', None)
     gerrit_patchset = os.environ.get('GERRIT_PATCHSET_NUMBER', None)
     if job_name and build_number and gerrit_change and gerrit_patchset:
-        result = node.newResult(job_name, build_number, gerrit_change, gerrit_patchset)
+        result = node.newResult(job_name,
+                                build_number,
+                                gerrit_change,
+                                gerrit_patchset)
     else:
         result = None
 
@@ -45,6 +49,7 @@ def main():
     print "NODE_ID=%s" % node.id
     if result:
         print "RESULT_ID=%s" % result.id
+
 
 if __name__ == "__main__":
     main()
