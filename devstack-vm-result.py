@@ -30,6 +30,7 @@ RESULTS = dict(success=vmdatabase.RESULT_SUCCESS,
                timeout=vmdatabase.RESULT_TIMEOUT,
                )
 
+
 def main():
     db = vmdatabase.VMDatabase()
     result = db.getResult(RESULT_ID)

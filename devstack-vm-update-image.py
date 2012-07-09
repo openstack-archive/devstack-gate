@@ -48,6 +48,7 @@ PROJECTS = ['openstack/nova',
             'openstack-dev/devstack',
             'openstack-ci/devstack-gate']
 
+
 def run_local(cmd, status=False, cwd='.', env={}):
     print "Running:", cmd
     newenv = os.environ
@@ -73,7 +74,8 @@ def tokenize(fn, tokens, distribution, comment=None):
     for line in open(fn):
         if 'dist:' in line and ('dist:%s' % distribution not in line):
             continue
-        if 'qpid' in line: continue #XXX
+        if 'qpid' in line:
+            continue  # XXX
         if comment and comment in line:
             line = line[:line.rfind(comment)]
         line = line.strip()
@@ -135,49 +137,67 @@ def bootstrap_server(provider, server, admin_pass, key):
         ssh_kwargs['pkey'] = key
     else:
         ssh_kwargs['password'] = admin_pass
-    
+
     for username in ['root', 'ubuntu']:
         client = utils.ssh_connect(ip, username, ssh_kwargs, timeout=600)
-        if client: break
+        if client:
+            break
 
     if not client:
         raise Exception("Unable to log in via SSH")
 
     # hpcloud can't reliably set the hostname
+    gerrit_url = 'https://review.openstack.org/p/openstack/' \
+                 'openstack-ci-puppet.git'
     client.ssh("set hostname", "sudo hostname %s" % server.name)
     client.ssh("update apt cache", "sudo apt-get update")
     client.ssh("upgrading system packages",
-               'sudo DEBIAN_FRONTEND=noninteractive apt-get --option "Dpkg::Options::=--force-confold" --assume-yes upgrade')
+               'sudo DEBIAN_FRONTEND=noninteractive apt-get '
+               '--option "Dpkg::Options::=--force-confold"'
+               ' --assume-yes upgrade')
     client.ssh("install git and puppet",
-               'sudo DEBIAN_FRONTEND=noninteractive apt-get --option "Dpkg::Options::=--force-confold" --assume-yes install git puppet')
+               'sudo DEBIAN_FRONTEND=noninteractive apt-get '
+               '--option "Dpkg::Options::=--force-confold"'
+               ' --assume-yes install git puppet')
     client.ssh("clone puppret repo",
-               "sudo git clone https://review.openstack.org/p/openstack/openstack-ci-puppet.git /root/openstack-ci-puppet")
+               "sudo git clone %s /root/openstack-ci-puppet" % gerrit_url)
     client.ssh("run puppet",
-               "sudo puppet apply --modulepath=/root/openstack-ci-puppet/modules /root/openstack-ci-puppet/manifests/site.pp")
+               "sudo puppet apply "
+               "--modulepath=/root/openstack-ci-puppet/modules"
+               "/root/openstack-ci-puppet/manifests/site.pp")
+
 
 def configure_server(server, branches):
     client = SSHClient(utils.get_public_ip(server), 'jenkins')
     client.ssh('make file cache directory', 'mkdir -p ~/cache/files')
     client.ssh('make pip cache directory', 'mkdir -p ~/cache/pip')
-    client.ssh('install build-essential', 'sudo DEBIAN_FRONTEND=noninteractive apt-get --option "Dpkg::Options::=--force-confold" --assume-yes install build-essential python-dev linux-headers-virtual linux-headers-`uname -r`')
+    client.ssh('install build-essential',
+               'sudo DEBIAN_FRONTEND=noninteractive '
+               'apt-get --option "Dpkg::Options::=--force-confold"'
+               ' --assume-yes install build-essential python-dev '
+               'linux-headers-virtual linux-headers-`uname -r`')
 
     for branch_data in branches:
         if branch_data['debs']:
             client.ssh('cache debs for branch %s' % branch_data['name'],
-                       'sudo apt-get -y -d install %s' % ' '.join(branch_data['debs']))
+                       'sudo apt-get -y -d install %s' %
+                       ' '.join(branch_data['debs']))
 
         if branch_data['pips']:
             venv = client.ssh('get temp dir for venv', 'mktemp -d').strip()
-            client.ssh('create venv', 'virtualenv --no-site-packages %s' % venv)
+            client.ssh('create venv',
+                       'virtualenv --no-site-packages %s' % venv)
             client.ssh('cache pips for branch %s' % branch_data['name'],
-                       'source %s/bin/activate && PIP_DOWNLOAD_CACHE=~/cache/pip pip install %s' %
+                       'source %s/bin/activate && '
+                       'PIP_DOWNLOAD_CACHE=~/cache/pip pip install %s' %
                        (venv, ' '.join(branch_data['pips'])))
             client.ssh('remove venv', 'rm -fr %s' % venv)
 
         for url in branch_data['images']:
             fname = url.split('/')[-1]
             try:
-                client.ssh('check for %s' % fname, 'ls ~/cache/files/%s' % fname)
+                client.ssh('check for %s' % fname,
+                           'ls ~/cache/files/%s' % fname)
             except:
                 client.ssh('download image %s' % fname,
                     'wget -c %s -O ~/cache/files/%s' % (url, fname))
@@ -187,7 +207,8 @@ def configure_server(server, branches):
     for project in PROJECTS:
         sp = project.split('/')[0]
         client.ssh('clone %s' % project,
-            'cd ~/workspace-cache && git clone https://review.openstack.org/p/%s' % project)
+            'cd ~/workspace-cache && '
+            'git clone https://review.openstack.org/p/%s' % project)
 
     script = os.environ.get('DEVSTACK_GATE_CUSTOM_SCRIPT', '')
     if script and os.path.isfile(script):
@@ -198,9 +219,10 @@ def configure_server(server, branches):
 
     client.ssh('sync', 'sync && sleep 5')
 
+
 def snapshot_server(client, server, name):
     print 'Saving image'
-    if hasattr(client.images, 'create'): #v1.0
+    if hasattr(client.images, 'create'):  # v1.0
         image = client.images.create(server, name)
     else:
         # TODO: fix novaclient so it returns an image here
@@ -211,7 +233,9 @@ def snapshot_server(client, server, name):
     image = utils.wait_for_resource(image)
     return image
 
-def build_image(provider, client, base_image, image, flavor, name, branches, timestamp):
+
+def build_image(provider, client, base_image, image,
+                flavor, name, branches, timestamp):
     print "Building image %s" % name
 
     create_kwargs = dict(image=image, flavor=flavor, name=name)
@@ -240,8 +264,8 @@ def build_image(provider, client, base_image, image, flavor, name, branches, tim
         # We made the snapshot, try deleting the server, but it's okay
         # if we fail.  The reap script will find it and try again.
         try:
-            pass #XXX
-            #utils.delete_server(server)
+            pass  # XXX
+            # utils.delete_server(server)
         except:
             print "Exception encountered deleting server:"
             traceback.print_exc()
@@ -284,12 +308,13 @@ def main():
         remote_base_image = client.images.find(name=base_image.external_id)
         timestamp = int(time.time())
         remote_snap_image_name = ('%sdevstack-%s-%s.template.openstack.org' %
-                                  (DEVSTACK_GATE_PREFIX, base_image.name, str(timestamp)))
-        remote_snap_image = build_image(provider, client, base_image, 
-                                        remote_base_image, flavor, 
+                                  (DEVSTACK_GATE_PREFIX,
+                                  base_image.name, str(timestamp)))
+        remote_snap_image = build_image(provider, client, base_image,
+                                        remote_base_image, flavor,
                                         remote_snap_image_name,
                                         branches, timestamp)
-        
+
 
 if __name__ == '__main__':
     main()

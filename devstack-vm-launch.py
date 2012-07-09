@@ -33,8 +33,9 @@ import utils
 
 PROVIDER_NAME = sys.argv[1]
 DEVSTACK_GATE_PREFIX = os.environ.get('DEVSTACK_GATE_PREFIX', '')
-DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG', 
-                                             os.path.expanduser('~/devstack-gate-secure.conf'))
+DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG',
+                                 os.path.expanduser(
+                                 '~/devstack-gate-secure.conf'))
 SKIP_DEVSTACK_GATE_JENKINS = os.environ.get('SKIP_DEVSTACK_GATE_JENKINS', None)
 
 ABANDON_TIMEOUT = 900   # assume a machine will never boot if it hasn't
@@ -81,22 +82,32 @@ def launch_node(client, snap_image, image, flavor, last_name):
     print
     return server, machine
 
+
 def create_jenkins_node(jenkins, machine):
-    name = '%sdevstack-%s-%s-%s' % (DEVSTACK_GATE_PREFIX, machine.base_image.name, 
-                                    machine.base_image.provider.name, machine.id)
+    name = '%sdevstack-%s-%s-%s' % (DEVSTACK_GATE_PREFIX,
+                                    machine.base_image.name,
+                                    machine.base_image.provider.name,
+                                    machine.id)
     machine.jenkins_name = name
 
     if jenkins:
-        jenkins.create_node(name, numExecutors=1, 
-                            nodeDescription='Dynamic single use %s slave for devstack' % machine.base_image.name,
+        node_desc = 'Dynamic single use %s slave for devstack' % \
+                    machine.base_image.name
+        labels = '%sdevstack-%s' % (DEVSTACK_GATE_PREFIX,
+                                    machine.base_image.name)
+        priv_key = '/var/lib/jenkins/.ssh/id_rsa',
+        jenkins.create_node(name, numExecutors=1,
+                            nodeDescription=node_desc,
                             remoteFS='/home/jenkins',
-                            labels='%sdevstack-%s' % (DEVSTACK_GATE_PREFIX, machine.base_image.name),
+                            labels=labels,
                             exclusive=True,
                             launcher='hudson.plugins.sshslaves.SSHLauncher',
-                            launcher_params = {'port': 22, 'username': 'jenkins', 
-                                               'privatekey': '/var/lib/jenkins/.ssh/id_rsa',
-                                               'host': machine.ip})
-                       
+                            launcher_params={'port': 22,
+                                             'username': 'jenkins',
+                                             'privatekey': priv_key,
+                                             'host': machine.ip})
+
+
 def check_machine(jenkins, client, machine, error_counts):
     try:
         server = client.servers.get(machine.external_id)
@@ -104,7 +115,7 @@ def check_machine(jenkins, client, machine, error_counts):
         print "Unable to get server detail, will retry"
         traceback.print_exc()
         return
-    
+
     if server.status == 'ACTIVE':
         ip = utils.get_public_ip(server)
         if not ip and 'os-floating-ips' in utils.get_extensions(client):
@@ -139,7 +150,7 @@ def main():
     db = vmdatabase.VMDatabase()
 
     if not SKIP_DEVSTACK_GATE_JENKINS:
-        config=ConfigParser.ConfigParser()
+        config = ConfigParser.ConfigParser()
         config.read(DEVSTACK_GATE_SECURE_CONFIG)
 
         jenkins = myjenkins.Jenkins(config.get('jenkins', 'server'),
@@ -173,8 +184,11 @@ def main():
         num_to_launch = calculate_deficit(provider, base_image)
         for i in range(num_to_launch):
             try:
-                server, machine = launch_node(client, snap_image,
-                                              remote_snap_image, flavor, last_name)
+                server, machine = launch_node(client,
+                                              snap_image,
+                                              remote_snap_image,
+                                              flavor,
+                                              last_name)
                 last_name = machine.name
             except:
                 traceback.print_exc()
