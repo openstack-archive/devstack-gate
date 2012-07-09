@@ -70,13 +70,18 @@ sudo -H -u stack ./stack.sh
 echo "Removing sudo privileges for devstack user"
 sudo rm /etc/sudoers.d/50_stack_sh
 
+echo "Running devstack exercises"
+sudo -H -u stack ./exercise.sh
+
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     echo "Configuring tempest"
     sudo -H -u stack ./tools/configure_tempest.sh
     cd $DEST/tempest
-    echo "Running tempest"
-    sudo -H -u stack nosetests --with-xunit -sv $DEVSTACK_GATE_TEMPEST_TESTS
-else
-    echo "Running devstack exercises"
-    sudo -H -u stack ./exercise.sh
+    echo "Running tempest smoke tests"
+    sudo -H -u stack nosetests --with-xunit -sv --nologcapture --attr=type=smoke tempest
+    RETVAL=$?
+    if [ $RETVAL = 0 && "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]; then
+      echo "Running tempest full test suite"
+      sudo -H -u stack nosetests --with-xunit -sv --nologcapture --eval-attr='type!=smoke' tempest
+    fi
 fi

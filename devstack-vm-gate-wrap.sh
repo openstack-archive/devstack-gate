@@ -24,10 +24,9 @@ PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keyst
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 
-# Supply specific tests to Tempest in second argument
-# For example, to execute only the server actions test,
-# you would supply tempest.test.test_server_actions
-export DEVSTACK_GATE_TEMPEST_TESTS=${DEVSTACK_GATE_TEMPEST_TESTS:-tempest}
+# See switch below for this -- it gets set to 1 when tempest
+# is the project being gated.
+export DEVSTACK_GATE_TEMPEST_FULL=${DEVSTACK_GATE_TEMPEST_FULL:-0}
 
 # Set this variable to skip updating the devstack-gate project itself.
 # Useful in development so you can edit scripts in place and run them
@@ -53,8 +52,8 @@ function setup_workspace {
     HOSTNAME=`/bin/hostname`
     if ! grep $HOSTNAME /etc/hosts >/dev/null
     then
-	echo "Need to add hostname to /etc/hosts"
-	sudo bash -c 'echo "127.0.1.1 $HOSTNAME" >>/etc/hosts'
+      echo "Need to add hostname to /etc/hosts"
+      sudo bash -c 'echo "127.0.1.1 $HOSTNAME" >>/etc/hosts'
     fi
 
     sudo mkdir -p $DEST
@@ -66,29 +65,29 @@ function setup_workspace {
 
     for GERRIT_PROJECT in $PROJECTS
     do
-	echo "Setting up $GERRIT_PROJECT"
-	SHORT_PROJECT=`basename $GERRIT_PROJECT`
-	if [[ ! -e $SHORT_PROJECT ]]; then
-	    echo "  Need to clone"
-	    git clone https://review.openstack.org/p/$GERRIT_PROJECT
-	fi
-	cd $SHORT_PROJECT
-    
-	GERRIT_BRANCH=$ORIGINAL_GERRIT_BRANCH
+      echo "Setting up $GERRIT_PROJECT"
+      SHORT_PROJECT=`basename $GERRIT_PROJECT`
+      if [[ ! -e $SHORT_PROJECT ]]; then
+          echo "  Need to clone $SHORT_PROJECT"
+          git clone https://review.openstack.org/p/$GERRIT_PROJECT
+      fi
+      cd $SHORT_PROJECT
 
-        # See if this project has this branch, if not, use master
-	git remote update || git remote update # attempt to work around bug #925790
-        # Ensure that we don't have stale remotes around
-	git remote prune origin
-	if ! git branch -a |grep remotes/origin/$GERRIT_BRANCH>/dev/null; then
-	    GERRIT_BRANCH=master
-	fi
-    
-	export GERRIT_BRANCH
-	export GERRIT_PROJECT
-	/usr/local/jenkins/slave_scripts/gerrit-git-prep.sh review.openstack.org
+      GERRIT_BRANCH=$ORIGINAL_GERRIT_BRANCH
 
-	cd $DEST
+      # See if this project has this branch, if not, use master
+      git remote update || git remote update # attempt to work around bug #925790
+      # Ensure that we don't have stale remotes around
+      git remote prune origin
+      if ! git branch -a |grep remotes/origin/$GERRIT_BRANCH>/dev/null; then
+          GERRIT_BRANCH=master
+      fi
+
+      export GERRIT_BRANCH
+      export GERRIT_PROJECT
+      /usr/local/jenkins/slave_scripts/gerrit-git-prep.sh review.openstack.org
+
+      cd $DEST
     done
 
     GERRIT_PROJECT=$ORIGINAL_GERRIT_PROJECT
@@ -111,17 +110,16 @@ function setup_host {
 
     # Hpcloud provides no swap, but does have a partition mounted at /mnt 
     # we can use:
-    if [ `cat /proc/meminfo | grep SwapTotal | awk '{ print $2; }'` -eq 0 ] &&
-	[ -b /dev/vdb ]; then
-	sudo umount /dev/vdb
-	sudo mkswap /dev/vdb
-	sudo swapon /dev/vdb
+    if [ `cat /proc/meminfo | grep SwapTotal | awk '{ print $2; }'` -eq 0 ] && [ -b /dev/vdb ]; then
+      sudo umount /dev/vdb
+      sudo mkswap /dev/vdb
+      sudo swapon /dev/vdb
     fi
 
     # The vm template update job should cache some images in ~/files.
     # Move them to where devstack expects:
     if ls ~/cache/files/*; then
-	mv ~/cache/files/* $DEST/devstack/files
+      mv ~/cache/files/* $DEST/devstack/files
     fi
 
     # Move the PIP cache into position:
@@ -197,6 +195,13 @@ then
 fi
 
 setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
+
+# We want to run the full tempest test suite for
+# new commits to Tempest, and the smoke test suite
+# for commits to the core projects
+if [[ $GERRIT_PROJECT == "openstack/tempest" ]]; then
+  export DEVSTACK_GATE_TEMPEST_FULL=1
+fi
 
 # Run the test
 $GATE_SCRIPT_DIR/devstack-vm-gate.sh
