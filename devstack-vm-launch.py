@@ -95,7 +95,7 @@ def create_jenkins_node(jenkins, machine):
                     machine.base_image.name
         labels = '%sdevstack-%s' % (DEVSTACK_GATE_PREFIX,
                                     machine.base_image.name)
-        priv_key = '/var/lib/jenkins/.ssh/id_rsa',
+        priv_key = '/var/lib/jenkins/.ssh/id_rsa'
         jenkins.create_node(name, numExecutors=1,
                             nodeDescription=node_desc,
                             remoteFS='/home/jenkins',
