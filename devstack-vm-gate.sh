@@ -80,7 +80,7 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     echo "Running tempest smoke tests"
     sudo -H -u stack nosetests --with-xunit -sv --nologcapture --attr=type=smoke tempest
     RETVAL=$?
-    if [ $RETVAL = 0 && "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]; then
+    if [[ $RETVAL = 0 && "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
       echo "Running tempest full test suite"
       sudo -H -u stack nosetests --with-xunit -sv --nologcapture --eval-attr='type!=smoke' tempest
     fi
