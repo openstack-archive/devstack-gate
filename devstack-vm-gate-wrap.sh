@@ -170,6 +170,11 @@ function cleanup_host {
     # Remove duplicate logs
     rm $WORKSPACE/logs/*.*.txt
 
+    # Save the tempest nosetests results
+    sudo cp $DEST/tempest/nosetests*.xml $WORKSPACE/
+    sudo chown jenkins:jenkins $WORKSPACE/nosetests*.xml
+    sudo chmod a+r $WORKSPACE/nosetests*.xml
+
     # Disable detailed logging as we return to the main script
     set +o xtrace
 }
