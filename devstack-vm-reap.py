@@ -137,9 +137,9 @@ def main():
         for snap_image in base_image.snapshot_images:
             # Normally, reap images that have sat in their current state
             # for 24 hours, unless the image is the current snapshot
-            if REAP_ALL_IMAGES or \
+            if (REAP_ALL_IMAGES or
                 (snap_image != base_image.current_snapshot and
-                now - snap_image.state_time > MACHINE_LIFETIME):
+                now - snap_image.state_time > MACHINE_LIFETIME)):
                 print 'Deleting image', snap_image.name
                 try:
                     delete_image(client, snap_image)
