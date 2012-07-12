@@ -19,7 +19,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/tempest"
+PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/tempest openstack/cinder openstack/python-cinderclient"
 
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
@@ -108,7 +108,7 @@ function setup_host {
     # Make sure headers for the currently running kernel are installed:
     sudo apt-get install -y --force-yes linux-headers-`uname -r`
 
-    # Hpcloud provides no swap, but does have a partition mounted at /mnt 
+    # Hpcloud provides no swap, but does have a partition mounted at /mnt
     # we can use:
     if [ `cat /proc/meminfo | grep SwapTotal | awk '{ print $2; }'` -eq 0 ] && [ -b /dev/vdb ]; then
       sudo umount /dev/vdb
