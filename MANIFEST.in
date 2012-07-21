@@ -1,3 +1,5 @@
+include AUTHORS
+include ChangeLog
 include README.md
 include setup.cfg
 include setup.py
