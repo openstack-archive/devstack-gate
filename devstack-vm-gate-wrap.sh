@@ -24,6 +24,9 @@ PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keyst
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 
+# Set the virtualization driver to: libvirt, openvz
+export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
+
 # See switch below for this -- it gets set to 1 when tempest
 # is the project being gated.
 export DEVSTACK_GATE_TEMPEST_FULL=${DEVSTACK_GATE_TEMPEST_FULL:-0}
@@ -141,6 +144,11 @@ function setup_host {
     chmod 0440 $TEMPFILE
     sudo chown root:root $TEMPFILE
     sudo mv $TEMPFILE /etc/sudoers.d/50_stack_sh
+
+    # If we will be testing OpenVZ, make sure stack is a member of the vz group
+    if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
+        sudo usermod -a -G vz stack
+    fi
 
     # Disable detailed logging as we return to the main script
     set +o xtrace

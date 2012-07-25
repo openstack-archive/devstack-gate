@@ -203,7 +203,7 @@ def configure_server(server, branches):
                            'ls ~/cache/files/%s' % fname)
             except:
                 client.ssh('download image %s' % fname,
-                    'wget -c %s -O ~/cache/files/%s' % (url, fname))
+                    'wget -nv -c %s -O ~/cache/files/%s' % (url, fname))
 
     client.ssh('clear workspace', 'rm -rf ~/workspace-cache')
     client.ssh('make workspace', 'mkdir -p ~/workspace-cache')
@@ -218,7 +218,7 @@ def configure_server(server, branches):
         bn = os.path.basename(script)
         client.scp(script, '/tmp/%s' % bn)
         client.ssh('run custom script %s' % bn,
-            'chmod +x /tmp/%s && /tmp/%s' % (bn, bn))
+            'chmod +x /tmp/%s && sudo /tmp/%s' % (bn, bn))
 
     client.ssh('sync', 'sync && sleep 5')
 

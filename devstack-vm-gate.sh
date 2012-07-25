@@ -55,8 +55,22 @@ SYSLOG=True
 SCREEN_LOGDIR=$DEST/screen-logs
 FIXED_RANGE=10.1.0.0/24
 FIXED_NETWORK_SIZE=256
+VIRT_DRIVER=$DEVSTACK_GATE_VIRT_DRIVER
 export OS_NO_CACHE=True
 EOF
+
+if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
+   cat <<\EOF >>localrc
+SKIP_EXERCISES=${SKIP_EXERCISES},volumes
+DEFAULT_INSTANCE_TYPE=m1.small
+DEFAULT_INSTANCE_USER=root
+EOF
+
+   cat <<EOF >>exerciserc
+DEFAULT_INSTANCE_TYPE=m1.small
+DEFAULT_INSTANCE_USER=root
+EOF
+fi
 
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     # We need to disable ratelimiting when running
