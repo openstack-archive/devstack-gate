@@ -23,10 +23,16 @@ set -o errexit
 
 cd $DEST/devstack
 
-ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,n-sch,cinder,c-api,c-vol,c-sch,horizon,mysql,rabbit
+ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-net,n-sch,horizon,mysql,rabbit
 
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     ENABLED_SERVICES=$ENABLED_SERVICES,tempest
+fi
+
+if [ "$BRANCH" != "stable/diablo" ] && [ "$BRANCH" != "stable/essex" ]; then
+    ENABLED_SERVICES=$ENABLED_SERVICES,cinder,c-api,c-vol,c-sch
+else
+    ENABLED_SERVICES=$ENABLED_SERVICES,n-vol
 fi
 
 cat <<EOF >localrc
