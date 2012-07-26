@@ -8,6 +8,8 @@ devstack_gate.egg-info/
 *.log
 .coverage
 covhtml
+AUTHORS
+ChangeLog
 pep8.txt
 nosetests.xml
 *.db
