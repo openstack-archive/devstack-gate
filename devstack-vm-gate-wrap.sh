@@ -83,8 +83,6 @@ function setup_workspace {
           GERRIT_BRANCH=master
       fi
 
-      export GERRIT_BRANCH
-      export GERRIT_PROJECT
       /usr/local/jenkins/slave_scripts/gerrit-git-prep.sh review.openstack.org
 
       cd $DEST

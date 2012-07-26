@@ -29,7 +29,8 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     ENABLED_SERVICES=$ENABLED_SERVICES,tempest
 fi
 
-if [ "$BRANCH" != "stable/diablo" ] && [ "$BRANCH" != "stable/essex" ]; then
+if [ "$GERRIT_BRANCH" != "stable/diablo" ] && 
+   [ "$GERRIT_BRANCH" != "stable/essex" ]; then
     ENABLED_SERVICES=$ENABLED_SERVICES,cinder,c-api,c-vol,c-sch
 else
     ENABLED_SERVICES=$ENABLED_SERVICES,n-vol
