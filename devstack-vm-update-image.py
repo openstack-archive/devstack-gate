@@ -166,7 +166,7 @@ def bootstrap_server(provider, server, admin_pass, key):
                "sudo git clone %s /root/openstack-ci-puppet" % gerrit_url)
     client.ssh("run puppet",
                "sudo puppet apply "
-               "--modulepath=/root/openstack-ci-puppet/modules"
+               "--modulepath=/root/openstack-ci-puppet/modules "
                "/root/openstack-ci-puppet/manifests/site.pp")
 
 
