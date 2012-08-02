@@ -60,6 +60,12 @@ function setup_workspace {
     sudo chown -R jenkins:jenkins $DEST
     cd $DEST
 
+    # The vm template update job should cache the git repos
+    # Move them to where we expect:
+    if ls ~/workspace-cache/*; then
+      mv ~/workspace-cache/* $DEST
+    fi
+
     ORIGINAL_GERRIT_PROJECT=$GERRIT_PROJECT
     ORIGINAL_GERRIT_BRANCH=$GERRIT_BRANCH
 
