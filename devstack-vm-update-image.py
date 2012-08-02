@@ -153,6 +153,11 @@ def bootstrap_server(provider, server, admin_pass, key):
     gerrit_url = 'https://review.openstack.org/p/openstack/' \
                  'openstack-ci-puppet.git'
     client.ssh("set hostname", "sudo hostname %s" % server.name)
+    client.ssh("get puppet repo deb",
+               "/usr/bin/wget "
+               "http://apt.puppetlabs.com/puppetlabs-release-"
+               "`lsb_release -c -s`.deb -O /root/puppet-repo.deb")
+    client.ssh("install puppet repo deb", "sudo dpkg -i /root/puppet-repo.deb")
     client.ssh("update apt cache", "sudo apt-get update")
     client.ssh("upgrading system packages",
                'sudo DEBIAN_FRONTEND=noninteractive apt-get '
