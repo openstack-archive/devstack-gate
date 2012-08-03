@@ -59,6 +59,11 @@ def delete_machine(jenkins, client, machine):
 
     if server:
         utils.delete_server(server)
+        # Rackspace Nova sometimes lies about whether a server is deleted.
+        # If we have deleted a server, don't believe it.  Instead, wait for
+        # the next run of the script and only if the server doesn't exist,
+        # delete it from Jenkins and the DB.
+        return
 
     if jenkins:
         if machine.jenkins_name:
@@ -77,6 +82,11 @@ def delete_image(client, image):
 
     if server:
         utils.delete_server(server)
+        # Rackspace Nova sometimes lies about whether a server is deleted.
+        # If we have deleted a server, don't believe it.  Instead, wait for
+        # the next run of the script and only if the server doesn't exist,
+        # delete it from Jenkins and the DB.
+        return
 
     try:
         remote_image = client.images.get(image.external_id)
