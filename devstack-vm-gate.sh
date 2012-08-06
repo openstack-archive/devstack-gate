@@ -29,6 +29,10 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     ENABLED_SERVICES=$ENABLED_SERVICES,tempest
 fi
 
+if [ "$GERRIT_BRANCH" == "stable/diablo" ]; then
+    export DEVSTACK_GATE_TEMPEST=0
+fi
+
 if [ "$GERRIT_BRANCH" != "stable/diablo" ] && 
    [ "$GERRIT_BRANCH" != "stable/essex" ]; then
     ENABLED_SERVICES=$ENABLED_SERVICES,cinder,c-api,c-vol,c-sch
@@ -91,4 +95,11 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
       echo "Running tempest full test suite"
       sudo -H -u stack NOSE_XUNIT_FILE=nosetests-full.xml nosetests --with-xunit -sv --nologcapture --eval-attr='type!=smoke' tempest
     fi
+else
+    # Jenkins expects at least one nosetests file.  If we're not running
+    # tempest, then write a fake one that indicates the tests pass (since
+    # we made it past exercise.sh.
+    cat > $WORKSPACE/nosetests-fake.xml <<EOF
+<?xml version="1.0" encoding="UTF-8"?><testsuite name="nosetests" tests="0" errors="0" failures="0" skip="0"></testsuite>
+EOF
 fi
