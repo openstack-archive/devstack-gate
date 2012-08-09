@@ -36,6 +36,13 @@ DEVSTACK_GATE_PREFIX = os.environ.get('DEVSTACK_GATE_PREFIX', '')
 DEVSTACK = os.path.join(WORKSPACE, 'devstack')
 PROVIDER_NAME = sys.argv[1]
 
+JENKINS_SSH_KEY = os.environ.get('JENKINS_SSH_KEY', False)
+if JENKINS_SSH_KEY:
+   PUPPET_CLASS="class {'openstack_project::slave_template': "
+      " install_users => false, ssh_key => '%s' }" % JENKINS_SSH_KEY
+else:
+   PUPPET_CLASS="class {'openstack_project::slave_template': }"
+
 PROJECTS = ['openstack/nova',
             'openstack/glance',
             'openstack/keystone',
@@ -154,7 +161,7 @@ def bootstrap_server(provider, server, admin_pass, key):
                  'openstack-ci-puppet.git'
     client.ssh("set hostname", "sudo hostname %s" % server.name)
     client.ssh("get puppet repo deb",
-               "/usr/bin/wget "
+               "sudo /usr/bin/wget "
                "http://apt.puppetlabs.com/puppetlabs-release-"
                "`lsb_release -c -s`.deb -O /root/puppet-repo.deb")
     client.ssh("install puppet repo deb", "sudo dpkg -i /root/puppet-repo.deb")
@@ -169,10 +176,12 @@ def bootstrap_server(provider, server, admin_pass, key):
                ' --assume-yes install git puppet')
     client.ssh("clone puppret repo",
                "sudo git clone %s /root/openstack-ci-puppet" % gerrit_url)
+    client.ssh("install puppet modules",
+               "/bin/bash /root/openstack-ci-puppet/install_modules.sh")
     client.ssh("run puppet",
-               "sudo puppet apply "
-               "--modulepath=/root/openstack-ci-puppet/modules "
-               "/root/openstack-ci-puppet/manifests/site.pp")
+               "sudo puppet apply --modulepath=/root/openstack-ci-puppet/modules:"
+               "/etc/puppet/modules "
+               "-e '%s'" % PUPPET_CLASS)
 
 
 def configure_server(server, branches):

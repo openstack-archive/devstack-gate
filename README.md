@@ -225,12 +225,13 @@ you're working as is called "jenkins"):
     python vmdatabase.py
     sqlite3 /home/jenkins/vm.db
 
-Currently the update-image script will produce a VM that only members
-of the OpenStack CI team can log into.  You should start by patching
-devstack-vm-update-image.py to have an option to install your own
-local ssh key, and if you don't want to use the "jenkins" user, it
-should also create whatever user you want to use.  Send that patch
-upstream to us so it can be merged.  Then run:
+By default, the update-image script will produce a VM that only members
+of the OpenStack CI team can log into.  You can inject your SSH public
+key by setting the appropriate env variable, like so:
+
+    export JENKINS_SSH_KEY=$(head -1 ~/.ssh/authorized_keys)
+
+Then run:
 
     ./devstack-vm-update-image.sh <YOUR PROVIDER NAME>
     ./devstack-vm-launch.py <YOUR PROVIDER NAME>
