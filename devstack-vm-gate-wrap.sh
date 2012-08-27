@@ -69,36 +69,44 @@ function setup_workspace {
       mv ~/workspace-cache/* $DEST
     fi
 
-    ORIGINAL_GERRIT_PROJECT=$GERRIT_PROJECT
-    ORIGINAL_GERRIT_BRANCH=$GERRIT_BRANCH
-
-    for GERRIT_PROJECT in $PROJECTS
+    for PROJECT in $PROJECTS
     do
-      echo "Setting up $GERRIT_PROJECT"
-      SHORT_PROJECT=`basename $GERRIT_PROJECT`
+      echo "Setting up $PROJECT"
+      SHORT_PROJECT=`basename $PROJECT`
       if [[ ! -e $SHORT_PROJECT ]]; then
           echo "  Need to clone $SHORT_PROJECT"
-          git clone https://review.openstack.org/p/$GERRIT_PROJECT
+          git clone https://review.openstack.org/p/$PROJECT
       fi
       cd $SHORT_PROJECT
 
-      GERRIT_BRANCH=$ORIGINAL_GERRIT_BRANCH
+      BRANCH=$ZUUL_BRANCH
 
       # See if this project has this branch, if not, use master
       git remote update || git remote update # attempt to work around bug #925790
       # Ensure that we don't have stale remotes around
       git remote prune origin
-      if ! git branch -a |grep remotes/origin/$GERRIT_BRANCH>/dev/null; then
-          GERRIT_BRANCH=master
+      if ! git branch -a |grep remotes/origin/$BRANCH>/dev/null; then
+          BRANCH=master
       fi
 
-      /usr/local/jenkins/slave_scripts/gerrit-git-prep.sh review.openstack.org
+      # See if Zuul prepared a ref for this project
+      if git fetch https://review.openstack.org/p/$PROJECT $ZUUL_REF; then
+	  # It's there, so check it out.
+	  git checkout FETCH_HEAD
+	  git reset --hard FETCH_HEAD
+	  git clean -x -f -d -q
+      else
+	  if [ $PROJECT == $ZUUL_PROJECT ]; then
+	      echo "Unable to find ref $ZUUL_REF for $PROJECT"
+	      exit 1
+	  fi
+	  git checkout $BRANCH
+	  git reset --hard
+	  git clean -x -f -d -q
+      fi
 
       cd $DEST
     done
-
-    GERRIT_PROJECT=$ORIGINAL_GERRIT_PROJECT
-    GERRIT_BRANCH=$ORIGINAL_GERRIT_BRANCH
 
     # Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
     # we are testing the proposed change from this point forward.
@@ -199,24 +207,21 @@ setup_workspace &> $WORKSPACE/logs/devstack-gate-setup-workspace.txt
 
 # Also, if we're testing devstack-gate, re-exec this script once so
 # that we can test the new version of it.
-if [[ $GERRIT_PROJECT == "openstack-ci/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
+if [[ $ZUUL_PROJECT == "openstack-ci/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
     export RE_EXEC="true"
     echo "This build includes a change to the devstack gate; re-execing this script."
     exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
 fi
 
-if [ ! -z "$GERRIT_CHANGES" ]
-then
-    CHANGE_NUMBER=`echo $GERRIT_CHANGES|grep -Po ".*/\K\d+(?=/\d+)"`
-    echo "Triggered by: https://review.openstack.org/$CHANGE_NUMBER"
-fi
+echo "Triggered by: https://review.openstack.org/$ZUUL_CHANGE patchset $ZUUL_PATCHSET"
+echo "Pipeline: $ZUUL_PIPELINE"
 
 setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 
 # We want to run the full tempest test suite for
 # new commits to Tempest, and the smoke test suite
 # for commits to the core projects
-if [[ $GERRIT_PROJECT == "openstack/tempest" ]]; then
+if [[ $ZUUL_PROJECT == "openstack/tempest" ]]; then
   export DEVSTACK_GATE_TEMPEST_FULL=1
 fi
 
