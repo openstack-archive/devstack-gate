@@ -33,13 +33,20 @@ if [ "$ZUUL_BRANCH" == "stable/diablo" ]; then
     export DEVSTACK_GATE_TEMPEST=0
 fi
 
-if [ "$ZUUL_BRANCH" != "stable/diablo" ] && 
-   [ "$ZUUL_BRANCH" != "stable/essex" ]; then
-    ENABLED_SERVICES=$ENABLED_SERVICES,cinder,c-api,c-vol,c-sch,swift
-    SKIP_EXERCISES=boot_from_volume,client-env
+SKIP_EXERCISES=boot_from_volume,client-env
+
+if [ "$GERRIT_BRANCH" != "stable/diablo" ] && 
+   [ "$GERRIT_BRANCH" != "stable/essex" ]; then
+
+    if [ "$DEVSTACK_GATE_CINDER" -eq "1" ]; then
+	ENABLED_SERVICES=$ENABLED_SERVICES,cinder,c-api,c-vol,c-sch
+    else
+	ENABLED_SERVICES=$ENABLED_SERVICES,n-vol
+    fi
+    ENABLED_SERVICES=$ENABLED_SERVICES,swift
 else
     ENABLED_SERVICES=$ENABLED_SERVICES,n-vol
-    SKIP_EXERCISES=boot_from_volume,client-env,swift
+    SKIP_EXERCISES=$SKIP_EXERCISES,swift
 fi
 
 cat <<EOF >localrc

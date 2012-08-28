@@ -24,6 +24,9 @@ PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keyst
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 
+# Set to 1 to run cinder instead of nova volume
+export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-1}
+
 # Set the virtualization driver to: libvirt, openvz
 export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
 
