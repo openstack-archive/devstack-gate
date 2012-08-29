@@ -104,7 +104,7 @@ function setup_workspace {
 	      exit 1
 	  fi
 	  git checkout $BRANCH
-	  git reset --hard
+	  git reset --hard remotes/origin/$BRANCH
 	  git clean -x -f -d -q
       fi
 
