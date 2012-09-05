@@ -33,7 +33,8 @@ def main():
     db = vmdatabase.VMDatabase()
 
     machine = db.getMachineByJenkinsName(NODE_NAME)
-    machine.state = vmdatabase.DELETE
+    if machine.state != vmdatabase.HOLD:
+        machine.state = vmdatabase.DELETE
 
 
 if __name__ == '__main__':
