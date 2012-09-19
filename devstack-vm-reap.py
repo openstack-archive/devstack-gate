@@ -157,33 +157,6 @@ def main():
                     error = True
                     traceback.print_exc()
 
-    # Make sure the provider has enough headroom for the min_ready
-    # of all base images, deleting used serverss if needed.
-    overcommitment = ((len(provider.machines) -
-                       len(provider.ready_machines) + provider_min_ready) -
-                      provider.max_servers)
-
-    while overcommitment > 0:
-        print 'Overcommitted by %s machines' % overcommitment
-        last_overcommitment = overcommitment
-        for machine in provider.machines:
-            if machine.state == vmdatabase.READY:
-                continue
-            if machine.state == vmdatabase.BUILDING:
-                continue
-            if machine.state == vmdatabase.HOLD:
-                continue
-            print 'Deleting machine', machine.name
-            try:
-                delete_machine(jenkins, client, machine)
-                overcommitment -= 1
-            except:
-                error = True
-                traceback.print_exc()
-        if overcommitment == last_overcommitment:
-            raise Exception("Unable to reduce overcommitment")
-        last_overcommitment = overcommitment
-
     print
     print 'Known machines (end):'
     db.print_state()
