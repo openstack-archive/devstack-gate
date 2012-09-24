@@ -180,6 +180,7 @@ function cleanup_host {
 
     sudo cp /var/log/syslog $WORKSPACE/logs/syslog.txt
     sudo cp $DEST/screen-logs/* $WORKSPACE/logs/
+    sudo cp $DEST/devstacklog.txt $WORKSPACE/logs/
 
     # Make the devstack localrc available with the logs
     sudo cp $DEST/devstack/localrc $WORKSPACE/logs/localrc.txt
