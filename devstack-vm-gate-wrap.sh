@@ -77,35 +77,52 @@ function setup_workspace {
       echo "Setting up $PROJECT"
       SHORT_PROJECT=`basename $PROJECT`
       if [[ ! -e $SHORT_PROJECT ]]; then
-          echo "  Need to clone $SHORT_PROJECT"
-          git clone https://review.openstack.org/p/$PROJECT
+        echo "  Need to clone $SHORT_PROJECT"
+        git clone https://review.openstack.org/p/$PROJECT
       fi
       cd $SHORT_PROJECT
 
       BRANCH=$ZUUL_BRANCH
 
-      # See if this project has this branch, if not, use master
-      git remote update || git remote update # attempt to work around bug #925790
+      MAX_ATTEMPTS=3
+      COUNT=0
+      # Attempt a git remote update. Run for up to 5 minutes before killing.
+      # If first SIGTERM does not kill the process wait a minute then SIGKILL.
+      # If update fails try again for up to a total of 3 attempts.
+      until timeout -k 1m 5m git remote update
+      do
+        COUNT=$(($COUNT + 1))
+        echo "git remote update failed."
+        if [ $COUNT -eq $MAX_ATTEMPTS ]
+        then
+          exit 1
+        fi
+        SLEEP_TIME=$((30 + $RANDOM % 60))
+        echo "sleep $SLEEP_TIME before retrying."
+        sleep $SLEEP_TIME
+      done
+
       # Ensure that we don't have stale remotes around
       git remote prune origin
+      # See if this project has this branch, if not, use master
       if ! git branch -a |grep remotes/origin/$BRANCH>/dev/null; then
-          BRANCH=master
+        BRANCH=master
       fi
 
       # See if Zuul prepared a ref for this project
       if git fetch https://review.openstack.org/p/$PROJECT $ZUUL_REF; then
-	  # It's there, so check it out.
-	  git checkout FETCH_HEAD
-	  git reset --hard FETCH_HEAD
-	  git clean -x -f -d -q
+        # It's there, so check it out.
+        git checkout FETCH_HEAD
+        git reset --hard FETCH_HEAD
+        git clean -x -f -d -q
       else
-	  if [ $PROJECT == $ZUUL_PROJECT ]; then
-	      echo "Unable to find ref $ZUUL_REF for $PROJECT"
-	      exit 1
-	  fi
-	  git checkout $BRANCH
-	  git reset --hard remotes/origin/$BRANCH
-	  git clean -x -f -d -q
+        if [ $PROJECT == $ZUUL_PROJECT ]; then
+          echo "Unable to find ref $ZUUL_REF for $PROJECT"
+          exit 1
+        fi
+        git checkout $BRANCH
+        git reset --hard remotes/origin/$BRANCH
+        git clean -x -f -d -q
       fi
 
       cd $DEST
