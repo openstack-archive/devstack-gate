@@ -39,7 +39,7 @@ PROVIDER_NAME = sys.argv[1]
 JENKINS_SSH_KEY = os.environ.get('JENKINS_SSH_KEY', False)
 if JENKINS_SSH_KEY:
    PUPPET_CLASS="class {'openstack_project::slave_template': "
-      " install_users => false, ssh_key => '%s' }" % JENKINS_SSH_KEY
+   " install_users => false, ssh_key => '%s' }" % JENKINS_SSH_KEY
 else:
    PUPPET_CLASS="class {'openstack_project::slave_template': }"
 
