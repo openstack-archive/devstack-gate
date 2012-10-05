@@ -178,7 +178,7 @@ def bootstrap_server(provider, server, admin_pass, key):
     client.ssh("clone puppret repo",
                "sudo git clone %s /root/openstack-ci-puppet" % gerrit_url)
     client.ssh("install puppet modules",
-               "/bin/bash /root/openstack-ci-puppet/install_modules.sh")
+               "sudo /bin/bash /root/openstack-ci-puppet/install_modules.sh")
     client.ssh("run puppet",
                "sudo puppet apply --modulepath=/root/openstack-ci-puppet/modules:"
                "/etc/puppet/modules "
