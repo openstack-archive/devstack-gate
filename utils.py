@@ -177,6 +177,6 @@ def delete_server(server):
     except:
         print "Unable to delete keypair"
         traceback.print_exc()
-            
+
     print "Deleting server", server.id
     server.delete()

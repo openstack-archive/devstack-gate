@@ -26,6 +26,7 @@ import time
 import subprocess
 import traceback
 import socket
+import pprint
 
 import vmdatabase
 import utils
@@ -35,13 +36,14 @@ WORKSPACE = os.environ['WORKSPACE']
 DEVSTACK_GATE_PREFIX = os.environ.get('DEVSTACK_GATE_PREFIX', '')
 DEVSTACK = os.path.join(WORKSPACE, 'devstack')
 PROVIDER_NAME = sys.argv[1]
-
 JENKINS_SSH_KEY = os.environ.get('JENKINS_SSH_KEY', False)
+
 if JENKINS_SSH_KEY:
-   PUPPET_CLASS="class {'openstack_project::slave_template': "
-   " install_users => false, ssh_key => '%s' }" % JENKINS_SSH_KEY
+    PUPPET_CLASS = ("class {'openstack_project::slave_template': "
+                    "install_users => false, ssh_key => '%s', }" %
+                    JENKINS_SSH_KEY)
 else:
-   PUPPET_CLASS="class {'openstack_project::slave_template': }"
+    PUPPET_CLASS = "class {'openstack_project::slave_template': }"
 
 PROJECTS = ['openstack/nova',
             'openstack/glance',
@@ -74,10 +76,11 @@ def run_local(cmd, status=False, cwd='.', env={}):
 
 def git_branches():
     branches = []
-    for branch in run_local(['git', 'branch'], cwd=DEVSTACK).split("\n"):
-        if branch.startswith('*'):
-            branch = branch.split()[1]
-        branches.append(branch.strip())
+    for branch in run_local(['git', 'branch', '-a'], cwd=DEVSTACK).split("\n"):
+        branch = branch.strip()
+        if not branch.startswith('remotes/origin'):
+            continue
+        branches.append(branch)
     return branches
 
 
@@ -86,7 +89,7 @@ def tokenize(fn, tokens, distribution, comment=None):
         if 'dist:' in line and ('dist:%s' % distribution not in line):
             continue
         if 'qpid' in line:
-            continue  # XXX
+            continue  # TODO: explain why this is here
         if comment and comment in line:
             line = line[:line.rfind(comment)]
         line = line.strip()
@@ -125,10 +128,14 @@ def local_prep(distribution):
                     line = line[:line.rfind('#')]
                 if line.endswith(';;'):
                     line = line[:-2]
-                value = line.split('=', 1)[1].strip()
-                if value[0] == value[-1] == '"':
-                    value = value[1:-1]
-                images += [x.strip() for x in value.split(',')]
+                line = line.split('=', 1)[1].strip()
+                if line.startswith('${IMAGE_URLS:-'):
+                    line = line[len('${IMAGE_URLS:-'):]
+                if line.endswith('}'):
+                    line = line[:-1]
+                if line[0] == line[-1] == '"':
+                    line = line[1:-1]
+                images += [x.strip() for x in line.split(',')]
         branch_data['images'] = images
         branches.append(branch_data)
     return branches
@@ -182,7 +189,7 @@ def bootstrap_server(provider, server, admin_pass, key):
     client.ssh("run puppet",
                "sudo puppet apply --modulepath=/root/openstack-ci-puppet/modules:"
                "/etc/puppet/modules "
-               "-e '%s'" % PUPPET_CLASS)
+               '-e "%s"' % PUPPET_CLASS)
 
 
 def configure_server(server, branches):
@@ -282,8 +289,7 @@ def build_image(provider, client, base_image, image,
         # We made the snapshot, try deleting the server, but it's okay
         # if we fail.  The reap script will find it and try again.
         try:
-            pass  # XXX
-            # utils.delete_server(server)
+            utils.delete_server(server)
         except:
             print "Exception encountered deleting server:"
             traceback.print_exc()
@@ -308,6 +314,11 @@ def build_image(provider, client, base_image, image,
 
 
 def main():
+    if '-n' in sys.argv:
+        dry = True
+    else:
+        dry = False
+
     db = vmdatabase.VMDatabase()
     provider = db.getProvider(PROVIDER_NAME)
     print "Working with provider %s" % provider.name
@@ -322,16 +333,18 @@ def main():
         print "Found flavor", flavor
 
         branches = local_prep(base_image.name)
+        pprint.pprint(branches)
 
         remote_base_image = client.images.find(name=base_image.external_id)
-        timestamp = int(time.time())
-        remote_snap_image_name = ('%sdevstack-%s-%s.template.openstack.org' %
-                                  (DEVSTACK_GATE_PREFIX,
-                                  base_image.name, str(timestamp)))
-        remote_snap_image = build_image(provider, client, base_image,
-                                        remote_base_image, flavor,
-                                        remote_snap_image_name,
-                                        branches, timestamp)
+        if not dry:
+            timestamp = int(time.time())
+            remote_snap_image_name = ('%sdevstack-%s-%s.template.openstack.org' %
+                                      (DEVSTACK_GATE_PREFIX,
+                                       base_image.name, str(timestamp)))
+            remote_snap_image = build_image(provider, client, base_image,
+                                            remote_base_image, flavor,
+                                            remote_snap_image_name,
+                                            branches, timestamp)
 
 
 if __name__ == '__main__':

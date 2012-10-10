@@ -8,6 +8,7 @@ cat >$WORKSPACE/test-env.sh <<EOF
 export WORKSPACE=/home/jenkins/workspace
 export DEVSTACK_GATE_PREFIX=wip-
 export SKIP_DEVSTACK_GATE_PROJECT=1
+export DEVSTACK_GATE_TEMPEST=1
 export GERRIT_BRANCH=master
 export GERRIT_PROJECT=testing
 export JOB_NAME=test
@@ -16,12 +17,13 @@ export GERRIT_CHANGE_NUMBER=1234
 export GERRIT_PATCHSET_NUMBER=1
 EOF
 
-rsync -az --delete $WORKSPACE/ $NODE_IP_ADDR:workspace/
+rsync -az --delete $WORKSPACE/ jenkins@$NODE_IP_ADDR:workspace/
 RETVAL=$?
 if [ $RETVAL != 0 ]; then
     exit $RETVAL
 fi
 
 rm $WORKSPACE/test-env.sh
-ssh $NODE_IP_ADDR '. workspace/test-env.sh && workspace/devstack-gate/devstack-vm-gate-wrap.sh'
+ssh jenkins@$NODE_IP_ADDR '. workspace/test-env.sh && cd workspace && ./devstack-gate/devstack-vm-gate-wrap.sh'
+echo "done"
 #RETVAL=$?

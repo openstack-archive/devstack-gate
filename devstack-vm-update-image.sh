@@ -29,5 +29,5 @@ git remote update
 git remote prune origin
 cd $WORKSPACE
 
-$GATE_SCRIPT_DIR/devstack-vm-update-image.py $1
+$GATE_SCRIPT_DIR/devstack-vm-update-image.py $1 $2
 
