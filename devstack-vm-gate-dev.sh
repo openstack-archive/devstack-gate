@@ -11,13 +11,19 @@ export SKIP_DEVSTACK_GATE_PROJECT=1
 export DEVSTACK_GATE_TEMPEST=1
 export ZUUL_BRANCH=master
 export ZUUL_PROJECT=testing
+export ZUUL_REF=refs/zuul/Ztest
 export JOB_NAME=test
 export BUILD_NUMBER=42
 export GERRIT_CHANGE_NUMBER=1234
 export GERRIT_PATCHSET_NUMBER=1
+export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
+export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-0}
+export DEVSTACK_GATE_QUANTUM=${DEVSTACK_GATE_QUANTUM:-0}
+export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-""}
 EOF
 
-rsync -az --delete $WORKSPACE/ jenkins@$NODE_IP_ADDR:workspace/
+rsync -az $WORKSPACE/ jenkins@$NODE_IP_ADDR:workspace-cache/
+rsync -az $WORKSPACE/ jenkins@$NODE_IP_ADDR:workspace/
 RETVAL=$?
 if [ $RETVAL != 0 ]; then
     exit $RETVAL

@@ -40,6 +40,9 @@ export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
 # Only applicable to master branch
 export DEVSTACK_GATE_QUANTUM=${DEVSTACK_GATE_QUANTUM:-0}
 
+# Set to the name of the "old" branch to run grenade (eg "stable/folsom")
+export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-""}
+
 # Set the virtualization driver to: libvirt, openvz
 export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
 
@@ -56,12 +59,13 @@ if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
     PROJECTS="openstack-ci/devstack-gate $PROJECTS"
 fi
 
-export DEST=/opt/stack
+export BASE=/opt/stack
 
 # Most of the work of this script is done in functions so that we may
 # easily redirect their stdout / stderr to log files.
 
 function setup_workspace {
+    DEST=$1
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
 
@@ -75,6 +79,21 @@ function setup_workspace {
       sudo bash -c 'echo "127.0.1.1 $HOSTNAME" >>/etc/hosts'
     fi
 
+    # Hpcloud provides no swap, but does have a virtual disk mounted
+    # at /mnt we can use.  It also doesn't have enough space on / for
+    # two devstack installs, so we partition the vdisk:
+    if [ `grep SwapTotal /proc/meminfo | awk '{ print $2; }'` -eq 0 ] && \
+       [ -b /dev/vdb ]; then
+      sudo umount /dev/vdb
+      sudo parted /dev/vdb --script -- mklabel msdos
+      sudo parted /dev/vdb --script -- mkpart primary linux-swap 0 8192
+      sudo parted /dev/vdb --script -- mkpart primary ext2 8192 -1
+      sudo mkswap /dev/vdb1
+      sudo mkfs.ext4 /dev/vdb2
+      sudo swapon /dev/vdb1
+      sudo mount /dev/vdb2 /opt
+    fi
+
     sudo mkdir -p $DEST
     sudo chown -R jenkins:jenkins $DEST
     cd $DEST
@@ -82,9 +101,10 @@ function setup_workspace {
     # The vm template update job should cache the git repos
     # Move them to where we expect:
     if ls ~/workspace-cache/*; then
-      mv ~/workspace-cache/* $DEST
+      rsync -a ~/workspace-cache/ $DEST/
     fi
 
+    echo "Using branch: $ZUUL_BRANCH"
     for PROJECT in $PROJECTS
     do
       echo "Setting up $PROJECT"
@@ -142,9 +162,11 @@ function setup_workspace {
       cd $DEST
     done
 
-    # Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
-    # we are testing the proposed change from this point forward.
-    GATE_SCRIPT_DIR=$DEST/devstack-gate
+    # The vm template update job should cache some images in ~/files.
+    # Move them to where devstack expects:
+    if [ -e ~/cache/files/* ]; then
+      rsync -a ~/cache/files/ $DEST/devstack/files/
+    fi
 
     # Disable detailed logging as we return to the main script
     set +o xtrace
@@ -156,20 +178,6 @@ function setup_host {
 
     # Make sure headers for the currently running kernel are installed:
     sudo apt-get install -y --force-yes linux-headers-`uname -r`
-
-    # Hpcloud provides no swap, but does have a partition mounted at /mnt
-    # we can use:
-    if [ `cat /proc/meminfo | grep SwapTotal | awk '{ print $2; }'` -eq 0 ] && [ -b /dev/vdb ]; then
-      sudo umount /dev/vdb
-      sudo mkswap /dev/vdb
-      sudo swapon /dev/vdb
-    fi
-
-    # The vm template update job should cache some images in ~/files.
-    # Move them to where devstack expects:
-    if ls ~/cache/files/*; then
-      mv ~/cache/files/* $DEST/devstack/files
-    fi
 
     # Move the PIP cache into position:
     sudo mkdir -p /var/cache/pip
@@ -191,7 +199,7 @@ function setup_host {
 
     # Create a stack user for devstack to run as, so that we can
     # revoke sudo permissions from that user when appropriate.
-    sudo useradd -U -s /bin/bash -d $DEST -m stack
+    sudo useradd -U -s /bin/bash -d $BASE/new -m stack
     TEMPFILE=`mktemp`
     echo "stack ALL=(root) NOPASSWD:ALL" >$TEMPFILE
     chmod 0440 $TEMPFILE
@@ -216,11 +224,23 @@ function cleanup_host {
 
     sudo cp /var/log/syslog $WORKSPACE/logs/syslog.txt
     sudo cp /var/log/kern.log $WORKSPACE/logs/kern_log.txt
-    sudo cp $DEST/screen-logs/* $WORKSPACE/logs/
-    sudo cp $DEST/devstacklog.txt $WORKSPACE/logs/
 
-    # Make the devstack localrc available with the logs
-    sudo cp $DEST/devstack/localrc $WORKSPACE/logs/localrc.txt
+    if [ -d $BASE/old ]; then
+      mkdir -p $WORKSPACE/logs/old/
+      mkdir -p $WORKSPACE/logs/new/
+      mkdir -p $WORKSPACE/logs/grenade/
+      sudo cp $BASE/old/screen-logs/* $WORKSPACE/logs/old/
+      sudo cp $BASE/old/devstacklog.txt $WORKSPACE/logs/old/
+      sudo cp $BASE/old/devstack/localrc $WORKSPACE/logs/old/localrc.txt
+      sudo cp $BASE/logs/* $WORKSPACE/logs/
+      sudo cp $BASE/new/grenade/localrc $WORKSPACE/logs/grenade/localrc.txt
+      NEWLOGTARGET=$WORKSPACE/logs/new
+    else
+      NEWLOGTARGET=$WORKSPACE/logs
+    fi
+    sudo cp $BASE/new/screen-logs/* $NEWLOGTARGET/
+    sudo cp $BASE/new/devstacklog.txt $NEWLOGTARGET/
+    sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
 
     # Make sure jenkins can read all the logs
     sudo chown -R jenkins:jenkins $WORKSPACE/logs/
@@ -232,7 +252,7 @@ function cleanup_host {
     rm $WORKSPACE/logs/*.*.txt
 
     # Save the tempest nosetests results
-    sudo cp $DEST/tempest/nosetests*.xml $WORKSPACE/
+    sudo cp $BASE/new/tempest/nosetests*.xml $WORKSPACE/
     sudo chown jenkins:jenkins $WORKSPACE/nosetests*.xml
     sudo chmod a+r $WORKSPACE/nosetests*.xml
 
@@ -241,10 +261,15 @@ function cleanup_host {
 }
 
 # Make a directory to store logs
+rm -rf logs
 mkdir -p logs
-rm -f logs/*
 
-setup_workspace &> $WORKSPACE/logs/devstack-gate-setup-workspace.txt
+setup_workspace $BASE/new &> \
+  $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
+
+# Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
+# we are testing the proposed change from this point forward.
+GATE_SCRIPT_DIR=$BASE/new/devstack-gate
 
 # Also, if we're testing devstack-gate, re-exec this script once so
 # that we can test the new version of it.
@@ -252,6 +277,14 @@ if [[ $ZUUL_PROJECT == "openstack-ci/devstack-gate" ]] && [[ $RE_EXEC != "true" 
     export RE_EXEC="true"
     echo "This build includes a change to the devstack gate; re-execing this script."
     exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
+fi
+
+if [ "$DEVSTACK_GATE_GRENADE" ]; then
+  ORIGBRANCH=$ZUUL_BRANCH
+  ZUUL_BRANCH=$DEVSTACK_GATE_GRENADE
+  setup_workspace $BASE/old &> \
+    $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
+  ZUUL_BRANCH=$ORIGBRANCH
 fi
 
 echo "Triggered by: https://review.openstack.org/$ZUUL_CHANGE patchset $ZUUL_PATCHSET"

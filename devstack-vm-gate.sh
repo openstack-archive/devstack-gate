@@ -21,7 +21,7 @@
 
 set -o errexit
 
-cd $DEST/devstack
+cd $BASE/new/devstack
 
 rm -f localrc
 
@@ -62,6 +62,7 @@ EOF
 fi
 
 cat <<EOF >>localrc
+DEST=$BASE/new
 ACTIVE_TIMEOUT=60
 BOOT_TIMEOUT=90
 ASSOCIATE_TIMEOUT=60
@@ -78,8 +79,8 @@ ENABLED_SERVICES=$ENABLED_SERVICES
 SKIP_EXERCISES=$SKIP_EXERCISES
 SERVICE_HOST=127.0.0.1
 SYSLOG=True
-SCREEN_LOGDIR=$DEST/screen-logs
-LOGFILE=$DEST/devstacklog.txt
+SCREEN_LOGDIR=$BASE/new/screen-logs
+LOGFILE=$BASE/new/devstacklog.txt
 VERBOSE=True
 FIXED_RANGE=10.1.0.0/24
 FIXED_NETWORK_SIZE=256
@@ -124,21 +125,42 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
 fi
 
 # Make the workspace owned by the stack user
-sudo chown -R stack:stack $DEST
+sudo chown -R stack:stack $BASE/new
+if [ -d $BASE/old ]; then
+    sed -e 's|$BASE/new|$BASE/old|' < $BASE/new/devstack/localrc \
+      > $BASE/old/devstack/localrc
+    sed -e 's|$BASE/new|$BASE/old|' < $BASE/new/devstack/exerciserc \
+      > $BASE/old/devstack/exerciserc
 
-echo "Running devstack"
-sudo -H -u stack ./stack.sh
+    sudo chown -R stack:stack $BASE/old
+fi
 
-echo "Removing sudo privileges for devstack user"
-sudo rm /etc/sudoers.d/50_stack_sh
+if [ "$DEVSTACK_GATE_GRENADE" != "" ]; then
+    sudo echo "GRENADE_PHASE=work"  >>$BASE/old/devstack/localrc
+    sudo echo "GRENADE_PHASE=trunk" >>$BASE/new/devstack/localrc
+    cat <<EOF >$BASE/new/grenade/localrc
+WORK_DEVSTACK_DIR=$BASE/old/devstack
+TRUNK_DEVSTACK_DIR=$BASE/new/devstack
+EOF
 
-echo "Running devstack exercises"
-sudo -H -u stack ./exercise.sh
+    cd $BASE
+    sudo -H -u stack ./grenade.sh
+else
+    echo "Running devstack"
+    sudo -H -u stack ./stack.sh
+
+    echo "Removing sudo privileges for devstack user"
+    sudo rm /etc/sudoers.d/50_stack_sh
+
+    echo "Running devstack exercises"
+    sudo -H -u stack ./exercise.sh
+fi
 
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     echo "Configuring tempest"
+    cd $BASE/new/devstack
     sudo -H -u stack ./tools/configure_tempest.sh
-    cd $DEST/tempest
+    cd $BASE/new/tempest
     echo "Running tempest smoke tests"
     sudo -H -u stack NOSE_XUNIT_FILE=nosetests-smoke.xml nosetests --with-xunit -sv --nologcapture --attr=type=smoke tempest
     RETVAL=$?
