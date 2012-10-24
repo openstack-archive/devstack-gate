@@ -25,9 +25,11 @@ PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keyst
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 
 # Set to 1 to run cinder instead of nova volume
-export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-1}
+# Only applicable to stable/folsom branch
+export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-0}
 
 # Set to 1 to run quantum instead of nova network
+# Only applicable to master branch
 export DEVSTACK_GATE_QUANTUM=${DEVSTACK_GATE_QUANTUM:-0}
 
 # Set the virtualization driver to: libvirt, openvz

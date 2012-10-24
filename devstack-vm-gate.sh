@@ -37,13 +37,19 @@ fi
 
 SKIP_EXERCISES=boot_from_volume,client-env
 
-if [ "$GERRIT_BRANCH" != "stable/diablo" ] && 
-   [ "$GERRIT_BRANCH" != "stable/essex" ]; then
+if [ "$ZUUL_BRANCH" == "stable/diablo" ] ||
+   [ "$ZUUL_BRANCH" == "stable/essex" ]; then
+    ENABLED_SERVICES=$ENABLED_SERVICES,n-vol,n-net
+    SKIP_EXERCISES=$SKIP_EXERCISES,swift
+elif [ "$ZUUL_BRANCH" == "stable/folsom" ]; then
+    ENABLED_SERVICES=$ENABLED_SERVICES,n-net,swift
     if [ "$DEVSTACK_GATE_CINDER" -eq "1" ]; then
 	ENABLED_SERVICES=$ENABLED_SERVICES,cinder,c-api,c-vol,c-sch
     else
 	ENABLED_SERVICES=$ENABLED_SERVICES,n-vol
     fi
+else # master
+    ENABLED_SERVICES=$ENABLED_SERVICES,swift,cinder,c-api,c-vol,c-sch
     if [ "$DEVSTACK_GATE_QUANTUM" -eq "1" ]; then
 	ENABLED_SERVICES=$ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3
 	cat <<EOF >>localrc
@@ -53,10 +59,6 @@ EOF
     else
 	ENABLED_SERVICES=$ENABLED_SERVICES,n-net
     fi
-    ENABLED_SERVICES=$ENABLED_SERVICES,swift
-else
-    ENABLED_SERVICES=$ENABLED_SERVICES,n-vol
-    SKIP_EXERCISES=$SKIP_EXERCISES,swift
 fi
 
 cat <<EOF >>localrc
