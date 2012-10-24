@@ -36,6 +36,7 @@ def main():
     if machine.state != vmdatabase.HOLD:
         machine.state = vmdatabase.DELETE
 
+    utils.update_stats(machine.base_image.provider)
 
 if __name__ == '__main__':
     main()

@@ -27,7 +27,9 @@ import traceback
 import paramiko
 import socket
 from sshclient import SSHClient
+import statsd
 
+import vmdatabase
 
 def iterate_timeout(max_seconds, purpose):
     start = time.time()
@@ -180,3 +182,43 @@ def delete_server(server):
 
     print "Deleting server", server.id
     server.delete()
+
+def update_stats(provider):
+    state_names = {
+        vmdatabase.BUILDING: 'building',
+        vmdatabase.READY: 'ready',
+        vmdatabase.USED: 'used',
+        vmdatabase.ERROR: 'error',
+        vmdatabase.HOLD: 'hold',
+        vmdatabase.DELETE: 'delete',
+        }
+
+    stats = statsd.StatsClient()
+
+    for base_image in provider.base_images:
+        states = {
+            vmdatabase.BUILDING: 0,
+            vmdatabase.READY: 0,
+            vmdatabase.USED: 0,
+            vmdatabase.ERROR: 0,
+            vmdatabase.HOLD: 0,
+            vmdatabase.DELETE: 0,
+            }
+        for machine in base_image.machines:
+            if machine.state not in states:
+                continue
+            states[machine.state] += 1
+        for state_id, count in states.items():
+            key = 'devstack.pool.%s.%s.%s' % (
+                provider.name,
+                base_image.name,
+                state_names[state_id])
+            stats.gauge(key, count)
+
+    key = 'devstack.pool.%s.%s.min_ready' % (
+        provider.name,
+        base_image.name)
+    stats.gauge(key, base_image.min_ready)
+
+    key = 'devstack.pool.%s.max_servers' % provider.name
+    stats.gauge(key, provider.max_servers)

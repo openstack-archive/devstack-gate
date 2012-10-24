@@ -195,6 +195,7 @@ def main():
                 error = True
 
     while True:
+        utils.update_stats(provider)
         building_machines = provider.building_machines
         if not building_machines:
             print "No more machines are building, finished."

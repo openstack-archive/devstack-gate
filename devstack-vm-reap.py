@@ -161,6 +161,7 @@ def main():
     print 'Known machines (end):'
     db.print_state()
 
+    utils.update_stats(provider)
     if error:
         sys.exit(1)
 

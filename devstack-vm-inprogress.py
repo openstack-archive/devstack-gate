@@ -59,6 +59,7 @@ def main():
             config = LABEL_RE.sub('<label>devstack-used</label>', config)
             jenkins.reconfig_node(machine.jenkins_name, config)
 
+    utils.update_stats(machine.base_image.provider)
 
 if __name__ == '__main__':
     main()
