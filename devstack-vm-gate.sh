@@ -52,10 +52,6 @@ else # master
     ENABLED_SERVICES=$ENABLED_SERVICES,swift,cinder,c-api,c-vol,c-sch
     if [ "$DEVSTACK_GATE_QUANTUM" -eq "1" ]; then
 	ENABLED_SERVICES=$ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3
-	cat <<EOF >>localrc
-Q_USE_NAMESPACE=False
-LIBVIRT_FIREWALL_DRIVER=nova.virt.firewall.NoopFirewallDriver
-EOF
     else
 	ENABLED_SERVICES=$ENABLED_SERVICES,n-net
     fi
