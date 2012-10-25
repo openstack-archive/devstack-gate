@@ -27,7 +27,7 @@ import traceback
 import paramiko
 import socket
 from sshclient import SSHClient
-import statsd
+from statsd import statsd
 
 import vmdatabase
 
@@ -193,8 +193,6 @@ def update_stats(provider):
         vmdatabase.DELETE: 'delete',
         }
 
-    stats = statsd.StatsClient()
-
     for base_image in provider.base_images:
         states = {
             vmdatabase.BUILDING: 0,
@@ -213,12 +211,12 @@ def update_stats(provider):
                 provider.name,
                 base_image.name,
                 state_names[state_id])
-            stats.gauge(key, count)
+            statsd.gauge(key, count)
 
         key = 'devstack.pool.%s.%s.min_ready' % (
             provider.name,
             base_image.name)
-        stats.gauge(key, base_image.min_ready)
+        statsd.gauge(key, base_image.min_ready)
 
     key = 'devstack.pool.%s.max_servers' % provider.name
-    stats.gauge(key, provider.max_servers)
+    statsd.gauge(key, provider.max_servers)
