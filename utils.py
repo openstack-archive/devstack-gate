@@ -215,10 +215,10 @@ def update_stats(provider):
                 state_names[state_id])
             stats.gauge(key, count)
 
-    key = 'devstack.pool.%s.%s.min_ready' % (
-        provider.name,
-        base_image.name)
-    stats.gauge(key, base_image.min_ready)
+        key = 'devstack.pool.%s.%s.min_ready' % (
+            provider.name,
+            base_image.name)
+        stats.gauge(key, base_image.min_ready)
 
     key = 'devstack.pool.%s.max_servers' % provider.name
     stats.gauge(key, provider.max_servers)
