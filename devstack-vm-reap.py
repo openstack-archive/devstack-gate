@@ -133,7 +133,8 @@ def main():
         if (REAP_ALL_SERVERS or
             (machine.state != vmdatabase.READY and
              now - machine.state_time > MACHINE_LIFETIME) or
-            machine.state == vmdatabase.DELETE):
+            machine.state == vmdatabase.DELETE or
+            machine.state == vmdatabase.ERROR):
             print 'Deleting machine', machine.name
             try:
                 delete_machine(jenkins, client, machine)
