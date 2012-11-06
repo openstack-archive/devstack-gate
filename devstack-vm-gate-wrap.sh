@@ -28,6 +28,11 @@ export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 # Only applicable to stable/folsom branch
 export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-0}
 
+# Set to 1 to enable Cinder secure delete.
+# False by default to avoid dd problems on Precise.
+# https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1023755
+export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
+
 # Set to 1 to run quantum instead of nova network
 # Only applicable to master branch
 export DEVSTACK_GATE_QUANTUM=${DEVSTACK_GATE_QUANTUM:-0}

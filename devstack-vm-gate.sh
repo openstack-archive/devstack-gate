@@ -91,6 +91,12 @@ DEFAULT_INSTANCE_TYPE=m1.small
 DEFAULT_INSTANCE_USER=root
 EOF
 
+if [ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]; then
+   cat <<\EOF >>localrc
+CINDER_SECURE_DELETE=False
+EOF
+fi
+
    cat <<EOF >>exerciserc
 DEFAULT_INSTANCE_TYPE=m1.small
 DEFAULT_INSTANCE_USER=root
