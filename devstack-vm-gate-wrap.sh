@@ -174,10 +174,15 @@ function setup_host {
     # Start with a fresh syslog
     sudo stop rsyslog
     sudo mv /var/log/syslog /var/log/syslog-pre-devstack
+    sudo mv /var/log/kern.log /var/log/kern_log-pre-devstack
     sudo touch /var/log/syslog
     sudo chown /var/log/syslog --ref /var/log/syslog-pre-devstack
     sudo chmod /var/log/syslog --ref /var/log/syslog-pre-devstack
     sudo chmod a+r /var/log/syslog
+    sudo touch /var/log/kern.log
+    sudo chown /var/log/kern.log --ref /var/log/kern_log-pre-devstack
+    sudo chmod /var/log/kern.log --ref /var/log/kern_log-pre-devstack
+    sudo chmod a+r /var/log/kern.log
     sudo start rsyslog
 
     # Create a stack user for devstack to run as, so that we can
@@ -206,6 +211,7 @@ function cleanup_host {
     # No matter what, archive logs
 
     sudo cp /var/log/syslog $WORKSPACE/logs/syslog.txt
+    sudo cp /var/log/kern.log $WORKSPACE/logs/kern_log.txt
     sudo cp $DEST/screen-logs/* $WORKSPACE/logs/
     sudo cp $DEST/devstacklog.txt $WORKSPACE/logs/
 
