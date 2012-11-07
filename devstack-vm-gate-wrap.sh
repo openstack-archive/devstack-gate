@@ -120,7 +120,8 @@ function setup_workspace {
       fi
 
       # See if Zuul prepared a ref for this project
-      if git fetch https://review.openstack.org/p/$PROJECT $ZUUL_REF; then
+      if [ "$ZUUL_REF" != "" ] && \
+          git fetch https://review.openstack.org/p/$PROJECT $ZUUL_REF; then
         # It's there, so check it out.
         git checkout FETCH_HEAD
         git reset --hard FETCH_HEAD
