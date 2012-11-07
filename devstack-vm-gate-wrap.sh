@@ -24,6 +24,9 @@ PROJECTS="openstack-dev/devstack openstack/nova openstack/glance openstack/keyst
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 
+# Set to 1 to run postgresql instead of mysql
+export DEVSTACK_GATE_POSTGRES=${DEVSTACK_GATE_POSTGRES:-0}
+
 # Set to 1 to run cinder instead of nova volume
 # Only applicable to stable/folsom branch
 export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-0}

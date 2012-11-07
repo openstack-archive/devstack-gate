@@ -97,6 +97,12 @@ CINDER_SECURE_DELETE=False
 EOF
 fi
 
+if [ "$DEVSTACK_GATE_POSTGRES" -eq "1" ]; then
+        cat <<\EOF >>localrc
+use_database postgresql
+EOF
+fi
+
    cat <<EOF >>exerciserc
 DEFAULT_INSTANCE_TYPE=m1.small
 DEFAULT_INSTANCE_USER=root
