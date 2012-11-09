@@ -115,8 +115,9 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     echo "API_RATE_LIMIT=False" >> localrc
     # Volume tests in Tempest require a number of volumes
     # to be created, each of 1G size. Devstack's default
-    # volume backing file size is 2G, so we increase to 4G
-    echo "VOLUME_BACKING_FILE_SIZE=4G" >> localrc
+    # volume backing file size is 2G, so we increase to 5G
+    # (apparently 4G is not always enough).
+    echo "VOLUME_BACKING_FILE_SIZE=5G" >> localrc
 fi
 
 # Make the workspace owned by the stack user
