@@ -130,7 +130,7 @@ function setup_workspace {
         git reset --hard FETCH_HEAD
         git clean -x -f -d -q
       else
-        if [ $PROJECT == $ZUUL_PROJECT ]; then
+        if [ "$PROJECT" == "$ZUUL_PROJECT" ]; then
           echo "Unable to find ref $ZUUL_REF for $PROJECT"
           exit 1
         fi
