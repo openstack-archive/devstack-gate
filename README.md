@@ -218,8 +218,8 @@ you're working as is called "jenkins"):
     export DEVSTACK_GATE_PREFIX=wip-
     export SKIP_DEVSTACK_GATE_PROJECT=1
     export SKIP_DEVSTACK_GATE_JENKINS=1
-    export GERRIT_BRANCH=master
-    export GERRIT_PROJECT=testing
+    export ZUUL_BRANCH=master
+    export ZUUL_PROJECT=testing
 
     cd /home/jenkins/workspace
     git clone https://github.com/openstack-ci/devstack-gate

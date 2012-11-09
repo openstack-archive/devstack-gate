@@ -267,7 +267,7 @@ if [[ $ZUUL_PROJECT == "openstack/tempest" ]]; then
 fi
 
 # Run the test
-$GATE_SCRIPT_DIR/devstack-vm-gate.sh $GERRIT_BRANCH
+$GATE_SCRIPT_DIR/devstack-vm-gate.sh
 RETVAL=$?
 
 cleanup_host &> $WORKSPACE/logs/devstack-gate-cleanup-host.txt
