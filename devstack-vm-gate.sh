@@ -84,13 +84,6 @@ SWIFT_REPLICAS=1
 export OS_NO_CACHE=True
 EOF
 
-if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
-   cat <<\EOF >>localrc
-SKIP_EXERCISES=${SKIP_EXERCISES},volumes
-DEFAULT_INSTANCE_TYPE=m1.small
-DEFAULT_INSTANCE_USER=root
-EOF
-
 if [ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]; then
    cat <<\EOF >>localrc
 CINDER_SECURE_DELETE=False
@@ -103,6 +96,12 @@ use_database postgresql
 EOF
 fi
 
+if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
+   cat <<\EOF >>localrc
+SKIP_EXERCISES=${SKIP_EXERCISES},volumes
+DEFAULT_INSTANCE_TYPE=m1.small
+DEFAULT_INSTANCE_USER=root
+EOF
    cat <<EOF >>exerciserc
 DEFAULT_INSTANCE_TYPE=m1.small
 DEFAULT_INSTANCE_USER=root
