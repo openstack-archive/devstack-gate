@@ -49,7 +49,7 @@ elif [ "$ZUUL_BRANCH" == "stable/folsom" ]; then
 	ENABLED_SERVICES=$ENABLED_SERVICES,n-vol
     fi
 else # master
-    ENABLED_SERVICES=$ENABLED_SERVICES,swift,cinder,c-api,c-vol,c-sch
+    ENABLED_SERVICES=$ENABLED_SERVICES,swift,cinder,c-api,c-vol,c-sch,n-cond
     if [ "$DEVSTACK_GATE_QUANTUM" -eq "1" ]; then
 	ENABLED_SERVICES=$ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3
 	cat <<EOF >>localrc
