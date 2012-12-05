@@ -224,6 +224,8 @@ function cleanup_host {
 
     sudo cp /var/log/syslog $WORKSPACE/logs/syslog.txt
     sudo cp /var/log/kern.log $WORKSPACE/logs/kern_log.txt
+    sudo mkdir $WORKSPACE/logs/rabbitmq/
+    sudo cp /var/log/rabbitmq/* $WORKSPACE/logs/rabbitmq/
 
     if [ -d $BASE/old ]; then
       mkdir -p $WORKSPACE/logs/old/
@@ -247,6 +249,9 @@ function cleanup_host {
     sudo chmod a+r $WORKSPACE/logs/
 
     rename 's/\.log$/.txt/' $WORKSPACE/logs/*
+    rename 's/\.log$/.txt/' $WORKSPACE/logs/rabbitmq/*
+    mv $WORKSPACE/logs/rabbitmq/startup_log \
+       $WORKSPACE/logs/rabbitmq/startup_log.txt
 
     # Remove duplicate logs
     rm $WORKSPACE/logs/*.*.txt
