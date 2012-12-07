@@ -159,11 +159,11 @@ fi
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     cd $BASE/new/tempest
     echo "Running tempest smoke tests"
-    sudo -H -u stack NOSE_XUNIT_FILE=nosetests-smoke.xml nosetests --with-xunit -sv --nologcapture --attr=type=smoke tempest
+    sudo -H -u stack NOSE_XUNIT_FILE=nosetests-smoke.xml nosetests --with-xunit -sv --attr=type=smoke tempest
     RETVAL=$?
     if [[ $RETVAL = 0 && "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
       echo "Running tempest full test suite"
-      sudo -H -u stack NOSE_XUNIT_FILE=nosetests-full.xml nosetests --with-xunit -sv --nologcapture -a '!smoke' tempest
+      sudo -H -u stack NOSE_XUNIT_FILE=nosetests-full.xml nosetests --with-xunit -sv -a '!smoke' tempest
     fi
 else
     # Jenkins expects at least one nosetests file.  If we're not running
