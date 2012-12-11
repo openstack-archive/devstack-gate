@@ -51,7 +51,7 @@ elif [ "$ZUUL_BRANCH" == "stable/folsom" ]; then
 else # master
     ENABLED_SERVICES=$ENABLED_SERVICES,swift,cinder,c-api,c-vol,c-sch,n-cond
     if [ "$DEVSTACK_GATE_QUANTUM" -eq "1" ]; then
-	ENABLED_SERVICES=$ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3
+	ENABLED_SERVICES=$ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta
 	cat <<EOF >>localrc
 Q_USE_DEBUG_COMMAND=True
 NETWORK_GATEWAY=10.1.0.1
