@@ -157,9 +157,11 @@ else
 fi
 
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
-    echo "Configuring tempest"
-    cd $BASE/new/devstack
-    sudo -H -u stack ./tools/configure_tempest.sh
+    if [ ! -f "$DEST/tempest/etc/tempest.conf" ]; then
+        echo "Configuring tempest"
+        cd $BASE/new/devstack
+        sudo -H -u stack ./tools/configure_tempest.sh
+    fi
     cd $BASE/new/tempest
     echo "Running tempest smoke tests"
     sudo -H -u stack NOSE_XUNIT_FILE=nosetests-smoke.xml nosetests --with-xunit -sv --nologcapture --attr=type=smoke tempest
