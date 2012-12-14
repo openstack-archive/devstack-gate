@@ -157,7 +157,7 @@ else
 fi
 
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
-    if [ ! -f "$DEST/tempest/etc/tempest.conf" ]; then
+    if [ ! -f "$BASE/new/tempest/etc/tempest.conf" ]; then
         echo "Configuring tempest"
         cd $BASE/new/devstack
         sudo -H -u stack ./tools/configure_tempest.sh
