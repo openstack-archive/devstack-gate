@@ -56,7 +56,7 @@ export DEVSTACK_GATE_TEMPEST_FULL=${DEVSTACK_GATE_TEMPEST_FULL:-0}
 # Normally not set, and we do include devstack-gate with the rest of
 # the projects.
 if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
-    PROJECTS="openstack-ci/devstack-gate $PROJECTS"
+    PROJECTS="openstack-infra/devstack-gate $PROJECTS"
 fi
 
 export BASE=/opt/stack
@@ -111,7 +111,7 @@ function setup_workspace {
       SHORT_PROJECT=`basename $PROJECT`
       if [[ ! -e $SHORT_PROJECT ]]; then
         echo "  Need to clone $SHORT_PROJECT"
-        git clone https://review.openstack.org/p/$PROJECT
+        git clone http://zuul.openstack.org/p/$PROJECT
       fi
       cd $SHORT_PROJECT
 
@@ -144,7 +144,7 @@ function setup_workspace {
 
       # See if Zuul prepared a ref for this project
       if [ "$ZUUL_REF" != "" ] && \
-          git fetch https://review.openstack.org/p/$PROJECT $ZUUL_REF; then
+          git fetch http://zuul.openstack.org/p/$PROJECT $ZUUL_REF; then
         # It's there, so check it out.
         git checkout FETCH_HEAD
         git reset --hard FETCH_HEAD
@@ -283,7 +283,7 @@ GATE_SCRIPT_DIR=$BASE/new/devstack-gate
 
 # Also, if we're testing devstack-gate, re-exec this script once so
 # that we can test the new version of it.
-if [[ $ZUUL_PROJECT == "openstack-ci/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
+if [[ $ZUUL_PROJECT == "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
     export RE_EXEC="true"
     echo "This build includes a change to the devstack gate; re-execing this script."
     exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh

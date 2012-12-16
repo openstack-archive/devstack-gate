@@ -69,7 +69,7 @@ devstack, and then runs the devstack-vm-update-image.py script. It
 boots a new VM from the provider's base image, installs some basic
 packages (build-essential, python-dev, etc) including java so that the
 machine can run the Jenkins slave agent, runs puppet to set up the
-basic system configuration for Jenkins slaves in the openstack-ci
+basic system configuration for Jenkins slaves in the openstack-infra
 project, and then caches all of the debian and pip packages and test
 images specified in the devstack repository, and clones the OpenStack
 project repositories. It then takes a snapshot image of that machine
@@ -198,8 +198,8 @@ managed in source code repositories just like the code of OpenStack
 itself. If you'd like to contribute, just clone and propose a patch to
 the relevant repository:
 
-    https://github.com/openstack-ci/devstack-gate
-    https://github.com/openstack/openstack-ci-puppet
+    https://github.com/openstack-infra/devstack-gate
+    https://github.com/openstack/openstack-infra-puppet
 
 You can file bugs on the openstack-ci project:
 
@@ -222,7 +222,7 @@ you're working as is called "jenkins"):
     export ZUUL_PROJECT=testing
 
     cd /home/jenkins/workspace
-    git clone https://github.com/openstack-ci/devstack-gate
+    git clone https://github.com/openstack-infra/devstack-gate
     cd devstack-gate
     python vmdatabase.py
     sqlite3 /home/jenkins/vm.db

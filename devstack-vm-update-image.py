@@ -60,7 +60,7 @@ PROJECTS = ['openstack/nova',
             'openstack/python-openstackclient',
             'openstack/python-quantumclient',
             'openstack-dev/devstack',
-            'openstack-ci/devstack-gate']
+            'openstack-infra/devstack-gate']
 
 
 def run_local(cmd, status=False, cwd='.', env={}):
@@ -166,8 +166,7 @@ def bootstrap_server(provider, server, admin_pass, key):
         raise Exception("Unable to log in via SSH")
 
     # hpcloud can't reliably set the hostname
-    gerrit_url = 'https://review.openstack.org/p/openstack/' \
-                 'openstack-ci-puppet.git'
+    gerrit_url = 'https://review.openstack.org/p/openstack-infra/config.git'
     client.ssh("set hostname", "sudo hostname %s" % server.name)
     client.ssh("get puppet repo deb",
                "sudo /usr/bin/wget "
@@ -184,11 +183,11 @@ def bootstrap_server(provider, server, admin_pass, key):
                '--option "Dpkg::Options::=--force-confold"'
                ' --assume-yes install git puppet')
     client.ssh("clone puppret repo",
-               "sudo git clone %s /root/openstack-ci-puppet" % gerrit_url)
+               "sudo git clone %s /root/config" % gerrit_url)
     client.ssh("install puppet modules",
-               "sudo /bin/bash /root/openstack-ci-puppet/install_modules.sh")
+               "sudo /bin/bash /root/config/install_modules.sh")
     client.ssh("run puppet",
-               "sudo puppet apply --modulepath=/root/openstack-ci-puppet/modules:"
+               "sudo puppet apply --modulepath=/root/config/modules:"
                "/etc/puppet/modules "
                '-e "%s"' % PUPPET_CLASS)
 

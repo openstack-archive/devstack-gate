@@ -1,4 +1,4 @@
 [gerrit]
 host=review.openstack.org
 port=29418
-project=openstack-ci/devstack-gate.git
+project=openstack-infra/devstack-gate.git

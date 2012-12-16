@@ -8,7 +8,7 @@ setuptools.setup(
     name="devstack-gate",
     version="2012.2",
     description="Devstack gate scripts used by Openstack CI team",
-    url='https://github.com/openstack-ci/devstack-gate',
+    url='https://github.com/openstack-infra/devstack-gate',
     license='Apache',
     author='Openstack CI team',
     author_email='openstack@lists.launchpad.net',
