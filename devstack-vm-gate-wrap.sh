@@ -115,6 +115,10 @@ function setup_workspace {
       fi
       cd $SHORT_PROJECT
 
+      # TODO: remove; this is temporary to handle the transition
+      # to zuul.openstack.org.
+      git remote set-url origin http://zuul.openstack.org/p/$PROJECT
+
       BRANCH=$ZUUL_BRANCH
 
       MAX_ATTEMPTS=3
