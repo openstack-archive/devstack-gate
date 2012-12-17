@@ -111,13 +111,12 @@ function setup_workspace {
       SHORT_PROJECT=`basename $PROJECT`
       if [[ ! -e $SHORT_PROJECT ]]; then
         echo "  Need to clone $SHORT_PROJECT"
-        git clone http://zuul.openstack.org/p/$PROJECT
+        git clone https://review.openstack.org/p/$PROJECT
       fi
       cd $SHORT_PROJECT
 
-      # TODO: remove; this is temporary to handle the transition
-      # to zuul.openstack.org.
-      git remote set-url origin http://zuul.openstack.org/p/$PROJECT
+      # TODO: remove; this is temporary to handle some project renames
+      git remote set-url origin https://review.openstack.org/p/$PROJECT
 
       BRANCH=$ZUUL_BRANCH
 
