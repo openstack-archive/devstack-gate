@@ -27,6 +27,9 @@ export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 # Set to 1 to run postgresql instead of mysql
 export DEVSTACK_GATE_POSTGRES=${DEVSTACK_GATE_POSTGRES:-0}
 
+# Set to 1 to run nova coverage with Tempest
+export DEVSTACK_GATE_TEMPEST_COVERAGE=${DEVSTACK_GATE_TEMPEST_COVERAGE:-0}
+
 # Set to 1 to run cinder instead of nova volume
 # Only applicable to stable/folsom branch
 export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-0}
@@ -313,6 +316,8 @@ setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 if [[ $ZUUL_PROJECT == "openstack/tempest" ]]; then
   export DEVSTACK_GATE_TEMPEST_FULL=1
 fi
+
+export COVERAGE_OUT=$WORKSPACE/logs/coverage-report
 
 # Run the test
 $GATE_SCRIPT_DIR/devstack-vm-gate.sh
