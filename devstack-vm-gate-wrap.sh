@@ -251,6 +251,8 @@ function cleanup_host {
     sudo cp $BASE/new/devstacklog.txt $NEWLOGTARGET/
     sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
 
+    sudo iptables-save > $WORKSPACE/logs/iptables.txt
+
     # Make sure jenkins can read all the logs
     sudo chown -R jenkins:jenkins $WORKSPACE/logs/
     sudo chmod a+r $WORKSPACE/logs/
