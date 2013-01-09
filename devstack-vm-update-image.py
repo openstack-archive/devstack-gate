@@ -101,6 +101,12 @@ def tokenize(fn, tokens, distribution, comment=None):
 def local_prep(distribution):
     branches = []
     for branch in git_branches():
+        # Ignore branches of the form 'somestring -> someotherstring' as
+        # this denotes a symbolic reference and the entire string as is
+        # cannot be checkout out. We can do this safely as the reference
+        # will refer to one of the other branches returned by git_branches.
+        if ' -> ' in branch:
+            continue
         branch_data = {'name': branch}
         print 'Branch: ', branch
         run_local(['git', 'checkout', branch], cwd=DEVSTACK)
