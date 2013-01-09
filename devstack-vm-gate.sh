@@ -121,7 +121,12 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     # to be created, each of 1G size. Devstack's default
     # volume backing file size is 2G, so we increase to 5G
     # (apparently 4G is not always enough).
-    echo "VOLUME_BACKING_FILE_SIZE=5G" >> localrc
+    #
+    # NOTE(sdague): the 10G setting is far larger than should
+    # be needed, however cinder tempest tests are currently
+    # not cleaning up correctly, and this is a temp measure
+    # to prevent it from blocking unrelated changes
+    echo "VOLUME_BACKING_FILE_SIZE=10G" >> localrc
 fi
 
 # Make the workspace owned by the stack user
