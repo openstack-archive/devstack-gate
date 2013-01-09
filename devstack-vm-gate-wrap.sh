@@ -228,6 +228,9 @@ function cleanup_host {
     cd $WORKSPACE
     # No matter what, archive logs
 
+    # Sleep to give services a chance to flush their log buffers.
+    sleep 2
+
     sudo cp /var/log/syslog $WORKSPACE/logs/syslog.txt
     sudo cp /var/log/kern.log $WORKSPACE/logs/kern_log.txt
     mkdir $WORKSPACE/logs/rabbitmq/
