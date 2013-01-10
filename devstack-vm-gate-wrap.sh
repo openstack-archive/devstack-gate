@@ -313,13 +313,6 @@ echo "Pipeline: $ZUUL_PIPELINE"
 
 setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 
-# We want to run the full tempest test suite for
-# new commits to Tempest, and the smoke test suite
-# for commits to the core projects
-if [[ $ZUUL_PROJECT == "openstack/tempest" ]]; then
-  export DEVSTACK_GATE_TEMPEST_FULL=1
-fi
-
 export COVERAGE_OUT=$WORKSPACE/logs/coverage-report
 
 # Run the test
