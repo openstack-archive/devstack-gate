@@ -235,6 +235,10 @@ function cleanup_host {
     sudo cp /var/log/kern.log $WORKSPACE/logs/kern_log.txt
     mkdir $WORKSPACE/logs/rabbitmq/
     sudo cp /var/log/rabbitmq/* $WORKSPACE/logs/rabbitmq/
+    if [ -d /var/log/mysql ] ; then
+        mkdir $WORKSPACE/logs/mysql/
+        sudo cp /var/log/mysql/* $WORKSPACE/logs/mysql/
+    fi
     mkdir $WORKSPACE/logs/sudoers.d/
 
     sudo cp /etc/sudoers.d/* $WORKSPACE/logs/sudoers.d/
