@@ -18,15 +18,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import os
 import sys
 import getopt
+from statsd import statsd
 import time
+import traceback
+import urllib
 
 import vmdatabase
 import utils
 
 NODE_NAME = sys.argv[1]
+UPSTREAM_BUILD_URL=os.environ.get('UPSTREAM_BUILD_URL', '')
+UPSTREAM_JOB_NAME=os.environ.get('UPSTREAM_JOB_NAME', '')
+UPSTREAM_BRANCH=os.environ.get('UPSTREAM_BRANCH', '')
 
 
 def main():
@@ -36,7 +43,30 @@ def main():
     if machine.state != vmdatabase.HOLD:
         machine.state = vmdatabase.DELETE
 
-    utils.update_stats(machine.base_image.provider)
+    try:
+        utils.update_stats(machine.base_image.provider)
+
+        if UPSTREAM_BUILD_URL:
+            fd = urllib.urlopen(UPSTREAM_BUILD_URL+'api/json')
+            data = json.load(fd)
+            result = data['result']
+            if result in ['SUCCESS', 'FAILURE']:
+                dt = int(data['duration'])
+
+                key = 'devstack.job.%s' % UPSTREAM_JOB_NAME
+                statsd.timing(key, dt)
+                statsd.incr(key)
+
+                key += '.%s' % UPSTREAM_BRANCH
+                statsd.timing(key, dt)
+                statsd.incr(key)
+
+                key += '.%s' % machine.base_image.provider.name
+                statsd.timing(key, dt)
+                statsd.incr(key)
+    except:
+        print "Error getting build information"
+        traceback.print_exc()
 
 if __name__ == '__main__':
     main()
