@@ -170,7 +170,7 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     cd $BASE/new/tempest
     if [[ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ]] ; then
         echo "Starting coverage data collection"
-        sudo -H -u stack python tools/tempest_coverage.py -c start --combine
+        sudo -H -u stack python -m tools/tempest_coverage -c start --combine
     fi
     echo "Running tempest smoke tests"
     sudo -H -u stack NOSE_XUNIT_FILE=nosetests-smoke.xml nosetests --with-xunit -sv --attr=type=smoke tempest
@@ -181,7 +181,7 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     fi
     if [[ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ]] ; then
         echo "Generating coverage report"
-        sudo -H -u stack python tools/tempest_coverage.py -c report --html -o $COVERAGE_OUT
+        sudo -H -u stack python -m tools/tempest_coverage -c report --html -o $COVERAGE_OUT
     fi
 else
     # Jenkins expects at least one nosetests file.  If we're not running
