@@ -54,16 +54,16 @@ def main():
                 dt = int(data['duration'])
 
                 key = 'devstack.job.%s' % UPSTREAM_JOB_NAME
-                statsd.timing(key, dt)
-                statsd.incr(key)
+                statsd.timing(key+'.runtime', dt)
+                statsd.incr(key+'.builds')
 
                 key += '.%s' % UPSTREAM_BRANCH
-                statsd.timing(key, dt)
-                statsd.incr(key)
+                statsd.timing(key+'.runtime', dt)
+                statsd.incr(key+'.builds')
 
                 key += '.%s' % machine.base_image.provider.name
-                statsd.timing(key, dt)
-                statsd.incr(key)
+                statsd.timing(key+'.runtime', dt)
+                statsd.incr(key+'.builds')
     except:
         print "Error getting build information"
         traceback.print_exc()
