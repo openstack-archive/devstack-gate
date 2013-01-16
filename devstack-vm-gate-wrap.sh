@@ -280,6 +280,10 @@ function cleanup_host {
     sudo cp $BASE/new/tempest/nosetests*.xml $WORKSPACE/
     sudo chown jenkins:jenkins $WORKSPACE/nosetests*.xml
     sudo chmod a+r $WORKSPACE/nosetests*.xml
+    if [ $DEVSTACK_GATE_TEMPEST_COVERAGE -eq "1" ] ; then
+        sudo mkdir $WORKSPACE/logs/coverage-report/
+        sudo cp $BASE/new/tempest/coverage-report/* $WORKSPACE/logs/coverage-report/
+    fi
 
     # Disable detailed logging as we return to the main script
     set +o xtrace
@@ -316,8 +320,6 @@ echo "Triggered by: https://review.openstack.org/$ZUUL_CHANGE patchset $ZUUL_PAT
 echo "Pipeline: $ZUUL_PIPELINE"
 
 setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
-
-export COVERAGE_OUT=$WORKSPACE/logs/coverage-report
 
 # Run the test
 $GATE_SCRIPT_DIR/devstack-vm-gate.sh

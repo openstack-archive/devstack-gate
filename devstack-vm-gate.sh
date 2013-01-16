@@ -181,7 +181,7 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     fi
     if [[ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ]] ; then
         echo "Generating coverage report"
-        sudo -H -u stack python -m tools/tempest_coverage -c report --html -o $COVERAGE_OUT
+        sudo -H -u stack python -m tools/tempest_coverage -c report --html -o $BASE/new/tempest/coverage-report
     fi
 else
     # Jenkins expects at least one nosetests file.  If we're not running
