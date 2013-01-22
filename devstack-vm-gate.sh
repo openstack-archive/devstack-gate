@@ -177,7 +177,7 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     RETVAL=$?
     if [[ $RETVAL = 0 && "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
       echo "Running tempest full test suite"
-      sudo -H -u stack NOSE_XUNIT_FILE=nosetests-full.xml nosetests --with-xunit -sv -a '!smoke' tempest
+      sudo -H -u stack NOSE_XUNIT_FILE=nosetests-full.xml nosetests --with-xunit -sv -A 'not type or type != "smoke"' tempest
     fi
     if [[ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ]] ; then
         echo "Generating coverage report"
