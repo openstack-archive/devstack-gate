@@ -170,7 +170,7 @@ function setup_workspace {
 
     # The vm template update job should cache some images in ~/files.
     # Move them to where devstack expects:
-    if [ -e ~/cache/files/* ]; then
+    if [ "$(ls ~/cache/files/* 2>/dev/null)" ]; then
       rsync -a ~/cache/files/ $DEST/devstack/files/
     fi
 
