@@ -68,6 +68,7 @@ BOOT_TIMEOUT=90
 ASSOCIATE_TIMEOUT=60
 TERMINATE_TIMEOUT=60
 MYSQL_PASSWORD=secret
+DATABASE_PASSWORD=secret
 RABBIT_PASSWORD=secret
 ADMIN_PASSWORD=secret
 SERVICE_PASSWORD=secret
@@ -141,23 +142,28 @@ fi
 # Make the workspace owned by the stack user
 sudo chown -R stack:stack $BASE/new
 if [ -d $BASE/old ]; then
-    sed -e 's|$BASE/new|$BASE/old|' < $BASE/new/devstack/localrc \
+    sed -e "s|$BASE/new|$BASE/old|" < $BASE/new/devstack/localrc \
       > $BASE/old/devstack/localrc
-    sed -e 's|$BASE/new|$BASE/old|' < $BASE/new/devstack/exerciserc \
+    sed -e "s|$BASE/new|$BASE/old|" < $BASE/new/devstack/exerciserc \
       > $BASE/old/devstack/exerciserc
 
     sudo chown -R stack:stack $BASE/old
 fi
 
 if [ "$DEVSTACK_GATE_GRENADE" != "" ]; then
-    sudo echo "GRENADE_PHASE=work"  >>$BASE/old/devstack/localrc
-    sudo echo "GRENADE_PHASE=trunk" >>$BASE/new/devstack/localrc
-    cat <<EOF >$BASE/new/grenade/localrc
-WORK_DEVSTACK_DIR=$BASE/old/devstack
-TRUNK_DEVSTACK_DIR=$BASE/new/devstack
+    echo "GRENADE_PHASE=base"  | sudo -u stack tee -a $BASE/old/devstack/localrc
+    echo "GRENADE_PHASE=target" | sudo -u stack tee -a $BASE/new/devstack/localrc
+    cat <<EOF | sudo -u stack tee -a $BASE/new/grenade/localrc
+BASE_RELEASE=old
+BASE_RELEASE_DIR=$BASE/\$BASE_RELEASE
+BASE_DEVSTACK_DIR=\$BASE_RELEASE_DIR/devstack
+TARGET_RELEASE=new
+TARGET_RELEASE_DIR=$BASE/\$TARGET_RELEASE
+TARGET_DEVSTACK_DIR=\$TARGET_RELEASE_DIR/devstack
+SAVE_DIR=\$BASE_RELEASE_DIR/save
 EOF
 
-    cd $BASE
+    cd $BASE/new/grenade
     sudo -H -u stack ./grenade.sh
 else
     echo "Running devstack"
