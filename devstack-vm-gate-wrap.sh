@@ -248,7 +248,6 @@ function cleanup_host {
       mkdir -p $WORKSPACE/logs/old/
       mkdir -p $WORKSPACE/logs/new/
       mkdir -p $WORKSPACE/logs/grenade/
-      sudo cp $BASE/old/screen-logs/* $WORKSPACE/logs/old/
       sudo cp $BASE/old/devstacklog.txt $WORKSPACE/logs/old/
       sudo cp $BASE/old/devstack/localrc $WORKSPACE/logs/old/localrc.txt
       sudo cp $BASE/logs/* $WORKSPACE/logs/
@@ -257,7 +256,6 @@ function cleanup_host {
     else
       NEWLOGTARGET=$WORKSPACE/logs
     fi
-    sudo cp $BASE/new/screen-logs/* $NEWLOGTARGET/
     sudo cp $BASE/new/devstacklog.txt $NEWLOGTARGET/
     sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
 
@@ -275,6 +273,9 @@ function cleanup_host {
 
     # Remove duplicate logs
     rm $WORKSPACE/logs/*.*.txt
+
+    # Compress all text logs
+    find $WORKSPACE/logs -iname '*.txt' -execdir gzip -9 {} \+
 
     # Save the tempest nosetests results
     sudo cp $BASE/new/tempest/nosetests*.xml $WORKSPACE/
