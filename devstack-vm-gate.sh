@@ -78,7 +78,8 @@ ERROR_ON_CLONE=True
 ENABLED_SERVICES=$ENABLED_SERVICES
 SKIP_EXERCISES=$SKIP_EXERCISES
 SERVICE_HOST=127.0.0.1
-SYSLOG=True
+# Screen console logs will capture service logs.
+SYSLOG=False
 SCREEN_LOGDIR=$BASE/new/screen-logs
 LOGFILE=$BASE/new/devstacklog.txt
 VERBOSE=True
