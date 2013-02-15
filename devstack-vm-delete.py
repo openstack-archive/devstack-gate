@@ -50,7 +50,7 @@ def main():
             fd = urllib.urlopen(UPSTREAM_BUILD_URL+'api/json')
             data = json.load(fd)
             result = data['result']
-            if result in ['SUCCESS', 'FAILURE']:
+            if result == 'SUCCESS':
                 dt = int(data['duration'])
 
                 key = 'devstack.job.%s' % UPSTREAM_JOB_NAME
