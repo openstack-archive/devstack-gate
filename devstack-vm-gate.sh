@@ -176,6 +176,8 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     if [[ "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite"
         sudo -H -u stack NOSE_XUNIT_FILE=nosetests-full.xml nosetests --with-xunit -sv tempest
+        echo "Running tempest/cli test suite"
+        sudo -H -u stack NOSE_XUNIT_FILE=nosetests-cli.xml nosetests --with-xunit -sv cli
     else
         echo "Running tempest smoke tests"
         sudo -H -u stack NOSE_XUNIT_FILE=nosetests-smoke.xml nosetests --with-xunit -sv --attr=type=smoke tempest
