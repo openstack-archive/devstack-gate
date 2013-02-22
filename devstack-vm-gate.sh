@@ -23,9 +23,20 @@ set -o errexit
 
 cd $BASE/new/devstack
 
-rm -f localrc
+# Allow calling context to pre-populate the localrc file with additional values
+if [ -z $KEEP_LOCALRC ] ; then
+    rm -f localrc
+fi
 
-ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-sch,horizon,mysql,rabbit,sysstat
+
+DEFAULT_ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-sch,horizon,mysql,rabbit,sysstat
+
+# Allow optional injection of ENABLED_SERVICES from the calling context
+if [ -z $ENABLED_SERVICES ] ; then
+    ENABLED_SERVICES=$DEFAULT_ENABLED_SERVICES
+else
+    ENABLED_SERVICES=$DEFAULT_ENABLED_SERVICES,$ENABLED_SERVICES
+fi
 
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     ENABLED_SERVICES=$ENABLED_SERVICES,tempest
