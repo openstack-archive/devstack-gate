@@ -278,6 +278,7 @@ function cleanup_host {
 
     # Compress all text logs
     find $WORKSPACE/logs -iname '*.txt' -execdir gzip -9 {} \+
+    find $WORKSPACE/logs -iname '*.dat' -execdir gzip -9 {} \+
 
     # Save the tempest nosetests results
     sudo cp $BASE/new/tempest/nosetests*.xml $WORKSPACE/
