@@ -110,7 +110,7 @@ CINDER_SECURE_DELETE=False
 EOF
 fi
 
-if ["$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ] ; then
+if [ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ] ; then
    cat <<\EOF >>localrc
 EXTRA_OPTS=(backdoor_port=0)
 EOF
