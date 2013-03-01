@@ -206,17 +206,19 @@ def update_stats(provider):
             if machine.state not in states:
                 continue
             states[machine.state] += 1
-        for state_id, count in states.items():
-            key = 'devstack.pool.%s.%s.%s' % (
+        if statsd:
+            for state_id, count in states.items():
+                key = 'devstack.pool.%s.%s.%s' % (
+                    provider.name,
+                    base_image.name,
+                    state_names[state_id])
+                statsd.gauge(key, count)
+
+            key = 'devstack.pool.%s.%s.min_ready' % (
                 provider.name,
-                base_image.name,
-                state_names[state_id])
-            statsd.gauge(key, count)
+                base_image.name)
+            statsd.gauge(key, base_image.min_ready)
 
-        key = 'devstack.pool.%s.%s.min_ready' % (
-            provider.name,
-            base_image.name)
-        statsd.gauge(key, base_image.min_ready)
-
-    key = 'devstack.pool.%s.max_servers' % provider.name
-    statsd.gauge(key, provider.max_servers)
+    if statsd:
+        key = 'devstack.pool.%s.max_servers' % provider.name
+        statsd.gauge(key, provider.max_servers)
