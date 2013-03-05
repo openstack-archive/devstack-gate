@@ -200,12 +200,12 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     fi
     if [[ "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite"
-        sudo -H -u stack NOSE_XUNIT_FILE=nosetests-full.xml nosetests --with-xunit -sv tempest
+        sudo -H -u stack NOSE_XUNIT_FILE=nosetests-full.xml nosetests --logging-format '%(asctime)-15s %(message)s' --with-xunit -sv tempest
         echo "Running tempest/cli test suite"
-        sudo -H -u stack NOSE_XUNIT_FILE=nosetests-cli.xml nosetests --with-xunit -sv cli
+        sudo -H -u stack NOSE_XUNIT_FILE=nosetests-cli.xml nosetests --logging-format '%(asctime)-15s %(message)s' --with-xunit -sv cli
     else
         echo "Running tempest smoke tests"
-        sudo -H -u stack NOSE_XUNIT_FILE=nosetests-smoke.xml nosetests --with-xunit -sv --attr=type=smoke tempest
+        sudo -H -u stack NOSE_XUNIT_FILE=nosetests-smoke.xml nosetests --logging-format '%(asctime)-15s %(message)s' --with-xunit -sv --attr=type=smoke tempest
     fi
     if [[ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ]] ; then
         echo "Generating coverage report"
