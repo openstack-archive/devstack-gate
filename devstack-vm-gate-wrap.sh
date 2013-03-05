@@ -217,6 +217,24 @@ function setup_host {
         sudo usermod -a -G vz stack
     fi
 
+    cat <<EOF > /tmp/pydistutils.cfg
+[easy_install]
+index_url = http://pypi.openstack.org
+EOF
+    cat <<EOF > /tmp/pip.conf
+[global]
+index-url = http://pypi.openstack.org
+EOF
+    cp /tmp/pydistutils.cfg ~/.pydistutils.cfg
+    cp /tmp/pydistutils.cfg ~stack/.pydistutils.cfg
+    sudo cp /tmp/pydistutils.cfg ~root/.pydistutils.cfg
+    mkdir -p ~/.pip
+    mkdir -p ~stack/.pip
+    sudo -u root mkdir -p ~root/.pip
+    cp /tmp/pip.conf ~/.pip/pip.conf
+    cp /tmp/pip.conf ~stack/.pip/pip.conf
+    sudo -u root cp /tmp/pip.conf ~root/.pip/pip.conf
+
     # Disable detailed logging as we return to the main script
     set +o xtrace
 }
