@@ -107,9 +107,12 @@ reviewers is as follows:
  * This job runs on one of the previously configured "devstack-foo" 
    nodes and invokes the ``devstack-vm-gate-wrap.sh`` script which 
    checks out code from all of the involved repositories, and merges 
-   the proposed change.  
- * That script then calls ``devstack-vm-gate.sh`` which installs a 
-   devstack configuration file, and invokes devstack.
+   the proposed change.
+ * If the ``pre_test_hook`` function is defined it is executed.
+ * The wrap script defines a ``gate_hook`` function if one is
+   not provided. By default it uses the devstack-vm-gate.sh script
+   which installs a devstack configuration file, and invokes devstack.
+ * If the ``post_test_hook`` function is defined it is executed.
  * Once devstack is finished, it runs ``exercise.sh`` which performs
    some basic integration testing. 
  * After everything is done, the script copies all of the log files 

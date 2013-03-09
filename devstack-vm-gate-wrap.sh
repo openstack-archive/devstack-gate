@@ -70,6 +70,10 @@ export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
 # is the project being gated.
 export DEVSTACK_GATE_TEMPEST_FULL=${DEVSTACK_GATE_TEMPEST_FULL:-0}
 
+# Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
+# we are testing the proposed change from this point forward.
+GATE_SCRIPT_DIR=$BASE/new/devstack-gate
+
 # Set this variable to skip updating the devstack-gate project itself.
 # Useful in development so you can edit scripts in place and run them
 # directly.  Do not set in production.
@@ -83,6 +87,17 @@ export BASE=/opt/stack
 
 # Most of the work of this script is done in functions so that we may
 # easily redirect their stdout / stderr to log files.
+
+function function_exists {
+    type $1 2>/dev/null | grep -q 'is a function'
+}
+
+if ! function_exists "gate_hook"; then
+  # the command we use to run the gate
+  function gate_hook {
+    $GATE_SCRIPT_DIR/devstack-vm-gate.sh
+  }
+fi
 
 function setup_workspace {
     DEST=$1
@@ -356,10 +371,6 @@ mkdir -p logs
 setup_workspace $BASE/new 1 &> \
   $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
 
-# Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
-# we are testing the proposed change from this point forward.
-GATE_SCRIPT_DIR=$BASE/new/devstack-gate
-
 # Also, if we're testing devstack-gate, re-exec this script once so
 # that we can test the new version of it.
 if [[ $ZUUL_PROJECT == "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
@@ -381,9 +392,20 @@ echo "Pipeline: $ZUUL_PIPELINE"
 
 setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 
-# Run the test
-$GATE_SCRIPT_DIR/devstack-vm-gate.sh
+# Run pre test hook if we have one
+if function_exists "pre_test_hook"; then
+  pre_test_hook
+fi
+
+# Run the gate function
+gate_hook
 RETVAL=$?
+
+# Run post test hook if we have one
+if [ $RETVAL -eq 0 ] && function_exists "post_test_hook"; then
+  post_test_hook
+  RETVAL=$?
+fi
 
 cleanup_host &> $WORKSPACE/logs/devstack-gate-cleanup-host.txt
 
