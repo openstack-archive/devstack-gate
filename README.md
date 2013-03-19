@@ -64,8 +64,8 @@ To accomplish all of that, the devstack-gate repository holds several
 scripts that are run by Jenkins.
 
 Once per day, for every image type (and provider) configured, the
-devstack-vm-update-image.sh script checks out the latest copy of
-devstack, and then runs the devstack-vm-update-image.py script. It
+``devstack-vm-update-image.sh`` script checks out the latest copy of
+devstack, and then runs the ``devstack-vm-update-image.py script.`` It
 boots a new VM from the provider's base image, installs some basic
 packages (build-essential, python-dev, etc) including java so that the
 machine can run the Jenkins slave agent, runs puppet to set up the
@@ -76,10 +76,10 @@ project repositories. It then takes a snapshot image of that machine
 to use when booting the actual test machines. When they boot, they
 will already be configured and have all, or nearly all, of the network
 accessible data they need. Then the template machine is deleted. The
-Jenkins job that does this is devstack-update-vm-image. It is a matrix
-job that runs for all configured providers, and if any of them fail,
-it's not a problem since the previously generated image will still be
-available.
+Jenkins job that does this is ``devstack-update-vm-image``. It is a 
+matrix job that runs for all configured providers, and if any of them 
+fail, it's not a problem since the previously generated image will 
+still be available.
 
 Even though launching a machine from a saved image is usually fast,
 depending on the provider's load it can sometimes take a while, and
@@ -87,42 +87,47 @@ it's possible that the resulting machine may end up in an error state,
 or have some malfunction (such as a misconfigured network). Due to
 these uncertainties, we provision the test machines ahead of time and
 keep them in a pool. Every ten minutes, a job runs to spin up new VMs
-for testing and add them to the pool, using the devstack-vm-launch.py
-script. Each image type has a parameter specifying how many machine of
-that type should be kept ready, and each provider has a parameter
-specifying the maximum number of machines allowed to be running on
-that provider. Within those bounds, the job attempts to keep the
-requested number of machines up and ready to go at all times. When a
-machine is spun up and found to be accessible, it as added to Jenkins
-as a slave machine with one executor and a tag like "devstack-foo"
-(eg, "devstack-oneiric" for oneiric image types). The Jenkins job that
-does this is devstack-launch-vms. It is also a matrix job that runs
-for all configured providers.
+for testing and add them to the pool, using the 
+``devstack-vm-launch.py`` script. Each image type has a parameter 
+specifying how many machine of that type should be kept ready, and 
+each provider has a parameter specifying the maximum number of 
+machines allowed to be running on that provider. Within those bounds, 
+the job attempts to keep the requested number of machines up and ready 
+to go at all times. When a machine is spun up and found to be 
+accessible, it as added to Jenkins as a slave machine with one 
+executor and a tag like "devstack-foo" (eg, "devstack-oneiric" for 
+oneiric image types). The Jenkins job that does this is 
+``devstack-launch-vms``. It is also a matrix job that runs for all 
+configured providers.
 
-When a proposed change is approved by the core reviewers, Jenkins
-triggers the devstack gate test itself. This job runs on one of the
-previously configured "devstack-foo" nodes and invokes the
-devstack-vm-gate-wrap.sh script which checks out code from all of the
-involved repositories, and merges the proposed change.  That script
-then calls devstack-vm-gate.sh which installs a devstack configuration
-file, and invokes devstack. Once devstack is finished, it runs
-exercise.sh which performs some basic integration testing. After
-everything is done, the script copies all of the log files back to the
-Jenkins workspace and archives them along with the console output of
-the run. The Jenkins job that does this is the somewhat awkwardly
-named gate-integration-tests-devstack-vm.
+Process invoked once a proposed change is approved by the core 
+reviewers is as follows:
+
+ * Jenkins triggers the devstack gate test itself.
+ * This job runs on one of the previously configured "devstack-foo" 
+   nodes and invokes the ``devstack-vm-gate-wrap.sh`` script which 
+   checks out code from all of the involved repositories, and merges 
+   the proposed change.  
+ * That script then calls ``devstack-vm-gate.sh`` which installs a 
+   devstack configuration file, and invokes devstack.
+ * Once devstack is finished, it runs ``exercise.sh`` which performs
+   some basic integration testing. 
+ * After everything is done, the script copies all of the log files 
+   back to the Jenkins workspace and archives them along with the
+   console output of the run. The Jenkins job that does this is the 
+   somewhat awkwardly named ``gate-integration-tests-devstack-vm``.
 
 To prevent a node from being used for a second run, there is a job
-named devstack-update-inprogress which is triggered as a parameterized
-build step from gate-interation-tests-devstack-vm.  It is passed the
-name of the node on which the gate job is running, and it disabled
-that node in Jenkins by invoking devstack-vm-inprogress.py.  The
-currently running job will continue, but no new jobs will be scheduled
-for that node.
+named ``devstack-update-inprogress`` which is triggered as a 
+parameterized build step from ``gate-interation-tests-devstack-vm``.
+ It is passed the name of the node on which the gate job is running, 
+and it disabled that node in Jenkins by invoking 
+``devstack-vm-inprogress.py``.  The currently running job will 
+continue, but no new jobs will be scheduled for that node.
 
 Similarly, when the node is finished, a parameterized job named
-devstack-update-complete (which runs devstack-vm-delete.py) is
-triggered as a post-build action.  It removes the node from Jenkins
+``devstack-update-complete`` (which runs ``devstack-vm-delete.py``)
+is triggered as a post-build action.  It removes the node from Jenkins
 and marks the VM for later deletion.
 
 In the future, we hope to be able to install developer SSH keys on VMs
@@ -130,8 +135,8 @@ from failed test runs, but for the moment the policies of the
 providers who are donating test resources do not permit that. However,
 most problems can be diagnosed from the log data that are copied back
 to Jenkins. There is a script that cleans up old images and VMs that
-runs frequently. It's devstack-vm-reap.py and is invoked by the
-Jenkins job devstack-reap-vms.
+runs frequently. It's ``devstack-vm-reap.py`` and is invoked by the
+Jenkins job ``devstack-reap-vms``.
 
 How to Debug a Devstack Gate Failure
 ====================================
