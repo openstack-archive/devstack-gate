@@ -219,11 +219,11 @@ function setup_host {
 
     cat <<EOF > /tmp/pydistutils.cfg
 [easy_install]
-index_url = http://pypi.openstack.org
+index_url = http://pypi.openstack.org/openstack
 EOF
     cat <<EOF > /tmp/pip.conf
 [global]
-index-url = http://pypi.openstack.org
+index-url = http://pypi.openstack.org/openstack
 EOF
     cp /tmp/pydistutils.cfg ~/.pydistutils.cfg
     cp /tmp/pydistutils.cfg ~stack/.pydistutils.cfg
