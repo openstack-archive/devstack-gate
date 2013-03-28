@@ -151,16 +151,14 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     echo "VOLUME_BACKING_FILE_SIZE=10G" >> localrc
 fi
 
-# Make the workspace owned by the stack user
-sudo chown -R stack:stack $BASE/new
 if [ -d $BASE/old ]; then
     sed -e "s|$BASE/new|$BASE/old|" < $BASE/new/devstack/localrc \
       > $BASE/old/devstack/localrc
     sed -e "s|$BASE/new|$BASE/old|" < $BASE/new/devstack/exerciserc \
       > $BASE/old/devstack/exerciserc
-
-    sudo chown -R stack:stack $BASE/old
 fi
+# Make the workspace owned by the stack user
+sudo chown -R stack:stack $BASE
 
 if [ "$DEVSTACK_GATE_GRENADE" != "" ]; then
     echo "GRENADE_PHASE=base"  | sudo -u stack tee -a $BASE/old/devstack/localrc
