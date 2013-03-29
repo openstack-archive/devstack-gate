@@ -99,11 +99,18 @@ FIXED_RANGE=10.1.0.0/24
 FIXED_NETWORK_SIZE=256
 VIRT_DRIVER=$DEVSTACK_GATE_VIRT_DRIVER
 SWIFT_REPLICAS=1
-USE_SCREEN=False
 LOG_COLOR=False
 PIP_USE_MIRRORS=False
 export OS_NO_CACHE=True
 EOF
+
+# Grenade needs screen, so only turn this off if we aren't
+# running grenade.
+if [ "$DEVSTACK_GATE_GRENADE" == "" ]; then
+   cat <<\EOF >>localrc
+USE_SCREEN=False
+EOF
+fi
 
 if [ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]; then
    cat <<\EOF >>localrc
