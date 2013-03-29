@@ -43,8 +43,16 @@ export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
 # Only applicable to master branch
 export DEVSTACK_GATE_QUANTUM=${DEVSTACK_GATE_QUANTUM:-0}
 
-# Set to the name of the "old" branch to run grenade (eg "stable/folsom")
-export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-""}
+# Set to 1 to run grenade.
+export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-0}
+
+if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
+    if [ "$ZUUL_BRANCH" == "stable/grizzly" ]; then
+        GRENADE_OLD_BRANCH="stable/folsom"
+    else # master
+        GRENADE_OLD_BRANCH="stable/folsom"
+    fi
+fi
 
 # Set the virtualization driver to: libvirt, openvz
 export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
@@ -69,6 +77,8 @@ export BASE=/opt/stack
 
 function setup_workspace {
     DEST=$1
+    CHECKOUT_ZUUL=$2
+
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
 
@@ -148,21 +158,29 @@ function setup_workspace {
         BRANCH=master
       fi
 
-      # See if Zuul prepared a ref for this project
-      if [ "$ZUUL_REF" != "" ] && \
-          git fetch http://zuul.openstack.org/p/$PROJECT $ZUUL_REF; then
-        # It's there, so check it out.
-        git checkout FETCH_HEAD
-        git reset --hard FETCH_HEAD
-        git clean -x -f -d -q
+      # See if we should check out a Zuul ref
+      if [ $CHECKOUT_ZUUL -eq "1" ]; then
+          # See if Zuul prepared a ref for this project
+          if [ "$ZUUL_REF" != "" ] && \
+              git fetch http://zuul.openstack.org/p/$PROJECT $ZUUL_REF; then
+              # It's there, so check it out.
+              git checkout FETCH_HEAD
+              git reset --hard FETCH_HEAD
+              git clean -x -f -d -q
+          else
+              if [ "$PROJECT" == "$ZUUL_PROJECT" ]; then
+                  echo "Unable to find ref $ZUUL_REF for $PROJECT"
+                  exit 1
+              fi
+              git checkout $BRANCH
+              git reset --hard remotes/origin/$BRANCH
+              git clean -x -f -d -q
+          fi
       else
-        if [ "$PROJECT" == "$ZUUL_PROJECT" ]; then
-          echo "Unable to find ref $ZUUL_REF for $PROJECT"
-          exit 1
-        fi
-        git checkout $BRANCH
-        git reset --hard remotes/origin/$BRANCH
-        git clean -x -f -d -q
+          # We're ignoring Zuul refs
+          git checkout $BRANCH
+          git reset --hard remotes/origin/$BRANCH
+          git clean -x -f -d -q
       fi
 
       cd $DEST
@@ -294,6 +312,14 @@ function cleanup_host {
     # Remove duplicate logs
     rm $WORKSPACE/logs/*.*.txt
 
+    if [ -d $BASE/old ]; then
+        rename 's/\.log$/.txt/' $WORKSPACE/logs/old/*
+        rename 's/\.log$/.txt/' $WORKSPACE/logs/new/*
+        rename 's/\.log$/.txt/' $WORKSPACE/logs/grenade/*
+        rm $WORKSPACE/logs/old/*.*.txt
+        rm $WORKSPACE/logs/new/*.*.txt
+    fi
+
     # Compress all text logs
     find $WORKSPACE/logs -iname '*.txt' -execdir gzip -9 {} \+
     find $WORKSPACE/logs -iname '*.dat' -execdir gzip -9 {} \+
@@ -315,7 +341,7 @@ function cleanup_host {
 rm -rf logs
 mkdir -p logs
 
-setup_workspace $BASE/new &> \
+setup_workspace $BASE/new 1 &> \
   $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
 
 # Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
@@ -330,10 +356,10 @@ if [[ $ZUUL_PROJECT == "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "tru
     exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
 fi
 
-if [ "$DEVSTACK_GATE_GRENADE" ]; then
+if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
   ORIGBRANCH=$ZUUL_BRANCH
-  ZUUL_BRANCH=$DEVSTACK_GATE_GRENADE
-  setup_workspace $BASE/old &> \
+  ZUUL_BRANCH=$GRENADE_OLD_BRANCH
+  setup_workspace $BASE/old 0 &> \
     $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
   ZUUL_BRANCH=$ORIGBRANCH
 fi

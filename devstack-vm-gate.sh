@@ -106,7 +106,7 @@ EOF
 
 # Grenade needs screen, so only turn this off if we aren't
 # running grenade.
-if [ "$DEVSTACK_GATE_GRENADE" == "" ]; then
+if [ "$DEVSTACK_GATE_GRENADE" -eq "0" ]; then
    cat <<\EOF >>localrc
 USE_SCREEN=False
 EOF
@@ -167,7 +167,7 @@ fi
 # Make the workspace owned by the stack user
 sudo chown -R stack:stack $BASE
 
-if [ "$DEVSTACK_GATE_GRENADE" != "" ]; then
+if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     echo "GRENADE_PHASE=base"  | sudo -u stack tee -a $BASE/old/devstack/localrc
     echo "GRENADE_PHASE=target" | sudo -u stack tee -a $BASE/new/devstack/localrc
     cat <<EOF | sudo -u stack tee -a $BASE/new/grenade/localrc
