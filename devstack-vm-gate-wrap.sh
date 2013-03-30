@@ -48,9 +48,9 @@ export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-0}
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     if [ "$ZUUL_BRANCH" == "stable/grizzly" ]; then
-        GRENADE_OLD_BRANCH="stable/folsom"
+        export GRENADE_OLD_BRANCH="stable/folsom"
     else # master
-        GRENADE_OLD_BRANCH="stable/folsom"
+        export GRENADE_OLD_BRANCH="stable/folsom"
     fi
 fi
 

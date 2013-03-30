@@ -21,59 +21,55 @@
 
 set -o errexit
 
-cd $BASE/new/devstack
+function setup_localrc() {
+    LOCALRC_OLDNEW=$1;
+    LOCALRC_BRANCH=$2;
 
-# Allow calling context to pre-populate the localrc file with additional values
-if [ -z $KEEP_LOCALRC ] ; then
-    rm -f localrc
-fi
-
-
-DEFAULT_ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-sch,horizon,mysql,rabbit,sysstat
-
-# Allow optional injection of ENABLED_SERVICES from the calling context
-if [ -z $ENABLED_SERVICES ] ; then
-    ENABLED_SERVICES=$DEFAULT_ENABLED_SERVICES
-else
-    ENABLED_SERVICES=$DEFAULT_ENABLED_SERVICES,$ENABLED_SERVICES
-fi
-
-if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
-    ENABLED_SERVICES=$ENABLED_SERVICES,tempest
-fi
-
-if [ "$ZUUL_BRANCH" == "stable/diablo" ]; then
-    export DEVSTACK_GATE_TEMPEST=0
-fi
-
-SKIP_EXERCISES=boot_from_volume,client-env
-
-if [ "$ZUUL_BRANCH" == "stable/diablo" ] ||
-   [ "$ZUUL_BRANCH" == "stable/essex" ]; then
-    ENABLED_SERVICES=$ENABLED_SERVICES,n-vol,n-net
-    SKIP_EXERCISES=$SKIP_EXERCISES,swift
-elif [ "$ZUUL_BRANCH" == "stable/folsom" ]; then
-    ENABLED_SERVICES=$ENABLED_SERVICES,n-net,swift
-    if [ "$DEVSTACK_GATE_CINDER" -eq "1" ]; then
-	ENABLED_SERVICES=$ENABLED_SERVICES,cinder,c-api,c-vol,c-sch
-    else
-	ENABLED_SERVICES=$ENABLED_SERVICES,n-vol
+    # Allow calling context to pre-populate the localrc file
+    # with additional values
+    if [ -z $KEEP_LOCALRC ] ; then
+        rm -f localrc
     fi
-else # master
-    ENABLED_SERVICES=$ENABLED_SERVICES,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,n-cond
-    if [ "$DEVSTACK_GATE_QUANTUM" -eq "1" ]; then
-	ENABLED_SERVICES=$ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta
-	cat <<EOF >>localrc
-Q_USE_DEBUG_COMMAND=True
-NETWORK_GATEWAY=10.1.0.1
-EOF
+
+    DEFAULT_ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-sch,horizon,mysql,rabbit,sysstat
+
+    # Allow optional injection of ENABLED_SERVICES from the calling context
+    if [ -z $ENABLED_SERVICES ] ; then
+        MY_ENABLED_SERVICES=$DEFAULT_ENABLED_SERVICES
     else
-	ENABLED_SERVICES=$ENABLED_SERVICES,n-net
+        MY_ENABLED_SERVICES=$DEFAULT_ENABLED_SERVICES,$ENABLED_SERVICES
     fi
-fi
+
+    if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
+        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,tempest
+    fi
+
+    SKIP_EXERCISES=boot_from_volume,client-env
+
+    if [ "$LOCALRC_BRANCH" == "stable/diablo" ] ||
+        [ "$LOCALRC_BRANCH" == "stable/essex" ]; then
+        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-vol,n-net
+        SKIP_EXERCISES=$SKIP_EXERCISES,swift
+    elif [ "$LOCALRC_BRANCH" == "stable/folsom" ]; then
+        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-net,swift
+        if [ "$DEVSTACK_GATE_CINDER" -eq "1" ]; then
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,cinder,c-api,c-vol,c-sch
+        else
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-vol
+        fi
+    else # master
+        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,n-cond
+        if [ "$DEVSTACK_GATE_QUANTUM" -eq "1" ]; then
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta
+            echo "Q_USE_DEBUG_COMMAND=True" >>localrc
+            echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
+        else
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-net
+        fi
+    fi
 
 cat <<EOF >>localrc
-DEST=$BASE/new
+DEST=$BASE/$LOCALRC_OLDNEW
 ACTIVE_TIMEOUT=90
 BOOT_TIMEOUT=90
 ASSOCIATE_TIMEOUT=60
@@ -87,13 +83,13 @@ SERVICE_TOKEN=111222333444
 SWIFT_HASH=1234123412341234
 ROOTSLEEP=0
 ERROR_ON_CLONE=True
-ENABLED_SERVICES=$ENABLED_SERVICES
+ENABLED_SERVICES=$MY_ENABLED_SERVICES
 SKIP_EXERCISES=$SKIP_EXERCISES
 SERVICE_HOST=127.0.0.1
 # Screen console logs will capture service logs.
 SYSLOG=False
-SCREEN_LOGDIR=$BASE/new/screen-logs
-LOGFILE=$BASE/new/devstacklog.txt
+SCREEN_LOGDIR=$BASE/$LOCALRC_OLDNEW/screen-logs
+LOGFILE=$BASE/$LOCALRC_OLDNEW/devstacklog.txt
 VERBOSE=True
 FIXED_RANGE=10.1.0.0/24
 FIXED_NETWORK_SIZE=256
@@ -104,73 +100,68 @@ PIP_USE_MIRRORS=False
 export OS_NO_CACHE=True
 EOF
 
-# Grenade needs screen, so only turn this off if we aren't
-# running grenade.
-if [ "$DEVSTACK_GATE_GRENADE" -eq "0" ]; then
-   cat <<\EOF >>localrc
-USE_SCREEN=False
-EOF
-fi
+    # Grenade needs screen, so only turn this off if we aren't
+    # running grenade.
+    if [ "$DEVSTACK_GATE_GRENADE" -eq "0" ]; then
+        echo "USE_SCREEN=False" >>localrc
+    fi
 
-if [ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]; then
-   cat <<\EOF >>localrc
-CINDER_SECURE_DELETE=False
-EOF
-fi
+    if [ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]; then
+        echo "CINDER_SECURE_DELETE=False" >>localrc
+    fi
 
-if [ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ] ; then
-   cat <<\EOF >>localrc
-EXTRA_OPTS=(backdoor_port=0)
-EOF
-fi
+    if [ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ] ; then
+        echo "EXTRA_OPTS=(backdoor_port=0)" >>localrc
+    fi
 
-if [ "$DEVSTACK_GATE_POSTGRES" -eq "1" ]; then
-        cat <<\EOF >>localrc
-use_database postgresql
-EOF
-fi
+    if [ "$DEVSTACK_GATE_POSTGRES" -eq "1" ]; then
+        echo "use_database postgresql" >>localrc
+    fi
 
-if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
-   cat <<\EOF >>localrc
-SKIP_EXERCISES=${SKIP_EXERCISES},volumes
-DEFAULT_INSTANCE_TYPE=m1.small
-DEFAULT_INSTANCE_USER=root
-EOF
-   cat <<EOF >>exerciserc
-DEFAULT_INSTANCE_TYPE=m1.small
-DEFAULT_INSTANCE_USER=root
-EOF
-fi
+    if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
+        echo "SKIP_EXERCISES=${SKIP_EXERCISES},volumes" >>localrc
+        echo "DEFAULT_INSTANCE_TYPE=m1.small" >>localrc
+        echo "DEFAULT_INSTANCE_USER=root" >>localrc
 
-if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
-    # We need to disable ratelimiting when running
-    # Tempest tests since so many requests are executed
-    echo "API_RATE_LIMIT=False" >> localrc
-    # Volume tests in Tempest require a number of volumes
-    # to be created, each of 1G size. Devstack's default
-    # volume backing file size is 2G, so we increase to 5G
-    # (apparently 4G is not always enough).
-    #
-    # NOTE(sdague): the 10G setting is far larger than should
-    # be needed, however cinder tempest tests are currently
-    # not cleaning up correctly, and this is a temp measure
-    # to prevent it from blocking unrelated changes
-    echo "VOLUME_BACKING_FILE_SIZE=10G" >> localrc
-fi
+        echo "DEFAULT_INSTANCE_TYPE=m1.small" >>exerciserc
+        echo "DEFAULT_INSTANCE_USER=root" >>exerciserc
+    fi
 
-if [ -d $BASE/old ]; then
-    sed -e "s|$BASE/new|$BASE/old|" < $BASE/new/devstack/localrc \
-      > $BASE/old/devstack/localrc
-    sed -e "s|$BASE/new|$BASE/old|" < $BASE/new/devstack/exerciserc \
-      > $BASE/old/devstack/exerciserc
+    if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
+        # We need to disable ratelimiting when running
+        # Tempest tests since so many requests are executed
+        echo "API_RATE_LIMIT=False" >> localrc
+        # Volume tests in Tempest require a number of volumes
+        # to be created, each of 1G size. Devstack's default
+        # volume backing file size is 2G, so we increase to 5G
+        # (apparently 4G is not always enough).
+        #
+        # NOTE(sdague): the 10G setting is far larger than should
+        # be needed, however cinder tempest tests are currently
+        # not cleaning up correctly, and this is a temp measure
+        # to prevent it from blocking unrelated changes
+        echo "VOLUME_BACKING_FILE_SIZE=10G" >> localrc
+    fi
+
+    if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
+        if [ "$LOCALRC_OLDNEW" == "old" ]; then
+            echo "GRENADE_PHASE=base" >> localrc
+        else
+            echo "GRENADE_PHASE=target" >> localrc
+        fi
+    fi
+}
+
+
+if [ "$ZUUL_BRANCH" == "stable/diablo" ]; then
+    export DEVSTACK_GATE_TEMPEST=0
 fi
-# Make the workspace owned by the stack user
-sudo chown -R stack:stack $BASE
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
-    echo "GRENADE_PHASE=base"  | sudo -u stack tee -a $BASE/old/devstack/localrc
-    echo "GRENADE_PHASE=target" | sudo -u stack tee -a $BASE/new/devstack/localrc
-    cat <<EOF | sudo -u stack tee -a $BASE/new/grenade/localrc
+    cd $BASE/old/devstack
+    setup_localrc "old" "$GRENADE_OLD_BRANCH"
+
+    cat <<EOF >$BASE/new/grenade/localrc
 BASE_RELEASE=old
 BASE_RELEASE_DIR=$BASE/\$BASE_RELEASE
 BASE_DEVSTACK_DIR=\$BASE_RELEASE_DIR/devstack
@@ -179,7 +170,15 @@ TARGET_RELEASE_DIR=$BASE/\$TARGET_RELEASE
 TARGET_DEVSTACK_DIR=\$TARGET_RELEASE_DIR/devstack
 SAVE_DIR=\$BASE_RELEASE_DIR/save
 EOF
+fi
 
+cd $BASE/new/devstack
+setup_localrc "new" "$ZUUL_BRANCH"
+
+# Make the workspace owned by the stack user
+sudo chown -R stack:stack $BASE
+
+if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     cd $BASE/new/grenade
     sudo -H -u stack ./grenade.sh
 else
