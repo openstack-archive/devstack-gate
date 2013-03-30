@@ -100,12 +100,6 @@ PIP_USE_MIRRORS=False
 export OS_NO_CACHE=True
 EOF
 
-    # Grenade needs screen, so only turn this off if we aren't
-    # running grenade.
-    if [ "$DEVSTACK_GATE_GRENADE" -eq "0" ]; then
-        echo "USE_SCREEN=False" >>localrc
-    fi
-
     if [ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]; then
         echo "CINDER_SECURE_DELETE=False" >>localrc
     fi
@@ -144,11 +138,17 @@ EOF
     fi
 
     if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
+        echo "DATA_DIR=/opt/stack/data" >> localrc
+        echo "SWIFT_DATA_DIR=/opt/stack/data/swift" >> localrc
         if [ "$LOCALRC_OLDNEW" == "old" ]; then
             echo "GRENADE_PHASE=base" >> localrc
         else
             echo "GRENADE_PHASE=target" >> localrc
         fi
+    else
+        # Grenade needs screen, so only turn this off if we aren't
+        # running grenade.
+        echo "USE_SCREEN=False" >>localrc
     fi
 }
 
