@@ -232,6 +232,9 @@ you're working as is called "jenkins"):
     python vmdatabase.py
     sqlite3 /home/jenkins/vm.db
 
+With the database open, you'll want to populate the provider and base_image
+tables with your provider details and specifications for images created.
+
 By default, the update-image script will produce a VM that only members
 of the OpenStack CI team can log into.  You can inject your SSH public
 key by setting the appropriate env variable, like so:
