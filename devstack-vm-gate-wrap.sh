@@ -50,8 +50,11 @@ if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     if [ "$ZUUL_BRANCH" == "stable/grizzly" ]; then
         export GRENADE_OLD_BRANCH="stable/folsom"
         export DEVSTACK_GATE_CINDER=1
+    elif [ "$ZUUL_BRANCH" == "stable/havana" ]; then
+        export GRENADE_OLD_BRANCH="stable/grizzly"
+        export DEVSTACK_GATE_CINDER=1
     else # master
-        export GRENADE_OLD_BRANCH="stable/folsom"
+        export GRENADE_OLD_BRANCH="stable/grizzly"
         export DEVSTACK_GATE_CINDER=1
     fi
 fi
