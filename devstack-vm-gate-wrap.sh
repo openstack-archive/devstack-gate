@@ -277,8 +277,7 @@ function cleanup_host {
     mkdir $WORKSPACE/logs/rabbitmq/
     sudo cp /var/log/rabbitmq/* $WORKSPACE/logs/rabbitmq/
     if [ -d /var/log/mysql ] ; then
-        mkdir $WORKSPACE/logs/mysql/
-        sudo cp /var/log/mysql/* $WORKSPACE/logs/mysql/
+        sudo cp -a /var/log/mysql $WORKSPACE/logs/
     fi
     mkdir $WORKSPACE/logs/sudoers.d/
 
@@ -311,6 +310,10 @@ function cleanup_host {
     rename 's/\.log$/.txt/' $WORKSPACE/logs/*
     rename 's/(.*)/$1.txt/' $WORKSPACE/logs/sudoers.d/*
     rename 's/\.log$/.txt/' $WORKSPACE/logs/rabbitmq/*
+    if [ -d $WORKSPACE/logs/mysql ]; then
+        rename 's/\.log$/.txt/' $WORKSPACE/logs/mysql/*
+    fi
+
     mv $WORKSPACE/logs/rabbitmq/startup_log \
        $WORKSPACE/logs/rabbitmq/startup_log.txt
 
