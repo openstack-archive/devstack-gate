@@ -109,14 +109,16 @@ EOF
     fi
 
     if [ "$DEVSTACK_GATE_POSTGRES" -eq "1" ]; then
-        echo "use_database postgresql" >>localrc
+        cat <<\EOF >>localrc
+disable_service mysql
+enable_service postgresql
+EOF
     fi
 
     if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
         echo "SKIP_EXERCISES=${SKIP_EXERCISES},volumes" >>localrc
         echo "DEFAULT_INSTANCE_TYPE=m1.small" >>localrc
         echo "DEFAULT_INSTANCE_USER=root" >>localrc
-
         echo "DEFAULT_INSTANCE_TYPE=m1.small" >>exerciserc
         echo "DEFAULT_INSTANCE_USER=root" >>exerciserc
     fi
