@@ -187,6 +187,19 @@ else
     echo "Running devstack"
     sudo -H -u stack ./stack.sh
 
+    # provide a check that the right db was running
+    if [ "$DEVSTACK_GATE_POSTGRES" -eq "1" ]; then
+        if [ ! -d /var/log/postgresql ]; then
+            echo "Postgresql should have been used, but there are no logs"
+            exit 1
+        fi
+    else
+        if [ ! -d /var/log/mysql ]; then
+            echo "Mysql should have been used, but there are no logs"
+            exit 1
+        fi
+    fi
+
     echo "Removing sudo privileges for devstack user"
     sudo rm /etc/sudoers.d/50_stack_sh
 
