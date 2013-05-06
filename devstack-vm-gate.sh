@@ -46,11 +46,7 @@ function setup_localrc() {
 
     SKIP_EXERCISES=boot_from_volume,client-env
 
-    if [ "$LOCALRC_BRANCH" == "stable/diablo" ] ||
-        [ "$LOCALRC_BRANCH" == "stable/essex" ]; then
-        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-vol,n-net
-        SKIP_EXERCISES=$SKIP_EXERCISES,swift
-    elif [ "$LOCALRC_BRANCH" == "stable/folsom" ]; then
+    if [ "$LOCALRC_BRANCH" == "stable/folsom" ]; then
         MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-net,swift
         if [ "$DEVSTACK_GATE_CINDER" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,cinder,c-api,c-vol,c-sch
@@ -153,11 +149,6 @@ EOF
         echo "USE_SCREEN=False" >>localrc
     fi
 }
-
-
-if [ "$ZUUL_BRANCH" == "stable/diablo" ]; then
-    export DEVSTACK_GATE_TEMPEST=0
-fi
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     cd $BASE/old/devstack
