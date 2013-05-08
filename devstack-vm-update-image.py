@@ -61,6 +61,7 @@ PROJECTS = ['openstack/nova',
             'openstack/python-quantumclient',
             'openstack-dev/devstack',
             'openstack-dev/grenade',
+            'openstack-dev/pbr',
             'openstack-infra/devstack-gate']
 
 
