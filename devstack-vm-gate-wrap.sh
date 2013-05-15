@@ -43,6 +43,10 @@ export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
 # Only applicable to master branch
 export DEVSTACK_GATE_QUANTUM=${DEVSTACK_GATE_QUANTUM:-0}
 
+# Set to 1 to run heat
+# Only applicable to master branch
+export DEVSTACK_GATE_HEAT=${DEVSTACK_GATE_HEAT:-0}
+
 # Set to 1 to run grenade.
 export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-0}
 
