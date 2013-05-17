@@ -185,7 +185,7 @@ def bootstrap_server(provider, server, admin_pass, key):
     client.ssh("upgrading system packages",
                'sudo DEBIAN_FRONTEND=noninteractive apt-get '
                '--option "Dpkg::Options::=--force-confold"'
-               ' --assume-yes upgrade')
+               ' --assume-yes dist-upgrade')
     client.ssh("install git and puppet",
                'sudo DEBIAN_FRONTEND=noninteractive apt-get '
                '--option "Dpkg::Options::=--force-confold"'
