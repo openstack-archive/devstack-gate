@@ -333,7 +333,7 @@ def main():
     client = utils.get_client(provider)
 
     for base_image in provider.base_images:
-        if base_image.min_ready <= 0:
+        if base_image.min_ready < 0:
             continue
         print "Working on base image %s" % base_image.name
 
