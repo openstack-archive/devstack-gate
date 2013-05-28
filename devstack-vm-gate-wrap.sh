@@ -70,6 +70,8 @@ export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
 # is the project being gated.
 export DEVSTACK_GATE_TEMPEST_FULL=${DEVSTACK_GATE_TEMPEST_FULL:-0}
 
+export BASE=/opt/stack
+
 # Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
 # we are testing the proposed change from this point forward.
 GATE_SCRIPT_DIR=$BASE/new/devstack-gate
@@ -82,8 +84,6 @@ GATE_SCRIPT_DIR=$BASE/new/devstack-gate
 if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
     PROJECTS="openstack-infra/devstack-gate $PROJECTS"
 fi
-
-export BASE=/opt/stack
 
 # Most of the work of this script is done in functions so that we may
 # easily redirect their stdout / stderr to log files.
