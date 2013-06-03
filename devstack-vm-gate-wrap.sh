@@ -21,6 +21,9 @@
 
 PROJECTS="openstack-dev/devstack openstack-dev/grenade openstack-dev/pbr openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/quantum openstack/tempest openstack/cinder openstack/python-cinderclient openstack/swift openstack/python-swiftclient ${PROJECTS}"
 
+# The URL from which to fetch ZUUL references
+export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
+
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 
@@ -186,7 +189,7 @@ function setup_workspace {
       if [ $CHECKOUT_ZUUL -eq "1" ]; then
           # See if Zuul prepared a ref for this project
           if [ "$ZUUL_REF" != "" ] && \
-              git fetch http://zuul.openstack.org/p/$PROJECT $ZUUL_REF; then
+              git fetch $ZUUL_URL/$PROJECT $ZUUL_REF; then
               # It's there, so check it out.
               git checkout FETCH_HEAD
               git reset --hard FETCH_HEAD
