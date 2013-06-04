@@ -118,6 +118,13 @@ enable_service postgresql
 EOF
     fi
 
+    if [ "$DEVSTACK_GATE_ZEROMQ" -eq "1" ]; then
+        cat <<\EOF >>localrc
+disable_service rabbit
+enable_service zeromq
+EOF
+    fi
+
     if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
         echo "SKIP_EXERCISES=${SKIP_EXERCISES},volumes" >>localrc
         echo "DEFAULT_INSTANCE_TYPE=m1.small" >>localrc

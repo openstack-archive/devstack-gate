@@ -27,6 +27,9 @@ export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 # Set to 1 to run postgresql instead of mysql
 export DEVSTACK_GATE_POSTGRES=${DEVSTACK_GATE_POSTGRES:-0}
 
+# Set to 1 to use zeromq instead of rabbitmq (or qpid)
+export DEVSTACK_GATE_ZEROMQ=${DEVSTACK_GATE_ZEROMQ:-0}
+
 # Set to 1 to run nova coverage with Tempest
 export DEVSTACK_GATE_TEMPEST_COVERAGE=${DEVSTACK_GATE_TEMPEST_COVERAGE:-0}
 
