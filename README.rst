@@ -23,6 +23,7 @@ change to the following projects must pass the devstack gate test::
     heat
     horizon
     quantum
+    ceilometer
     python-novaclient
     python-heatclient
     python-keystoneclient
