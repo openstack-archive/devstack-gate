@@ -76,6 +76,9 @@ export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
 # is the project being gated.
 export DEVSTACK_GATE_TEMPEST_FULL=${DEVSTACK_GATE_TEMPEST_FULL:-0}
 
+# Set to 1 to run all tempest tests
+export DEVSTACK_GATE_TEMPEST_ALL=${DEVSTACK_GATE_TEMPEST_ALL:-0}
+
 export BASE=/opt/stack
 
 # Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that

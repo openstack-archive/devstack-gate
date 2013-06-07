@@ -223,7 +223,10 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         echo "Starting coverage data collection"
         sudo -H -u stack python -m tools/tempest_coverage -c start --combine
     fi
-    if [[ "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
+    if [[ "$DEVSTACK_GATE_TEMPEST_ALL" -eq "1" ]]; then
+        echo "Running tempest all test suite"
+        sudo -H -u stack tox -eall
+    elif [[ "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite"
         sudo -H -u stack tox -efull
     else
