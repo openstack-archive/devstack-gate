@@ -15,7 +15,7 @@ in python2.6 and python2.7, and pep8. Those tests are all run only on
 the project in question. The devstack gate test, however, is an
 integration test and ensures that a proposed change still enables
 several of the projects to work together. Currently, any proposed
-change to the following projects must pass the devstack gate test:
+change to the following projects must pass the devstack gate test::
 
     nova
     glance
@@ -33,7 +33,7 @@ because they all work closely together to form an OpenStack
 system. Changes to devstack itself are also required to pass this test
 so that we can be assured that devstack is always able to produce a
 system capable of testing the next change to nova. The devstack gate
-scripts themselves are included for the same reason.  
+scripts themselves are included for the same reason.
 
 How It Works
 ============
@@ -76,9 +76,9 @@ project repositories. It then takes a snapshot image of that machine
 to use when booting the actual test machines. When they boot, they
 will already be configured and have all, or nearly all, of the network
 accessible data they need. Then the template machine is deleted. The
-Jenkins job that does this is ``devstack-update-vm-image``. It is a 
-matrix job that runs for all configured providers, and if any of them 
-fail, it's not a problem since the previously generated image will 
+Jenkins job that does this is ``devstack-update-vm-image``. It is a
+matrix job that runs for all configured providers, and if any of them
+fail, it's not a problem since the previously generated image will
 still be available.
 
 Even though launching a machine from a saved image is usually fast,
@@ -87,26 +87,26 @@ it's possible that the resulting machine may end up in an error state,
 or have some malfunction (such as a misconfigured network). Due to
 these uncertainties, we provision the test machines ahead of time and
 keep them in a pool. Every ten minutes, a job runs to spin up new VMs
-for testing and add them to the pool, using the 
-``devstack-vm-launch.py`` script. Each image type has a parameter 
-specifying how many machine of that type should be kept ready, and 
-each provider has a parameter specifying the maximum number of 
-machines allowed to be running on that provider. Within those bounds, 
-the job attempts to keep the requested number of machines up and ready 
-to go at all times. When a machine is spun up and found to be 
-accessible, it as added to Jenkins as a slave machine with one 
-executor and a tag like "devstack-foo" (eg, "devstack-oneiric" for 
-oneiric image types). The Jenkins job that does this is 
-``devstack-launch-vms``. It is also a matrix job that runs for all 
+for testing and add them to the pool, using the
+``devstack-vm-launch.py`` script. Each image type has a parameter
+specifying how many machine of that type should be kept ready, and
+each provider has a parameter specifying the maximum number of
+machines allowed to be running on that provider. Within those bounds,
+the job attempts to keep the requested number of machines up and ready
+to go at all times. When a machine is spun up and found to be
+accessible, it as added to Jenkins as a slave machine with one
+executor and a tag like "devstack-foo" (eg, "devstack-oneiric" for
+oneiric image types). The Jenkins job that does this is
+``devstack-launch-vms``. It is also a matrix job that runs for all
 configured providers.
 
-Process invoked once a proposed change is approved by the core 
+Process invoked once a proposed change is approved by the core
 reviewers is as follows:
 
  * Jenkins triggers the devstack gate test itself.
- * This job runs on one of the previously configured "devstack-foo" 
-   nodes and invokes the ``devstack-vm-gate-wrap.sh`` script which 
-   checks out code from all of the involved repositories, and merges 
+ * This job runs on one of the previously configured "devstack-foo"
+   nodes and invokes the ``devstack-vm-gate-wrap.sh`` script which
+   checks out code from all of the involved repositories, and merges
    the proposed change.
  * If the ``pre_test_hook`` function is defined it is executed.
  * The wrap script defines a ``gate_hook`` function if one is
@@ -114,18 +114,18 @@ reviewers is as follows:
    which installs a devstack configuration file, and invokes devstack.
  * If the ``post_test_hook`` function is defined it is executed.
  * Once devstack is finished, it runs ``exercise.sh`` which performs
-   some basic integration testing. 
- * After everything is done, the script copies all of the log files 
+   some basic integration testing.
+ * After everything is done, the script copies all of the log files
    back to the Jenkins workspace and archives them along with the
-   console output of the run. The Jenkins job that does this is the 
+   console output of the run. The Jenkins job that does this is the
    somewhat awkwardly named ``gate-integration-tests-devstack-vm``.
 
 To prevent a node from being used for a second run, there is a job
-named ``devstack-update-inprogress`` which is triggered as a 
+named ``devstack-update-inprogress`` which is triggered as a
 parameterized build step from ``gate-interation-tests-devstack-vm``.
- It is passed the name of the node on which the gate job is running, 
-and it disabled that node in Jenkins by invoking 
-``devstack-vm-inprogress.py``.  The currently running job will 
+It is passed the name of the node on which the gate job is running,
+and it disabled that node in Jenkins by invoking
+``devstack-vm-inprogress.py``.  The currently running job will
 continue, but no new jobs will be scheduled for that node.
 
 Similarly, when the node is finished, a parameterized job named
@@ -186,7 +186,7 @@ are configured to syslog, so you may find helpful log messages by
 clicking on "syslog.txt". Some error messages are so basic they don't
 make it to syslog, such as if a service fails to start. Devstack
 starts all of the services in screen, and you can see the output
-captured by screen in files named "screen-*.txt". You may find a
+captured by screen in files named "screen-\*.txt". You may find a
 traceback there that isn't in syslog.
 
 After examining the output from the test, if you believe the result
@@ -204,12 +204,12 @@ Contributions Welcome
 All of the OpenStack developer infrastructure is freely available and
 managed in source code repositories just like the code of OpenStack
 itself. If you'd like to contribute, just clone and propose a patch to
-the relevant repository:
+the relevant repository::
 
     https://github.com/openstack-infra/devstack-gate
     https://github.com/openstack/openstack-infra-puppet
 
-You can file bugs on the openstack-ci project:
+You can file bugs on the openstack-ci project::
 
     https://launchpad.net/openstack-ci
 
@@ -220,7 +220,7 @@ Developer Setup
 
 If you'd like to work on the devstack-gate scripts and test process,
 this should help you bootstrap a test environment (assuming the user
-you're working as is called "jenkins"):
+you're working as is called "jenkins")::
 
     export WORKSPACE=/home/jenkins/workspace
     export DEVSTACK_GATE_PREFIX=wip-
@@ -240,11 +240,11 @@ tables with your provider details and specifications for images created.
 
 By default, the update-image script will produce a VM that only members
 of the OpenStack CI team can log into.  You can inject your SSH public
-key by setting the appropriate env variable, like so:
+key by setting the appropriate env variable, like so::
 
     export JENKINS_SSH_KEY=$(head -1 ~/.ssh/authorized_keys)
 
-Then run:
+Then run::
 
     ./devstack-vm-update-image.sh <YOUR PROVIDER NAME>
     ./devstack-vm-launch.py <YOUR PROVIDER NAME>
@@ -254,13 +254,13 @@ So that you don't need an entire Jenkins environment during
 development, The SKIP_DEVSTACK_GATE_JENKINS variable will cause the
 launch and reap scripts to omit making changes to Jenkins.  You'll
 need to pick a machine to use yourself, so chose an IP from the output
-from 'python vmdatabase.py' and then run:
+from 'python vmdatabase.py' and then run::
 
     ./devstack-vm-gate-dev.sh <IP>
 
 To test your changes.  That script copies the workspace over to the
 machine and invokes the gate script as Jenkins would.  When you're
-done, you'll need to run:
+done, you'll need to run::
 
     ./devstack-vm-reap.py <YOUR PROVIDER NAME> --all-servers
 
@@ -272,7 +272,7 @@ Production Setup
 In addition to the jobs described under "How It Works", you will need
 to install a config file at ~/devstack-gate-secure.conf on the Jenkins
 node where you are running the update-image, launch, and reap jobs
-that looks like this:
+that looks like this::
 
     [jenkins]
     server=https://jenkins.example.com
