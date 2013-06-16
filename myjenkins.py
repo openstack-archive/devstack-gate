@@ -7,11 +7,12 @@ from jenkins import JenkinsException, NODE_TYPE, CREATE_NODE
 TOGGLE_OFFLINE = '/computer/%(name)s/toggleOffline?offlineMessage=%(msg)s'
 CONFIG_NODE = '/computer/%(name)s/config.xml'
 
+
 class Jenkins(jenkins.Jenkins):
     def disable_node(self, name, msg=''):
         '''
         Disable a node
-        
+
         @param name: Jenkins node name
         @type  name: str
         @param msg: Offline message
@@ -25,7 +26,7 @@ class Jenkins(jenkins.Jenkins):
     def enable_node(self, name):
         '''
         Enable a node
-        
+
         @param name: Jenkins node name
         @type  name: str
         '''
@@ -38,7 +39,7 @@ class Jenkins(jenkins.Jenkins):
     def get_node_config(self, name):
         '''
         Get the configuration for a node.
-        
+
         :param name: Jenkins node name, ``str``
         '''
         get_config_url = self.server + CONFIG_NODE%locals()
@@ -47,7 +48,7 @@ class Jenkins(jenkins.Jenkins):
     def reconfig_node(self, name, config_xml):
         '''
         Change the configuration for an existing node.
-        
+
         :param name: Jenkins node name, ``str``
         :param config_xml: New XML configuration, ``str``
         '''
@@ -68,7 +69,7 @@ class Jenkins(jenkins.Jenkins):
         @param remoteFS: Remote filesystem location to use
         @type  remoteFS: str
         @param labels: Labels to associate with node
-        @type  labels: str        
+        @type  labels: str
         @param exclusive: Use this node for tied jobs only
         @type  exclusive: boolean
         @param launcher: The launch method for the slave
@@ -78,7 +79,7 @@ class Jenkins(jenkins.Jenkins):
         '''
         if self.node_exists(name):
             raise JenkinsException('node[%s] already exists'%(name))
-        
+
         mode = 'NORMAL'
         if exclusive:
             mode = 'EXCLUSIVE'
@@ -87,7 +88,7 @@ class Jenkins(jenkins.Jenkins):
         #hudson.slaves.CommandLauncher
         #hudson.os.windows.ManagedWindowsServiceLauncher
         launcher_params['stapler-class'] = launcher
-           
+
         inner_params = {
                 'name'            : name,
                 'nodeDescription' : nodeDescription,
@@ -100,13 +101,13 @@ class Jenkins(jenkins.Jenkins):
                 'nodeProperties'    : { 'stapler-class-bag' : 'true' },
                 'launcher'          : launcher_params
         }
-        
+
         params = {
             'name' : name,
             'type' : NODE_TYPE,
             'json' : json.dumps(inner_params)
         }
-        
+
         self.jenkins_open(urllib2.Request(self.server + CREATE_NODE%urllib.urlencode(params)))
 
         if not self.node_exists(name):

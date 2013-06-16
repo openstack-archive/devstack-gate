@@ -16,3 +16,4 @@ nosetests.xml
 .DS_Store
 build/
 dist/
+.testrepository
