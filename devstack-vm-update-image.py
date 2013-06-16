@@ -350,9 +350,9 @@ def main():
         remote_base_image = client.images.find(name=base_image.external_id)
         if not dry:
             timestamp = int(time.time())
-            remote_snap_image_name = ('%sdevstack-%s-%s.template.openstack.org' %
-                                      (DEVSTACK_GATE_PREFIX,
-                                       base_image.name, str(timestamp)))
+            remote_snap_image_name = (
+                '%sdevstack-%s-%s.template.openstack.org' %
+                (DEVSTACK_GATE_PREFIX, base_image.name, str(timestamp)))
             remote_snap_image = build_image(provider, client, base_image,
                                             remote_base_image, flavor,
                                             remote_snap_image_name,

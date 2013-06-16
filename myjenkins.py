@@ -21,7 +21,8 @@ class Jenkins(jenkins.Jenkins):
         info = self.get_node_info(name)
         if info['offline']:
             return
-        self.jenkins_open(urllib2.Request(self.server + TOGGLE_OFFLINE%locals()))
+        self.jenkins_open(
+            urllib2.Request(self.server + TOGGLE_OFFLINE % locals()))
 
     def enable_node(self, name):
         '''
@@ -34,7 +35,8 @@ class Jenkins(jenkins.Jenkins):
         if not info['offline']:
             return
         msg = ''
-        self.jenkins_open(urllib2.Request(self.server + TOGGLE_OFFLINE%locals()))
+        self.jenkins_open(
+            urllib2.Request(self.server + TOGGLE_OFFLINE % locals()))
 
     def get_node_config(self, name):
         '''
@@ -42,7 +44,7 @@ class Jenkins(jenkins.Jenkins):
 
         :param name: Jenkins node name, ``str``
         '''
-        get_config_url = self.server + CONFIG_NODE%locals()
+        get_config_url = self.server + CONFIG_NODE % locals()
         return self.jenkins_open(urllib2.Request(get_config_url))
 
     def reconfig_node(self, name, config_xml):
@@ -53,7 +55,7 @@ class Jenkins(jenkins.Jenkins):
         :param config_xml: New XML configuration, ``str``
         '''
         headers = {'Content-Type': 'text/xml'}
-        reconfig_url = self.server + CONFIG_NODE%locals()
+        reconfig_url = self.server + CONFIG_NODE % locals()
         self.jenkins_open(urllib2.Request(reconfig_url, config_xml, headers))
 
     def create_node(self, name, numExecutors=2, nodeDescription=None,
@@ -78,7 +80,7 @@ class Jenkins(jenkins.Jenkins):
         @type  launcher_params: dict
         '''
         if self.node_exists(name):
-            raise JenkinsException('node[%s] already exists'%(name))
+            raise JenkinsException('node[%s] already exists' % (name))
 
         mode = 'NORMAL'
         if exclusive:
@@ -90,25 +92,27 @@ class Jenkins(jenkins.Jenkins):
         launcher_params['stapler-class'] = launcher
 
         inner_params = {
-                'name'            : name,
-                'nodeDescription' : nodeDescription,
-                'numExecutors'    : numExecutors,
-                'remoteFS'        : remoteFS,
-                'labelString'     : labels,
-                'mode'            : mode,
-                'type'            : NODE_TYPE,
-                'retentionStrategy' : { 'stapler-class'  : 'hudson.slaves.RetentionStrategy$Always' },
-                'nodeProperties'    : { 'stapler-class-bag' : 'true' },
-                'launcher'          : launcher_params
+            'name': name,
+            'nodeDescription': nodeDescription,
+            'numExecutors': numExecutors,
+            'remoteFS': remoteFS,
+            'labelString': labels,
+            'mode': mode,
+            'type': NODE_TYPE,
+            'retentionStrategy': {
+                'stapler-class': 'hudson.slaves.RetentionStrategy$Always'},
+            'nodeProperties': {'stapler-class-bag': 'true'},
+            'launcher': launcher_params
         }
 
         params = {
-            'name' : name,
-            'type' : NODE_TYPE,
-            'json' : json.dumps(inner_params)
+            'name': name,
+            'type': NODE_TYPE,
+            'json': json.dumps(inner_params)
         }
 
-        self.jenkins_open(urllib2.Request(self.server + CREATE_NODE%urllib.urlencode(params)))
+        self.jenkins_open(urllib2.Request(
+            self.server + CREATE_NODE % urllib.urlencode(params)))
 
         if not self.node_exists(name):
-            raise JenkinsException('create[%s] failed'%(name))
+            raise JenkinsException('create[%s] failed' % (name))

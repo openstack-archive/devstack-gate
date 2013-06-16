@@ -36,7 +36,7 @@ DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG',
                                              os.path.expanduser(
                                              '~/devstack-gate-secure.conf'))
 SKIP_DEVSTACK_GATE_JENKINS = os.environ.get('SKIP_DEVSTACK_GATE_JENKINS', None)
-BUILD_URL=os.environ.get('BUILD_URL', '')
+BUILD_URL = os.environ.get('BUILD_URL', '')
 
 LABEL_RE = re.compile(r'<label>(.*)</label>')
 
@@ -74,12 +74,14 @@ def main():
                     try:
                         jenkins.reconfig_node(machine.jenkins_name, config)
                     except:
-                        if i==2:
-                            utils.log.exception("Unable to relabel ID: %s" % machine.id)
+                        if i == 2:
+                            utils.log.exception(
+                                "Unable to relabel ID: %s" % machine.id)
                             raise
                         time.sleep(5)
-                utils.log.debug("Relabeled ID: %s old label: %s new label: %s" % (
-                        machine.id, old, 'devstack-used'))
+                utils.log.debug(
+                    "Relabeled ID: %s old label: %s new label: %s" % (
+                    machine.id, old, 'devstack-used'))
 
     utils.update_stats(machine.base_image.provider)
 
