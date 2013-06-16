@@ -18,7 +18,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sqlite3
 import os
 import time
 
@@ -45,8 +44,8 @@ RESULT_FAILURE = 2
 RESULT_TIMEOUT = 3
 
 from sqlalchemy import Table, Column, Boolean, Integer, String, \
-                       MetaData, ForeignKey, UniqueConstraint, Index, \
-                       create_engine, and_, or_
+                       MetaData, ForeignKey, \
+                       create_engine, and_
 from sqlalchemy.orm import mapper, relation
 from sqlalchemy.orm.session import Session, sessionmaker
 
@@ -407,7 +406,6 @@ class VMDatabase(object):
     def getMachineForUse(self, image_name):
         """Atomically find a machine that is ready for use, and update
         its state."""
-        image = None
         for machine in self.session.query(Machine).filter(
             machine_table.c.state == READY).order_by(
             machine_table.c.state_time):

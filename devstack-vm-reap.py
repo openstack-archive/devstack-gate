@@ -21,7 +21,6 @@
 import os
 import sys
 import time
-import getopt
 import traceback
 import ConfigParser
 

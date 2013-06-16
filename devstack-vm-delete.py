@@ -21,9 +21,7 @@
 import json
 import os
 import sys
-import getopt
 from statsd import statsd
-import time
 import traceback
 import urllib
 

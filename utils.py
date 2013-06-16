@@ -22,7 +22,6 @@ import novaclient
 from novaclient.v1_1 import client as Client11
 from v1_0 import client as Client10
 import time
-import os
 import traceback
 import paramiko
 import socket

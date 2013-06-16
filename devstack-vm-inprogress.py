@@ -20,15 +20,11 @@
 
 import os
 import sys
-import time
-import getopt
-import traceback
 import ConfigParser
 
 import myjenkins
 import vmdatabase
 import utils
-import novaclient
 import re
 
 NODE_NAME = sys.argv[1]

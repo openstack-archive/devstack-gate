@@ -21,9 +21,7 @@
 
 import os
 import sys
-import getopt
 import time
-import paramiko
 import traceback
 import ConfigParser
 from statsd import statsd

@@ -21,8 +21,6 @@
 
 import os
 import sys
-import time
-import getopt
 import commands
 import json
 import urllib2
