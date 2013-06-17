@@ -308,6 +308,9 @@ export BASE=/opt/stack
 # we are testing the proposed change from this point forward.
 GATE_SCRIPT_DIR=$BASE/new/devstack-gate
 
+# The URL from which to fetch ZUUL references
+export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
+
 # Make a directory to store logs
 rm -rf logs
 mkdir -p logs
@@ -322,9 +325,6 @@ if [[ $ZUUL_PROJECT == "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "tru
     echo "This build includes a change to the devstack gate; re-execing this script."
     exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
 fi
-
-# The URL from which to fetch ZUUL references
-export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
 
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
