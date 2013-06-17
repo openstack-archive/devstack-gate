@@ -19,94 +19,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-PROJECTS="openstack-dev/devstack openstack-dev/grenade openstack-dev/pbr openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/quantum openstack/tempest openstack/cinder openstack/python-cinderclient openstack/swift openstack/python-swiftclient ${PROJECTS}"
-
-# The URL from which to fetch ZUUL references
-export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
-
-# Set to 1 to run the Tempest test suite
-export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
-
-# Set to 1 to run postgresql instead of mysql
-export DEVSTACK_GATE_POSTGRES=${DEVSTACK_GATE_POSTGRES:-0}
-
-# Set to 1 to use zeromq instead of rabbitmq (or qpid)
-export DEVSTACK_GATE_ZEROMQ=${DEVSTACK_GATE_ZEROMQ:-0}
-
-# Set to 1 to run nova coverage with Tempest
-export DEVSTACK_GATE_TEMPEST_COVERAGE=${DEVSTACK_GATE_TEMPEST_COVERAGE:-0}
-
-# Set to 1 to run cinder instead of nova volume
-# Only applicable to stable/folsom branch
-export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-0}
-
-# Set to 1 to enable Cinder secure delete.
-# False by default to avoid dd problems on Precise.
-# https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1023755
-export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
-
-# Set to 1 to run quantum instead of nova network
-# Only applicable to master branch
-export DEVSTACK_GATE_QUANTUM=${DEVSTACK_GATE_QUANTUM:-0}
-
-# Set to 1 to run heat
-# Only applicable to master branch
-export DEVSTACK_GATE_HEAT=${DEVSTACK_GATE_HEAT:-0}
-
-# Set to 1 to run grenade.
-export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-0}
-
-if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
-    if [ "$ZUUL_BRANCH" == "stable/grizzly" ]; then
-        export GRENADE_OLD_BRANCH="stable/folsom"
-        export DEVSTACK_GATE_CINDER=1
-    elif [ "$ZUUL_BRANCH" == "stable/havana" ]; then
-        export GRENADE_OLD_BRANCH="stable/grizzly"
-        export DEVSTACK_GATE_CINDER=1
-    else # master
-        export GRENADE_OLD_BRANCH="stable/grizzly"
-        export DEVSTACK_GATE_CINDER=1
-    fi
-fi
-
-# Set the virtualization driver to: libvirt, openvz
-export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
-
-# See switch below for this -- it gets set to 1 when tempest
-# is the project being gated.
-export DEVSTACK_GATE_TEMPEST_FULL=${DEVSTACK_GATE_TEMPEST_FULL:-0}
-
-# Set to 1 to run all tempest tests
-export DEVSTACK_GATE_TEMPEST_ALL=${DEVSTACK_GATE_TEMPEST_ALL:-0}
-
-export BASE=/opt/stack
-
-# Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
-# we are testing the proposed change from this point forward.
-GATE_SCRIPT_DIR=$BASE/new/devstack-gate
-
-# Set this variable to skip updating the devstack-gate project itself.
-# Useful in development so you can edit scripts in place and run them
-# directly.  Do not set in production.
-# Normally not set, and we do include devstack-gate with the rest of
-# the projects.
-if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
-    PROJECTS="openstack-infra/devstack-gate $PROJECTS"
-fi
-
 # Most of the work of this script is done in functions so that we may
 # easily redirect their stdout / stderr to log files.
 
 function function_exists {
     type $1 2>/dev/null | grep -q 'is a function'
 }
-
-if ! function_exists "gate_hook"; then
-  # the command we use to run the gate
-  function gate_hook {
-    $GATE_SCRIPT_DIR/devstack-vm-gate.sh
-  }
-fi
 
 function setup_workspace {
     DEST=$1
@@ -373,6 +291,23 @@ function cleanup_host {
     set +o xtrace
 }
 
+PROJECTS="openstack-dev/devstack openstack-dev/grenade openstack-dev/pbr openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/quantum openstack/tempest openstack/cinder openstack/python-cinderclient openstack/swift openstack/python-swiftclient ${PROJECTS}"
+
+# Set this variable to skip updating the devstack-gate project itself.
+# Useful in development so you can edit scripts in place and run them
+# directly.  Do not set in production.
+# Normally not set, and we do include devstack-gate with the rest of
+# the projects.
+if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
+    PROJECTS="openstack-infra/devstack-gate $PROJECTS"
+fi
+
+export BASE=/opt/stack
+
+# Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
+# we are testing the proposed change from this point forward.
+GATE_SCRIPT_DIR=$BASE/new/devstack-gate
+
 # Make a directory to store logs
 rm -rf logs
 mkdir -p logs
@@ -386,6 +321,71 @@ if [[ $ZUUL_PROJECT == "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "tru
     export RE_EXEC="true"
     echo "This build includes a change to the devstack gate; re-execing this script."
     exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
+fi
+
+# The URL from which to fetch ZUUL references
+export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
+
+# Set to 1 to run the Tempest test suite
+export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
+
+# Set to 1 to run postgresql instead of mysql
+export DEVSTACK_GATE_POSTGRES=${DEVSTACK_GATE_POSTGRES:-0}
+
+# Set to 1 to use zeromq instead of rabbitmq (or qpid)
+export DEVSTACK_GATE_ZEROMQ=${DEVSTACK_GATE_ZEROMQ:-0}
+
+# Set to 1 to run nova coverage with Tempest
+export DEVSTACK_GATE_TEMPEST_COVERAGE=${DEVSTACK_GATE_TEMPEST_COVERAGE:-0}
+
+export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-0}
+
+# Set to 1 to enable Cinder secure delete.
+# False by default to avoid dd problems on Precise.
+# https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1023755
+export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
+
+# Set to 1 to run quantum instead of nova network
+# Only applicable to master branch
+export DEVSTACK_GATE_QUANTUM=${DEVSTACK_GATE_QUANTUM:-0}
+
+# Set to 1 to run heat
+# Only applicable to master branch
+export DEVSTACK_GATE_HEAT=${DEVSTACK_GATE_HEAT:-0}
+
+# Set to 1 to run grenade.
+export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-0}
+
+if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
+    if [ "$ZUUL_BRANCH" == "stable/grizzly" ]; then
+# Set to 1 to run cinder instead of nova volume
+# Only applicable to stable/folsom branch
+        export GRENADE_OLD_BRANCH="stable/folsom"
+        export DEVSTACK_GATE_CINDER=1
+    elif [ "$ZUUL_BRANCH" == "stable/havana" ]; then
+        export GRENADE_OLD_BRANCH="stable/grizzly"
+        export DEVSTACK_GATE_CINDER=1
+    else # master
+        export GRENADE_OLD_BRANCH="stable/grizzly"
+        export DEVSTACK_GATE_CINDER=1
+    fi
+fi
+
+# Set the virtualization driver to: libvirt, openvz
+export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
+
+# See switch below for this -- it gets set to 1 when tempest
+# is the project being gated.
+export DEVSTACK_GATE_TEMPEST_FULL=${DEVSTACK_GATE_TEMPEST_FULL:-0}
+
+# Set to 1 to run all tempest tests
+export DEVSTACK_GATE_TEMPEST_ALL=${DEVSTACK_GATE_TEMPEST_ALL:-0}
+
+if ! function_exists "gate_hook"; then
+  # the command we use to run the gate
+  function gate_hook {
+    $GATE_SCRIPT_DIR/devstack-vm-gate.sh
+  }
 fi
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
