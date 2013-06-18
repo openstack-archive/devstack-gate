@@ -20,9 +20,11 @@ change to the following projects must pass the devstack gate test::
     nova
     glance
     keystone
+    heat
     horizon
     quantum
     python-novaclient
+    python-heatclient
     python-keystoneclient
     python-quantumclient
     devstack

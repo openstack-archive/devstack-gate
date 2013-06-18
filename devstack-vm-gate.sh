@@ -54,7 +54,7 @@ function setup_localrc() {
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-vol
         fi
     else # master
-        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,n-cond
+        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,n-cond,heat,h-api,h-api-cfn,h-api-cw,h-eng
         if [ "$DEVSTACK_GATE_QUANTUM" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta
             echo "Q_USE_DEBUG_COMMAND=True" >>localrc
@@ -62,12 +62,9 @@ function setup_localrc() {
         else
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-net
         fi
-        if [ "$DEVSTACK_GATE_HEAT" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,heat,h-api,h-api-cfn,h-api-cw,h-eng
-            # When uncommented this will download and register the most recent successfully built
-            # ubuntu-vm-heat-cfntools image from jenkins.tripleo.org
-            # echo "IMAGE_URLS+=,\"http://jenkins.tripleo.org:8080/job/autobuilt-images/elements=ubuntu%20vm%20heat-cfntools/lastSuccessfulBuild/artifact/ubuntu-vm-heat-cfntools.qcow2\"" >>localrc
-        fi
+        # When uncommented this will download and register the most recent successfully built
+        # ubuntu-vm-heat-cfntools image from jenkins.tripleo.org
+        # echo "IMAGE_URLS+=,\"http://jenkins.tripleo.org:8080/job/autobuilt-images/elements=ubuntu%20vm%20heat-cfntools/lastSuccessfulBuild/artifact/ubuntu-vm-heat-cfntools.qcow2\"" >>localrc
     fi
 
 cat <<EOF >>localrc

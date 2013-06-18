@@ -291,7 +291,7 @@ function cleanup_host {
     set +o xtrace
 }
 
-PROJECTS="openstack-dev/devstack openstack-dev/grenade openstack-dev/pbr openstack/nova openstack/glance openstack/keystone openstack/python-novaclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/quantum openstack/tempest openstack/cinder openstack/python-cinderclient openstack/swift openstack/python-swiftclient ${PROJECTS}"
+PROJECTS="openstack-dev/devstack openstack-dev/grenade openstack-dev/pbr openstack/nova openstack/glance openstack/heat openstack/keystone openstack/python-novaclient openstack/python-heatclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/quantum openstack/tempest openstack/cinder openstack/python-cinderclient openstack/swift openstack/python-swiftclient ${PROJECTS}"
 
 # Set this variable to skip updating the devstack-gate project itself.
 # Useful in development so you can edit scripts in place and run them
@@ -348,10 +348,6 @@ export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
 # Set to 1 to run quantum instead of nova network
 # Only applicable to master branch
 export DEVSTACK_GATE_QUANTUM=${DEVSTACK_GATE_QUANTUM:-0}
-
-# Set to 1 to run heat
-# Only applicable to master branch
-export DEVSTACK_GATE_HEAT=${DEVSTACK_GATE_HEAT:-0}
 
 # Set to 1 to run grenade.
 export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-0}
