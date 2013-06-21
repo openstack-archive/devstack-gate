@@ -320,7 +320,7 @@ setup_workspace $BASE/new 1 &> \
 
 # Also, if we're testing devstack-gate, re-exec this script once so
 # that we can test the new version of it.
-if [[ $ZUUL_PROJECT == "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
+if [[ $ZUUL_CHANGES =~ "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
     export RE_EXEC="true"
     echo "This build includes a change to the devstack gate; re-execing this script."
     exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
