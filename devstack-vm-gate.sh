@@ -219,8 +219,10 @@ else
     echo "Removing sudo privileges for devstack user"
     sudo rm /etc/sudoers.d/50_stack_sh
 
-    echo "Running devstack exercises"
-    sudo -H -u stack ./exercise.sh
+    if [ "$DEVSTACK_GATE_EXERCISES" -eq "1" ]; then
+        echo "Running devstack exercises"
+        sudo -H -u stack ./exercise.sh
+    fi
 fi
 
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then

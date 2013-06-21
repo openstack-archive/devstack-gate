@@ -329,6 +329,9 @@ fi
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 
+# Set to 0 to skip the devstack exercises
+export DEVSTACK_GATE_EXERCISES=${DEVSTACK_GATE_EXERCISES:-1}
+
 # Set to 1 to run postgresql instead of mysql
 export DEVSTACK_GATE_POSTGRES=${DEVSTACK_GATE_POSTGRES:-0}
 
