@@ -82,7 +82,7 @@ function setup_localrc() {
         # echo "IMAGE_URLS+=,\"http://jenkins.tripleo.org:8080/job/autobuilt-images/elements=ubuntu%20vm%20heat-cfntools/lastSuccessfulBuild/artifact/ubuntu-vm-heat-cfntools.qcow2\"" >>localrc
     fi
 
-cat <<EOF >>localrc
+    cat <<EOF >>localrc
 DEST=$BASE/$LOCALRC_OLDNEW
 ACTIVE_TIMEOUT=90
 BOOT_TIMEOUT=90
@@ -185,6 +185,9 @@ if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     cd $BASE/old/devstack
     setup_localrc "old" "$GRENADE_OLD_BRANCH"
 
+    cd $BASE/new/devstack
+    setup_localrc "new" "$GRENADE_OLD_BRANCH"
+
     cat <<EOF >$BASE/new/grenade/localrc
 BASE_RELEASE=old
 BASE_RELEASE_DIR=$BASE/\$BASE_RELEASE
@@ -192,20 +195,25 @@ BASE_DEVSTACK_DIR=\$BASE_RELEASE_DIR/devstack
 TARGET_RELEASE=new
 TARGET_RELEASE_DIR=$BASE/\$TARGET_RELEASE
 TARGET_DEVSTACK_DIR=\$TARGET_RELEASE_DIR/devstack
+TARGET_RUN_EXERCISES=False
+TARGET_RUN_SMOKE=False
 SAVE_DIR=\$BASE_RELEASE_DIR/save
 EOF
-fi
+    # Make the workspace owned by the stack user
+    sudo chown -R stack:stack $BASE
 
-cd $BASE/new/devstack
-setup_localrc "new" "$ZUUL_BRANCH"
-
-# Make the workspace owned by the stack user
-sudo chown -R stack:stack $BASE
-
-if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     cd $BASE/new/grenade
+    echo "Running grenade ..."
     sudo -H -u stack ./grenade.sh
+    cd $BASE/new/devstack
+
 else
+    cd $BASE/new/devstack
+    setup_localrc "new" "$ZUUL_BRANCH"
+
+    # Make the workspace owned by the stack user
+    sudo chown -R stack:stack $BASE
+
     echo "Running devstack"
     sudo -H -u stack ./stack.sh
 
@@ -221,14 +229,14 @@ else
             exit 1
         fi
     fi
+fi
 
-    echo "Removing sudo privileges for devstack user"
-    sudo rm /etc/sudoers.d/50_stack_sh
+echo "Removing sudo privileges for devstack user"
+sudo rm /etc/sudoers.d/50_stack_sh
 
-    if [ "$DEVSTACK_GATE_EXERCISES" -eq "1" ]; then
-        echo "Running devstack exercises"
-        sudo -H -u stack ./exercise.sh
-    fi
+if [ "$DEVSTACK_GATE_EXERCISES" -eq "1" ]; then
+    echo "Running devstack exercises"
+    sudo -H -u stack ./exercise.sh
 fi
 
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then

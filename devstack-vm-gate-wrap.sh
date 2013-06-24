@@ -370,9 +370,13 @@ if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     elif [ "$ZUUL_BRANCH" == "stable/havana" ]; then
         export GRENADE_OLD_BRANCH="stable/grizzly"
         export DEVSTACK_GATE_CINDER=1
+        export DEVSTACK_GATE_TEMPEST=1
+        export DEVSTACK_GATE_EXERCISES=1
     else # master
         export GRENADE_OLD_BRANCH="stable/grizzly"
         export DEVSTACK_GATE_CINDER=1
+        export DEVSTACK_GATE_TEMPEST=1
+        export DEVSTACK_GATE_EXERCISES=1
     fi
 fi
 
