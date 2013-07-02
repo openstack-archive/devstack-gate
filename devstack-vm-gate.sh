@@ -145,14 +145,11 @@ EOF
         echo "API_RATE_LIMIT=False" >> localrc
         # Volume tests in Tempest require a number of volumes
         # to be created, each of 1G size. Devstack's default
-        # volume backing file size is 2G, so we increase to 5G
-        # (apparently 4G is not always enough).
+        # volume backing file size is 10G.
         #
-        # NOTE(sdague): the 10G setting is far larger than should
-        # be needed, however cinder tempest tests are currently
-        # not cleaning up correctly, and this is a temp measure
-        # to prevent it from blocking unrelated changes
-        echo "VOLUME_BACKING_FILE_SIZE=10G" >> localrc
+        # The 24G setting is expected to be enough even
+        # in parallel run.
+        echo "VOLUME_BACKING_FILE_SIZE=24G" >> localrc
         # The volume-upload-image test requires a volume to be
         # uploaded in glance which in turns is configured for use
         # swift as backend
