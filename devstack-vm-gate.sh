@@ -241,6 +241,9 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     elif [[ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ]] ; then
         echo "Generating coverage report"
         sudo -H -u stack tox -ecoverage -- -o $BASE/new/tempest/coverage-report
+    elif [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] ; then
+        echo "Running stress tests"
+        sudo -H -u stack tox -estress
     else
         echo "Running tempest smoke tests"
         sudo -H -u stack tox -esmoke

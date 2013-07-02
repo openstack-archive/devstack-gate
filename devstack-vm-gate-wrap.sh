@@ -341,6 +341,9 @@ export DEVSTACK_GATE_ZEROMQ=${DEVSTACK_GATE_ZEROMQ:-0}
 # Set to 1 to run nova coverage with Tempest
 export DEVSTACK_GATE_TEMPEST_COVERAGE=${DEVSTACK_GATE_TEMPEST_COVERAGE:-0}
 
+# Set to 1 to run tempest stress tests
+export DEVSTACK_GATE_TEMPEST_STRESS=${DEVSTACK_GATE_TEMPEST_STRESS:-0}
+
 export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-0}
 
 # Set to 1 to enable Cinder secure delete.
