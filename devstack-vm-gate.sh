@@ -62,6 +62,9 @@ function setup_localrc() {
         else
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-net
         fi
+        if [ "$DEVSTACK_GATE_CELLS" -eq "1" ]; then
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-cell
+        fi
     else # master
         MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,n-cond,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api
         if [ "$DEVSTACK_GATE_QUANTUM" -eq "1" ]; then
@@ -70,6 +73,9 @@ function setup_localrc() {
             echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
         else
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-net
+        fi
+        if [ "$DEVSTACK_GATE_CELLS" -eq "1" ]; then
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-cell
         fi
         # When uncommented this will download and register the most recent successfully built
         # ubuntu-vm-heat-cfntools image from jenkins.tripleo.org

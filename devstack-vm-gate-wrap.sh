@@ -352,6 +352,9 @@ export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
 # Only applicable to master branch
 export DEVSTACK_GATE_QUANTUM=${DEVSTACK_GATE_QUANTUM:-0}
 
+# Set to 1 to run nova in cells mode instead of the default mode
+export DEVSTACK_GATE_CELLS=${DEVSTACK_GATE_CELLS:-0}
+
 # Set to 1 to run grenade.
 export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-0}
 
