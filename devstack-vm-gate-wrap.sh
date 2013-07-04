@@ -291,7 +291,7 @@ function cleanup_host {
     set +o xtrace
 }
 
-PROJECTS="openstack-dev/devstack openstack-dev/grenade openstack-dev/pbr openstack/nova openstack/glance openstack/heat openstack/keystone openstack/python-novaclient openstack/python-heatclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/quantum openstack/tempest openstack/cinder openstack/python-cinderclient openstack/swift openstack/python-swiftclient openstack/ceilometer openstack/python-ceilometerclient ${PROJECTS}"
+PROJECTS="openstack-dev/devstack openstack-dev/grenade openstack-dev/pbr openstack/requirements openstack/nova openstack/glance openstack/heat openstack/keystone openstack/python-novaclient openstack/python-heatclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/quantum openstack/tempest openstack/cinder openstack/python-cinderclient openstack/swift openstack/python-swiftclient openstack/ceilometer openstack/python-ceilometerclient ${PROJECTS}"
 
 # Set this variable to skip updating the devstack-gate project itself.
 # Useful in development so you can edit scripts in place and run them
