@@ -55,7 +55,7 @@ function setup_localrc() {
         fi
     elif [ "$LOCALRC_BRANCH" == "stable/grizzly" ]; then
         MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,n-cond
-        if [ "$DEVSTACK_GATE_QUANTUM" -eq "1" ]; then
+        if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta
             echo "Q_USE_DEBUG_COMMAND=True" >>localrc
             echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
@@ -67,7 +67,7 @@ function setup_localrc() {
         fi
     else # master
         MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,n-cond,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api
-        if [ "$DEVSTACK_GATE_QUANTUM" -eq "1" ]; then
+        if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta
             echo "Q_USE_DEBUG_COMMAND=True" >>localrc
             echo "NETWORK_GATEWAY=10.1.0.1" >>localrc

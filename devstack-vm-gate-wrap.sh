@@ -291,7 +291,7 @@ function cleanup_host {
     set +o xtrace
 }
 
-PROJECTS="openstack-dev/devstack openstack-dev/grenade openstack-dev/pbr openstack/requirements openstack/nova openstack/glance openstack/heat openstack/keystone openstack/python-novaclient openstack/python-heatclient openstack/python-keystoneclient openstack/python-quantumclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/quantum openstack/tempest openstack/cinder openstack/python-cinderclient openstack/swift openstack/python-swiftclient openstack/ceilometer openstack/python-ceilometerclient ${PROJECTS}"
+PROJECTS="openstack-dev/devstack openstack-dev/grenade openstack-dev/pbr openstack/requirements openstack/nova openstack/glance openstack/heat openstack/keystone openstack/python-novaclient openstack/python-heatclient openstack/python-keystoneclient openstack/python-neutronclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/neutron openstack/tempest openstack/cinder openstack/python-cinderclient openstack/swift openstack/python-swiftclient openstack/ceilometer openstack/python-ceilometerclient ${PROJECTS}"
 
 # Set this variable to skip updating the devstack-gate project itself.
 # Useful in development so you can edit scripts in place and run them
@@ -348,9 +348,9 @@ export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-0}
 # https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1023755
 export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
 
-# Set to 1 to run quantum instead of nova network
+# Set to 1 to run neutron instead of nova network
 # Only applicable to master branch
-export DEVSTACK_GATE_QUANTUM=${DEVSTACK_GATE_QUANTUM:-0}
+export DEVSTACK_GATE_NEUTRON=${DEVSTACK_GATE_NEUTRON:-0}
 
 # Set to 1 to run nova in cells mode instead of the default mode
 export DEVSTACK_GATE_CELLS=${DEVSTACK_GATE_CELLS:-0}
