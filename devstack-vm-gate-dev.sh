@@ -31,6 +31,6 @@ if [ $RETVAL != 0 ]; then
 fi
 
 rm $WORKSPACE/test-env.sh
-ssh jenkins@$NODE_IP_ADDR '. workspace/test-env.sh && cd workspace && ./devstack-gate/devstack-vm-gate-wrap.sh'
+ssh -t jenkins@$NODE_IP_ADDR '. workspace/test-env.sh && cd workspace && ./devstack-gate/devstack-vm-gate-wrap.sh'
 echo "done"
 #RETVAL=$?
