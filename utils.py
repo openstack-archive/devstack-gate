@@ -28,8 +28,16 @@ import paramiko
 import socket
 from sshclient import SSHClient
 from statsd import statsd
+import logging
+import logging.handlers
 
 import vmdatabase
+
+log = logging.getLogger('devstack-gate')
+log.setLevel(logging.DEBUG)
+handler = logging.handlers.SysLogHandler(address = '/dev/log')
+handler.setFormatter(logging.Formatter("devstack-gate: %(message)s"))
+log.addHandler(handler)
 
 def iterate_timeout(max_seconds, purpose):
     start = time.time()

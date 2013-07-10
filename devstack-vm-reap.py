@@ -63,12 +63,14 @@ def delete_machine(jenkins, client, machine):
         # If we have deleted a server, don't believe it.  Instead, wait for
         # the next run of the script and only if the server doesn't exist,
         # delete it from Jenkins and the DB.
+        utils.log.debug("Delete ID: %s" % machine.id)
         return
 
     if jenkins:
         if machine.jenkins_name:
             if jenkins.node_exists(machine.jenkins_name):
                 jenkins.delete_node(machine.jenkins_name)
+                utils.log.debug("Delete jenkins node ID: %s" % machine.id)
 
     machine.delete()
 

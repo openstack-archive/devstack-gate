@@ -35,8 +35,10 @@ NODE_NAME = sys.argv[1]
 DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG',
                                              os.path.expanduser(
                                              '~/devstack-gate-secure.conf'))
+SKIP_DEVSTACK_GATE_JENKINS = os.environ.get('SKIP_DEVSTACK_GATE_JENKINS', None)
+BUILD_URL=os.environ.get('BUILD_URL', '')
 
-LABEL_RE = re.compile(r'<label>.*</label>')
+LABEL_RE = re.compile(r'<label>(.*)</label>')
 
 
 def main():
@@ -45,19 +47,39 @@ def main():
     config = ConfigParser.ConfigParser()
     config.read(DEVSTACK_GATE_SECURE_CONFIG)
 
-    jenkins = myjenkins.Jenkins(config.get('jenkins', 'server'),
-                                config.get('jenkins', 'user'),
-                                config.get('jenkins', 'apikey'))
-    jenkins.get_info()
+    if not SKIP_DEVSTACK_GATE_JENKINS:
+        jenkins = myjenkins.Jenkins(config.get('jenkins', 'server'),
+                                    config.get('jenkins', 'user'),
+                                    config.get('jenkins', 'apikey'))
+        jenkins.get_info()
+    else:
+        jenkins = None
 
     machine = db.getMachineByJenkinsName(NODE_NAME)
+    utils.log.debug("Used ID: %s old state: %s build:%s" % (
+            machine.id, machine.state, BUILD_URL))
+
     machine.state = vmdatabase.USED
 
-    if machine.jenkins_name:
-        if jenkins.node_exists(machine.jenkins_name):
-            config = jenkins.get_node_config(machine.jenkins_name)
-            config = LABEL_RE.sub('<label>devstack-used</label>', config)
-            jenkins.reconfig_node(machine.jenkins_name, config)
+    if jenkins:
+        if machine.jenkins_name:
+            if jenkins.node_exists(machine.jenkins_name):
+                config = jenkins.get_node_config(machine.jenkins_name)
+                old = None
+                m = LABEL_RE.search(config)
+                if m:
+                    old = m.group(1)
+                config = LABEL_RE.sub('<label>devstack-used</label>', config)
+                for i in range(3):
+                    try:
+                        jenkins.reconfig_node(machine.jenkins_name, config)
+                    except:
+                        if i==2:
+                            utils.log.exception("Unable to relabel ID: %s" % machine.id)
+                            raise
+                        time.sleep(5)
+                utils.log.debug("Relabeled ID: %s old label: %s new label: %s" % (
+                        machine.id, old, 'devstack-used'))
 
     utils.update_stats(machine.base_image.provider)
 

@@ -34,14 +34,19 @@ NODE_NAME = sys.argv[1]
 UPSTREAM_BUILD_URL=os.environ.get('UPSTREAM_BUILD_URL', '')
 UPSTREAM_JOB_NAME=os.environ.get('UPSTREAM_JOB_NAME', '')
 UPSTREAM_BRANCH=os.environ.get('UPSTREAM_BRANCH', '')
-
+BUILD_URL=os.environ.get('BUILD_URL', '')
 
 def main():
     db = vmdatabase.VMDatabase()
 
     machine = db.getMachineByJenkinsName(NODE_NAME)
     if machine.state != vmdatabase.HOLD:
+        utils.log.debug("Set deleted ID: %s old state: %s build: %s" % (
+                machine.id, machine.state, BUILD_URL))
         machine.state = vmdatabase.DELETE
+    else:
+        utils.log.debug("Hold ID: %s old state: %s build: %s" % (
+                machine.id, machine.state, BUILD_URL))
 
     try:
         utils.update_stats(machine.base_image.provider)
