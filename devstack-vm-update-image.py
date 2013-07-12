@@ -66,6 +66,7 @@ PROJECTS = ['openstack/nova',
             'openstack-dev/devstack',
             'openstack-dev/grenade',
             'openstack-dev/pbr',
+            'openstack-infra/jeepyb',
             'openstack-infra/devstack-gate']
 
 

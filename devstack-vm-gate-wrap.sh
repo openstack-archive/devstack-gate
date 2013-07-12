@@ -304,6 +304,7 @@ function cleanup_host {
 PROJECTS="openstack-dev/devstack $PROJECTS"
 PROJECTS="openstack-dev/grenade $PROJECTS"
 PROJECTS="openstack-dev/pbr $PROJECTS"
+PROJECTS="openstack-infra/jeepyb $PROJECTS"
 PROJECTS="openstack/ceilometer $PROJECTS"
 PROJECTS="openstack/cinder $PROJECTS"
 PROJECTS="openstack/glance $PROJECTS"
