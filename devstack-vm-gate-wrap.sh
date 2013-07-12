@@ -291,7 +291,29 @@ function cleanup_host {
     set +o xtrace
 }
 
-PROJECTS="openstack-dev/devstack openstack-dev/grenade openstack-dev/pbr openstack/requirements openstack/nova openstack/glance openstack/heat openstack/keystone openstack/python-novaclient openstack/python-heatclient openstack/python-keystoneclient openstack/python-neutronclient openstack/python-glanceclient openstack/python-openstackclient openstack/horizon openstack/neutron openstack/tempest openstack/cinder openstack/python-cinderclient openstack/swift openstack/python-swiftclient openstack/ceilometer openstack/python-ceilometerclient ${PROJECTS}"
+PROJECTS="openstack-dev/devstack $PROJECTS"
+PROJECTS="openstack-dev/grenade $PROJECTS"
+PROJECTS="openstack-dev/pbr $PROJECTS"
+PROJECTS="openstack/ceilometer $PROJECTS"
+PROJECTS="openstack/cinder $PROJECTS"
+PROJECTS="openstack/glance $PROJECTS"
+PROJECTS="openstack/heat $PROJECTS"
+PROJECTS="openstack/horizon $PROJECTS"
+PROJECTS="openstack/keystone $PROJECTS"
+PROJECTS="openstack/neutron $PROJECTS"
+PROJECTS="openstack/nova $PROJECTS"
+PROJECTS="openstack/python-ceilometerclient $PROJECTS"
+PROJECTS="openstack/python-cinderclient $PROJECTS"
+PROJECTS="openstack/python-glanceclient $PROJECTS"
+PROJECTS="openstack/python-heatclient $PROJECTS"
+PROJECTS="openstack/python-keystoneclient $PROJECTS"
+PROJECTS="openstack/python-neutronclient $PROJECTS"
+PROJECTS="openstack/python-novaclient $PROJECTS"
+PROJECTS="openstack/python-openstackclient $PROJECTS"
+PROJECTS="openstack/python-swiftclient $PROJECTS"
+PROJECTS="openstack/requirements $PROJECTS"
+PROJECTS="openstack/swift $PROJECTS"
+PROJECTS="openstack/tempest $PROJECTS"
 
 # Set this variable to skip updating the devstack-gate project itself.
 # Useful in development so you can edit scripts in place and run them
