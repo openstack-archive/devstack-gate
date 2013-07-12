@@ -249,6 +249,16 @@ function cleanup_host {
 
     sudo iptables-save > $WORKSPACE/logs/iptables.txt
 
+    #Copy and compress testr_results.
+    if [ -f $BASE/new/tempest/testr_results.html ]; then
+        sudo cp $BASE/new/tempest/testr_results.html $NEWLOGTARGET/
+        sudo gzip -9 $NEWLOGTARGET/testr_results.html
+    fi
+    #Copy subunit log.
+    if [ -f $BASE/new/tempest/subunit_log.txt ]; then
+        sudo cp $BASE/new/tempest/subunit_log.txt $NEWLOGTARGET/
+    fi
+
     # Make sure jenkins can read all the logs
     sudo chown -R jenkins:jenkins $WORKSPACE/logs/
     sudo chmod a+r $WORKSPACE/logs/
@@ -386,6 +396,9 @@ export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
 # See switch below for this -- it gets set to 1 when tempest
 # is the project being gated.
 export DEVSTACK_GATE_TEMPEST_FULL=${DEVSTACK_GATE_TEMPEST_FULL:-0}
+
+# Set to enable running full tempest with testr:
+export DEVSTACK_GATE_TEMPEST_TESTR_FULL=${DEVSTACK_GATE_TEMPEST_TESTR_FULL:-0}
 
 # Set to 1 to run all tempest tests
 export DEVSTACK_GATE_TEMPEST_ALL=${DEVSTACK_GATE_TEMPEST_ALL:-0}
