@@ -81,6 +81,8 @@ def launch_node(client, snap_image, image, flavor, last_name):
     print "    id: %s" % (server.id)
     print "  name: %s" % (name)
     print
+    utils.log.debug("Launching ID: %s name: %s provider ID: %s" %
+                    (machine.id, name, server.id))
     return server, machine
 
 
@@ -137,6 +139,7 @@ def check_machine(jenkins, client, machine, error_counts):
             create_jenkins_node(jenkins, machine)
             print "Machine %s is ready" % machine.id
             machine.state = vmdatabase.READY
+            utils.log.debug("Online ID: %s" % machine.id)
             return
     elif not server.status.startswith('BUILD'):
         count = error_counts.get(machine.id, 0)
@@ -220,6 +223,7 @@ def main():
             except:
                 traceback.print_exc()
                 print "Abandoning machine %s" % machine.id
+                utils.log.exception("Abandoning ID: %s" % machine.id)
                 machine.state = vmdatabase.ERROR
                 error = True
             db.commit()
