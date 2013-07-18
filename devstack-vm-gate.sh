@@ -265,10 +265,6 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         echo "Running tempest smoke tests"
         sudo -H -u stack tox -esmoke
     fi
-    if [ -f .testrepository/0 ]; then
-        sudo -H -u stack cp .testrepository/0 subunit_log.txt
-        sudo -H -u stack python /usr/local/jenkins/slave_scripts/subunit2html.py ./subunit_log.txt testr_results.html
-    fi
 else
     # Jenkins expects at least one nosetests file.  If we're not running
     # tempest, then write a fake one that indicates the tests pass (since

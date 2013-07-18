@@ -249,14 +249,14 @@ function cleanup_host {
 
     sudo iptables-save > $WORKSPACE/logs/iptables.txt
 
-    #Copy and compress testr_results.
-    if [ -f $BASE/new/tempest/testr_results.html ]; then
-        sudo cp $BASE/new/tempest/testr_results.html $NEWLOGTARGET/
-        sudo gzip -9 $NEWLOGTARGET/testr_results.html
-    fi
-    #Copy subunit log.
-    if [ -f $BASE/new/tempest/subunit_log.txt ]; then
-        sudo cp $BASE/new/tempest/subunit_log.txt $NEWLOGTARGET/
+    # Process testr artifacts.
+    if [ -f $BASE/new/tempest/.testrepository/0 ]; then
+        sudo cp $BASE/new/tempest/.testrepository/0 $WORKSPACE/subunit_log.txt
+        sudo python /usr/local/jenkins/slave_scripts/subunit2html.py $WORKSPACE/subunit_log.txt $WORKSPACE/testr_results.html
+        sudo gzip -9 $WORKSPACE/subunit_log.txt
+        sudo gzip -9 $WORKSPACE/testr_results.html
+        sudo chown jenkins:jenkins $WORKSPACE/subunit_log.txt.gz $WORKSPACE/testr_results.html.gz
+        sudo chmod a+r $WORKSPACE/subunit_log.txt.gz $WORKSPACE/testr_results.html.gz
     fi
 
     # Make sure jenkins can read all the logs
