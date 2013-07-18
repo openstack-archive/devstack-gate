@@ -252,6 +252,9 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     elif [[ "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite"
         sudo -H -u stack tox -efull
+    elif [[ "$DEVSTACK_GATE_TEMPEST_TESTR_FULL" -eq "1" ]]; then
+        echo "Running tempest full test suite with testr"
+        sudo -H -u stack tox -etestr-full
     elif [[ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ]] ; then
         echo "Generating coverage report"
         sudo -H -u stack tox -ecoverage -- -o $BASE/new/tempest/coverage-report
@@ -261,6 +264,10 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     else
         echo "Running tempest smoke tests"
         sudo -H -u stack tox -esmoke
+    fi
+    if [ -f .testrepository/0 ]; then
+        sudo -H -u stack cp .testrepository/0 subunit_log.txt
+        sudo -H -u stack python /usr/local/jenkins/slave_scripts/subunit2html.py ./subunit_log.txt testr_results.html
     fi
 else
     # Jenkins expects at least one nosetests file.  If we're not running
