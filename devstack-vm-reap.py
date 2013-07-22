@@ -51,6 +51,11 @@ else:
 
 
 def delete_machine(jenkins, client, machine):
+    if machine.state != vmdatabase.DELETE:
+        utils.log.debug("Set deleted ID: %s old state: %s" % (
+                machine.id, machine.state))
+        machine.state = vmdatabase.DELETE
+
     try:
         server = client.servers.get(machine.external_id)
     except novaclient.exceptions.NotFound:
