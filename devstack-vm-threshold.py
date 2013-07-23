@@ -31,8 +31,7 @@ def main(threshold, stat_file):
 
     for provider in db.getProviders():
         for base_image in provider.base_images:
-            ready_nodes = [x for x in base_image.machines \
-                            if x.state == ready]
+            ready_nodes = [x for x in base_image.machines if x.state == ready]
     ready_count = len(ready_nodes)
     set_vm_state(ready_count, stat_file)
 
@@ -55,7 +54,7 @@ def usage(msg=None):
         stream = sys.stderr
     else:
         stream = sys.stdout
-    stream.write("usage: %s [-h] -t threshold [-f stat-file]\n" \
+    stream.write("usage: %s [-h] -t threshold [-f stat-file]\n"
                  % os.path.basename(sys.argv[0]))
     if msg:
         stream.write("\nERROR: " + msg + "\n")

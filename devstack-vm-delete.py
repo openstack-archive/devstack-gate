@@ -36,6 +36,7 @@ UPSTREAM_JOB_NAME=os.environ.get('UPSTREAM_JOB_NAME', '')
 UPSTREAM_BRANCH=os.environ.get('UPSTREAM_BRANCH', '')
 BUILD_URL=os.environ.get('BUILD_URL', '')
 
+
 def main():
     db = vmdatabase.VMDatabase()
 

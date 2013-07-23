@@ -35,6 +35,7 @@ DEVSTACK_GATE_SECURE_CONFIG = os.environ.get('DEVSTACK_GATE_SECURE_CONFIG',
                                                 '~/devstack-gate-secure.conf'))
 SKIP_DEVSTACK_GATE_JENKINS = os.environ.get('SKIP_DEVSTACK_GATE_JENKINS', None)
 
+
 def check_machine(jenkins, machine):
     utils.log.debug("Check ID: %s" % machine.id)
 
@@ -53,6 +54,7 @@ def check_machine(jenkins, machine):
                     jenkins.delete_node(machine.jenkins_name)
 
     machine.delete()
+
 
 def main():
     db = vmdatabase.VMDatabase()

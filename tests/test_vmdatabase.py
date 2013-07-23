@@ -18,13 +18,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
-import vmdatabase
 import time
 
-class testVMDatabase(unittest.TestCase):
+import testtools
+from testtools import content
+
+import vmdatabase
+
+
+class TestVMDatabase(testtools.TestCase):
 
     def setUp(self):
+        super(TestVMDatabase, self).setUp()
         self.db = vmdatabase.VMDatabase(':memory:')
 
     def test_add_provider(self):
@@ -41,7 +46,7 @@ class testVMDatabase(unittest.TestCase):
 
     def test_add_base_image(self):
         self.test_add_provider()
-        
+
         provider = self.db.getProvider('rackspace')
         base_image1 = provider.newBaseImage('oneiric', 1)
         base_image2 = provider.newBaseImage('precise', 2)
@@ -54,13 +59,13 @@ class testVMDatabase(unittest.TestCase):
         self.test_add_base_image()
         provider = self.db.getProvider('rackspace')
         base_image1 = provider.getBaseImage('oneiric')
-        base_image2 = provider.getBaseImage('precise')       
+        base_image2 = provider.getBaseImage('precise')
         snapshot_image1 = base_image1.newSnapshotImage('oneiric-1331683549', 1331683549, 201, 301)
         snapshot_image2 = base_image2.newSnapshotImage('precise-1331683549', 1331683549, 202, 301)
 
         hp_provider = self.db.getProvider('hpcloud')
         hp_base_image1 = hp_provider.getBaseImage('oneiric')
-        hp_base_image2 = hp_provider.getBaseImage('precise')       
+        hp_base_image2 = hp_provider.getBaseImage('precise')
         hp_snapshot_image1 = hp_base_image1.newSnapshotImage('oneiric-1331683549', 1331929410, 211, 311)
         hp_snapshot_image2 = hp_base_image2.newSnapshotImage('precise-1331683549', 1331929410, 212, 311)
 
@@ -79,7 +84,7 @@ class testVMDatabase(unittest.TestCase):
         assert(snapshot_image1 == base_image1.current_snapshot)
         assert(snapshot_image2 == base_image2.current_snapshot)
 
-        snapshot_image2_latest = base_image2.newSnapshotImage('precise-1331683550', 
+        snapshot_image2_latest = base_image2.newSnapshotImage('precise-1331683550',
                                                               1331683550, 203, 303)
         assert(base_image1.current_snapshot)
         assert(base_image2.current_snapshot)
@@ -195,25 +200,25 @@ class testVMDatabase(unittest.TestCase):
         assert(len(hp_provider.ready_machines)==2)
 
         machine = self.db.getMachineForUse('oneiric')
-        print 'got machine', machine.name
+        self.addDetail('machine name', content.text_content(machine.name))
         assert(len(rs_provider.ready_machines)==1)
         assert(len(hp_provider.ready_machines)==2)
         assert(machine==machine1)
 
         machine = self.db.getMachineForUse('oneiric')
-        print 'got machine', machine.name
+        self.addDetail('machine name', content.text_content(machine.name))
         assert(len(rs_provider.ready_machines)==1)
         assert(len(hp_provider.ready_machines)==1)
         assert(machine==hp_machine1)
 
         machine = self.db.getMachineForUse('precise')
-        print 'got machine', machine.name
+        self.addDetail('machine name', content.text_content(machine.name))
         assert(len(rs_provider.ready_machines)==1)
         assert(len(hp_provider.ready_machines)==0)
         assert(machine==hp_machine2)
 
         machine = self.db.getMachineForUse('precise')
-        print 'got machine', machine.name
+        self.addDetail('machine name', content.text_content(machine.name))
         assert(len(rs_provider.ready_machines)==0)
         assert(len(hp_provider.ready_machines)==0)
         assert(machine==machine2)
@@ -223,7 +228,7 @@ class testVMDatabase(unittest.TestCase):
         self.db.print_state()
 
         machine = self.db.getMachineForUse('oneiric')
-        print 'got machine', machine.name
+        self.addDetail('machine name', content.text_content(machine.name))
         result = machine.newResult('test-job', 82, 1234, 1)
         time.sleep(2)
         result.setResult(vmdatabase.RESULT_SUCCESS)
@@ -245,4 +250,3 @@ class testVMDatabase(unittest.TestCase):
                         assert(result.gerrit_patchset_number == 1)
                 else:
                     assert(len(base_image.results)==0)
-
