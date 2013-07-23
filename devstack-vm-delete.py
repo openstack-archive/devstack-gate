@@ -31,10 +31,10 @@ import vmdatabase
 import utils
 
 NODE_NAME = sys.argv[1]
-UPSTREAM_BUILD_URL=os.environ.get('UPSTREAM_BUILD_URL', '')
-UPSTREAM_JOB_NAME=os.environ.get('UPSTREAM_JOB_NAME', '')
-UPSTREAM_BRANCH=os.environ.get('UPSTREAM_BRANCH', '')
-BUILD_URL=os.environ.get('BUILD_URL', '')
+UPSTREAM_BUILD_URL = os.environ.get('UPSTREAM_BUILD_URL', '')
+UPSTREAM_JOB_NAME = os.environ.get('UPSTREAM_JOB_NAME', '')
+UPSTREAM_BRANCH = os.environ.get('UPSTREAM_BRANCH', '')
+BUILD_URL = os.environ.get('BUILD_URL', '')
 
 
 def main():
@@ -53,23 +53,23 @@ def main():
         utils.update_stats(machine.base_image.provider)
 
         if UPSTREAM_BUILD_URL:
-            fd = urllib.urlopen(UPSTREAM_BUILD_URL+'api/json')
+            fd = urllib.urlopen(UPSTREAM_BUILD_URL + 'api/json')
             data = json.load(fd)
             result = data['result']
             if statsd and result == 'SUCCESS':
                 dt = int(data['duration'])
 
                 key = 'devstack.job.%s' % UPSTREAM_JOB_NAME
-                statsd.timing(key+'.runtime', dt)
-                statsd.incr(key+'.builds')
+                statsd.timing(key + '.runtime', dt)
+                statsd.incr(key + '.builds')
 
                 key += '.%s' % UPSTREAM_BRANCH
-                statsd.timing(key+'.runtime', dt)
-                statsd.incr(key+'.builds')
+                statsd.timing(key + '.runtime', dt)
+                statsd.incr(key + '.builds')
 
                 key += '.%s' % machine.base_image.provider.name
-                statsd.timing(key+'.runtime', dt)
-                statsd.incr(key+'.builds')
+                statsd.timing(key + '.runtime', dt)
+                statsd.incr(key + '.builds')
     except:
         print "Error getting build information"
         traceback.print_exc()
