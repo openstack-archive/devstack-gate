@@ -21,11 +21,9 @@
 
 import sys
 import os
-import commands
 import time
 import subprocess
 import traceback
-import socket
 import pprint
 
 import vmdatabase
@@ -243,7 +241,6 @@ def configure_server(server, branches):
     client.ssh('clear workspace', 'rm -rf ~/workspace-cache')
     client.ssh('make workspace', 'mkdir -p ~/workspace-cache')
     for project in PROJECTS:
-        sp = project.split('/')[0]
         client.ssh('clone %s' % project,
             'cd ~/workspace-cache && '
             'git clone https://review.openstack.org/p/%s' % project)
@@ -306,7 +303,7 @@ def build_image(provider, client, base_image, image,
         except:
             print "Exception encountered deleting server:"
             traceback.print_exc()
-    except Exception, real_error:
+    except Exception:
         # Something went wrong, try our best to mark the server in error
         # then delete the server, then delete the db record for it.
         # If any of this fails, the reap script should catch it.  But
@@ -316,10 +313,10 @@ def build_image(provider, client, base_image, image,
             try:
                 utils.delete_server(server)
                 snap_image.delete()
-            except Exception, delete_error:
+            except Exception:
                 print "Exception encountered deleting server:"
                 traceback.print_exc()
-        except Execption, database_error:
+        except Exception:
             print "Exception encountered marking server in error:"
             traceback.print_exc()
         # Raise the important exception that started this
@@ -354,10 +351,10 @@ def main():
             remote_snap_image_name = (
                 '%sdevstack-%s-%s.template.openstack.org' %
                 (DEVSTACK_GATE_PREFIX, base_image.name, str(timestamp)))
-            remote_snap_image = build_image(provider, client, base_image,
-                                            remote_base_image, flavor,
-                                            remote_snap_image_name,
-                                            branches, timestamp)
+            build_image(provider, client, base_image,
+                        remote_base_image, flavor,
+                        remote_snap_image_name,
+                        branches, timestamp)
 
 
 if __name__ == '__main__':

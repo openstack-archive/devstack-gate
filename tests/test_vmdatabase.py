@@ -50,12 +50,12 @@ class TestVMDatabase(testtools.TestCase):
         self.test_add_provider()
 
         provider = self.db.getProvider('rackspace')
-        base_image1 = provider.newBaseImage('oneiric', 1)
-        base_image2 = provider.newBaseImage('precise', 2)
+        provider.newBaseImage('oneiric', 1)
+        provider.newBaseImage('precise', 2)
 
         provider = self.db.getProvider('hpcloud')
-        base_image1 = provider.newBaseImage('oneiric', 1)
-        base_image2 = provider.newBaseImage('precise', 2)
+        provider.newBaseImage('oneiric', 1)
+        provider.newBaseImage('precise', 2)
 
     def test_add_snap_image(self):
         self.test_add_base_image()
@@ -70,9 +70,9 @@ class TestVMDatabase(testtools.TestCase):
         hp_provider = self.db.getProvider('hpcloud')
         hp_base_image1 = hp_provider.getBaseImage('oneiric')
         hp_base_image2 = hp_provider.getBaseImage('precise')
-        hp_snapshot_image1 = hp_base_image1.newSnapshotImage(
+        hp_base_image1.newSnapshotImage(
             'oneiric-1331683549', 1331929410, 211, 311)
-        hp_snapshot_image2 = hp_base_image2.newSnapshotImage(
+        hp_base_image2.newSnapshotImage(
             'precise-1331683549', 1331929410, 212, 311)
 
         self.db.print_state()
@@ -108,8 +108,8 @@ class TestVMDatabase(testtools.TestCase):
         provider = self.db.getProvider('rackspace')
         base_image1 = provider.getBaseImage('oneiric')
         base_image2 = provider.getBaseImage('precise')
-        snapshot_image1 = base_image1.current_snapshot
-        snapshot_image2 = base_image2.current_snapshot
+        base_image1.current_snapshot
+        base_image2.current_snapshot
         assert(len(provider.machines) == 0)
         assert(len(provider.ready_machines) == 0)
         assert(len(provider.building_machines) == 0)
@@ -180,8 +180,6 @@ class TestVMDatabase(testtools.TestCase):
         hp_provider = self.db.getProvider('hpcloud')
         hp_base_image1 = hp_provider.getBaseImage('oneiric')
         hp_base_image2 = hp_provider.getBaseImage('precise')
-        hp_snapshot_image1 = hp_base_image1.current_snapshot
-        hp_snapshot_image2 = hp_base_image2.current_snapshot
         hp_machine1 = hp_base_image1.newMachine(
             '%s-1331683551' % hp_base_image1.name,
             '21000021', '2.2.3.4', 'hpuuid1')
