@@ -97,16 +97,23 @@ def create_jenkins_node(jenkins, machine):
         labels = '%sdevstack-%s' % (DEVSTACK_GATE_PREFIX,
                                     machine.base_image.name)
         priv_key = '/var/lib/jenkins/.ssh/id_rsa'
-        jenkins.create_node(name, numExecutors=1,
-                            nodeDescription=node_desc,
-                            remoteFS='/home/jenkins',
-                            labels=labels,
-                            exclusive=True,
-                            launcher='hudson.plugins.sshslaves.SSHLauncher',
-                            launcher_params={'port': 22,
-                                             'username': 'jenkins',
-                                             'privatekey': priv_key,
-                                             'host': machine.ip})
+        try:
+            jenkins.create_node(
+                name, numExecutors=1,
+                nodeDescription=node_desc,
+                remoteFS='/home/jenkins',
+                labels=labels,
+                exclusive=True,
+                launcher='hudson.plugins.sshslaves.SSHLauncher',
+                launcher_params={'port': 22,
+                                 'username': 'jenkins',
+                                 'privatekey': priv_key,
+                                 'host': machine.ip})
+        except myjenkins.JenkinsException as e:
+            if 'already exists' in str(e):
+                pass
+            else:
+                raise
 
 
 def check_machine(jenkins, client, machine, error_counts):
