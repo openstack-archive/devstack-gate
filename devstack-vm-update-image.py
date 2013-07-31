@@ -57,6 +57,8 @@ PROJECTS = [
     'openstack/keystone',
     'openstack/neutron',
     'openstack/nova',
+    'openstack/oslo.config',
+    'openstack/oslo.messaging',
     'openstack/python-ceilometerclient',
     'openstack/python-cinderclient',
     'openstack/python-glanceclient',

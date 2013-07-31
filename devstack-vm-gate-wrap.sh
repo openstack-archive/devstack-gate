@@ -327,6 +327,8 @@ PROJECTS="openstack/python-swiftclient $PROJECTS"
 PROJECTS="openstack/requirements $PROJECTS"
 PROJECTS="openstack/swift $PROJECTS"
 PROJECTS="openstack/tempest $PROJECTS"
+PROJECTS="openstack/oslo.config $PROJECTS"
+PROJECTS="openstack/oslo.messaging $PROJECTS"
 
 # Set this variable to skip updating the devstack-gate project itself.
 # Useful in development so you can edit scripts in place and run them
