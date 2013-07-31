@@ -259,6 +259,10 @@ function cleanup_host {
         sudo chmod a+r $WORKSPACE/subunit_log.txt.gz $WORKSPACE/testr_results.html.gz
     fi
 
+    if [ -f $BASE/new/tempest/tempest.log ] ; then
+        sudo cp $BASE/new/tempest/tempest.log $WORKSPACE/logs/tempest.log
+    fi
+
     # Make sure jenkins can read all the logs
     sudo chown -R jenkins:jenkins $WORKSPACE/logs/
     sudo chmod a+r $WORKSPACE/logs/
