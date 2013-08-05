@@ -84,7 +84,7 @@ def launch_node(client, snap_image, image, flavor, last_name):
     return server, machine
 
 
-def create_jenkins_node(jenkins, machine):
+def create_jenkins_node(jenkins, machine, credentials_id):
     name = '%sdevstack-%s-%s-%s' % (DEVSTACK_GATE_PREFIX,
                                     machine.base_image.name,
                                     machine.base_image.provider.name,
@@ -97,6 +97,16 @@ def create_jenkins_node(jenkins, machine):
         labels = '%sdevstack-%s' % (DEVSTACK_GATE_PREFIX,
                                     machine.base_image.name)
         priv_key = '/var/lib/jenkins/.ssh/id_rsa'
+        if credentials_id:
+            launcher_params={'port': 22,
+                             'credentialsId': credentials_id,
+                             'host': machine.ip}
+        else:
+            launcher_params={'port': 22,
+                             'username': 'jenkins',
+                             'privatekey': priv_key,
+                             'host': machine.ip}
+
         try:
             jenkins.create_node(
                 name, numExecutors=1,
@@ -105,10 +115,7 @@ def create_jenkins_node(jenkins, machine):
                 labels=labels,
                 exclusive=True,
                 launcher='hudson.plugins.sshslaves.SSHLauncher',
-                launcher_params={'port': 22,
-                                 'username': 'jenkins',
-                                 'privatekey': priv_key,
-                                 'host': machine.ip})
+                launcher_params=launcher_params)
         except myjenkins.JenkinsException as e:
             if 'already exists' in str(e):
                 pass
@@ -116,7 +123,7 @@ def create_jenkins_node(jenkins, machine):
                 raise
 
 
-def check_machine(jenkins, client, machine, error_counts):
+def check_machine(jenkins, client, machine, error_counts, credentials_id):
     try:
         server = client.servers.get(machine.external_id)
     except:
@@ -141,7 +148,7 @@ def check_machine(jenkins, client, machine, error_counts):
                 statsd.timing(key, dt)
                 statsd.incr(key)
             print "Adding machine %s to Jenkins" % machine.id
-            create_jenkins_node(jenkins, machine)
+            create_jenkins_node(jenkins, machine, credentials_id)
             print "Machine %s is ready" % machine.id
             machine.state = vmdatabase.READY
             utils.log.debug("Online ID: %s" % machine.id)
@@ -169,6 +176,8 @@ def check_machine(jenkins, client, machine, error_counts):
 def main():
     db = vmdatabase.VMDatabase()
 
+    jenkins = None
+    credentials_id = None
     if not SKIP_DEVSTACK_GATE_JENKINS:
         config = ConfigParser.ConfigParser()
         config.read(DEVSTACK_GATE_SECURE_CONFIG)
@@ -177,8 +186,8 @@ def main():
                                     config.get('jenkins', 'user'),
                                     config.get('jenkins', 'apikey'))
         jenkins.get_info()
-    else:
-        jenkins = None
+        if config.has_option('jenkins', 'credentials_id'):
+            credentials_id = config.get('jenkins', 'credentials_id')
 
     provider = db.getProvider(PROVIDER_NAME)
     print "Working with provider %s" % provider.name
@@ -224,7 +233,7 @@ def main():
         print "Waiting on %s machines" % len(building_machines)
         for machine in building_machines:
             try:
-                check_machine(jenkins, client, machine, error_counts)
+                check_machine(jenkins, client, machine, error_counts, credentials_id)
             except:
                 traceback.print_exc()
                 print "Abandoning machine %s" % machine.id
