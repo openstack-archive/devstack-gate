@@ -51,7 +51,12 @@ def main():
     else:
         jenkins = None
 
-    machine = db.getMachineByJenkinsName(NODE_NAME)
+    try:
+        machine = db.getMachineByJenkinsName(NODE_NAME)
+    except Exception:
+        utils.log.debug("Unable to find node: %s" % NODE_NAME)
+        return
+
     utils.log.debug("Used ID: %s old state: %s build:%s" % (
             machine.id, machine.state, BUILD_URL))
 

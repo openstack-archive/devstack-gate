@@ -38,7 +38,12 @@ BUILD_URL = os.environ.get('BUILD_URL', '')
 def main():
     db = vmdatabase.VMDatabase()
 
-    machine = db.getMachineByJenkinsName(NODE_NAME)
+    try:
+        machine = db.getMachineByJenkinsName(NODE_NAME)
+    except Exception:
+        utils.log.debug("Unable to find node: %s" % NODE_NAME)
+        return
+
     if machine.state != vmdatabase.HOLD:
         utils.log.debug("Set deleted ID: %s old state: %s build: %s" % (
                 machine.id, machine.state, BUILD_URL))
