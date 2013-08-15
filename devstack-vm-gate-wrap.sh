@@ -370,8 +370,8 @@ fi
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 
-# Set to 0 to skip the devstack exercises
-export DEVSTACK_GATE_EXERCISES=${DEVSTACK_GATE_EXERCISES:-1}
+# Set to 1 to run the devstack exercises
+export DEVSTACK_GATE_EXERCISES=${DEVSTACK_GATE_EXERCISES:-0}
 
 # Set to 1 to run postgresql instead of mysql
 export DEVSTACK_GATE_POSTGRES=${DEVSTACK_GATE_POSTGRES:-0}
@@ -403,6 +403,7 @@ export DEVSTACK_GATE_CELLS=${DEVSTACK_GATE_CELLS:-0}
 export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-0}
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
+    export DEVSTACK_GATE_EXERCISES=1
     if [ "$ZUUL_BRANCH" == "stable/grizzly" ]; then
 # Set to 1 to run cinder instead of nova volume
 # Only applicable to stable/folsom branch
@@ -412,13 +413,15 @@ if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
         export GRENADE_OLD_BRANCH="stable/grizzly"
         export DEVSTACK_GATE_CINDER=1
         export DEVSTACK_GATE_TEMPEST=1
-        export DEVSTACK_GATE_EXERCISES=1
     else # master
         export GRENADE_OLD_BRANCH="stable/grizzly"
         export DEVSTACK_GATE_CINDER=1
         export DEVSTACK_GATE_TEMPEST=1
-        export DEVSTACK_GATE_EXERCISES=1
     fi
+fi
+
+if [ "$ZUUL_BRANCH" == "stable/grizzly" -o "$ZUUL_BRANCH" == "stable/folsom"]; then
+    export DEVSTACK_GATE_EXERCISES=1
 fi
 
 # Set the virtualization driver to: libvirt, openvz
