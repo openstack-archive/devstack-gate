@@ -119,6 +119,10 @@ EOF
         echo "CINDER_SECURE_DELETE=False" >>localrc
     fi
 
+    if [ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]; then
+        echo "HEAT_CREATE_TEST_IMAGE=True" >>localrc
+    fi
+
     if [ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ] ; then
         echo "EXTRA_OPTS=(backdoor_port=0)" >>localrc
     fi
@@ -261,6 +265,9 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     elif [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] ; then
         echo "Running stress tests"
         sudo -H -u stack tox -estress
+    elif [[ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]] ; then
+        echo "Running slow heat tests"
+        sudo -H -u stack tox -eheat-slow
     else
         echo "Running tempest smoke tests"
         sudo -H -u stack tox -esmoke
