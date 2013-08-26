@@ -183,6 +183,16 @@ EOF
         # running grenade.
         echo "USE_SCREEN=False" >>localrc
     fi
+
+    if [ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]; then
+        # use fake virt driver and 10 copies of nova-compute
+        echo "VIRT_DRIVER=fake" >> localrc
+        # To make debugging easier, disabled until bug 1218575 is fixed.
+        # echo "NUMBER_FAKE_NOVA_COMPUTE=10" >>localrc
+        echo "TEMPEST_LARGE_OPS_NUMBER=150" >>localrc
+    fi
+
+
 }
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
@@ -268,6 +278,9 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     elif [[ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]] ; then
         echo "Running slow heat tests"
         sudo -H -u stack tox -eheat-slow
+    elif [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]] ; then
+        echo "Running large ops tests"
+        sudo -H -u stack tox -elarge-ops
     else
         echo "Running tempest smoke tests"
         sudo -H -u stack tox -esmoke

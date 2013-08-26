@@ -387,6 +387,9 @@ export DEVSTACK_GATE_TEMPEST_STRESS=${DEVSTACK_GATE_TEMPEST_STRESS:-0}
 # Set to 1 to run tempest heat slow tests
 export DEVSTACK_GATE_TEMPEST_HEAT_SLOW=${DEVSTACK_GATE_TEMPEST_HEAT_SLOW:-0}
 
+# Set to 1 to run tempest large ops test
+export DEVSTACK_GATE_TEMPEST_LARGE_OPS=${DEVSTACK_GATE_TEMPEST_LARGE_OPS:-0}
+
 export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-0}
 
 # Set to 1 to enable Cinder secure delete.
