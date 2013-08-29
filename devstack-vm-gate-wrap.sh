@@ -419,7 +419,7 @@ if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     fi
 fi
 
-if [ "$ZUUL_BRANCH" == "stable/grizzly" -o "$ZUUL_BRANCH" == "stable/folsom"]; then
+if [ "$ZUUL_BRANCH" = "stable/grizzly" -o "$ZUUL_BRANCH" = "stable/folsom" ]; then
     export DEVSTACK_GATE_EXERCISES=1
 fi
 
