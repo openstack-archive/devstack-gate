@@ -1,4 +1,0 @@
-# devstack-gate dependencies
-sqlalchemy
-sqlalchemy-migrate
-statsd
