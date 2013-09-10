@@ -248,6 +248,8 @@ function cleanup_host {
 
     sudo iptables-save > $WORKSPACE/logs/iptables.txt
 
+    pip freeze > $WORKSPACE/logs/pip-freeze.txt
+
     # Process testr artifacts.
     if [ -f $BASE/new/tempest/.testrepository/0 ]; then
         sudo cp $BASE/new/tempest/.testrepository/0 $WORKSPACE/subunit_log.txt
