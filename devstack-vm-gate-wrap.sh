@@ -468,7 +468,9 @@ setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 
 # Run pre test hook if we have one
 if function_exists "pre_test_hook"; then
-  pre_test_hook
+  set -o xtrace
+  pre_test_hook 2>&1 | tee $WORKSPACE/logs/devstack-gate-pre-test-hook.txt
+  set +o xtrace
 fi
 
 # Run the gate function
@@ -477,8 +479,10 @@ RETVAL=$?
 
 # Run post test hook if we have one
 if [ $RETVAL -eq 0 ] && function_exists "post_test_hook"; then
-  post_test_hook
+  set -o xtrace -o pipefail
+  post_test_hook 2>&1 | tee $WORKSPACE/logs/devstack-gate-post-test-hook.txt
   RETVAL=$?
+  set +o xtrace +o pipefail
 fi
 
 cleanup_host &> $WORKSPACE/logs/devstack-gate-cleanup-host.txt
