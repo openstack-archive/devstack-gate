@@ -160,10 +160,6 @@ EOF
         # The 24G setting is expected to be enough even
         # in parallel run.
         echo "VOLUME_BACKING_FILE_SIZE=24G" >> localrc
-        # The volume-upload-image test requires a volume to be
-        # uploaded in glance which in turns is configured for use
-        # swift as backend
-        echo "SWIFT_LOOPBACK_DISK_SIZE=2000000" >> localrc
         # in order to ensure glance http tests don't time out, we
         # specify the TEMPEST_HTTP_IMAGE address to be horrizon's
         # front page. Kind of hacky, but it works.
