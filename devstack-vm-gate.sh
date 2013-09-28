@@ -68,7 +68,7 @@ function setup_localrc() {
     else # master
         MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,c-bak,n-cond,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api
         if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas
             echo "Q_USE_DEBUG_COMMAND=True" >>localrc
             echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
         else
