@@ -255,31 +255,38 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         cd $BASE/new/devstack
         sudo -H -u stack ./tools/configure_tempest.sh
     fi
+    # under tempest issolation tempest will need to write .tox dir, log files
+    sudo chown -R tempest:stack $BASE/new/tempest
+    # our lock files are in data, so we need to be able to write over there
+    sudo chown -R tempest:stack /opt/stack/data/tempest
+    # ensure the cirros image files are accessible
+    sudo chmod -R o+rx /opt/stack/new/devstack/files/
+
     cd $BASE/new/tempest
     if [[ "$DEVSTACK_GATE_TEMPEST_ALL" -eq "1" ]]; then
         echo "Running tempest all test suite"
-        sudo -H -u stack tox -eall
+        sudo -H -u tempest tox -eall
     elif [[ "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite"
-        sudo -H -u stack tox -efull
+        sudo -H -u tempest tox -efull
     elif [[ "$DEVSTACK_GATE_TEMPEST_TESTR_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite with testr"
-        sudo -H -u stack tox -etestr-full
+        sudo -H -u tempest tox -etestr-full
     elif [[ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ]] ; then
         echo "Generating coverage report"
-        sudo -H -u stack tox -ecoverage -- -o $BASE/new/tempest/coverage-report
+        sudo -H -u tempest tox -ecoverage -- -o $BASE/new/tempest/coverage-report
     elif [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] ; then
         echo "Running stress tests"
-        sudo -H -u stack tox -estress
+        sudo -H -u tempest tox -estress
     elif [[ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]] ; then
         echo "Running slow heat tests"
-        sudo -H -u stack tox -eheat-slow
+        sudo -H -u tempest tox -eheat-slow
     elif [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]] ; then
         echo "Running large ops tests"
-        sudo -H -u stack tox -elarge-ops
+        sudo -H -u tempest tox -elarge-ops
     else
         echo "Running tempest smoke tests"
-        sudo -H -u stack tox -esmoke
+        sudo -H -u tempest tox -esmoke
     fi
 else
     # Jenkins expects at least one nosetests file.  If we're not running
