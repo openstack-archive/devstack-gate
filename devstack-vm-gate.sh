@@ -166,6 +166,10 @@ EOF
         echo "TEMPEST_HTTP_IMAGE=http://127.0.0.1/" >> localrc
     fi
 
+    if [ "$DEVSTACK_GATE_TEMPEST_ALLOW_TENANT_ISOLATION" -eq "1" ]; then
+        echo "TEMPEST_ALLOW_TENANT_ISOLATION=True" >>localrc
+    fi
+
     if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
         echo "DATA_DIR=/opt/stack/data" >> localrc
         echo "SWIFT_DATA_DIR=/opt/stack/data/swift" >> localrc

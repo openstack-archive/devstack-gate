@@ -405,6 +405,10 @@ export DEVSTACK_GATE_TEMPEST_HEAT_SLOW=${DEVSTACK_GATE_TEMPEST_HEAT_SLOW:-0}
 # Set to 1 to run tempest large ops test
 export DEVSTACK_GATE_TEMPEST_LARGE_OPS=${DEVSTACK_GATE_TEMPEST_LARGE_OPS:-0}
 
+# Set to 1 to explicitly enable tempest tenant isolation. Otherwise tenant isolation setting
+# for tempest will be the one chosen by devstack.
+export DEVSTACK_GATE_TEMPEST_ALLOW_TENANT_ISOLATION=${DEVSTACK_GATE_TEMPEST_ALLOW_TENANT_ISOLATION:-0}
+
 export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-0}
 
 # Set to 1 to enable Cinder secure delete.
