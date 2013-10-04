@@ -259,12 +259,18 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         cd $BASE/new/devstack
         sudo -H -u stack ./tools/configure_tempest.sh
     fi
-    # under tempest issolation tempest will need to write .tox dir, log files
-    sudo chown -R tempest:stack $BASE/new/tempest
+    # under tempest isolation tempest will need to write .tox dir, log files
+    if [ -d "$BASE/new/tempest" ]; then
+        sudo chown -R tempest:stack $BASE/new/tempest
+    fi
     # our lock files are in data, so we need to be able to write over there
-    sudo chown -R tempest:stack /opt/stack/data/tempest
+    if [ -d /opt/stack/data/tempest ]; then
+        sudo chown -R tempest:stack /opt/stack/data/tempest
+    fi
     # ensure the cirros image files are accessible
-    sudo chmod -R o+rx /opt/stack/new/devstack/files/
+    if [ -d /opt/stack/new/devstack/files ]; then
+        sudo chmod -R o+rx /opt/stack/new/devstack/files
+    fi
 
     cd $BASE/new/tempest
     if [[ "$DEVSTACK_GATE_TEMPEST_ALL" -eq "1" ]]; then
