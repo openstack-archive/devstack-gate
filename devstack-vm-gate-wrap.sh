@@ -197,23 +197,26 @@ function setup_host {
         sudo usermod -a -G vz stack
     fi
 
-    cat <<EOF > /tmp/pydistutils.cfg
+    if [ "$DEVSTACK_GATE_REQS_INTEGRATION" -eq "0" \
+        -o "$ZUUL_PROJECT" != "openstack/requirements" ]; then
+        cat <<EOF > /tmp/pydistutils.cfg
 [easy_install]
 index_url = http://pypi.openstack.org/openstack
 EOF
-    cat <<EOF > /tmp/pip.conf
+        cat <<EOF > /tmp/pip.conf
 [global]
 index-url = http://pypi.openstack.org/openstack
 EOF
-    cp /tmp/pydistutils.cfg ~/.pydistutils.cfg
-    cp /tmp/pydistutils.cfg ~stack/.pydistutils.cfg
-    sudo cp /tmp/pydistutils.cfg ~root/.pydistutils.cfg
-    mkdir -p ~/.pip
-    mkdir -p ~stack/.pip
-    sudo -u root mkdir -p ~root/.pip
-    cp /tmp/pip.conf ~/.pip/pip.conf
-    cp /tmp/pip.conf ~stack/.pip/pip.conf
-    sudo -u root cp /tmp/pip.conf ~root/.pip/pip.conf
+        cp /tmp/pydistutils.cfg ~/.pydistutils.cfg
+        cp /tmp/pydistutils.cfg ~stack/.pydistutils.cfg
+        sudo cp /tmp/pydistutils.cfg ~root/.pydistutils.cfg
+        mkdir -p ~/.pip
+        mkdir -p ~stack/.pip
+        sudo -u root mkdir -p ~root/.pip
+        cp /tmp/pip.conf ~/.pip/pip.conf
+        cp /tmp/pip.conf ~stack/.pip/pip.conf
+        sudo -u root cp /tmp/pip.conf ~root/.pip/pip.conf
+    fi
 
     # Disable detailed logging as we return to the main script
     set +o xtrace
@@ -460,6 +463,9 @@ export DEVSTACK_GATE_TEMPEST_TESTR_FULL=${DEVSTACK_GATE_TEMPEST_TESTR_FULL:-0}
 
 # Set to 1 to run all tempest tests
 export DEVSTACK_GATE_TEMPEST_ALL=${DEVSTACK_GATE_TEMPEST_ALL:-0}
+
+# Set to 1 if running the openstack/requirements integration test
+export DEVSTACK_GATE_REQS_INTEGRATION=${DEVSTACK_GATE_REQS_INTEGRATION:-0}
 
 if ! function_exists "gate_hook"; then
   # the command we use to run the gate
