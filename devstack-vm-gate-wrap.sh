@@ -83,6 +83,10 @@ function setup_workspace {
 
       BRANCH=$ZUUL_BRANCH
 
+      if [ -n $OVERRIDE_ZUUL_BRANCH ] ; then
+          OVERRIDE_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$ZUUL_BRANCH,$OVERRIDE_ZUUL_BRANCH,")
+      fi
+
       MAX_ATTEMPTS=3
       COUNT=0
       # Attempt a git remote update. Run for up to 5 minutes before killing.
@@ -111,8 +115,10 @@ function setup_workspace {
       # See if we should check out a Zuul ref
       if [ $CHECKOUT_ZUUL -eq "1" ]; then
           # See if Zuul prepared a ref for this project
-          if [ "$ZUUL_REF" != "" ] && \
-              git fetch $ZUUL_URL/$PROJECT $ZUUL_REF; then
+          if { [ "$OVERRIDE_ZUUL_REF" != "" ] && \
+              git fetch $ZUUL_URL/$PROJECT $OVERRIDE_ZUUL_REF ; } || \
+              { [ "$ZUUL_REF" != "" ] && \
+              git fetch $ZUUL_URL/$PROJECT $ZUUL_REF ; }; then
               # It's there, so check it out.
               git checkout FETCH_HEAD
               git reset --hard FETCH_HEAD
