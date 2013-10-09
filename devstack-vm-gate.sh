@@ -276,28 +276,46 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     if [[ "$DEVSTACK_GATE_TEMPEST_ALL" -eq "1" ]]; then
         echo "Running tempest all test suite"
         sudo -H -u tempest tox -eall
+        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite"
         sudo -H -u tempest tox -efull
+        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_TESTR_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite with testr"
         sudo -H -u tempest tox -etestr-full
+        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ]] ; then
         echo "Generating coverage report"
         sudo -H -u tempest tox -ecoverage -- -o $BASE/new/tempest/coverage-report
+        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] ; then
         echo "Running stress tests"
         sudo -H -u tempest tox -estress
+        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]] ; then
         echo "Running slow heat tests"
         sudo -H -u tempest tox -eheat-slow
+        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]] ; then
         echo "Running large ops tests"
         sudo -H -u tempest tox -elarge-ops
+        res=$?
     else
         echo "Running tempest smoke tests"
         sudo -H -u tempest tox -esmoke
+        res=$?
     fi
+
+    if [[ "$LOCALRC_BRANCH" == "stable/folsom" ]] || \
+       [[ "$LOCALRC_BRANCH" == "stable/grizzly" ]] || \
+       [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] || \
+       [[ "$res" -ne "0" ]] ; then
+      exit $res
+    else
+      tools/check_logs.py -d $BASE/new/screen-logs
+    fi
+
 else
     # Jenkins expects at least one nosetests file.  If we're not running
     # tempest, then write a fake one that indicates the tests pass (since
