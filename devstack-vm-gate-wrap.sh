@@ -110,6 +110,7 @@ function setup_workspace {
       # See if this project has this branch, if not, use master
       if ! git branch -a |grep remotes/origin/$BRANCH>/dev/null; then
         BRANCH=master
+        FALLBACK_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$ZUUL_BRANCH,master,")
       fi
 
       # See if we should check out a Zuul ref
@@ -118,7 +119,9 @@ function setup_workspace {
           if { [ "$OVERRIDE_ZUUL_REF" != "" ] && \
               git fetch $ZUUL_URL/$PROJECT $OVERRIDE_ZUUL_REF ; } || \
               { [ "$ZUUL_REF" != "" ] && \
-              git fetch $ZUUL_URL/$PROJECT $ZUUL_REF ; }; then
+              git fetch $ZUUL_URL/$PROJECT $ZUUL_REF ; } || \
+              { [ "$FALLBACK_ZUUL_REF" != "" ] && \
+              git fetch $ZUUL_URL/$PROJECT $FALLBACK_ZUUL_REF ; }; then
               # It's there, so check it out.
               git checkout FETCH_HEAD
               git reset --hard FETCH_HEAD
