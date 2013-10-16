@@ -108,6 +108,7 @@ function setup_workspace {
       # Ensure that we don't have stale remotes around
       git remote prune origin
       # See if this project has this branch, if not, use master
+      FALLBACK_ZUUL_REF=""
       if ! git branch -a |grep remotes/origin/$BRANCH>/dev/null; then
         BRANCH=master
         FALLBACK_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$ZUUL_BRANCH,master,")
