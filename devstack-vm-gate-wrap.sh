@@ -83,7 +83,7 @@ function setup_workspace {
 
       BRANCH=$ZUUL_BRANCH
 
-      if [ -n $OVERRIDE_ZUUL_BRANCH ] ; then
+      if [ -n "$OVERRIDE_ZUUL_BRANCH" ] ; then
           OVERRIDE_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$ZUUL_BRANCH,$OVERRIDE_ZUUL_BRANCH,")
       fi
 
