@@ -26,6 +26,19 @@ function function_exists {
     type $1 2>/dev/null | grep -q 'is a function'
 }
 
+function git_checkout {
+    local branch=$1
+    local reset_branch=$branch
+
+    if [[ "$branch" != "FETCH_HEAD" ]]; then
+        reset_branch="remotes/origin/$branch"
+    fi
+
+    git checkout $branch
+    git reset --hard $reset_branch
+    git clean -x -f -d -q
+}
+
 function setup_workspace {
     DEST=$1
     CHECKOUT_ZUUL=$2
@@ -124,23 +137,17 @@ function setup_workspace {
               { [ "$FALLBACK_ZUUL_REF" != "" ] && \
               git fetch $ZUUL_URL/$PROJECT $FALLBACK_ZUUL_REF ; }; then
               # It's there, so check it out.
-              git checkout FETCH_HEAD
-              git reset --hard FETCH_HEAD
-              git clean -x -f -d -q
+              git_checkout FETCH_HEAD
           else
               if [ "$PROJECT" == "$ZUUL_PROJECT" ]; then
                   echo "Unable to find ref $ZUUL_REF for $PROJECT"
                   exit 1
               fi
-              git checkout $BRANCH
-              git reset --hard remotes/origin/$BRANCH
-              git clean -x -f -d -q
+              git_checkout $BRANCH
           fi
       else
           # We're ignoring Zuul refs
-          git checkout $BRANCH
-          git reset --hard remotes/origin/$BRANCH
-          git clean -x -f -d -q
+          git_checkout $BRANCH
       fi
 
       cd $DEST
