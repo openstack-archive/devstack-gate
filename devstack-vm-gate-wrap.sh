@@ -40,8 +40,9 @@ function git_checkout {
 }
 
 function setup_workspace {
-    DEST=$1
-    CHECKOUT_ZUUL=$2
+    local branch=$1
+    local DEST=$2
+    local CHECKOUT_ZUUL=$3
 
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
@@ -81,10 +82,11 @@ function setup_workspace {
       rsync -a ~/workspace-cache/ $DEST/
     fi
 
-    echo "Using branch: $ZUUL_BRANCH"
+    echo "Using branch: $branch"
     for PROJECT in $PROJECTS
     do
-      echo "Setting up $PROJECT"
+      BRANCH=$branch
+      echo "Setting up $PROJECT @ $BRANCH"
       SHORT_PROJECT=`basename $PROJECT`
       if [[ ! -e $SHORT_PROJECT ]]; then
         echo "  Need to clone $SHORT_PROJECT"
@@ -94,10 +96,8 @@ function setup_workspace {
 
       git remote set-url origin https://git.openstack.org/$PROJECT
 
-      BRANCH=$ZUUL_BRANCH
-
       if [ -n "$OVERRIDE_ZUUL_BRANCH" ] ; then
-          OVERRIDE_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$ZUUL_BRANCH,$OVERRIDE_ZUUL_BRANCH,")
+          OVERRIDE_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$BRANCH,$OVERRIDE_ZUUL_BRANCH,")
       fi
 
       MAX_ATTEMPTS=3
@@ -124,7 +124,7 @@ function setup_workspace {
       FALLBACK_ZUUL_REF=""
       if ! git branch -a |grep remotes/origin/$BRANCH>/dev/null; then
         BRANCH=master
-        FALLBACK_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$ZUUL_BRANCH,master,")
+        FALLBACK_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$BRANCH,master,")
       fi
 
       # See if we should check out a Zuul ref
@@ -390,17 +390,6 @@ export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
 rm -rf logs
 mkdir -p logs
 
-setup_workspace $BASE/new 1 &> \
-  $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
-
-# Also, if we're testing devstack-gate, re-exec this script once so
-# that we can test the new version of it.
-if [[ $ZUUL_CHANGES =~ "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
-    export RE_EXEC="true"
-    echo "This build includes a change to the devstack gate; re-execing this script."
-    exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
-fi
-
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 
@@ -443,29 +432,49 @@ export DEVSTACK_GATE_NEUTRON=${DEVSTACK_GATE_NEUTRON:-0}
 # Set to 1 to run nova in cells mode instead of the default mode
 export DEVSTACK_GATE_CELLS=${DEVSTACK_GATE_CELLS:-0}
 
-# Set to 1 to run grenade.
+# The following variables are set for different directions of Grenade updating
+# for a stable branch we want to both try to upgrade forward n => n+1 as
+# well as upgrade from last n-1 => n.
+#
+# i.e. stable/havana:
+#   DGG=1 means stable/grizzly => stable/havana
+#   DGGF=1 means stable/havana => master (or stable/icehouse if that's out)
 export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-0}
+export DEVSTACK_GATE_GRENADE_FORWARD=${DEVSTACK_GATE_GRENADE_FORWARD:-0}
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     export DEVSTACK_GATE_EXERCISES=1
     if [ "$ZUUL_BRANCH" == "stable/grizzly" ]; then
 # Set to 1 to run cinder instead of nova volume
 # Only applicable to stable/folsom branch
-        export GRENADE_OLD_BRANCH="stable/folsom"
         export DEVSTACK_GATE_CINDER=1
+        export GRENADE_OLD_BRANCH="stable/folsom"
+        export GRENADE_NEW_BRANCH="stable/grizzly"
     elif [ "$ZUUL_BRANCH" == "stable/havana" ]; then
         export GRENADE_OLD_BRANCH="stable/grizzly"
-        export DEVSTACK_GATE_CINDER=1
+        export GRENADE_NEW_BRANCH="stable/havana"
+        export DEVSTACK_GATE_TEMPEST=1
+    elif [ "$ZUUL_BRANCH" == "stable/icehouse" ]; then
+        export GRENADE_OLD_BRANCH="stable/havana"
+        export GRENADE_NEW_BRANCH="stable/icehouse"
         export DEVSTACK_GATE_TEMPEST=1
     else # master
+        # TODO(sdague): this is to let us get past retooling for havana
         export GRENADE_OLD_BRANCH="stable/grizzly"
-        export DEVSTACK_GATE_CINDER=1
+        export GRENADE_NEW_BRANCH="master"
         export DEVSTACK_GATE_TEMPEST=1
     fi
-fi
-
-if [ "$ZUUL_BRANCH" = "stable/grizzly" -o "$ZUUL_BRANCH" = "stable/folsom" ]; then
+    # the roll forward case
+elif [ "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
     export DEVSTACK_GATE_EXERCISES=1
+    export DEVSTACK_GATE_TEMPEST=1
+    if [ "$ZUUL_BRANCH" == "stable/grizzly" ]; then
+        export GRENADE_OLD_BRANCH="stable/grizzly"
+        export GRENADE_NEW_BRANCH="stable/havana"
+    elif [ "$ZUUL_BRANCH" == "stable/havana" ]; then
+        export GRENADE_OLD_BRANCH="stable/havana"
+        export GRENADE_NEW_BRANCH="master"
+    fi
 fi
 
 # Set the virtualization driver to: libvirt, openvz
@@ -491,12 +500,37 @@ if ! function_exists "gate_hook"; then
   }
 fi
 
-if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
-  ORIGBRANCH=$ZUUL_BRANCH
-  ZUUL_BRANCH=$GRENADE_OLD_BRANCH
-  setup_workspace $BASE/old 0 &> \
-    $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
-  ZUUL_BRANCH=$ORIGBRANCH
+echo "Triggered by: https://review.openstack.org/$ZUUL_CHANGE patchset $ZUUL_PATCHSET"
+echo "Pipeline: $ZUUL_PIPELINE"
+echo "IP configuration of this host:"
+ip -f inet addr show
+
+setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
+
+if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
+    setup_workspace $GRENADE_NEW_BRANCH $BASE/new 1 &> \
+        $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
+else
+    setup_workspace $ZUUL_BRANCH $BASE/new 1 &> \
+        $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
+fi
+
+# Also, if we're testing devstack-gate, re-exec this script once so
+# that we can test the new version of it.
+if [[ $ZUUL_CHANGES =~ "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
+    export RE_EXEC="true"
+    echo "This build includes a change to the devstack gate; re-execing this script."
+    exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
+fi
+
+# this looks like we are unDRY (does that make us wet?), however we want to do
+# as much as possible after the RE_EXEC as that will happen with the new script
+# and not the old script. The long term evolution is to make setup_workspace be
+# able to do a single project, only devstack_gate, and have all the rest of
+# setup_workspace happen after it.
+if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
+    setup_workspace $GRENADE_OLD_BRANCH $BASE/old 1 &> \
+        $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
 fi
 
 echo "Triggered by: https://review.openstack.org/$ZUUL_CHANGE patchset $ZUUL_PATCHSET"
