@@ -160,9 +160,6 @@ function setup_host {
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
 
-    # Make sure headers for the currently running kernel are installed:
-    sudo apt-get install -y --force-yes linux-headers-`uname -r`
-
     # Move the PIP cache into position:
     sudo mkdir -p /var/cache/pip
     sudo mv ~/cache/pip/* /var/cache/pip
