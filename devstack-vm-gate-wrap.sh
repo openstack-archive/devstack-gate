@@ -130,7 +130,8 @@ function setup_workspace {
       # See if we should check out a Zuul ref
       if [ $CHECKOUT_ZUUL -eq "1" ]; then
           # See if Zuul prepared a ref for this project
-          if { [ "$OVERRIDE_ZUUL_REF" != "" ] && \
+          if { [ "$ZUUL_BRANCH" == "$branch" ] && \
+              [ "$OVERRIDE_ZUUL_REF" != "" ] && \
               git fetch $ZUUL_URL/$PROJECT $OVERRIDE_ZUUL_REF ; } || \
               { [ "$ZUUL_REF" != "" ] && \
               git fetch $ZUUL_URL/$PROJECT $ZUUL_REF ; } || \
