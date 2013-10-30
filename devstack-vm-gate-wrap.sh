@@ -42,7 +42,6 @@ function git_checkout {
 function setup_workspace {
     local branch=$1
     local DEST=$2
-    local CHECKOUT_ZUUL=$3
 
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
@@ -128,10 +127,9 @@ function setup_workspace {
       fi
 
       # See if we should check out a Zuul ref
-      if [ $CHECKOUT_ZUUL -eq "1" ]; then
+      if [ "$ZUUL_BRANCH" == "$branch" ]; then
           # See if Zuul prepared a ref for this project
-          if { [ "$ZUUL_BRANCH" == "$branch" ] && \
-              [ "$OVERRIDE_ZUUL_REF" != "" ] && \
+          if { [ "$OVERRIDE_ZUUL_REF" != "" ] && \
               git fetch $ZUUL_URL/$PROJECT $OVERRIDE_ZUUL_REF ; } || \
               { [ "$ZUUL_REF" != "" ] && \
               git fetch $ZUUL_URL/$PROJECT $ZUUL_REF ; } || \
@@ -509,10 +507,10 @@ ip -f inet addr show
 setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
-    setup_workspace $GRENADE_NEW_BRANCH $BASE/new 1 &> \
+    setup_workspace $GRENADE_NEW_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
 else
-    setup_workspace $ZUUL_BRANCH $BASE/new 1 &> \
+    setup_workspace $ZUUL_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
 fi
 
@@ -530,7 +528,7 @@ fi
 # able to do a single project, only devstack_gate, and have all the rest of
 # setup_workspace happen after it.
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
-    setup_workspace $GRENADE_OLD_BRANCH $BASE/old 0 &> \
+    setup_workspace $GRENADE_OLD_BRANCH $BASE/old &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
 fi
 
