@@ -40,7 +40,7 @@ function git_checkout {
 }
 
 function setup_workspace {
-    local branch=$1
+    local base_branch=$1
     local DEST=$2
 
     # Enabled detailed logging, since output of this function is redirected
@@ -81,10 +81,10 @@ function setup_workspace {
       rsync -a ~/workspace-cache/ $DEST/
     fi
 
-    echo "Using branch: $branch"
+    echo "Using branch: $base_branch"
     for PROJECT in $PROJECTS
     do
-      BRANCH=$branch
+      BRANCH=$base_branch
       echo "Setting up $PROJECT @ $BRANCH"
       SHORT_PROJECT=`basename $PROJECT`
       if [[ ! -e $SHORT_PROJECT ]]; then
@@ -127,7 +127,7 @@ function setup_workspace {
       fi
 
       # See if we should check out a Zuul ref
-      if [ "$ZUUL_BRANCH" == "$branch" ]; then
+      if [ "$ZUUL_BRANCH" == "$BRANCH" ]; then
           # See if Zuul prepared a ref for this project
           if { [ "$OVERRIDE_ZUUL_REF" != "" ] && \
               git fetch $ZUUL_URL/$PROJECT $OVERRIDE_ZUUL_REF ; } || \
