@@ -530,7 +530,7 @@ fi
 # able to do a single project, only devstack_gate, and have all the rest of
 # setup_workspace happen after it.
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
-    setup_workspace $GRENADE_OLD_BRANCH $BASE/old 1 &> \
+    setup_workspace $GRENADE_OLD_BRANCH $BASE/old 0 &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
 fi
 
