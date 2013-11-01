@@ -157,6 +157,18 @@ function setup_project {
     fi
 }
 
+function reboot_devstack_gate {
+    export RE_EXEC="true"
+    echo "This build includes a change to the devstack gate; re-execing this script."
+
+    fix_disk_layout
+
+    mkdir -p $BASE/new
+    cd $BASE/new
+    setup_project openstack-infra/devstack-gate master
+    exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
+}
+
 function setup_workspace {
     local base_branch=$1
     local DEST=$2
@@ -400,14 +412,6 @@ PROJECTS="openstack/tempest $PROJECTS"
 PROJECTS="openstack/oslo.config $PROJECTS"
 PROJECTS="openstack/oslo.messaging $PROJECTS"
 
-# Set this variable to skip updating the devstack-gate project itself.
-# Useful in development so you can edit scripts in place and run them
-# directly.  Do not set in production.
-# Normally not set, and we do include devstack-gate with the rest of
-# the projects.
-if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
-    PROJECTS="openstack-infra/devstack-gate $PROJECTS"
-fi
 
 export BASE=/opt/stack
 
@@ -421,6 +425,20 @@ export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
 # Make a directory to store logs
 rm -rf logs
 mkdir -p logs
+
+# Set this variable to skip updating the devstack-gate project itself.
+# Useful in development so you can edit scripts in place and run them
+# directly.  Do not set in production.
+# Normally not set, and we do include devstack-gate with the rest of
+# the projects.
+if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
+    PROJECTS="openstack-infra/devstack-gate $PROJECTS"
+    # Also, if we're testing devstack-gate, re-exec this script once so
+    # that we can test the new version of it.
+    if [[ $ZUUL_CHANGES =~ "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
+        reboot_devstack_gate
+    fi
+fi
 
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
@@ -545,14 +563,6 @@ if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1
 else
     setup_workspace $ZUUL_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
-fi
-
-# Also, if we're testing devstack-gate, re-exec this script once so
-# that we can test the new version of it.
-if [[ $ZUUL_CHANGES =~ "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
-    export RE_EXEC="true"
-    echo "This build includes a change to the devstack gate; re-execing this script."
-    exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
 fi
 
 # this looks like we are unDRY (does that make us wet?), however we want to do
