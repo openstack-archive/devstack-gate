@@ -39,6 +39,18 @@ function git_checkout {
     git clean -x -f -d -q
 }
 
+function fix_etc_hosts {
+    # HPcloud stopped adding the hostname to /etc/hosts with their
+    # precise images.
+
+    HOSTNAME=`/bin/hostname`
+    if ! grep $HOSTNAME /etc/hosts >/dev/null; then
+        echo "Need to add hostname to /etc/hosts"
+        sudo bash -c 'echo "127.0.1.1 $HOSTNAME" >>/etc/hosts'
+    fi
+
+}
+
 function fix_disk_layout {
     # Hpcloud provides no swap, but does have a virtual disk mounted
     # at /mnt we can use.  It also doesn't have enough space on / for
@@ -63,15 +75,7 @@ function setup_workspace {
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
 
-    # HPcloud stopped adding the hostname to /etc/hosts with their
-    # precise images.
-
-    HOSTNAME=`/bin/hostname`
-    if ! grep $HOSTNAME /etc/hosts >/dev/null
-    then
-      echo "Need to add hostname to /etc/hosts"
-      sudo bash -c 'echo "127.0.1.1 $HOSTNAME" >>/etc/hosts'
-    fi
+    fix_etc_hosts
 
     fix_disk_layout
 
