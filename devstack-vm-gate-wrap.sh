@@ -39,6 +39,23 @@ function git_checkout {
     git clean -x -f -d -q
 }
 
+function fix_disk_layout {
+    # Hpcloud provides no swap, but does have a virtual disk mounted
+    # at /mnt we can use.  It also doesn't have enough space on / for
+    # two devstack installs, so we partition the vdisk:
+    if [ `grep SwapTotal /proc/meminfo | awk '{ print $2; }'` -eq 0 ] && \
+        [ -b /dev/vdb ]; then
+        sudo umount /dev/vdb
+        sudo parted /dev/vdb --script -- mklabel msdos
+        sudo parted /dev/vdb --script -- mkpart primary linux-swap 0 8192
+        sudo parted /dev/vdb --script -- mkpart primary ext2 8192 -1
+        sudo mkswap /dev/vdb1
+        sudo mkfs.ext4 /dev/vdb2
+        sudo swapon /dev/vdb1
+        sudo mount /dev/vdb2 /opt
+    fi
+}
+
 function setup_workspace {
     local base_branch=$1
     local DEST=$2
@@ -56,20 +73,7 @@ function setup_workspace {
       sudo bash -c 'echo "127.0.1.1 $HOSTNAME" >>/etc/hosts'
     fi
 
-    # Hpcloud provides no swap, but does have a virtual disk mounted
-    # at /mnt we can use.  It also doesn't have enough space on / for
-    # two devstack installs, so we partition the vdisk:
-    if [ `grep SwapTotal /proc/meminfo | awk '{ print $2; }'` -eq 0 ] && \
-       [ -b /dev/vdb ]; then
-      sudo umount /dev/vdb
-      sudo parted /dev/vdb --script -- mklabel msdos
-      sudo parted /dev/vdb --script -- mkpart primary linux-swap 0 8192
-      sudo parted /dev/vdb --script -- mkpart primary ext2 8192 -1
-      sudo mkswap /dev/vdb1
-      sudo mkfs.ext4 /dev/vdb2
-      sudo swapon /dev/vdb1
-      sudo mount /dev/vdb2 /opt
-    fi
+    fix_disk_layout
 
     sudo mkdir -p $DEST
     sudo chown -R jenkins:jenkins $DEST
