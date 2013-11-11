@@ -454,6 +454,10 @@ export DEVSTACK_GATE_POSTGRES=${DEVSTACK_GATE_POSTGRES:-0}
 # Set to 1 to use zeromq instead of rabbitmq (or qpid)
 export DEVSTACK_GATE_ZEROMQ=${DEVSTACK_GATE_ZEROMQ:-0}
 
+# Set to qpid to use qpid, or zeromq to use zeromq.
+# Default set to rabbitmq
+export DEVSTACK_GATE_MQ_DRIVER=${DEVSTACK_GATE_MQ_DRIVER:-"rabbitmq"}
+
 # Set to 1 to run tempest stress tests
 export DEVSTACK_GATE_TEMPEST_STRESS=${DEVSTACK_GATE_TEMPEST_STRESS:-0}
 
