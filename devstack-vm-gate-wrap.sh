@@ -26,6 +26,19 @@ function function_exists {
     type $1 2>/dev/null | grep -q 'is a function'
 }
 
+# Attempt to fetch a git ref for a project, if that ref is not empty
+function git_fetch_at_ref {
+    local project=$1
+    local ref=$2
+    if [ "$ref" != "" ]; then
+        git fetch $ZUUL_URL/$project $ref
+        return $?
+    else
+        # return failing
+        return 1
+    fi
+}
+
 function git_checkout {
     local branch=$1
     local reset_branch=$branch
@@ -125,13 +138,11 @@ function setup_project {
     # See if we should check out a Zuul ref
     if [ "$ZUUL_BRANCH" == "$branch" ]; then
         # See if Zuul prepared a ref for this project
-        if { [ "$OVERRIDE_ZUUL_REF" != "" ] && \
-            git fetch $ZUUL_URL/$project $OVERRIDE_ZUUL_REF ; } || \
-            { [ "$ZUUL_REF" != "" ] && \
-            git fetch $ZUUL_URL/$project $ZUUL_REF ; } || \
-            { [ "$FALLBACK_ZUUL_REF" != "" ] && \
-            git fetch $ZUUL_URL/$project $FALLBACK_ZUUL_REF ; }; then
-              # It's there, so check it out.
+        if git_fetch_at_ref $project $OVERRIDE_ZUUL_REF || \
+            git_fetch_at_ref $project $ZUUL_REF || \
+            git_fetch_at_ref $project $FALLBACK_ZUUL_REF; then
+
+            # It's there, so check it out.
             git_checkout FETCH_HEAD
         else
               if [ "$project" == "$ZUUL_PROJECT" ]; then
