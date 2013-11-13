@@ -68,6 +68,84 @@ function fix_disk_layout {
     fi
 }
 
+# do all the zuulification magic for project at a specified branch
+#
+# The basic logic flow is as follows:
+#   if we have ``branch`` for project, check that out
+#   if we don't have ``branch`` for project, change ``branch`` to master
+#     and check that out
+#   if the global ZUUL_BRANCH matches ``branch``, then also look for a
+#     valid ZUUL_REF, and use that instead of the HEAD of the branch
+#
+# The end result is a tree on disk checked out at the right ref for zuul
+function setup_project {
+    local project=$1
+    local branch=$2
+    local short_project=`basename $project`
+
+    echo "Setting up $project @ $branch"
+    short_project=`basename $project`
+    if [[ ! -e $short_project ]]; then
+        echo "  Need to clone $short_project"
+        git clone https://git.openstack.org/$project
+    fi
+    cd $short_project
+
+    git remote set-url origin https://git.openstack.org/$project
+
+    if [ -n "$OVERRIDE_ZUUL_BRANCH" ] ; then
+        OVERRIDE_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$branch,$OVERRIDE_ZUUL_BRANCH,")
+    fi
+
+    MAX_ATTEMPTS=3
+    COUNT=0
+    # Attempt a git remote update. Run for up to 5 minutes before killing.
+    # If first SIGTERM does not kill the process wait a minute then SIGKILL.
+    # If update fails try again for up to a total of 3 attempts.
+    until timeout -k 1m 5m git remote update; do
+        COUNT=$(($COUNT + 1))
+        echo "git remote update failed."
+        if [ $COUNT -eq $MAX_ATTEMPTS ]; then
+            exit 1
+        fi
+        SLEEP_TIME=$((30 + $RANDOM % 60))
+        echo "sleep $SLEEP_TIME before retrying."
+        sleep $SLEEP_TIME
+    done
+
+    # Ensure that we don't have stale remotes around
+    git remote prune origin
+    # See if this project has this branch, if not, use master
+    FALLBACK_ZUUL_REF=""
+    if ! git branch -a |grep remotes/origin/$branch>/dev/null; then
+        branch=master
+        FALLBACK_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$branch,master,")
+    fi
+
+    # See if we should check out a Zuul ref
+    if [ "$ZUUL_BRANCH" == "$branch" ]; then
+        # See if Zuul prepared a ref for this project
+        if { [ "$OVERRIDE_ZUUL_REF" != "" ] && \
+            git fetch $ZUUL_URL/$project $OVERRIDE_ZUUL_REF ; } || \
+            { [ "$ZUUL_REF" != "" ] && \
+            git fetch $ZUUL_URL/$project $ZUUL_REF ; } || \
+            { [ "$FALLBACK_ZUUL_REF" != "" ] && \
+            git fetch $ZUUL_URL/$project $FALLBACK_ZUUL_REF ; }; then
+              # It's there, so check it out.
+            git_checkout FETCH_HEAD
+        else
+              if [ "$project" == "$ZUUL_PROJECT" ]; then
+                  echo "Unable to find ref $ZUUL_REF for $project"
+                  exit 1
+              fi
+              git_checkout $branch
+        fi
+    else
+          # We're ignoring Zuul refs
+        git_checkout $branch
+    fi
+}
+
 function setup_workspace {
     local base_branch=$1
     local DEST=$2
@@ -81,7 +159,6 @@ function setup_workspace {
 
     sudo mkdir -p $DEST
     sudo chown -R jenkins:jenkins $DEST
-    cd $DEST
 
     # The vm template update job should cache the git repos
     # Move them to where we expect:
@@ -90,75 +167,12 @@ function setup_workspace {
     fi
 
     echo "Using branch: $base_branch"
-    for PROJECT in $PROJECTS
-    do
-      BRANCH=$base_branch
-      echo "Setting up $PROJECT @ $BRANCH"
-      SHORT_PROJECT=`basename $PROJECT`
-      if [[ ! -e $SHORT_PROJECT ]]; then
-        echo "  Need to clone $SHORT_PROJECT"
-        git clone https://git.openstack.org/$PROJECT
-      fi
-      cd $SHORT_PROJECT
-
-      git remote set-url origin https://git.openstack.org/$PROJECT
-
-      if [ -n "$OVERRIDE_ZUUL_BRANCH" ] ; then
-          OVERRIDE_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$BRANCH,$OVERRIDE_ZUUL_BRANCH,")
-      fi
-
-      MAX_ATTEMPTS=3
-      COUNT=0
-      # Attempt a git remote update. Run for up to 5 minutes before killing.
-      # If first SIGTERM does not kill the process wait a minute then SIGKILL.
-      # If update fails try again for up to a total of 3 attempts.
-      until timeout -k 1m 5m git remote update
-      do
-        COUNT=$(($COUNT + 1))
-        echo "git remote update failed."
-        if [ $COUNT -eq $MAX_ATTEMPTS ]
-        then
-          exit 1
-        fi
-        SLEEP_TIME=$((30 + $RANDOM % 60))
-        echo "sleep $SLEEP_TIME before retrying."
-        sleep $SLEEP_TIME
-      done
-
-      # Ensure that we don't have stale remotes around
-      git remote prune origin
-      # See if this project has this branch, if not, use master
-      FALLBACK_ZUUL_REF=""
-      if ! git branch -a |grep remotes/origin/$BRANCH>/dev/null; then
-        BRANCH=master
-        FALLBACK_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$BRANCH,master,")
-      fi
-
-      # See if we should check out a Zuul ref
-      if [ "$ZUUL_BRANCH" == "$BRANCH" ]; then
-          # See if Zuul prepared a ref for this project
-          if { [ "$OVERRIDE_ZUUL_REF" != "" ] && \
-              git fetch $ZUUL_URL/$PROJECT $OVERRIDE_ZUUL_REF ; } || \
-              { [ "$ZUUL_REF" != "" ] && \
-              git fetch $ZUUL_URL/$PROJECT $ZUUL_REF ; } || \
-              { [ "$FALLBACK_ZUUL_REF" != "" ] && \
-              git fetch $ZUUL_URL/$PROJECT $FALLBACK_ZUUL_REF ; }; then
-              # It's there, so check it out.
-              git_checkout FETCH_HEAD
-          else
-              if [ "$PROJECT" == "$ZUUL_PROJECT" ]; then
-                  echo "Unable to find ref $ZUUL_REF for $PROJECT"
-                  exit 1
-              fi
-              git_checkout $BRANCH
-          fi
-      else
-          # We're ignoring Zuul refs
-          git_checkout $BRANCH
-      fi
-
-      cd $DEST
+    for PROJECT in $PROJECTS; do
+        cd $DEST
+        setup_project $PROJECT $base_branch
     done
+    # It's important we are back at DEST for the rest of the script
+    cd $DEST
 
     # The vm template update job should cache some images in ~/files.
     # Move them to where devstack expects:
