@@ -163,7 +163,8 @@ function reboot_devstack_gate {
 
     fix_disk_layout
 
-    mkdir -p $BASE/new
+    sudo mkdir -p $BASE/new
+    sudo chown -R jenkins:jenkins $BASE/new
     cd $BASE/new
     setup_project openstack-infra/devstack-gate master
     exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
