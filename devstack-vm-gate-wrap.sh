@@ -324,6 +324,7 @@ function cleanup_host {
     sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
 
     sudo iptables-save > $WORKSPACE/logs/iptables.txt
+    df -h> $WORKSPACE/logs/df.txt
 
     pip freeze > $WORKSPACE/logs/pip-freeze.txt
 
