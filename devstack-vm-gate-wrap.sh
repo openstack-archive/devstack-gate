@@ -439,8 +439,6 @@ export DEVSTACK_GATE_TEMPEST_LARGE_OPS=${DEVSTACK_GATE_TEMPEST_LARGE_OPS:-0}
 # for tempest will be the one chosen by devstack.
 export DEVSTACK_GATE_TEMPEST_ALLOW_TENANT_ISOLATION=${DEVSTACK_GATE_TEMPEST_ALLOW_TENANT_ISOLATION:-0}
 
-export DEVSTACK_GATE_CINDER=${DEVSTACK_GATE_CINDER:-0}
-
 # Set to 1 to enable Cinder secure delete.
 # False by default to avoid dd problems on Precise.
 # https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1023755
@@ -465,13 +463,7 @@ export DEVSTACK_GATE_GRENADE_FORWARD=${DEVSTACK_GATE_GRENADE_FORWARD:-0}
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     export DEVSTACK_GATE_EXERCISES=1
-    if [ "$ZUUL_BRANCH" == "stable/grizzly" ]; then
-# Set to 1 to run cinder instead of nova volume
-# Only applicable to stable/folsom branch
-        export DEVSTACK_GATE_CINDER=1
-        export GRENADE_OLD_BRANCH="stable/folsom"
-        export GRENADE_NEW_BRANCH="stable/grizzly"
-    elif [ "$ZUUL_BRANCH" == "stable/havana" ]; then
+    if [ "$ZUUL_BRANCH" == "stable/havana" ]; then
         export GRENADE_OLD_BRANCH="stable/grizzly"
         export GRENADE_NEW_BRANCH="stable/havana"
         export DEVSTACK_GATE_TEMPEST=1
