@@ -296,6 +296,10 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         echo "Running large ops tests"
         sudo -H -u tempest tox -elarge-ops
         res=$?
+    elif [[ "$DEVSTACK_GATE_SMOKE_SERIAL" -eq "1" ]] ; then
+        echo "Running tempest smoke tests"
+        sudo -H -u tempest tox -esmoke-serial
+        res=$?
     else
         echo "Running tempest smoke tests"
         sudo -H -u tempest tox -esmoke
