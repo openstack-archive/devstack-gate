@@ -46,14 +46,7 @@ function setup_localrc() {
 
     SKIP_EXERCISES=boot_from_volume,client-env
 
-    if [ "$LOCALRC_BRANCH" == "stable/folsom" ]; then
-        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-net,swift
-        if [ "$DEVSTACK_GATE_CINDER" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,cinder,c-api,c-vol,c-sch
-        else
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-vol
-        fi
-    elif [ "$LOCALRC_BRANCH" == "stable/grizzly" ]; then
+    if [ "$LOCALRC_BRANCH" == "stable/grizzly" ]; then
         MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,n-cond
         if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta
@@ -309,8 +302,7 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         res=$?
     fi
 
-    if [[ "$LOCALRC_BRANCH" == "stable/folsom" ]] || \
-       [[ "$LOCALRC_BRANCH" == "stable/grizzly" ]] || \
+    if [[ "$LOCALRC_BRANCH" == "stable/grizzly" ]] || \
        [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] || \
        [[ "$res" -ne "0" ]] ; then
       exit $res
