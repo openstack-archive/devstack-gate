@@ -410,8 +410,6 @@ PROJECTS="openstack/python-swiftclient $PROJECTS"
 PROJECTS="openstack/requirements $PROJECTS"
 PROJECTS="openstack/swift $PROJECTS"
 PROJECTS="openstack/tempest $PROJECTS"
-PROJECTS="openstack/oslo.config $PROJECTS"
-PROJECTS="openstack/oslo.messaging $PROJECTS"
 
 
 export BASE=/opt/stack
