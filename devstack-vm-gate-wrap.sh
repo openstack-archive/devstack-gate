@@ -393,6 +393,7 @@ PROJECTS="openstack/cinder $PROJECTS"
 PROJECTS="openstack/glance $PROJECTS"
 PROJECTS="openstack/heat $PROJECTS"
 PROJECTS="openstack/horizon $PROJECTS"
+PROJECTS="openstack/ironic $PROJECTS"
 PROJECTS="openstack/keystone $PROJECTS"
 PROJECTS="openstack/neutron $PROJECTS"
 PROJECTS="openstack/nova $PROJECTS"
@@ -402,6 +403,7 @@ PROJECTS="openstack/python-ceilometerclient $PROJECTS"
 PROJECTS="openstack/python-cinderclient $PROJECTS"
 PROJECTS="openstack/python-glanceclient $PROJECTS"
 PROJECTS="openstack/python-heatclient $PROJECTS"
+PROJECTS="openstack/python-ironicclient $PROJECTS"
 PROJECTS="openstack/python-keystoneclient $PROJECTS"
 PROJECTS="openstack/python-neutronclient $PROJECTS"
 PROJECTS="openstack/python-novaclient $PROJECTS"
@@ -481,6 +483,9 @@ export DEVSTACK_GATE_NEUTRON=${DEVSTACK_GATE_NEUTRON:-0}
 
 # Set to 1 to run nova in cells mode instead of the default mode
 export DEVSTACK_GATE_CELLS=${DEVSTACK_GATE_CELLS:-0}
+
+# Set to 1 to run ironic baremetal provisioning service.
+export DEVSTACK_GATE_IRONIC=${DEVSTACK_GATE_IRONIC:-0}
 
 # The following variables are set for different directions of Grenade updating
 # for a stable branch we want to both try to upgrade forward n => n+1 as

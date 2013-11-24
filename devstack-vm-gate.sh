@@ -82,6 +82,9 @@ function setup_localrc() {
         if [ "$DEVSTACK_GATE_CELLS" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-cell
         fi
+        if [ "$DEVSTACK_GATE_IRONIC" -eq "1" ]; then
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,ir-api,ir-cond
+        fi
         # When uncommented this will download and register the most recent successfully built
         # ubuntu-vm-heat-cfntools image from jenkins.tripleo.org
         # echo "IMAGE_URLS+=,\"http://jenkins.tripleo.org:8080/job/autobuilt-images/elements=ubuntu%20vm%20heat-cfntools/lastSuccessfulBuild/artifact/ubuntu-vm-heat-cfntools.qcow2\"" >>localrc
