@@ -314,15 +314,15 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     cd $BASE/new/tempest
     if [[ "$DEVSTACK_GATE_TEMPEST_ALL" -eq "1" ]]; then
         echo "Running tempest all test suite"
-        sudo -H -u tempest tox -eall
+        sudo -H -u tempest tox -eall -- --concurrency=$TEMPEST_CONCURRENCY
         res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite"
-        sudo -H -u tempest tox -efull
+        sudo -H -u tempest tox -efull -- --concurrency=$TEMPEST_CONCURRENCY
         res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_TESTR_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite with testr"
-        sudo -H -u tempest tox -etestr-full
+        sudo -H -u tempest tox -etestr-full -- --concurrency=$TEMPEST_CONCURRENCY
         res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] ; then
         echo "Running stress tests"
@@ -330,11 +330,11 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]] ; then
         echo "Running slow heat tests"
-        sudo -H -u tempest tox -eheat-slow
+        sudo -H -u tempest tox -eheat-slow -- --concurrency=$TEMPEST_CONCURRENCY
         res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]] ; then
         echo "Running large ops tests"
-        sudo -H -u tempest tox -elarge-ops
+        sudo -H -u tempest tox -elarge-ops -- --concurrency=$TEMPEST_CONCURRENCY
         res=$?
     elif [[ "$DEVSTACK_GATE_SMOKE_SERIAL" -eq "1" ]] ; then
         echo "Running tempest smoke tests"
@@ -342,7 +342,7 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         res=$?
     else
         echo "Running tempest smoke tests"
-        sudo -H -u tempest tox -esmoke
+        sudo -H -u tempest tox -esmoke -- --concurrency=$TEMPEST_CONCURRENCY
         res=$?
     fi
 
