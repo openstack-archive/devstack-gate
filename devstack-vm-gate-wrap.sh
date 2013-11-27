@@ -49,7 +49,10 @@ function git_checkout {
 
     git checkout $branch
     git reset --hard $reset_branch
-    git clean -x -f -d -q
+    if ! git clean -x -f -d -q ; then
+        sleep 1
+        git clean -x -f -d -q
+    fi
 }
 
 function fix_etc_hosts {
