@@ -242,13 +242,21 @@ else
     sudo -H -u stack ./stack.sh
 
     # provide a check that the right db was running
+    # the path are different for fedora and red hat.
+    if [ -f /usr/bin/yum ]; then
+        POSTGRES_LOG_PATH="-d /var/lib/pgsql"
+        MYSQL_LOG_PATH="-f /var/lib/mysqld.log"
+    else
+        POSTGRES_LOG_PATH="-d /var/log/postgresql"
+        MYSQL_LOG_PATH="-d /var/log/mysql"
+    fi
     if [ "$DEVSTACK_GATE_POSTGRES" -eq "1" ]; then
-        if [ ! -d /var/log/postgresql ]; then
+        if [ ! $POSTGRES_LOG_PATH ]; then
             echo "Postgresql should have been used, but there are no logs"
             exit 1
         fi
     else
-        if [ ! -d /var/log/mysql ]; then
+        if [ ! $MYSQL_LOG_PATH ]; then
             echo "Mysql should have been used, but there are no logs"
             exit 1
         fi
