@@ -409,8 +409,11 @@ PROJECTS="openstack/python-keystoneclient $PROJECTS"
 PROJECTS="openstack/python-neutronclient $PROJECTS"
 PROJECTS="openstack/python-novaclient $PROJECTS"
 PROJECTS="openstack/python-openstackclient $PROJECTS"
+PROJECTS="openstack/python-savannaclient $PROJECTS"
 PROJECTS="openstack/python-swiftclient $PROJECTS"
 PROJECTS="openstack/requirements $PROJECTS"
+PROJECTS="openstack/savanna $PROJECTS"
+PROJECTS="openstack/savanna-dashboard $PROJECTS"
 PROJECTS="openstack/swift $PROJECTS"
 PROJECTS="openstack/tempest $PROJECTS"
 
@@ -487,6 +490,9 @@ export DEVSTACK_GATE_CELLS=${DEVSTACK_GATE_CELLS:-0}
 
 # Set to 1 to run ironic baremetal provisioning service.
 export DEVSTACK_GATE_IRONIC=${DEVSTACK_GATE_IRONIC:-0}
+
+# Set to 1 to run savanna
+export DEVSTACK_GATE_SAVANNA=${DEVSTACK_GATE_SAVANNA:-0}
 
 # The following variables are set for different directions of Grenade updating
 # for a stable branch we want to both try to upgrade forward n => n+1 as
