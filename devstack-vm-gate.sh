@@ -133,10 +133,6 @@ EOF
         echo "HEAT_CREATE_TEST_IMAGE=True" >>localrc
     fi
 
-    if [ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ] ; then
-        echo "EXTRA_OPTS=(backdoor_port=0)" >>localrc
-    fi
-
     if [ "$DEVSTACK_GATE_POSTGRES" -eq "1" ]; then
         cat <<\EOF >>localrc
 disable_service mysql
@@ -302,10 +298,6 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     elif [[ "$DEVSTACK_GATE_TEMPEST_TESTR_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite with testr"
         sudo -H -u tempest tox -etestr-full
-        res=$?
-    elif [[ "$DEVSTACK_GATE_TEMPEST_COVERAGE" -eq "1" ]] ; then
-        echo "Generating coverage report"
-        sudo -H -u tempest tox -ecoverage -- -o $BASE/new/tempest/coverage-report
         res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] ; then
         echo "Running stress tests"

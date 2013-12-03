@@ -375,10 +375,6 @@ function cleanup_host {
     sudo cp $BASE/new/tempest/nosetests*.xml $WORKSPACE/
     sudo chown jenkins:jenkins $WORKSPACE/nosetests*.xml
     sudo chmod a+r $WORKSPACE/nosetests*.xml
-    if [ $DEVSTACK_GATE_TEMPEST_COVERAGE -eq "1" ] ; then
-        sudo mkdir $WORKSPACE/logs/coverage-report/
-        sudo cp $BASE/new/tempest/coverage-report/* $WORKSPACE/logs/coverage-report/
-    fi
 
     # Disable detailed logging as we return to the main script
     set +o xtrace
@@ -453,9 +449,6 @@ export DEVSTACK_GATE_POSTGRES=${DEVSTACK_GATE_POSTGRES:-0}
 
 # Set to 1 to use zeromq instead of rabbitmq (or qpid)
 export DEVSTACK_GATE_ZEROMQ=${DEVSTACK_GATE_ZEROMQ:-0}
-
-# Set to 1 to run nova coverage with Tempest
-export DEVSTACK_GATE_TEMPEST_COVERAGE=${DEVSTACK_GATE_TEMPEST_COVERAGE:-0}
 
 # Set to 1 to run tempest stress tests
 export DEVSTACK_GATE_TEMPEST_STRESS=${DEVSTACK_GATE_TEMPEST_STRESS:-0}
