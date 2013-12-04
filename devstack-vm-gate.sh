@@ -206,7 +206,11 @@ EOF
         echo "TEMPEST_LARGE_OPS_NUMBER=150" >>localrc
     fi
 
-
+    if [ "$DEVSTACK_GATE_CONFIGDRIVE" -eq "1" ]; then
+        echo "FORCE_CONFIG_DRIVE=always" >>localrc
+    else
+        echo "FORCE_CONFIG_DRIVE=False" >>localrc
+    fi
 }
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
