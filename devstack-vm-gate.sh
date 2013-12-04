@@ -203,7 +203,7 @@ EOF
         echo "VIRT_DRIVER=fake" >> localrc
         # To make debugging easier, disabled until bug 1218575 is fixed.
         # echo "NUMBER_FAKE_NOVA_COMPUTE=10" >>localrc
-        echo "TEMPEST_LARGE_OPS_NUMBER=150" >>localrc
+        echo "TEMPEST_LARGE_OPS_NUMBER=100" >>localrc
     fi
 
 
