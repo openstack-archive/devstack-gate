@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # Gate commits to several projects on a VM running those projects
 # configured by devstack.
@@ -68,19 +68,30 @@ function fix_etc_hosts {
 }
 
 function fix_disk_layout {
-    # Hpcloud provides no swap, but does have a virtual disk mounted
-    # at /mnt we can use.  It also doesn't have enough space on / for
-    # two devstack installs, so we partition the vdisk:
-    if [ `grep SwapTotal /proc/meminfo | awk '{ print $2; }'` -eq 0 ] && \
-        [ -b /dev/vdb ]; then
-        sudo umount /dev/vdb
-        sudo parted /dev/vdb --script -- mklabel msdos
-        sudo parted /dev/vdb --script -- mkpart primary linux-swap 0 8192
-        sudo parted /dev/vdb --script -- mkpart primary ext2 8192 -1
-        sudo mkswap /dev/vdb1
-        sudo mkfs.ext4 /dev/vdb2
-        sudo swapon /dev/vdb1
-        sudo mount /dev/vdb2 /opt
+    # HPCloud and Rackspace performance nodes provide no swap, but do
+    # have ephemeral disks we can use.  HPCloud also doesn't have
+    # enough space on / for two devstack installs, so we partition the
+    # disk and mount it on /opt, syncing the previous contents of /opt
+    # over.
+    if [ `grep SwapTotal /proc/meminfo | awk '{ print $2; }'` -eq 0 ]; then
+        if [ -b /dev/vdb ]; then
+            DEV='/dev/vdb'
+        elif [ -b /dev/xvde ]; then
+            DEV='/dev/xvde'
+        fi
+        if [ -n "$DEV" ]; then
+            sudo umount ${DEV}
+            sudo parted ${DEV} --script -- mklabel msdos
+            sudo parted ${DEV} --script -- mkpart primary linux-swap 0 8192
+            sudo parted ${DEV} --script -- mkpart primary ext2 8192 -1
+            sudo mkswap ${DEV}1
+            sudo mkfs.ext4 ${DEV}2
+            sudo swapon ${DEV}1
+            sudo mount ${DEV}2 /mnt
+            sudo rsync -a /opt/ /mnt/
+            sudo umount /mnt
+            sudo mount ${DEV}2 /opt
+        fi
     fi
 }
 
