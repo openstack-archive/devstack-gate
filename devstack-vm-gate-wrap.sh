@@ -84,20 +84,6 @@ function fix_disk_layout {
     fi
 }
 
-function clone_and_setup_project {
-    local project=$1
-    local branch=$2
-    local short_project=`basename $project`
-
-    if [[ ! -e $short_project ]]; then
-        echo "  Need to clone $short_project"
-        git clone https://git.openstack.org/$project
-    fi
-    cd $short_project
-
-    setup_project $project $branch $short_project
-}
-
 # do all the zuulification magic for project at a specified branch
 #
 # The basic logic flow is as follows:
@@ -111,9 +97,16 @@ function clone_and_setup_project {
 function setup_project {
     local project=$1
     local branch=$2
-    local short_project=$3
+    local short_project=`basename $project`
 
     echo "Setting up $project @ $branch"
+    short_project=`basename $project`
+    if [[ ! -e $short_project ]]; then
+        echo "  Need to clone $short_project"
+        git clone https://git.openstack.org/$project
+    fi
+    cd $short_project
+
     git remote set-url origin https://git.openstack.org/$project
 
     if [ -n "$OVERRIDE_ZUUL_BRANCH" ] ; then
@@ -167,9 +160,16 @@ function setup_project {
     fi
 }
 
-function re_exec_devstack_gate {
+function reboot_devstack_gate {
     export RE_EXEC="true"
     echo "This build includes a change to the devstack gate; re-execing this script."
+
+    fix_disk_layout
+
+    sudo mkdir -p $BASE/new
+    sudo chown -R jenkins:jenkins $BASE/new
+    cd $BASE/new
+    setup_project openstack-infra/devstack-gate master
     exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
 }
 
@@ -196,7 +196,7 @@ function setup_workspace {
     echo "Using branch: $base_branch"
     for PROJECT in $PROJECTS; do
         cd $DEST
-        clone_and_setup_project $PROJECT $base_branch
+        setup_project $PROJECT $base_branch
     done
     # It's important we are back at DEST for the rest of the script
     cd $DEST
@@ -416,11 +416,16 @@ PROJECTS="openstack/tempest $PROJECTS"
 
 export BASE=/opt/stack
 
-# Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace.
-GATE_SCRIPT_DIR=$(cd $(dirname "$0") && pwd)
+# Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
+# we are testing the proposed change from this point forward.
+GATE_SCRIPT_DIR=$BASE/new/devstack-gate
 
 # The URL from which to fetch ZUUL references
 export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
+
+# Make a directory to store logs
+rm -rf logs
+mkdir -p logs
 
 # Set this variable to skip updating the devstack-gate project itself.
 # Useful in development so you can edit scripts in place and run them
@@ -428,24 +433,13 @@ export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
 # Normally not set, and we do include devstack-gate with the rest of
 # the projects.
 if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
-    # Add devstack-gate to projects so that the zuul-ref checkout code
-    # is fully exercised, even on a change to devstack-gate
     PROJECTS="openstack-infra/devstack-gate $PROJECTS"
-
-    # However, the actual checkout we will use is here:
-    setup_project openstack-infra/devstack-gate master
-
     # Also, if we're testing devstack-gate, re-exec this script once so
     # that we can test the new version of it.
     if [[ $ZUUL_CHANGES =~ "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
-        re_exec_devstack_gate
+        reboot_devstack_gate
     fi
 fi
-
-# Make a directory to store logs
-rm -rf logs
-mkdir -p logs
-
 
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
