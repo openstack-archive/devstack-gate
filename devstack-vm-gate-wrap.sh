@@ -100,7 +100,6 @@ function setup_project {
     local short_project=`basename $project`
 
     echo "Setting up $project @ $branch"
-    short_project=`basename $project`
     if [[ ! -e $short_project ]]; then
         echo "  Need to clone $short_project"
         git clone https://git.openstack.org/$project
@@ -160,17 +159,10 @@ function setup_project {
     fi
 }
 
-function reboot_devstack_gate {
+function re_exec_devstack_gate {
     export RE_EXEC="true"
-    echo "This build includes a change to the devstack gate; re-execing this script."
-
-    fix_disk_layout
-
-    sudo mkdir -p $BASE/new
-    sudo chown -R jenkins:jenkins $BASE/new
-    cd $BASE/new
-    setup_project openstack-infra/devstack-gate master
-    exec $GATE_SCRIPT_DIR/devstack-vm-gate-wrap.sh
+    echo "This build includes a change to devstack-gate; re-execing this script."
+    exec $WORKSPACE/devstack-gate/devstack-vm-gate-wrap.sh
 }
 
 function setup_workspace {
@@ -417,16 +409,8 @@ PROJECTS="openstack/tempest $PROJECTS"
 
 export BASE=/opt/stack
 
-# Set GATE_SCRIPT_DIR to point to devstack-gate in the workspace so that
-# we are testing the proposed change from this point forward.
-GATE_SCRIPT_DIR=$BASE/new/devstack-gate
-
 # The URL from which to fetch ZUUL references
 export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
-
-# Make a directory to store logs
-rm -rf logs
-mkdir -p logs
 
 # Set this variable to skip updating the devstack-gate project itself.
 # Useful in development so you can edit scripts in place and run them
@@ -435,12 +419,24 @@ mkdir -p logs
 # the projects.
 if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
     PROJECTS="openstack-infra/devstack-gate $PROJECTS"
+
     # Also, if we're testing devstack-gate, re-exec this script once so
     # that we can test the new version of it.
     if [[ $ZUUL_CHANGES =~ "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
-        reboot_devstack_gate
+        echo "This build includes a change to devstack-gate; updating working copy."
+        # Since we're early in the script, we need to update the d-g
+        # copy in the workspace, not $DEST, which is what will be
+        # updated later.
+        setup_project openstack-infra/devstack-gate master
+        cd $WORKSPACE
+
+        re_exec_devstack_gate
     fi
 fi
+
+# Make a directory to store logs
+rm -rf logs
+mkdir -p logs
 
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
@@ -549,7 +545,7 @@ export DEVSTACK_GATE_SELECT_MIRROR=${DEVSTACK_GATE_SELECT_MIRROR:-/usr/local/jen
 if ! function_exists "gate_hook"; then
   # the command we use to run the gate
   function gate_hook {
-    $GATE_SCRIPT_DIR/devstack-vm-gate.sh
+    $BASE/new/devstack-gate/devstack-vm-gate.sh
   }
 fi
 
