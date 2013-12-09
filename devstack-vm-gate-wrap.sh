@@ -211,6 +211,25 @@ function setup_workspace {
     set +o xtrace
 }
 
+function select_mirror {
+
+    if [ "$DEVSTACK_GATE_REQS_INTEGRATION" -eq "0" ]; then
+
+        ORG=$(dirname $ZUUL_PROJECT)
+        SHORT_PROJECT=$(basename $ZUUL_PROJECT)
+        $DEVSTACK_GATE_SELECT_MIRROR $ORG $SHORT_PROJECT
+
+        cp ~/.pydistutils.cfg ~stack/.pydistutils.cfg
+        sudo cp ~/.pydistutils.cfg ~root/.pydistutils.cfg
+
+        mkdir -p ~stack/.pip
+        sudo -u root mkdir -p ~root/.pip
+
+        cp ~/.pip/pip.conf ~stack/.pip/pip.conf
+        sudo -u root cp ~/.pip/pip.conf ~root/.pip/pip.conf
+    fi
+}
+
 function setup_host {
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
@@ -259,27 +278,9 @@ function setup_host {
         sudo usermod -a -G vz stack
     fi
 
-    if [ "$DEVSTACK_GATE_REQS_INTEGRATION" -eq "0" \
-        -o "$ZUUL_PROJECT" != "openstack/requirements" ]; then
-        cat <<EOF > /tmp/pydistutils.cfg
-[easy_install]
-index_url = http://pypi.openstack.org/openstack
-EOF
-        cat <<EOF > /tmp/pip.conf
-[global]
-index-url = http://pypi.openstack.org/openstack
-EOF
-        cp /tmp/pydistutils.cfg ~/.pydistutils.cfg
-        cp /tmp/pydistutils.cfg ~stack/.pydistutils.cfg
-        sudo cp /tmp/pydistutils.cfg ~root/.pydistutils.cfg
-        mkdir -p ~/.pip
-        mkdir -p ~stack/.pip
-        sudo -u root mkdir -p ~root/.pip
-        cp /tmp/pip.conf ~/.pip/pip.conf
-        cp /tmp/pip.conf ~stack/.pip/pip.conf
-        sudo -u root cp /tmp/pip.conf ~root/.pip/pip.conf
+    if [ -f $DEVSTACK_GATE_SELECT_MIRROR ] ; then
+        select_mirror
     fi
-
     # Disable detailed logging as we return to the main script
     set +o xtrace
 }
@@ -541,6 +542,10 @@ export DEVSTACK_GATE_TEMPEST_ALL=${DEVSTACK_GATE_TEMPEST_ALL:-0}
 
 # Set to 1 if running the openstack/requirements integration test
 export DEVSTACK_GATE_REQS_INTEGRATION=${DEVSTACK_GATE_REQS_INTEGRATION:-0}
+
+# Set this variable to override the mirror selection script. Set to a
+# nonexistant location to disable mirror selection
+export DEVSTACK_GATE_SELECT_MIRROR=${DEVSTACK_GATE_SELECT_MIRROR:-/usr/local/jenkins/slave_scripts/select-mirror.sh}
 
 if ! function_exists "gate_hook"; then
   # the command we use to run the gate
