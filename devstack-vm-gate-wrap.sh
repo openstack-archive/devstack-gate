@@ -509,8 +509,7 @@ if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
         export GRENADE_NEW_BRANCH="stable/icehouse"
         export DEVSTACK_GATE_TEMPEST=1
     else # master
-        # TODO(sdague): this is to let us get past retooling for havana
-        export GRENADE_OLD_BRANCH="stable/grizzly"
+        export GRENADE_OLD_BRANCH="stable/havana"
         export GRENADE_NEW_BRANCH="master"
         export DEVSTACK_GATE_TEMPEST=1
     fi
