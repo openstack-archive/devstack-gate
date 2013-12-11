@@ -14,7 +14,7 @@ passes all of the configured tests. Most projects require unit tests
 in python2.6 and python2.7, and pep8. Those tests are all run only on
 the project in question. The devstack gate test, however, is an
 integration test and ensures that a proposed change still enables
-several of the projects to work together. 
+several of the projects to work together.
 
 Obviously we test integrated OpenStack components and their clients
 because they all work closely together to form an OpenStack
@@ -128,6 +128,10 @@ line. A provider settings file for Rackspace would look something like::
   export OS_REGION_NAME=DFW
   export FLAVOR='8GB Standard Instance'
   export IMAGE='Ubuntu 12.04 LTS (Precise Pangolin)'
+
+Where provider_username and provider_password are the user / password
+for a valid user in your account, and provider_tenant is the numeric
+id of your account (typically 6 digits).
 
 By comparison, a provider settings file for HPCloud::
 
