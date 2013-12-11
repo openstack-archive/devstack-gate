@@ -88,9 +88,6 @@ function setup_localrc() {
         if [ "$DEVSTACK_GATE_SAVANNA" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,savanna
         fi
-        # When uncommented this will download and register the most recent successfully built
-        # ubuntu-vm-heat-cfntools image from jenkins.tripleo.org
-        # echo "IMAGE_URLS+=,\"http://jenkins.tripleo.org:8080/job/autobuilt-images/elements=ubuntu%20vm%20heat-cfntools/lastSuccessfulBuild/artifact/ubuntu-vm-heat-cfntools.qcow2\"" >>localrc
     fi
 
     cat <<EOF >>localrc
@@ -134,7 +131,9 @@ EOF
     fi
 
     if [ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]; then
-        echo "HEAT_CREATE_TEST_IMAGE=True" >>localrc
+        echo "HEAT_CREATE_TEST_IMAGE=False" >>localrc
+        # Use Fedora 20 for heat test image, it has heat-cfntools pre-installed
+        echo "HEAT_FETCHED_TEST_IMAGE=Fedora-i386-20-20131211.1-sda.qcow2" >>localrc
     fi
 
     if [ "$DEVSTACK_GATE_POSTGRES" -eq "1" ]; then
