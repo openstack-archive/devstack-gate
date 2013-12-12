@@ -488,6 +488,9 @@ export DEVSTACK_GATE_IRONIC=${DEVSTACK_GATE_IRONIC:-0}
 # Set to 1 to run savanna
 export DEVSTACK_GATE_SAVANNA=${DEVSTACK_GATE_SAVANNA:-0}
 
+# Set to 0 to disable config_drive and use the metadata server instead
+export DEVSTACK_GATE_CONFIGDRIVE=${DEVSTACK_GATE_CONFIGDRIVE:-1}
+
 # The following variables are set for different directions of Grenade updating
 # for a stable branch we want to both try to upgrade forward n => n+1 as
 # well as upgrade from last n-1 => n.
