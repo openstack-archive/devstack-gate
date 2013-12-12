@@ -221,12 +221,17 @@ function select_mirror {
 
         cp ~/.pydistutils.cfg ~stack/.pydistutils.cfg
         sudo cp ~/.pydistutils.cfg ~root/.pydistutils.cfg
+        sudo cp ~/.pydistutils.cfg ~tempest/.pydistutils.cfg
+        sudo chown tempest:tempest ~tempest/.pydistutils.cfg
 
         mkdir -p ~stack/.pip
         sudo -u root mkdir -p ~root/.pip
+        sudo -u tempest mkdir -p ~tempest/.pip
 
         cp ~/.pip/pip.conf ~stack/.pip/pip.conf
         sudo -u root cp ~/.pip/pip.conf ~root/.pip/pip.conf
+        sudo cp ~/.pip/pip.conf ~tempest/.pip/pip.conf
+        sudo chown tempest:tempest ~tempest/.pip/pip.conf
     fi
 }
 
@@ -272,6 +277,10 @@ function setup_host {
     chmod 0440 $TEMPFILE
     sudo chown root:root $TEMPFILE
     sudo mv $TEMPFILE /etc/sudoers.d/51_tempest_sh
+
+    # Future useradd calls should strongly consider also updating
+    # ~/.pip/pip.conf and ~/.pydisutils.cfg in the select_mirror function if
+    # tox/pip will be used at all.
 
     # If we will be testing OpenVZ, make sure stack is a member of the vz group
     if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
