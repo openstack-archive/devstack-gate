@@ -341,13 +341,13 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         res=$?
     fi
 
-    if [[ "$LOCALRC_BRANCH" == "stable/grizzly" ]] || \
-       [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] || \
-       [[ "$res" -ne "0" ]] ; then
-      exit $res
-    else
-      tools/check_logs.py -d $BASE/new/screen-logs
+    if [[ "$LOCALRC_BRANCH" -ne "stable/grizzly" ]] && \
+       [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -ne "1" ]] ; then
+        tools/check_logs.py -d $BASE/new/screen-logs
+        res2=$?
     fi
+    [[ $res -eq 0 && $res2 -eq 0 ]]
+    exit $?
 
 else
     # Jenkins expects at least one nosetests file.  If we're not running
