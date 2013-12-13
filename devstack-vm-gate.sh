@@ -86,7 +86,7 @@ function setup_localrc() {
         # ceilometer which inject code in other projects
         if [ "$DEVSTACK_GATE_GRENADE" -ne "1" ]; then
             MY_ENABLED_SERVICES+=,heat,h-api,h-api-cfn,h-api-cw,h-eng
-            MY_ENABLED_SERVICES+=,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator
+            MY_ENABLED_SERVICES+=,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification
         fi
         if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn
