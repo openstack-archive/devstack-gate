@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Gate commits to several projects on a VM running those projects
 # configured by devstack.
@@ -569,10 +569,14 @@ export DEVSTACK_GATE_REQS_INTEGRATION=${DEVSTACK_GATE_REQS_INTEGRATION:-0}
 # nonexistant location to disable mirror selection
 export DEVSTACK_GATE_SELECT_MIRROR=${DEVSTACK_GATE_SELECT_MIRROR:-/usr/local/jenkins/slave_scripts/select-mirror.sh}
 
+# Set this to the time in minutes that the gate test should be allowed
+# to run before being aborted (default 60).
+export DEVSTACK_GATE_TIMEOUT=${DEVSTACK_GATE_TIMEOUT:-60}
+
 if ! function_exists "gate_hook"; then
   # the command we use to run the gate
   function gate_hook {
-    $BASE/new/devstack-gate/devstack-vm-gate.sh
+    timeout -s 9 ${DEVSTACK_GATE_TIMEOUT}m $BASE/new/devstack-gate/devstack-vm-gate.sh
   }
 fi
 
@@ -617,14 +621,21 @@ fi
 
 # Run the gate function
 gate_hook
-RETVAL=$?
+GATE_RETVAL=$?
+RETVAL=$GATE_RETVAL
 
 # Run post test hook if we have one
-if [ $RETVAL -eq 0 ] && function_exists "post_test_hook"; then
+if [ $GATE_RETVAL -eq 0 ] && function_exists "post_test_hook"; then
   set -o xtrace -o pipefail
   post_test_hook 2>&1 | tee $WORKSPACE/logs/devstack-gate-post-test-hook.txt
   RETVAL=$?
   set +o xtrace +o pipefail
+fi
+
+if [ $GATE_RETVAL -eq 137 ] && [ -f $WORKSPACE/gate.pid ] ; then
+    GATEPID=`cat $WORKSPACE/gate.pid`
+    echo "Killing process group ${GATEPID}"
+    sudo kill -s 9 -${GATEPID}
 fi
 
 cleanup_host &> $WORKSPACE/logs/devstack-gate-cleanup-host.txt
