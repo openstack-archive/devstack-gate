@@ -249,6 +249,8 @@ function setup_host {
     sudo chmod a+r /var/log/kern.log
     sudo start rsyslog
 
+    # We set some home directories under $BASE, make sure it exists.
+    sudo mkdir $BASE
     # Create a stack user for devstack to run as, so that we can
     # revoke sudo permissions from that user when appropriate.
     sudo useradd -U -s /bin/bash -d $BASE/new -m stack
@@ -569,27 +571,12 @@ setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
     setup_workspace $GRENADE_NEW_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
+    setup_workspace $GRENADE_OLD_BRANCH $BASE/old &> \
+        $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
 else
     setup_workspace $ZUUL_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
 fi
-
-# this looks like we are unDRY (does that make us wet?), however we want to do
-# as much as possible after the RE_EXEC as that will happen with the new script
-# and not the old script. The long term evolution is to make setup_workspace be
-# able to do a single project, only devstack_gate, and have all the rest of
-# setup_workspace happen after it.
-if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
-    setup_workspace $GRENADE_OLD_BRANCH $BASE/old &> \
-        $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
-fi
-
-echo "Triggered by: https://review.openstack.org/$ZUUL_CHANGE patchset $ZUUL_PATCHSET"
-echo "Pipeline: $ZUUL_PIPELINE"
-echo "IP configuration of this host:"
-ip -f inet addr show
-
-setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 
 # Run pre test hook if we have one
 if function_exists "pre_test_hook"; then
