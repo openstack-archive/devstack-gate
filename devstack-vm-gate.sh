@@ -143,17 +143,6 @@ enable_service postgresql
 EOF
     fi
 
-    # We are replacing DEVSTACK_GATE_ZEROMQ for
-    # DEVSTACK_GATE_MQ_DRIVER in order to have more
-    # flexibility in choosing a MQ driver.
-    # After this change, in Jenkins Job Builder you
-    # no longer set 1 to DEVSTACK_GATE_ZEROMQ, instead
-    # you choose which MQ driver you want.
-    # example:
-    # export DEVSTACK_GATE_MQ_DRIVER="zeromq"
-    if [ "$DEVSTACK_GATE_ZEROMQ" -eq "1" ]; then
-        DEVSTACK_GATE_MQ_DRIVER="zeromq"
-    fi
     if [ "$DEVSTACK_GATE_MQ_DRIVER" == "zeromq" ]; then
         echo "disable_service rabbit" >>localrc
         echo "enable_service zeromq" >>localrc
