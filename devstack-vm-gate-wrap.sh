@@ -346,6 +346,12 @@ function cleanup_host {
         sudo gzip -9 $WORKSPACE/testr_results.html
         sudo chown jenkins:jenkins $WORKSPACE/subunit_log.txt.gz $WORKSPACE/testr_results.html.gz
         sudo chmod a+r $WORKSPACE/subunit_log.txt.gz $WORKSPACE/testr_results.html.gz
+    elif [ -f $BASE/new/tempest/.testrepository/tmp* ]; then
+        # If testr timed out, collect temp file from testr
+        sudo cp $BASE/new/tempest/.testrepository/tmp* $WORKSPACE/subunit_log.txt
+        sudo gzip -9 $WORKSPACE/subunit_log.txt
+        sudo chown jenkins:jenkins $WORKSPACE/subunit_log.txt.gz
+        sudo chmod a+r $WORKSPACE/subunit_log.txt.gz
     fi
 
     if [ -f $BASE/new/tempest/tempest.log ] ; then
