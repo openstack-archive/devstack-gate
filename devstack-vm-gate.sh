@@ -133,7 +133,7 @@ EOF
     if [ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]; then
         echo "HEAT_CREATE_TEST_IMAGE=False" >>localrc
         # Use Fedora 20 for heat test image, it has heat-cfntools pre-installed
-        echo "HEAT_FETCHED_TEST_IMAGE=Fedora-i386-20-20131211.1-sda.qcow2" >>localrc
+        echo "HEAT_FETCHED_TEST_IMAGE=Fedora-i386-20-20131211.1-sda" >>localrc
     fi
 
     if [ "$DEVSTACK_GATE_POSTGRES" -eq "1" ]; then
