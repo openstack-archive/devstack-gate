@@ -32,6 +32,7 @@ function setup_localrc() {
     fi
 
     DEFAULT_ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-sch,horizon,mysql,rabbit,sysstat
+    DEFAULT_ENABLED_SERVICES+=,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,n-cond
 
     # Allow optional injection of ENABLED_SERVICES from the calling context
     if [ -z $ENABLED_SERVICES ] ; then
@@ -47,7 +48,6 @@ function setup_localrc() {
     SKIP_EXERCISES=boot_from_volume,client-env
 
     if [ "$LOCALRC_BRANCH" == "stable/grizzly" ]; then
-        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,n-cond
         if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta
             echo "Q_USE_DEBUG_COMMAND=True" >>localrc
@@ -59,7 +59,14 @@ function setup_localrc() {
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-cell
         fi
     elif [ "$LOCALRC_BRANCH" == "stable/havana" ]; then
-        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,c-bak,n-cond,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api
+        MY_ENABLED_SERVICES+=,c-bak
+        # we don't want to enable services for grenade that don't have upgrade support
+        # otherwise they can break grenade, especially when they are projects like
+        # ceilometer which inject code in other projects
+        if [ "$DEVSTACK_GATE_GRENADE" -ne "1" ]; then
+            MY_ENABLED_SERVICES+=,heat,h-api,h-api-cfn,h-api-cw,h-eng
+            MY_ENABLED_SERVICES+=,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api
+        fi
         if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn
             echo "Q_USE_DEBUG_COMMAND=True" >>localrc
@@ -71,7 +78,14 @@ function setup_localrc() {
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-cell
         fi
     else # master
-        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,c-bak,n-cond,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator
+        MY_ENABLED_SERVICES+=,c-bak
+        # we don't want to enable services for grenade that don't have upgrade support
+        # otherwise they can break grenade, especially when they are projects like
+        # ceilometer which inject code in other projects
+        if [ "$DEVSTACK_GATE_GRENADE" -ne "1" ]; then
+            MY_ENABLED_SERVICES+=,heat,h-api,h-api-cfn,h-api-cw,h-eng
+            MY_ENABLED_SERVICES+=,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator
+        fi
         if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn
             echo "Q_USE_DEBUG_COMMAND=True" >>localrc
