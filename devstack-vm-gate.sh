@@ -47,7 +47,8 @@ function setup_localrc() {
         MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,tempest
     fi
 
-    SKIP_EXERCISES=boot_from_volume,client-env
+    # the exercises we *don't* want to test on for grenade
+    SKIP_EXERCISES=boot_from_volume,bundle,client-env,euca
 
     if [ "$LOCALRC_BRANCH" == "stable/grizzly" ]; then
         if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
