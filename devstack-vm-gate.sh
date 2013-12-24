@@ -346,7 +346,7 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         res=$?
     fi
 
-    if [[ "$LOCALRC_BRANCH" -ne "stable/grizzly" ]] && \
+    if [[ "$GRENADE_OLD_BRANCH" != "stable/grizzly" ]] && \
        [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -ne "1" ]] ; then
         tools/check_logs.py -d $BASE/new/screen-logs
         res2=$?
