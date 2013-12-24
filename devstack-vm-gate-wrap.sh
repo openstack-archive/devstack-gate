@@ -183,8 +183,6 @@ function setup_workspace {
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
 
-    fix_etc_hosts
-
     fix_disk_layout
 
     sudo mkdir -p $DEST
@@ -222,17 +220,19 @@ function select_mirror {
         SHORT_PROJECT=$(basename $ZUUL_PROJECT)
         $DEVSTACK_GATE_SELECT_MIRROR $ORG $SHORT_PROJECT
 
-        cp ~/.pydistutils.cfg ~stack/.pydistutils.cfg
         sudo cp ~/.pydistutils.cfg ~root/.pydistutils.cfg
+        sudo cp ~/.pydistutils.cfg ~stack/.pydistutils.cfg
+        sudo chown stack:stack ~stack/.pydistutils.cfg
         sudo cp ~/.pydistutils.cfg ~tempest/.pydistutils.cfg
         sudo chown tempest:tempest ~tempest/.pydistutils.cfg
 
-        mkdir -p ~stack/.pip
+        sudo -u stack mkdir -p ~stack/.pip
         sudo -u root mkdir -p ~root/.pip
         sudo -u tempest mkdir -p ~tempest/.pip
 
-        cp ~/.pip/pip.conf ~stack/.pip/pip.conf
         sudo -u root cp ~/.pip/pip.conf ~root/.pip/pip.conf
+        sudo cp ~/.pip/pip.conf ~stack/.pip/pip.conf
+        sudo chown stack:stack ~stack/.pip/pip.conf
         sudo cp ~/.pip/pip.conf ~tempest/.pip/pip.conf
         sudo chown tempest:tempest ~tempest/.pip/pip.conf
     fi
@@ -241,6 +241,9 @@ function select_mirror {
 function setup_host {
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
+
+    # This is necessary to keep sudo from complaining
+    fix_etc_hosts
 
     # Move the PIP cache into position:
     sudo mkdir -p /var/cache/pip
