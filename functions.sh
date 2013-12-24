@@ -138,16 +138,29 @@ function fix_disk_layout {
     fi
 }
 
-# do all the zuulification magic for project at a specified branch
+# Set up a project in accordance with the future state proposed by
+# Zuul.
 #
-# The basic logic flow is as follows:
-#   if we have ``branch`` for project, check that out
-#   if we don't have ``branch`` for project, change ``branch`` to master
-#     and check that out
-#   if the global ZUUL_BRANCH matches ``branch``, then also look for a
-#     valid ZUUL_REF, and use that instead of the HEAD of the branch
+# Arguments:
+#   project: The full name of the project to set up
+#   branch: The branch to check out
 #
-# The end result is a tree on disk checked out at the right ref for zuul
+# The branch argument should be the desired branch to check out.  If
+# you have no other opinions, then you should supply ZUUL_BRANCH here.
+# This is generally the branch corresponding with the change being
+# tested.
+#
+# If you would like to check out a branch other than what ZUUL has
+# selected, for example in order to check out the old or new branches
+# for grenade, or an alternate branch to test client library
+# compatability, then supply that as the argument instead.  This
+# function will try to check out the following (in order):
+#
+#   The zuul ref for the indicated branch
+#   The zuul ref for the master branch
+#   The tip of the indicated branch
+#   The tip of the master branch
+#
 function setup_project {
     local project=$1
     local branch=$2
@@ -158,9 +171,8 @@ function setup_project {
 
     git_remote_set_url origin https://git.openstack.org/$project
 
-    if [ -n "$OVERRIDE_ZUUL_BRANCH" ] ; then
-        OVERRIDE_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$branch,$OVERRIDE_ZUUL_BRANCH,")
-    fi
+    # Try the specified branch before the ZUUL_BRANCH.
+    OVERRIDE_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$ZUUL_BRANCH,$branch,")
 
     # Update git remotes
     git_remote_update
@@ -169,29 +181,21 @@ function setup_project {
     # See if this project has this branch, if not, use master
     FALLBACK_ZUUL_REF=""
     if ! git_has_branch $project $branch; then
-        branch=master
         FALLBACK_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$branch,master,")
     fi
 
-    # See if we should check out a Zuul ref
-    if [ "$ZUUL_BRANCH" == "$branch" ]; then
-        # See if Zuul prepared a ref for this project
-        if git_fetch_at_ref $project $OVERRIDE_ZUUL_REF || \
-            git_fetch_at_ref $project $ZUUL_REF || \
-            git_fetch_at_ref $project $FALLBACK_ZUUL_REF; then
+    # See if Zuul prepared a ref for this project
+    if git_fetch_at_ref $project $OVERRIDE_ZUUL_REF || \
+        git_fetch_at_ref $project $FALLBACK_ZUUL_REF; then
 
-            # It's there, so check it out.
-            git_checkout $project FETCH_HEAD
-        else
-              if [ "$project" == "$ZUUL_PROJECT" ]; then
-                  echo "Unable to find ref $ZUUL_REF for $project"
-                  exit 1
-              fi
-              git_checkout $project $branch
-        fi
+        # It's there, so check it out.
+        git_checkout $project FETCH_HEAD
     else
-          # We're ignoring Zuul refs
-        git_checkout $project $branch
+        if git_has_branch $project $branch; then
+            git_checkout $project $branch
+        else
+            git_checkout $project master
+        fi
     fi
 }
 
