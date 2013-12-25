@@ -204,10 +204,6 @@ export DEVSTACK_GATE_SELECT_MIRROR=${DEVSTACK_GATE_SELECT_MIRROR:-/usr/local/jen
 # to run before being aborted (default 60).
 export DEVSTACK_GATE_TIMEOUT=${DEVSTACK_GATE_TIMEOUT:-60}
 
-# Set this to override the branch selected for testing (in
-# single-branch checkouts; not used for grenade)
-export OVERRIDE_ZUUL_BRANCH=${OVERRIDE_ZUUL_BRANCH:-$ZUUL_BRANCH}
-
 if ! function_exists "gate_hook"; then
   # the command we use to run the gate
   function gate_hook {
@@ -228,7 +224,7 @@ if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1
     setup_workspace $GRENADE_OLD_BRANCH $BASE/old &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
 else
-    setup_workspace $OVERRIDE_ZUUL_BRANCH $BASE/new &> \
+    setup_workspace $ZUUL_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
 fi
 
