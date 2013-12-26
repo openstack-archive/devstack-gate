@@ -348,6 +348,7 @@ function test_periodic {
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
     ZUUL_BRANCH='stable/havana'
+    ZUUL_PROJECT='openstack/glance'
 
     setup_project openstack/glance $ZUUL_BRANCH
 
