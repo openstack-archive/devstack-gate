@@ -151,6 +151,9 @@ export DEVSTACK_GATE_CONFIGDRIVE=${DEVSTACK_GATE_CONFIGDRIVE:-1}
 #   DGGF=1 means stable/havana => master (or stable/icehouse if that's out)
 export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-0}
 export DEVSTACK_GATE_GRENADE_FORWARD=${DEVSTACK_GATE_GRENADE_FORWARD:-0}
+# DGGR=1 means do a rolling upgrade, where the resulting state is mix of
+#        new and old services.
+export DEVSTACK_GATE_GRENADE_ROLLING=${DEVSTACK_GATE_GRENADE_ROLLING:-0}
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     export DEVSTACK_GATE_EXERCISES=1

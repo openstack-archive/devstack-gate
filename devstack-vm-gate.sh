@@ -205,6 +205,9 @@ EOF
         else
             echo "GRENADE_PHASE=target" >> localrc
         fi
+        if [ "$DEVSTACK_GATE_GRENADE_ROLLING" -eq "1" ]; then
+            echo "NOVA_COMPUTE_ROLLING_UPGRADE=True" >> localrc
+        fi
     else
         # Grenade needs screen, so only turn this off if we aren't
         # running grenade.
