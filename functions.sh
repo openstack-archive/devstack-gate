@@ -343,6 +343,7 @@ function cleanup_host {
 
     sudo cp /var/log/syslog $WORKSPACE/logs/syslog.txt
     sudo cp /var/log/kern.log $WORKSPACE/logs/kern_log.txt
+    sudo cp /var/log/apache2/horizon_error.log $WORKSPACE/logs/horizon_error.log
     mkdir $WORKSPACE/logs/rabbitmq/
     sudo cp /var/log/rabbitmq/* $WORKSPACE/logs/rabbitmq/
     mkdir $WORKSPACE/logs/sudoers.d/
