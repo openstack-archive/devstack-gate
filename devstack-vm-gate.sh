@@ -99,6 +99,9 @@ function setup_localrc() {
         if [ "$DEVSTACK_GATE_CELLS" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-cell
         fi
+        if [ "$DEVSTACK_GATE_MARCONI" -eq "1" ]; then
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,marconi-server
+        fi
         if [ "$DEVSTACK_GATE_IRONIC" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,ir-api,ir-cond
         fi
