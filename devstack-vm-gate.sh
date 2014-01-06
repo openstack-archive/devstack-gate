@@ -105,6 +105,9 @@ function setup_localrc() {
         if [ "$DEVSTACK_GATE_SAVANNA" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,savanna
         fi
+        if [ "$DEVSTACK_GATE_TROVE" -eq "1" ]; then
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,trove,tr-api,tr-tmgr,tr-cond
+        fi
     fi
 
     cat <<EOF >>localrc

@@ -52,7 +52,9 @@ PROJECTS="openstack/python-novaclient $PROJECTS"
 PROJECTS="openstack/python-openstackclient $PROJECTS"
 PROJECTS="openstack/python-savannaclient $PROJECTS"
 PROJECTS="openstack/python-swiftclient $PROJECTS"
+PROJECTS="openstack/python-troveclient $PROJECTS"
 PROJECTS="openstack/requirements $PROJECTS"
+PROJECTS="openstack/trove $PROJECTS"
 PROJECTS="openstack/savanna $PROJECTS"
 PROJECTS="openstack/savanna-dashboard $PROJECTS"
 PROJECTS="openstack/swift $PROJECTS"
@@ -139,6 +141,9 @@ export DEVSTACK_GATE_IRONIC=${DEVSTACK_GATE_IRONIC:-0}
 
 # Set to 1 to run savanna
 export DEVSTACK_GATE_SAVANNA=${DEVSTACK_GATE_SAVANNA:-0}
+
+# Set to 1 to run trove
+export DEVSTACK_GATE_TROVE=${DEVSTACK_GATE_TROVE:-0}
 
 # Set to 0 to disable config_drive and use the metadata server instead
 export DEVSTACK_GATE_CONFIGDRIVE=${DEVSTACK_GATE_CONFIGDRIVE:-1}
