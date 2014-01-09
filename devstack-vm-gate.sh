@@ -71,7 +71,7 @@ function setup_localrc() {
             MY_ENABLED_SERVICES+=,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api
         fi
         if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn,q-fwaas
             echo "Q_USE_DEBUG_COMMAND=True" >>localrc
             echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
         else
@@ -90,7 +90,7 @@ function setup_localrc() {
             MY_ENABLED_SERVICES+=,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification
         fi
         if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn,q-fwaas
             echo "Q_USE_DEBUG_COMMAND=True" >>localrc
             echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
         else
