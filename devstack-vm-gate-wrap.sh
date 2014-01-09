@@ -144,7 +144,7 @@ export DEVSTACK_GATE_SAVANNA=${DEVSTACK_GATE_SAVANNA:-0}
 export DEVSTACK_GATE_CONFIGDRIVE=${DEVSTACK_GATE_CONFIGDRIVE:-1}
 
 # Set the number of threads to run tempest with
-export TEMPEST_CONCURRENCY=${TEMPEST_CONCURRENCY:-4}
+export TEMPEST_CONCURRENCY=${TEMPEST_CONCURRENCY:-2}
 
 # The following variables are set for different directions of Grenade updating
 # for a stable branch we want to both try to upgrade forward n => n+1 as
