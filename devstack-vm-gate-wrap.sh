@@ -87,8 +87,8 @@ if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
 fi
 
 # Make a directory to store logs
-rm -rf logs
-mkdir -p logs
+rm -rf $WORKSPACE/logs
+mkdir -p $WORKSPACE/logs
 
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
