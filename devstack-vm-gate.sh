@@ -351,8 +351,12 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         tools/check_logs.py -d $BASE/new/screen-logs
         res2=$?
     fi
-    [[ $res -eq 0 && $res2 -eq 0 ]]
-    exit $?
+    # TODO(sdague): post icehouse-2 we can talk about turning
+    # this back on, but right now it is violating the do no harm
+    # principle.
+    # [[ $res -eq 0 && $res2 -eq 0 ]]
+    # exit $?
+    exit $res
 
 else
     # Jenkins expects at least one nosetests file.  If we're not running
