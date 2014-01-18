@@ -311,6 +311,9 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         sudo chmod -R o+rx /opt/stack/new/devstack/files
     fi
 
+    # let us control if we die or not
+    set +o errexit
+
     cd $BASE/new/tempest
     if [[ "$DEVSTACK_GATE_TEMPEST_ALL" -eq "1" ]]; then
         echo "Running tempest all test suite"
