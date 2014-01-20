@@ -222,7 +222,12 @@ fi
 echo "Triggered by: https://review.openstack.org/$ZUUL_CHANGE patchset $ZUUL_PATCHSET"
 echo "Pipeline: $ZUUL_PIPELINE"
 echo "IP configuration of this host:"
-ip -f inet addr show
+ip addr show
+echo "IP routing tables of this host:"
+ip route show
+ip -6 route show
+echo "ARP table of this host:"
+ip neighbor show
 
 setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 
