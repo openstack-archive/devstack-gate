@@ -96,6 +96,9 @@ function setup_localrc() {
         else
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-net
         fi
+        if [ "$DEVSTACK_GATE_NOVA_API_METADATA_SPLIT" -eq "1" ]; then
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-api-meta
+        fi
         if [ "$DEVSTACK_GATE_CELLS" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-cell
         fi
