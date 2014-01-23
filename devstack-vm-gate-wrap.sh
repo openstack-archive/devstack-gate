@@ -241,10 +241,17 @@ else
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
 fi
 
+# relocate and symlink logs into $BASE to save space on the root filesystem
+if [ -d "$WORKSPACE/logs" -a \! -e "$BASE/logs" ]; then
+    sudo mv $WORKSPACE/logs $BASE/
+    ln -s $BASE/logs $WORKSPACE/
+fi
+
 # Run pre test hook if we have one
 if function_exists "pre_test_hook"; then
   set -o xtrace
-  pre_test_hook 2>&1 | tee $WORKSPACE/logs/devstack-gate-pre-test-hook.txt
+  pre_test_hook 2>&1 | tee $WORKSPACE/devstack-gate-pre-test-hook.txt
+  sudo mv $WORKSPACE/devstack-gate-pre-test-hook.txt $BASE/logs/
   set +o xtrace
 fi
 
@@ -256,8 +263,9 @@ RETVAL=$GATE_RETVAL
 # Run post test hook if we have one
 if [ $GATE_RETVAL -eq 0 ] && function_exists "post_test_hook"; then
   set -o xtrace -o pipefail
-  post_test_hook 2>&1 | tee $WORKSPACE/logs/devstack-gate-post-test-hook.txt
+  post_test_hook 2>&1 | tee $WORKSPACE/devstack-gate-post-test-hook.txt
   RETVAL=$?
+  sudo mv $WORKSPACE/devstack-gate-post-test-hook.txt $BASE/logs/
   set +o xtrace +o pipefail
 fi
 
@@ -267,6 +275,7 @@ if [ $GATE_RETVAL -eq 137 ] && [ -f $WORKSPACE/gate.pid ] ; then
     sudo kill -s 9 -${GATEPID}
 fi
 
-cleanup_host &> $WORKSPACE/logs/devstack-gate-cleanup-host.txt
+cleanup_host &> $WORKSPACE/devstack-gate-cleanup-host.txt
+sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
 
 exit $RETVAL
