@@ -236,6 +236,8 @@ ip route show
 ip -6 route show
 echo "ARP table of this host:"
 ip neighbor show
+echo "Available disk space on this host:"
+df -h
 
 setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 
