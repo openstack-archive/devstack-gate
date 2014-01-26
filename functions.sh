@@ -341,88 +341,86 @@ function cleanup_host {
     # Sleep to give services a chance to flush their log buffers.
     sleep 2
 
-    sudo cp /var/log/syslog $WORKSPACE/logs/syslog.txt
-    sudo cp /var/log/kern.log $WORKSPACE/logs/kern_log.txt
-    sudo cp /var/log/apache2/horizon_error.log $WORKSPACE/logs/horizon_error.log
-    mkdir $WORKSPACE/logs/rabbitmq/
-    sudo cp /var/log/rabbitmq/* $WORKSPACE/logs/rabbitmq/
-    mkdir $WORKSPACE/logs/sudoers.d/
+    sudo cp /var/log/syslog $BASE/logs/syslog.txt
+    sudo cp /var/log/kern.log $BASE/logs/kern_log.txt
+    sudo cp /var/log/apache2/horizon_error.log $BASE/logs/horizon_error.log
+    sudo mkdir $BASE/logs/rabbitmq/
+    sudo cp /var/log/rabbitmq/* $BASE/logs/rabbitmq/
+    sudo mkdir $BASE/logs/sudoers.d/
 
-    sudo cp /etc/sudoers.d/* $WORKSPACE/logs/sudoers.d/
-    sudo cp /etc/sudoers $WORKSPACE/logs/sudoers.txt
+    sudo cp /etc/sudoers.d/* $BASE/logs/sudoers.d/
+    sudo cp /etc/sudoers $BASE/logs/sudoers.txt
 
     if [ -d $BASE/old ]; then
-      mkdir -p $WORKSPACE/logs/old/
-      mkdir -p $WORKSPACE/logs/new/
-      mkdir -p $WORKSPACE/logs/grenade/
-      sudo cp $BASE/old/screen-logs/* $WORKSPACE/logs/old/
-      sudo cp $BASE/old/devstacklog.txt $WORKSPACE/logs/old/
-      sudo cp $BASE/old/devstack/localrc $WORKSPACE/logs/old/localrc.txt
-      sudo cp $BASE/logs/* $WORKSPACE/logs/
-      sudo cp $BASE/new/grenade/localrc $WORKSPACE/logs/grenade/localrc.txt
-      NEWLOGTARGET=$WORKSPACE/logs/new
+      sudo mkdir -p $BASE/logs/old $BASE/logs/new $BASE/logs/grenade
+      sudo cp $BASE/old/screen-logs/* $BASE/logs/old/
+      sudo cp $BASE/old/devstacklog.txt $BASE/logs/old/
+      sudo cp $BASE/old/devstack/localrc $BASE/logs/old/localrc.txt
+      sudo cp $BASE/new/grenade/localrc $BASE/logs/grenade/localrc.txt
+      NEWLOGTARGET=$BASE/logs/new
     else
-      NEWLOGTARGET=$WORKSPACE/logs
+      NEWLOGTARGET=$BASE/logs
     fi
     sudo cp $BASE/new/screen-logs/* $NEWLOGTARGET/
     sudo cp $BASE/new/devstacklog.txt $NEWLOGTARGET/
     sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
 
-    sudo iptables-save > $WORKSPACE/logs/iptables.txt
-    df -h> $WORKSPACE/logs/df.txt
-
-    pip freeze > $WORKSPACE/logs/pip-freeze.txt
+    sudo iptables-save > $WORKSPACE/iptables.txt
+    df -h> $WORKSPACE/df.txt
+    pip freeze > $WORKSPACE/pip-freeze.txt
+    sudo mv $WORKSPACE/iptables.txt $WORKSPACE/df.txt \
+        $WORKSPACE/pip-freeze.txt $BASE/logs/
 
     # Process testr artifacts.
     if [ -f $BASE/new/tempest/.testrepository/0 ]; then
-        sudo cp $BASE/new/tempest/.testrepository/0 $WORKSPACE/subunit_log.txt
-        sudo python /usr/local/jenkins/slave_scripts/subunit2html.py $WORKSPACE/subunit_log.txt $WORKSPACE/testr_results.html
-        sudo gzip -9 $WORKSPACE/subunit_log.txt
-        sudo gzip -9 $WORKSPACE/testr_results.html
-        sudo chown jenkins:jenkins $WORKSPACE/subunit_log.txt.gz $WORKSPACE/testr_results.html.gz
-        sudo chmod a+r $WORKSPACE/subunit_log.txt.gz $WORKSPACE/testr_results.html.gz
+        sudo cp $BASE/new/tempest/.testrepository/0 $BASE/logs/subunit_log.txt
+        sudo python /usr/local/jenkins/slave_scripts/subunit2html.py $BASE/logs/subunit_log.txt $BASE/logs/testr_results.html
+        sudo gzip -9 $BASE/logs/subunit_log.txt
+        sudo gzip -9 $BASE/logs/testr_results.html
+        sudo chown jenkins:jenkins $BASE/logs/subunit_log.txt.gz $BASE/logs/testr_results.html.gz
+        sudo chmod a+r $BASE/logs/subunit_log.txt.gz $BASE/logs/testr_results.html.gz
     elif [ -f $BASE/new/tempest/.testrepository/tmp* ]; then
         # If testr timed out, collect temp file from testr
-        sudo cp $BASE/new/tempest/.testrepository/tmp* $WORKSPACE/subunit_log.txt
-        sudo gzip -9 $WORKSPACE/subunit_log.txt
-        sudo chown jenkins:jenkins $WORKSPACE/subunit_log.txt.gz
-        sudo chmod a+r $WORKSPACE/subunit_log.txt.gz
+        sudo cp $BASE/new/tempest/.testrepository/tmp* $BASE/logs/subunit_log.txt
+        sudo gzip -9 $BASE/logs/subunit_log.txt
+        sudo chown jenkins:jenkins $BASE/logs/subunit_log.txt.gz
+        sudo chmod a+r $BASE/logs/subunit_log.txt.gz
     fi
 
     if [ -f $BASE/new/tempest/tempest.log ] ; then
-        sudo cp $BASE/new/tempest/tempest.log $WORKSPACE/logs/tempest.log
+        sudo cp $BASE/new/tempest/tempest.log $BASE/logs/tempest.log
     fi
 
     # Make sure jenkins can read all the logs
-    sudo chown -R jenkins:jenkins $WORKSPACE/logs/
-    sudo chmod a+r $WORKSPACE/logs/
+    sudo chown -R jenkins:jenkins $BASE/logs/
+    sudo chmod a+r $BASE/logs/
 
-    rename 's/\.log$/.txt/' $WORKSPACE/logs/*
-    rename 's/(.*)/$1.txt/' $WORKSPACE/logs/sudoers.d/*
-    rename 's/\.log$/.txt/' $WORKSPACE/logs/rabbitmq/*
+    rename 's/\.log$/.txt/' $BASE/logs/*
+    rename 's/(.*)/$1.txt/' $BASE/logs/sudoers.d/*
+    rename 's/\.log$/.txt/' $BASE/logs/rabbitmq/*
 
-    mv $WORKSPACE/logs/rabbitmq/startup_log \
-       $WORKSPACE/logs/rabbitmq/startup_log.txt
+    sudo mv $BASE/logs/rabbitmq/startup_log \
+       $BASE/logs/rabbitmq/startup_log.txt
 
     # Remove duplicate logs
-    rm $WORKSPACE/logs/*.*.txt
+    sudo rm $BASE/logs/*.*.txt
 
     if [ -d $BASE/old ]; then
-        rename 's/\.log$/.txt/' $WORKSPACE/logs/old/*
-        rename 's/\.log$/.txt/' $WORKSPACE/logs/new/*
-        rename 's/\.log$/.txt/' $WORKSPACE/logs/grenade/*
-        rm $WORKSPACE/logs/old/*.*.txt
-        rm $WORKSPACE/logs/new/*.*.txt
+        sudo rename 's/\.log$/.txt/' $BASE/logs/old/*
+        sudo rename 's/\.log$/.txt/' $BASE/logs/new/*
+        sudo rename 's/\.log$/.txt/' $BASE/logs/grenade/*
+        sudo rm $BASE/logs/old/*.*.txt
+        sudo rm $BASE/logs/new/*.*.txt
     fi
 
     # Compress all text logs
-    find $WORKSPACE/logs -iname '*.txt' -execdir gzip -9 {} \+
-    find $WORKSPACE/logs -iname '*.dat' -execdir gzip -9 {} \+
+    sudo find $BASE/logs -iname '*.txt' -execdir gzip -9 {} \+
+    sudo find $BASE/logs -iname '*.dat' -execdir gzip -9 {} \+
 
     # Save the tempest nosetests results
-    sudo cp $BASE/new/tempest/nosetests*.xml $WORKSPACE/
-    sudo chown jenkins:jenkins $WORKSPACE/nosetests*.xml
-    sudo chmod a+r $WORKSPACE/nosetests*.xml
+    sudo cp $BASE/new/tempest/nosetests*.xml $BASE/logs/
+    sudo chown jenkins:jenkins $BASE/logs/nosetests*.xml
+    sudo chmod a+r $BASE/logs/nosetests*.xml
 
     # Disable detailed logging as we return to the main script
     set +o xtrace
