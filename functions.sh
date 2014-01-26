@@ -131,7 +131,7 @@ function fix_disk_layout {
             sudo mkfs.ext4 ${DEV}2
             sudo swapon ${DEV}1
             sudo mount ${DEV}2 /mnt
-            sudo rsync -a /opt/ /mnt/
+            sudo find /opt/ -mindepth 1 -maxdepth 1 -exec mv {} /mnt/ \;
             sudo umount /mnt
             sudo mount ${DEV}2 /opt
         fi
@@ -217,25 +217,26 @@ function setup_workspace {
     sudo mkdir -p $DEST
     sudo chown -R jenkins:jenkins $DEST
 
+    #TODO(jeblair): remove when this is no longer created by the image
+    rm -fr ~/workspace-cache/
+
     # The vm template update job should cache the git repos
     # Move them to where we expect:
-    if ls ~/workspace-cache/*; then
-      rsync -a ~/workspace-cache/ $DEST/
-    fi
-
     echo "Using branch: $base_branch"
     for PROJECT in $PROJECTS; do
         cd $DEST
+        if [ -d /opt/git/$PROJECT ]; then
+            # Start with a cached git repo if possible
+            rsync -a /opt/git/${PROJECT}/ `basename $PROJECT`
+        fi
         setup_project $PROJECT $base_branch
     done
     # It's important we are back at DEST for the rest of the script
     cd $DEST
 
-    # The vm template update job should cache some images in ~/files.
+    # The vm template update job should cache some images in ~/cache.
     # Move them to where devstack expects:
-    if [ "$(ls ~/cache/files/* 2>/dev/null)" ]; then
-      rsync -a ~/cache/files/ $DEST/devstack/files/
-    fi
+    find ~/cache/files/ -mindepth 1 -maxdepth 1 -exec mv {} $DEST/devstack/files/ \;
 
     # Disable detailed logging as we return to the main script
     set +o xtrace
