@@ -372,7 +372,7 @@ function cleanup_host {
     set -o xtrace
 
     cd $WORKSPACE
-    # No matter what, archive logs
+    # No matter what, archive logs and config files
 
     # Sleep to give services a chance to flush their log buffers.
     sleep 2
@@ -389,6 +389,15 @@ function cleanup_host {
 
     sudo cp /etc/sudoers.d/* $BASE/logs/sudoers.d/
     sudo cp /etc/sudoers $BASE/logs/sudoers.txt
+
+    # Archive config files
+    sudo mkdir $BASE/logs/etc/
+    for PROJECT in $PROJECTS; do
+        proj=`basename $PROJECT`
+        if [ -d /etc/$proj ]; then
+            sudo cp -r /etc/$proj $BASE/logs/etc/
+        fi
+    done
 
     if [ -d $BASE/old ]; then
       sudo mkdir -p $BASE/logs/old $BASE/logs/new $BASE/logs/grenade
@@ -445,7 +454,12 @@ function cleanup_host {
         sudo cp $BASE/new/tempest/tempest.log $BASE/logs/tempest.log
     fi
 
-    # Make sure jenkins can read all the logs
+    sudo chown -R jenkins:jenkins $BASE/logs/etc/
+    sudo chmod a+r $BASE/logs/etc/
+
+    find $BASE/logs/etc/ -type f -exec rename 's/(.*)/$1.txt/' '{}' \;
+
+    # Make sure jenkins can read all the logs and configs
     sudo chown -R jenkins:jenkins $BASE/logs/
     sudo chmod a+r $BASE/logs/
 
