@@ -299,11 +299,6 @@ if [ "$DEVSTACK_GATE_EXERCISES" -eq "1" ]; then
 fi
 
 if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
-    if [ ! -f "$BASE/new/tempest/etc/tempest.conf" ]; then
-        echo "Configuring tempest"
-        cd $BASE/new/devstack
-        sudo -H -u stack ./tools/configure_tempest.sh
-    fi
     # under tempest isolation tempest will need to write .tox dir, log files
     if [ -d "$BASE/new/tempest" ]; then
         sudo chown -R tempest:stack $BASE/new/tempest
