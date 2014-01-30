@@ -347,6 +347,9 @@ function cleanup_host {
     sudo cp /var/log/apache2/horizon_error.log $BASE/logs/horizon_error.log
     sudo mkdir $BASE/logs/rabbitmq/
     sudo cp /var/log/rabbitmq/* $BASE/logs/rabbitmq/
+    if [ -d /var/log/libvirt ] ; then
+        sudo cp /var/log/libvirt/libvirtd*.log $BASE/logs/
+    fi
     sudo mkdir $BASE/logs/sudoers.d/
 
     sudo cp /etc/sudoers.d/* $BASE/logs/sudoers.d/
