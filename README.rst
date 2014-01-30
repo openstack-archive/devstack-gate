@@ -171,11 +171,7 @@ and reboot to make sure you're running a current kernel::
 
 Wait a few moments for the reboot to complete, then log back in with
 ``nova ssh --login jenkins testserver`` or ``ssh jenkins@<ip_address>``
-and set up parts of the environment expected by devstack-gate testing
-(the "devstack-vm-gate-dev.sh" script mentioned below in the
-`Developer Setup`_ section implements a similar workflow for testing
-changes to devstack-gate itself, but could be modified to automate much
-of this for ease of repetition)::
+and set up parts of the environment expected by devstack-gate testing::
 
   export REPO_URL=https://review.openstack.org/p
   export ZUUL_URL=/home/jenkins/workspace-cache
