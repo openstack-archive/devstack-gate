@@ -294,7 +294,7 @@ function setup_host {
     sudo start rsyslog
 
     # We set some home directories under $BASE, make sure it exists.
-    sudo mkdir $BASE
+    sudo mkdir -p $BASE
     # Create a stack user for devstack to run as, so that we can
     # revoke sudo permissions from that user when appropriate.
     sudo useradd -U -s /bin/bash -d $BASE/new -m stack
