@@ -375,6 +375,17 @@ function cleanup_host {
     sudo mv $WORKSPACE/iptables.txt $WORKSPACE/df.txt \
         $WORKSPACE/pip-freeze.txt $BASE/logs/
 
+    if [ `command -v dpkg` ]; then
+      dpkg -l> $WORKSPACE/dpkg-l.txt
+      gzip -9 dpkg-l.txt
+      sudo mv $WORKSPACE/dpkg-l.txt.gz $BASE/logs/
+    fi
+    if [ `command -v rpm` ]; then
+      rpm -qa > $WORKSPACE/rpm-qa.txt
+      gzip -9 rpm-qa.txt
+      sudo mv $WORKSPACE/rpm-qa.txt.gz $BASE/logs/
+    fi
+
     # Process testr artifacts.
     if [ -f $BASE/new/tempest/.testrepository/0 ]; then
         sudo cp $BASE/new/tempest/.testrepository/0 $BASE/logs/subunit_log.txt
