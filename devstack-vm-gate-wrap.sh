@@ -38,6 +38,7 @@ PROJECTS="openstack/heat $PROJECTS"
 PROJECTS="openstack/horizon $PROJECTS"
 PROJECTS="openstack/ironic $PROJECTS"
 PROJECTS="openstack/keystone $PROJECTS"
+PROJECTS="openstack/marconi $PROJECTS"
 PROJECTS="openstack/neutron $PROJECTS"
 PROJECTS="openstack/nova $PROJECTS"
 PROJECTS="openstack/os-apply-config $PROJECTS"
@@ -52,6 +53,7 @@ PROJECTS="openstack/python-glanceclient $PROJECTS"
 PROJECTS="openstack/python-heatclient $PROJECTS"
 PROJECTS="openstack/python-ironicclient $PROJECTS"
 PROJECTS="openstack/python-keystoneclient $PROJECTS"
+PROJECTS="openstack/python-marconiclient $PROJECTS"
 PROJECTS="openstack/python-neutronclient $PROJECTS"
 PROJECTS="openstack/python-novaclient $PROJECTS"
 PROJECTS="openstack/python-openstackclient $PROJECTS"
@@ -152,6 +154,9 @@ export DEVSTACK_GATE_SAVANNA=${DEVSTACK_GATE_SAVANNA:-0}
 
 # Set to 1 to run trove
 export DEVSTACK_GATE_TROVE=${DEVSTACK_GATE_TROVE:-0}
+
+# Set to 1 to run marconi
+export DEVSTACK_GATE_MARCONI=${DEVSTACK_GATE_MARCONI:-0}
 
 # Set to 0 to disable config_drive and use the metadata server instead
 export DEVSTACK_GATE_CONFIGDRIVE=${DEVSTACK_GATE_CONFIGDRIVE:-1}
