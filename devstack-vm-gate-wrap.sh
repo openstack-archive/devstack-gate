@@ -178,23 +178,19 @@ export DEVSTACK_GATE_GRENADE_FORWARD=${DEVSTACK_GATE_GRENADE_FORWARD:-0}
 export DEVSTACK_GATE_GRENADE_ROLLING=${DEVSTACK_GATE_GRENADE_ROLLING:-0}
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
-    export DEVSTACK_GATE_EXERCISES=1
+    export DEVSTACK_GATE_TEMPEST=1
     if [ "$ZUUL_BRANCH" == "stable/havana" ]; then
         export GRENADE_OLD_BRANCH="stable/grizzly"
         export GRENADE_NEW_BRANCH="stable/havana"
-        export DEVSTACK_GATE_TEMPEST=1
     elif [ "$ZUUL_BRANCH" == "stable/icehouse" ]; then
         export GRENADE_OLD_BRANCH="stable/havana"
         export GRENADE_NEW_BRANCH="stable/icehouse"
-        export DEVSTACK_GATE_TEMPEST=1
     else # master
         export GRENADE_OLD_BRANCH="stable/havana"
         export GRENADE_NEW_BRANCH="master"
-        export DEVSTACK_GATE_TEMPEST=1
     fi
     # the roll forward case
 elif [ "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
-    export DEVSTACK_GATE_EXERCISES=1
     export DEVSTACK_GATE_TEMPEST=1
     if [ "$ZUUL_BRANCH" == "stable/grizzly" ]; then
         export GRENADE_OLD_BRANCH="stable/grizzly"
