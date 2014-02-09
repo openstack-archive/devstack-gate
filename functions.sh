@@ -369,6 +369,9 @@ function cleanup_host {
     sudo cp $BASE/new/devstacklog.txt $NEWLOGTARGET/
     sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
 
+    # Copy tempest config file
+    sudo cp $BASE/new/tempest/etc/tempest.conf $NEWLOGTARGET/
+
     sudo iptables-save > $WORKSPACE/iptables.txt
     df -h > $WORKSPACE/df.txt
     pip freeze > $WORKSPACE/pip-freeze.txt
