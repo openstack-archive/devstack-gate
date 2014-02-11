@@ -47,7 +47,7 @@ function setup_localrc() {
         MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,tempest
     fi
 
-    # the exercises we *don't* want to test on for grenade
+    # the exercises we *don't* want to test on for devstack
     SKIP_EXERCISES=boot_from_volume,bundle,client-env,euca
 
     if [ "$LOCALRC_BRANCH" == "stable/grizzly" ]; then
@@ -249,7 +249,6 @@ BASE_DEVSTACK_DIR=\$BASE_RELEASE_DIR/devstack
 TARGET_RELEASE=new
 TARGET_RELEASE_DIR=$BASE/\$TARGET_RELEASE
 TARGET_DEVSTACK_DIR=\$TARGET_RELEASE_DIR/devstack
-TARGET_RUN_EXERCISES=False
 TARGET_RUN_SMOKE=False
 SAVE_DIR=\$BASE_RELEASE_DIR/save
 EOF
