@@ -360,6 +360,7 @@ function cleanup_host {
       sudo cp $BASE/old/screen-logs/* $BASE/logs/old/
       sudo cp $BASE/old/devstacklog.txt $BASE/logs/old/
       sudo cp $BASE/old/devstack/localrc $BASE/logs/old/localrc.txt
+      sudo cp $BASE/old/tempest/etc/tempest.conf $BASE/logs/old/
       sudo cp $BASE/new/grenade/localrc $BASE/logs/grenade/localrc.txt
       NEWLOGTARGET=$BASE/logs/new
     else
