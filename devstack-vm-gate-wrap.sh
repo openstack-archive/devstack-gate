@@ -150,6 +150,9 @@ export DEVSTACK_GATE_NEUTRON=${DEVSTACK_GATE_NEUTRON:-0}
 # Set to 1 to run nova in cells mode instead of the default mode
 export DEVSTACK_GATE_CELLS=${DEVSTACK_GATE_CELLS:-0}
 
+# Set to 1 to run nova in with nova metadata server as a separate binary
+export DEVSTACK_GATE_NOVA_API_METADATA_SPLIT=${DEVSTACK_GATE_NOVA_API_METADATA_SPLIT:-0}
+
 # Set to 1 to run ironic baremetal provisioning service.
 export DEVSTACK_GATE_IRONIC=${DEVSTACK_GATE_IRONIC:-0}
 
