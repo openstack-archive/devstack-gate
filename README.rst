@@ -164,7 +164,7 @@ and reboot to make sure you're running a current kernel::
   && git clone https://review.openstack.org/p/openstack-infra/config \
   && config/install_puppet.sh && config/install_modules.sh \
   && puppet apply --modulepath=/root/config/modules:/etc/puppet/modules \
-  -e "class { openstack_project::slave_template: install_users => false,
+  -e "class { openstack_project::single_use_slave: install_users => false,
   ssh_key => \"$( cat .ssh/authorized_keys )\" }" \
   && echo HostKey /etc/ssh/ssh_host_ecdsa_key >> /etc/ssh/sshd_config \
   && reboot
