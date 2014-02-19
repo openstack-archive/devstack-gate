@@ -435,6 +435,7 @@ function cleanup_host {
     # Compress all text logs
     sudo find $BASE/logs -iname '*.txt' -execdir gzip -9 {} \+
     sudo find $BASE/logs -iname '*.dat' -execdir gzip -9 {} \+
+    sudo find $BASE/logs -iname '*.conf' -execdir gzip -9 {} \+
 
     # Save the tempest nosetests results
     sudo cp $BASE/new/tempest/nosetests*.xml $BASE/logs/
