@@ -51,6 +51,7 @@ function setup_localrc() {
     SKIP_EXERCISES=boot_from_volume,bundle,client-env,euca
 
     if [ "$LOCALRC_BRANCH" == "stable/grizzly" ]; then
+        SKIP_EXERCISES=${SKIP_EXERCISES},swift,client-args
         if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta
             echo "Q_USE_DEBUG_COMMAND=True" >>localrc
