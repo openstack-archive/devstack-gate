@@ -125,7 +125,7 @@ function fix_disk_layout {
         if [ -n "$DEV" ]; then
             sudo umount ${DEV}
             sudo parted ${DEV} --script -- mklabel msdos
-            sudo parted ${DEV} --script -- mkpart primary linux-swap 0 8192
+            sudo parted ${DEV} --script -- mkpart primary linux-swap 1 8192
             sudo parted ${DEV} --script -- mkpart primary ext2 8192 -1
             sudo mkswap ${DEV}1
             sudo mkfs.ext4 ${DEV}2
