@@ -33,6 +33,12 @@ function tsfilter {
     }'
 }
 
+# indent the output of a command 4 spaces, useful for distinguishing
+# the output of a command from the command itself
+function indent {
+    $@ | (while read; do echo "    $REPLY"; done)
+}
+
 # Attempt to fetch a git ref for a project, if that ref is not empty
 function git_fetch_at_ref {
     local project=$1
