@@ -153,7 +153,7 @@ function fix_disk_layout {
 # If you would like to check out a branch other than what ZUUL has
 # selected, for example in order to check out the old or new branches
 # for grenade, or an alternate branch to test client library
-# compatability, then supply that as the argument instead.  This
+# compatibility, then supply that as the argument instead.  This
 # function will try to check out the following (in order):
 #
 #   The zuul ref for the indicated branch
