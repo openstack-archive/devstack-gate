@@ -272,7 +272,8 @@ else
     sudo chown -R stack:stack $BASE
 
     echo "Running devstack"
-    sudo -H -u stack stdbuf -oL -eL ./stack.sh
+    echo "... this will take 5 - 8 minutes"
+    sudo -H -u stack stdbuf -oL -eL ./stack.sh > /dev/null
 
     # provide a check that the right db was running
     # the path are different for fedora and red hat.
