@@ -20,6 +20,19 @@ function function_exists {
     type $1 2>/dev/null | grep -q 'is a function'
 }
 
+# awk filter to timestamp the stream, including stderr merging
+function tsfilter {
+    $@ 2>&1 | awk '
+    {
+        cmd ="date +\"%Y-%m-%d %H:%M:%S.%3N | \""
+        cmd | getline now
+        close("date +\"%Y-%m-%d %H:%M:%S.%3N | \"")
+        sub(/^/, now)
+        print
+        fflush()
+    }'
+}
+
 # Attempt to fetch a git ref for a project, if that ref is not empty
 function git_fetch_at_ref {
     local project=$1

@@ -259,15 +259,15 @@ ip neighbor show
 echo "Available disk space on this host:"
 df -h
 
-setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
+tsfilter setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
-    setup_workspace $GRENADE_NEW_BRANCH $BASE/new &> \
+    tsfilter setup_workspace $GRENADE_NEW_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
-    setup_workspace $GRENADE_OLD_BRANCH $BASE/old &> \
+    tsfilter setup_workspace $GRENADE_OLD_BRANCH $BASE/old &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
 else
-    setup_workspace $OVERRIDE_ZUUL_BRANCH $BASE/new &> \
+    tsfilter setup_workspace $OVERRIDE_ZUUL_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
 fi
 
@@ -280,7 +280,7 @@ fi
 # Run pre test hook if we have one
 if function_exists "pre_test_hook"; then
   set -o xtrace
-  pre_test_hook 2>&1 | tee $WORKSPACE/devstack-gate-pre-test-hook.txt
+  tsfilter pre_test_hook | tee $WORKSPACE/devstack-gate-pre-test-hook.txt
   sudo mv $WORKSPACE/devstack-gate-pre-test-hook.txt $BASE/logs/
   set +o xtrace
 fi
@@ -293,7 +293,7 @@ RETVAL=$GATE_RETVAL
 # Run post test hook if we have one
 if [ $GATE_RETVAL -eq 0 ] && function_exists "post_test_hook"; then
   set -o xtrace -o pipefail
-  post_test_hook 2>&1 | tee $WORKSPACE/devstack-gate-post-test-hook.txt
+  tsfilter post_test_hook | tee $WORKSPACE/devstack-gate-post-test-hook.txt
   RETVAL=$?
   sudo mv $WORKSPACE/devstack-gate-post-test-hook.txt $BASE/logs/
   set +o xtrace +o pipefail
@@ -305,7 +305,7 @@ if [ $GATE_RETVAL -eq 137 ] && [ -f $WORKSPACE/gate.pid ] ; then
     sudo kill -s 9 -${GATEPID}
 fi
 
-cleanup_host &> $WORKSPACE/devstack-gate-cleanup-host.txt
+tsfilter cleanup_host &> $WORKSPACE/devstack-gate-cleanup-host.txt
 sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
 
 exit $RETVAL
