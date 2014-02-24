@@ -203,8 +203,8 @@ EOF
         echo "TEMPEST_HTTP_IMAGE=http://127.0.0.1/" >> localrc
     fi
 
-    if [ "$DEVSTACK_GATE_TEMPEST_ALLOW_TENANT_ISOLATION" -eq "1" ]; then
-        echo "TEMPEST_ALLOW_TENANT_ISOLATION=True" >>localrc
+    if [ "$DEVSTACK_GATE_TEMPEST_DISABLE_TENANT_ISOLATION" -eq "1" ]; then
+        echo "TEMPEST_ALLOW_TENANT_ISOLATION=False" >>localrc
     fi
 
     if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
@@ -325,6 +325,10 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     if [[ "$DEVSTACK_GATE_TEMPEST_ALL" -eq "1" ]]; then
         echo "Running tempest all test suite"
         sudo -H -u tempest tox -eall -- --concurrency=$TEMPEST_CONCURRENCY
+        res=$?
+    elif [[ "$DEVSTACK_GATE_TEMPEST_DISABLE_TENANT_ISOLATION" -eq "1" ]]; then
+        echo "Running tempest full test suite serially"
+        sudo -H -u tempest tox -efull-serial
         res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite"
