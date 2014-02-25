@@ -258,14 +258,18 @@ indent ip neighbor show
 echo "Available disk space on this host:"
 indent df -h
 
+echo "Setting up the host ..."
 tsfilter setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
+    echo "Setting up the new (migrate to) workspace ..."
     tsfilter setup_workspace $GRENADE_NEW_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
+    echo "Setting up the old (migrate from) workspace ..."
     tsfilter setup_workspace $GRENADE_OLD_BRANCH $BASE/old &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
 else
+    echo "Setting up workspace ..."
     tsfilter setup_workspace $OVERRIDE_ZUUL_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
 fi
@@ -278,6 +282,7 @@ fi
 
 # Run pre test hook if we have one
 if function_exists "pre_test_hook"; then
+  echo "Running pre_test_hook"
   local xtrace=$(set +o | grep xtrace)
   set -o xtrace
   tsfilter pre_test_hook | tee $WORKSPACE/devstack-gate-pre-test-hook.txt
@@ -286,12 +291,14 @@ if function_exists "pre_test_hook"; then
 fi
 
 # Run the gate function
+echo "Running gate_hook"
 gate_hook
 GATE_RETVAL=$?
 RETVAL=$GATE_RETVAL
 
 # Run post test hook if we have one
 if [ $GATE_RETVAL -eq 0 ] && function_exists "post_test_hook"; then
+  echo "Running post_test_hook"
   local xtrace=$(set +o | grep xtrace)
   set -o xtrace -o pipefail
   tsfilter post_test_hook | tee $WORKSPACE/devstack-gate-post-test-hook.txt
@@ -307,6 +314,7 @@ if [ $GATE_RETVAL -eq 137 ] && [ -f $WORKSPACE/gate.pid ] ; then
     sudo kill -s 9 -${GATEPID}
 fi
 
+echo "Cleaning up host..."
 tsfilter cleanup_host &> $WORKSPACE/devstack-gate-cleanup-host.txt
 sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
 
