@@ -24,6 +24,8 @@
 
 source $WORKSPACE/devstack-gate/functions.sh
 
+start_timer
+
 PROJECTS="openstack-dev/devstack $PROJECTS"
 PROJECTS="openstack-dev/grenade $PROJECTS"
 PROJECTS="openstack-dev/pbr $PROJECTS"
@@ -242,7 +244,8 @@ export OVERRIDE_ZUUL_BRANCH=${OVERRIDE_ZUUL_BRANCH:-$ZUUL_BRANCH}
 if ! function_exists "gate_hook"; then
   # the command we use to run the gate
   function gate_hook {
-    timeout -s 9 ${DEVSTACK_GATE_TIMEOUT}m $BASE/new/devstack-gate/devstack-vm-gate.sh
+    remaining_time
+    timeout -s 9 ${REMAINING_TIME}m $BASE/new/devstack-gate/devstack-vm-gate.sh
   }
 fi
 
