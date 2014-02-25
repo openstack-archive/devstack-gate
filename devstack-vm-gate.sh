@@ -274,7 +274,7 @@ else
     sudo chown -R stack:stack $BASE
 
     echo "Running devstack"
-    echo "... this will take 5 - 8 minutes"
+    echo "... this takes 5 - 8 minutes (logs in logs/devstacklog.txt.gz)"
     sudo -H -u stack stdbuf -oL -eL ./stack.sh > /dev/null
 
     # provide a check that the right db was running
