@@ -221,6 +221,7 @@ function re_exec_devstack_gate {
 function setup_workspace {
     local base_branch=$1
     local DEST=$2
+    local xtrace=$(set +o | grep xtrace)
 
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
@@ -252,7 +253,7 @@ function setup_workspace {
     find ~/cache/files/ -mindepth 1 -maxdepth 1 -exec mv {} $DEST/devstack/files/ \;
 
     # Disable detailed logging as we return to the main script
-    set +o xtrace
+    $xtrace
 }
 
 function select_mirror {
@@ -283,6 +284,7 @@ function select_mirror {
 
 function setup_host {
     # Enabled detailed logging, since output of this function is redirected
+    local xtrace=$(set +o | grep xtrace)
     set -o xtrace
 
     # This is necessary to keep sudo from complaining
@@ -342,11 +344,12 @@ function setup_host {
         select_mirror
     fi
     # Disable detailed logging as we return to the main script
-    set +o xtrace
+    $xtrace
 }
 
 function cleanup_host {
     # Enabled detailed logging, since output of this function is redirected
+    local xtrace=$(set +o | grep xtrace)
     set -o xtrace
 
     cd $WORKSPACE
@@ -456,5 +459,5 @@ function cleanup_host {
     sudo chmod a+r $BASE/logs/nosetests*.xml
 
     # Disable detailed logging as we return to the main script
-    set +o xtrace
+    $xtrace
 }
