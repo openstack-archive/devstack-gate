@@ -67,7 +67,9 @@ function setup_localrc() {
         # we don't want to enable services for grenade that don't have upgrade support
         # otherwise they can break grenade, especially when they are projects like
         # ceilometer which inject code in other projects
-        if [ "$DEVSTACK_GATE_GRENADE" -ne "1" ]; then
+        if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
+            SKIP_EXERCISES=${SKIP_EXERCISES},swift,client-args
+        else
             MY_ENABLED_SERVICES+=,heat,h-api,h-api-cfn,h-api-cw,h-eng
             MY_ENABLED_SERVICES+=,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api
         fi
