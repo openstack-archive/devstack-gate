@@ -217,9 +217,6 @@ EOF
         else
             echo "GRENADE_PHASE=target" >> localrc
         fi
-        if [ "$DEVSTACK_GATE_GRENADE_PARTIAL_NCPU" -eq "1" ]; then
-            echo "DO_NOT_UPGRADE_SERVICES=[n-cpu]" >> localrc
-        fi
     else
         # Grenade needs screen, so only turn this off if we aren't
         # running grenade.
@@ -257,6 +254,7 @@ TARGET_RELEASE_DIR=$BASE/\$TARGET_RELEASE
 TARGET_DEVSTACK_DIR=\$TARGET_RELEASE_DIR/devstack
 TARGET_RUN_SMOKE=False
 SAVE_DIR=\$BASE_RELEASE_DIR/save
+DO_NOT_UPGRADE_SERVICES=$DO_NOT_UPGRADE_SERVICES
 EOF
     # Make the workspace owned by the stack user
     sudo chown -R stack:stack $BASE
