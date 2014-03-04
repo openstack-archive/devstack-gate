@@ -267,18 +267,22 @@ indent ip neighbor show
 echo "Available disk space on this host:"
 indent df -h
 
-echo "Setting up the host ..."
+echo "Setting up the host"
+echo "... this takes a few seconds (logs at logs/devstack-gate-setup-host.txt.gz)"
 tsfilter setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
-    echo "Setting up the new (migrate to) workspace ..."
+    echo "Setting up the new (migrate to) workspace"
+    echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
     tsfilter setup_workspace $GRENADE_NEW_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
     echo "Setting up the old (migrate from) workspace ..."
+    echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-old.txt.gz)"
     tsfilter setup_workspace $GRENADE_OLD_BRANCH $BASE/old &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
 else
-    echo "Setting up workspace ..."
+    echo "Setting up the workspace"
+    echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
     tsfilter setup_workspace $OVERRIDE_ZUUL_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
 fi
@@ -305,6 +309,10 @@ gate_hook
 GATE_RETVAL=$?
 RETVAL=$GATE_RETVAL
 
+if [ $GATE_RETVAL -ne 0 ]; then
+    echo "ERROR: gate_hook failed"
+fi
+
 # Run post test hook if we have one
 if [ $GATE_RETVAL -eq 0 ] && function_exists "post_test_hook"; then
   echo "Running post_test_hook"
@@ -323,7 +331,8 @@ if [ $GATE_RETVAL -eq 137 ] && [ -f $WORKSPACE/gate.pid ] ; then
     sudo kill -s 9 -${GATEPID}
 fi
 
-echo "Cleaning up host..."
+echo "Cleaning up host"
+echo "... this takes 3 - 4 minutes (logs at logs/devstack-gate-cleanup-host.txt.gz)"
 tsfilter cleanup_host &> $WORKSPACE/devstack-gate-cleanup-host.txt
 sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
 
