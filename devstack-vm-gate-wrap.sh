@@ -292,7 +292,7 @@ fi
 # Run pre test hook if we have one
 if function_exists "pre_test_hook"; then
   echo "Running pre_test_hook"
-  local xtrace=$(set +o | grep xtrace)
+  xtrace=$(set +o | grep xtrace)
   set -o xtrace
   tsfilter pre_test_hook | tee $WORKSPACE/devstack-gate-pre-test-hook.txt
   sudo mv $WORKSPACE/devstack-gate-pre-test-hook.txt $BASE/logs/
@@ -308,7 +308,7 @@ RETVAL=$GATE_RETVAL
 # Run post test hook if we have one
 if [ $GATE_RETVAL -eq 0 ] && function_exists "post_test_hook"; then
   echo "Running post_test_hook"
-  local xtrace=$(set +o | grep xtrace)
+  xtrace=$(set +o | grep xtrace)
   set -o xtrace -o pipefail
   tsfilter post_test_hook | tee $WORKSPACE/devstack-gate-post-test-hook.txt
   RETVAL=$?
