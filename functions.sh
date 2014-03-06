@@ -394,7 +394,7 @@ function cleanup_host {
       sudo cp $BASE/old/screen-logs/* $BASE/logs/old/
       sudo cp $BASE/old/devstacklog.txt $BASE/logs/old/
       sudo cp $BASE/old/devstack/localrc $BASE/logs/old/localrc.txt
-      sudo cp $BASE/old/tempest/etc/tempest.conf $BASE/logs/old/
+      sudo cp $BASE/old/tempest/etc/tempest.conf $BASE/logs/old/tempest.conf.txt
       sudo cp $BASE/new/grenade/localrc $BASE/logs/grenade/localrc.txt
       NEWLOGTARGET=$BASE/logs/new
     else
@@ -405,7 +405,7 @@ function cleanup_host {
     sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
 
     # Copy tempest config file
-    sudo cp $BASE/new/tempest/etc/tempest.conf $NEWLOGTARGET/
+    sudo cp $BASE/new/tempest/etc/tempest.conf $NEWLOGTARGET/tempest.conf.txt
 
     sudo iptables-save > $WORKSPACE/iptables.txt
     df -h > $WORKSPACE/df.txt
