@@ -62,12 +62,12 @@ PROJECTS="openstack/python-marconiclient $PROJECTS"
 PROJECTS="openstack/python-neutronclient $PROJECTS"
 PROJECTS="openstack/python-novaclient $PROJECTS"
 PROJECTS="openstack/python-openstackclient $PROJECTS"
-PROJECTS="openstack/python-savannaclient $PROJECTS"
+PROJECTS="openstack/python-saharaclient $PROJECTS"
 PROJECTS="openstack/python-swiftclient $PROJECTS"
 PROJECTS="openstack/python-troveclient $PROJECTS"
 PROJECTS="openstack/requirements $PROJECTS"
-PROJECTS="openstack/savanna $PROJECTS"
-PROJECTS="openstack/savanna-dashboard $PROJECTS"
+PROJECTS="openstack/sahara $PROJECTS"
+PROJECTS="openstack/sahara-dashboard $PROJECTS"
 PROJECTS="openstack/stevedore $PROJECTS"
 PROJECTS="openstack/swift $PROJECTS"
 PROJECTS="openstack/taskflow $PROJECTS"
@@ -159,8 +159,8 @@ export DEVSTACK_GATE_NOVA_API_METADATA_SPLIT=${DEVSTACK_GATE_NOVA_API_METADATA_S
 # Set to 1 to run ironic baremetal provisioning service.
 export DEVSTACK_GATE_IRONIC=${DEVSTACK_GATE_IRONIC:-0}
 
-# Set to 1 to run savanna
-export DEVSTACK_GATE_SAVANNA=${DEVSTACK_GATE_SAVANNA:-0}
+# Set to 1 to run sahara
+export DEVSTACK_GATE_SAHARA=${DEVSTACK_GATE_SAHARA:-0}
 
 # Set to 1 to run trove
 export DEVSTACK_GATE_TROVE=${DEVSTACK_GATE_TROVE:-0}

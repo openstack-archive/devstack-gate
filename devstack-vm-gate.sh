@@ -111,8 +111,8 @@ function setup_localrc() {
         if [ "$DEVSTACK_GATE_IRONIC" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,ir-api,ir-cond
         fi
-        if [ "$DEVSTACK_GATE_SAVANNA" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,savanna
+        if [ "$DEVSTACK_GATE_SAHARA" -eq "1" ]; then
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,sahara
         fi
         if [ "$DEVSTACK_GATE_TROVE" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,trove,tr-api,tr-tmgr,tr-cond
