@@ -341,7 +341,7 @@ function setup_host {
     # revoke sudo permissions from that user when appropriate.
     # NOTE(sdague): we should try to get the state dump to be a
     # neutron API call in Icehouse to remove this.
-    sudo useradd -U -s /bin/bash -d $BASE/new/tempest -m tempest
+    sudo useradd -U -s /bin/bash -m tempest
     TEMPFILE=`mktemp`
     echo "tempest ALL=(root) NOPASSWD:/sbin/ip" >$TEMPFILE
     echo "tempest ALL=(root) NOPASSWD:/sbin/iptables" >>$TEMPFILE
