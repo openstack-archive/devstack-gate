@@ -345,6 +345,7 @@ function setup_host {
     TEMPFILE=`mktemp`
     echo "tempest ALL=(root) NOPASSWD:/sbin/ip" >$TEMPFILE
     echo "tempest ALL=(root) NOPASSWD:/sbin/iptables" >>$TEMPFILE
+    echo "tempest ALL=(root) NOPASSWD:/usr/bin/ovsdb-client" >>$TEMPFILE
     chmod 0440 $TEMPFILE
     sudo chown root:root $TEMPFILE
     sudo mv $TEMPFILE /etc/sudoers.d/51_tempest_sh
