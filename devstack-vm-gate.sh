@@ -324,7 +324,11 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
     set +o errexit
 
     cd $BASE/new/tempest
-    if [[ "$DEVSTACK_GATE_TEMPEST_ALL" -eq "1" ]]; then
+    if [[ "$DEVSTACK_GATE_TEMPEST_REGEX" -ne "" ]] ; then
+        echo "Running tempest with a custom regex filter"
+        sudo -H -u tempest tox -eall -- --concurrency=$TEMPEST_CONCURRENCY $DEVSTACK_GATE_TEMPEST_REGEX
+        res=$?
+    elif [[ "$DEVSTACK_GATE_TEMPEST_ALL" -eq "1" ]]; then
         echo "Running tempest all test suite"
         sudo -H -u tempest tox -eall -- --concurrency=$TEMPEST_CONCURRENCY
         res=$?
