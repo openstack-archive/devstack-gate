@@ -113,6 +113,9 @@ function setup_localrc() {
         fi
         if [ "$DEVSTACK_GATE_SAHARA" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,sahara
+
+            # TODO(slukjanov): remove when Tempest integration will be updated
+            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,savanna
         fi
         if [ "$DEVSTACK_GATE_TROVE" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,trove,tr-api,tr-tmgr,tr-cond
