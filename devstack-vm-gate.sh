@@ -192,6 +192,11 @@ EOF
         echo "DEFAULT_INSTANCE_USER=root" >>exerciserc
     fi
 
+    if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "ironic" ]; then
+        echo "VIRT_DRIVER=ironic" >>localrc
+        echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>localrc
+    fi
+
     if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         # We need to disable ratelimiting when running
         # Tempest tests since so many requests are executed
