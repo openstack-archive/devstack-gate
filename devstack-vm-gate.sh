@@ -233,11 +233,16 @@ EOF
     fi
 
     if [ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]; then
+	# NOTE(danms): Temporary transition to =NUM_RESOURCES
+        echo "VIRT_DRIVER=fake" >> localrc
+        echo "TEMPEST_LARGE_OPS_NUMBER=50" >>localrc
+    elif [ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -gt "1" ]; then
         # use fake virt driver and 10 copies of nova-compute
         echo "VIRT_DRIVER=fake" >> localrc
         # To make debugging easier, disabled until bug 1218575 is fixed.
         # echo "NUMBER_FAKE_NOVA_COMPUTE=10" >>localrc
-        echo "TEMPEST_LARGE_OPS_NUMBER=50" >>localrc
+        echo "TEMPEST_LARGE_OPS_NUMBER=$DEVSTACK_GATE_TEMPEST_LARGE_OPS" >>localrc
+
     fi
 
     if [ "$DEVSTACK_GATE_CONFIGDRIVE" -eq "1" ]; then
