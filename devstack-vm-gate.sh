@@ -322,62 +322,52 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         sudo chmod -R o+rx /opt/stack/new/devstack/files
     fi
 
-    # let us control if we die or not
-    set +o errexit
+    # From here until the end we rely on the fact that all the code fails if
+    # something is wrong, to enforce exit on bad test results.
+    set -o errexit
 
     cd $BASE/new/tempest
     if [[ "$DEVSTACK_GATE_TEMPEST_REGEX" != "" ]] ; then
         echo "Running tempest with a custom regex filter"
         sudo -H -u tempest tox -eall -- --concurrency=$TEMPEST_CONCURRENCY $DEVSTACK_GATE_TEMPEST_REGEX
-        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_ALL" -eq "1" ]]; then
         echo "Running tempest all test suite"
         sudo -H -u tempest tox -eall -- --concurrency=$TEMPEST_CONCURRENCY
-        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_DISABLE_TENANT_ISOLATION" -eq "1" ]]; then
         echo "Running tempest full test suite serially"
         sudo -H -u tempest tox -efull-serial
-        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite"
         sudo -H -u tempest tox -efull -- --concurrency=$TEMPEST_CONCURRENCY
-        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_TESTR_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite with testr"
         sudo -H -u tempest tox -etestr-full -- --concurrency=$TEMPEST_CONCURRENCY
-        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] ; then
         echo "Running stress tests"
         sudo -H -u tempest tox -estress
-        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]] ; then
         echo "Running slow heat tests"
         sudo -H -u tempest tox -eheat-slow -- --concurrency=$TEMPEST_CONCURRENCY
-        res=$?
     elif [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -ge "1" ]] ; then
         echo "Running large ops tests"
         sudo -H -u tempest tox -elarge-ops -- --concurrency=$TEMPEST_CONCURRENCY
-        res=$?
     elif [[ "$DEVSTACK_GATE_SMOKE_SERIAL" -eq "1" ]] ; then
         echo "Running tempest smoke tests"
         sudo -H -u tempest tox -esmoke-serial
-        res=$?
     else
         echo "Running tempest smoke tests"
         sudo -H -u tempest tox -esmoke -- --concurrency=$TEMPEST_CONCURRENCY
-        res=$?
     fi
 
-    if [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -ne "1" ]] ; then
-        tools/check_logs.py -d $BASE/new/screen-logs
-        res2=$?
+    if [[ "$DEVSTACK_GATE_CLEAN_LOGS" -eq "0" ]] ; then
+        # if we don't want to enforce clean logs, just turn off
+        # errexit on this final command
+        set +o errexit
     fi
-    # TODO(sdague): post icehouse-2 we can talk about turning
-    # this back on, but right now it is violating the do no harm
-    # principle.
-    # [[ $res -eq 0 && $res2 -eq 0 ]]
-    # exit $?
-    exit $res
+
+    echo "Running log checker"
+    tools/check_logs.py -d $BASE/new/screen-logs
+
 
 else
     # Jenkins expects at least one nosetests file.  If we're not running

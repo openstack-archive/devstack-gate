@@ -240,6 +240,10 @@ export DEVSTACK_GATE_REQS_INTEGRATION=${DEVSTACK_GATE_REQS_INTEGRATION:-0}
 # nonexistant location to disable mirror selection
 export DEVSTACK_GATE_SELECT_MIRROR=${DEVSTACK_GATE_SELECT_MIRROR:-/usr/local/jenkins/slave_scripts/select-mirror.sh}
 
+# Set to 0 to disable clean logs enforcement (3rd party CI might want to do this
+# until they get their driver cleaned up)
+export DEVSTACK_GATE_CLEAN_LOGS=${DEVSTACK_GATE_CLEAN_LOGS:-1}
+
 # Set this to the time in minutes that the gate test should be allowed
 # to run before being aborted (default 60).
 export DEVSTACK_GATE_TIMEOUT=${DEVSTACK_GATE_TIMEOUT:-60}
