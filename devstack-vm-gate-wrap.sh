@@ -260,13 +260,6 @@ fi
 
 echo "Triggered by: https://review.openstack.org/$ZUUL_CHANGE patchset $ZUUL_PATCHSET"
 echo "Pipeline: $ZUUL_PIPELINE"
-echo "IP configuration of this host:"
-indent ip addr show
-echo "IP routing tables of this host:"
-indent ip route show
-indent ip -6 route show
-echo "ARP table of this host:"
-indent ip neighbor show
 echo "Available disk space on this host:"
 indent df -h
 
