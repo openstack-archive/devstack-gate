@@ -158,7 +158,8 @@ connect by running ``ssh root@<ip_address>`` instead.
 
 Upgrade the server, install git and pip packages, add tox via pip
 (because the packaged version is too old), set up a "jenkins" account
-and reboot to make sure you're running a current kernel::
+(add user "jenkins" to sudoers) and reboot to make sure you're running 
+a current kernel::
 
   apt-get install -y git \
   && git clone https://review.openstack.org/p/openstack-infra/config \
@@ -167,6 +168,7 @@ and reboot to make sure you're running a current kernel::
   -e "class { openstack_project::single_use_slave: install_users => false,
   ssh_key => \"$( cat .ssh/authorized_keys )\" }" \
   && echo HostKey /etc/ssh/ssh_host_ecdsa_key >> /etc/ssh/sshd_config \
+  && echo "jenkins ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
   && reboot
 
 Wait a few moments for the reboot to complete, then log back in with
