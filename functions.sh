@@ -300,6 +300,43 @@ function select_mirror {
     fi
 }
 
+function enable_latest_libvirt {
+    sudo apt-get update
+
+    # Log the libvirtd info before we start
+    date
+    /usr/sbin/libvirtd --version
+    ls -altr /usr/sbin/libvirtd
+
+    # Upgrade just a few things we need
+    sudo apt-get --force-yes -y install libvirt-bin python-libvirt
+
+    # Stop the one that is running
+    sudo service libvirt-bin stop
+
+    # Fetch and install libvirt-0.9.8-2ubuntu18 our internal site. original binaries are from
+    # @hallyn's site - http://people.canonical.com/~serge/libvirt-0.9.8-2ubuntu18/
+    pushd /tmp
+    REMOTE_URL=http://b64a126b01b637c4fdf4-11809a5fee9c1af804008df022f3a2d9.r93.cf2.rackcdn.com/
+    wget $REMOTE_URL/libvirt-bin_0.9.8-2ubuntu17.18_amd64.deb
+    wget $REMOTE_URL/libvirt0_0.9.8-2ubuntu17.18_amd64.deb
+    wget $REMOTE_URL/python-libvirt_0.9.8-2ubuntu17.18_amd64.deb
+    sudo dpkg -i *libvirt*.deb
+    rm *libvirt*.deb
+    popd
+
+    # clean up old logs
+    sudo rm /var/log/libvirt/libvirtd*.log
+
+    # Log version/date etc of what we ended with
+    date
+    /usr/sbin/libvirtd --version
+    ls -altr /usr/sbin/libvirtd
+
+    # Start the one that we installed
+    sudo service libvirt-bin start
+}
+
 function setup_host {
     # Enabled detailed logging, since output of this function is redirected
     local xtrace=$(set +o | grep xtrace)
@@ -307,6 +344,14 @@ function setup_host {
 
     # This is necessary to keep sudo from complaining
     fix_etc_hosts
+
+    # Detect OS type
+    # Ubuntu has an lsb_release command which allows us to detect if it is Ubuntu
+    if lsb_release -i 2>/dev/null | grep -iq ubuntu
+    then
+        # Temporary work around to install a patched libvirt 0.9.8+
+        enable_latest_libvirt
+    fi
 
     # Move the PIP cache into position:
     sudo mkdir -p /var/cache/pip
