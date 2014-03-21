@@ -91,6 +91,7 @@ function setup_localrc() {
         if [ "$DEVSTACK_GATE_GRENADE" -ne "1" ]; then
             MY_ENABLED_SERVICES+=,heat,h-api,h-api-cfn,h-api-cw,h-eng
             MY_ENABLED_SERVICES+=,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification
+            MY_ENABLED_SERVICES+=trove,tr-api,tr-tmgr,tr-cond
         fi
         if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn,q-fwaas,q-metering
@@ -116,9 +117,6 @@ function setup_localrc() {
 
             # TODO(slukjanov): remove when Tempest integration will be updated
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,savanna
-        fi
-        if [ "$DEVSTACK_GATE_TROVE" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,trove,tr-api,tr-tmgr,tr-cond
         fi
     fi
 
