@@ -193,6 +193,7 @@ EOF
     if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "ironic" ]; then
         echo "VIRT_DRIVER=ironic" >>localrc
         echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>localrc
+        echo "DEFAULT_INSTANCE_TYPE=baremetal" >>localrc
     fi
 
     if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
