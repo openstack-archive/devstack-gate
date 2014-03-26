@@ -270,7 +270,7 @@ EOF
 
 else
     cd $BASE/new/devstack
-    setup_localrc "new" "$ZUUL_BRANCH"
+    setup_localrc "new" "$OVERRIDE_ZUUL_BRANCH"
 
     # Make the workspace owned by the stack user
     sudo chown -R stack:stack $BASE
