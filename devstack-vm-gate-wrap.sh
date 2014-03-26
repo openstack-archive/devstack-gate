@@ -307,7 +307,8 @@ GATE_RETVAL=$?
 RETVAL=$GATE_RETVAL
 
 if [ $GATE_RETVAL -ne 0 ]; then
-    echo "ERROR: gate_hook failed"
+    echo "ERROR: the main setup script run by this job failed - exit code: $GATE_RETVAL"
+    echo "    please look at the relevant log files to determine the root cause"
 fi
 
 # Run post test hook if we have one
