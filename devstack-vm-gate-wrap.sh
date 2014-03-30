@@ -183,9 +183,9 @@ export TEMPEST_CONCURRENCY=${TEMPEST_CONCURRENCY:-${DEFAULT_CONCURRENCY}}
 # for a stable branch we want to both try to upgrade forward n => n+1 as
 # well as upgrade from last n-1 => n.
 #
-# i.e. stable/havana:
-#   DGG=1 means stable/grizzly => stable/havana
-#   DGGF=1 means stable/havana => master (or stable/icehouse if that's out)
+# i.e. stable/icehouse:
+#   DGG=1 means stable/havana => stable/icehouse
+#   DGGF=1 means stable/icehouse => master (or stable/juno if that's out)
 export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-0}
 export DEVSTACK_GATE_GRENADE_FORWARD=${DEVSTACK_GATE_GRENADE_FORWARD:-0}
 # DGGPN=1 means upgrade everything but n-cpu.
@@ -193,10 +193,7 @@ export DEVSTACK_GATE_GRENADE_PARTIAL_NCPU=${DEVSTACK_GATE_GRENADE_PARTIAL_NCPU:-
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     export DEVSTACK_GATE_TEMPEST=1
-    if [ "$ZUUL_BRANCH" == "stable/havana" ]; then
-        export GRENADE_OLD_BRANCH="stable/grizzly"
-        export GRENADE_NEW_BRANCH="stable/havana"
-    elif [ "$ZUUL_BRANCH" == "stable/icehouse" ]; then
+    if [ "$ZUUL_BRANCH" == "stable/icehouse" ]; then
         export GRENADE_OLD_BRANCH="stable/havana"
         export GRENADE_NEW_BRANCH="stable/icehouse"
     else # master
@@ -211,10 +208,7 @@ if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
     # the roll forward case
 elif [ "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
     export DEVSTACK_GATE_TEMPEST=1
-    if [ "$ZUUL_BRANCH" == "stable/grizzly" ]; then
-        export GRENADE_OLD_BRANCH="stable/grizzly"
-        export GRENADE_NEW_BRANCH="stable/havana"
-    elif [ "$ZUUL_BRANCH" == "stable/havana" ]; then
+    if [ "$ZUUL_BRANCH" == "stable/havana" ]; then
         export GRENADE_OLD_BRANCH="stable/havana"
         export GRENADE_NEW_BRANCH="master"
     fi

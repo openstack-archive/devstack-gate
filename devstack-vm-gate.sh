@@ -50,19 +50,7 @@ function setup_localrc() {
     # the exercises we *don't* want to test on for devstack
     SKIP_EXERCISES=boot_from_volume,bundle,client-env,euca
 
-    if [ "$LOCALRC_BRANCH" == "stable/grizzly" ]; then
-        SKIP_EXERCISES=${SKIP_EXERCISES},swift,client-args
-        if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta
-            echo "Q_USE_DEBUG_COMMAND=True" >>localrc
-            echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
-        else
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-net
-        fi
-        if [ "$DEVSTACK_GATE_CELLS" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-cell
-        fi
-    elif [ "$LOCALRC_BRANCH" == "stable/havana" ]; then
+    if [ "$LOCALRC_BRANCH" == "stable/havana" ]; then
         MY_ENABLED_SERVICES+=,c-bak
         # we don't want to enable services for grenade that don't have upgrade support
         # otherwise they can break grenade, especially when they are projects like
@@ -370,8 +358,7 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         res=$?
     fi
 
-    if [[ "$GRENADE_OLD_BRANCH" != "stable/grizzly" ]] && \
-       [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -ne "1" ]] ; then
+    if [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -ne "1" ]] ; then
         tools/check_logs.py -d $BASE/new/screen-logs
         res2=$?
     fi
