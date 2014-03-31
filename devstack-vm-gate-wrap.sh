@@ -172,6 +172,9 @@ export DEVSTACK_GATE_MARCONI=${DEVSTACK_GATE_MARCONI:-0}
 # Set to 0 to disable config_drive and use the metadata server instead
 export DEVSTACK_GATE_CONFIGDRIVE=${DEVSTACK_GATE_CONFIGDRIVE:-1}
 
+# Set to 1 to enable running a keystone v3 based gate
+export DEVSTACK_GATE_KEYSTONE_V3=${DEVSTACK_GATE_KEYSTONE_V3:-0}
+
 # Set the number of threads to run tempest with
 DEFAULT_CONCURRENCY=$(nproc)
 if [ ${DEFAULT_CONCURRENCY} > 3 ] ; then

@@ -229,6 +229,11 @@ EOF
     else
         echo "FORCE_CONFIG_DRIVE=False" >>localrc
     fi
+    if [ "$DEVSTACK_GATE_KEYSTONE_V3" -eq "1" ]; then
+        # Run gate using only keystone v3
+        # For now this is only injected in tempest configuration
+        echo "TEMPEST_AUTH_VERSION=v3" >>localrc
+    fi
 }
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
