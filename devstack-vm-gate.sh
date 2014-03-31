@@ -33,8 +33,12 @@ function setup_localrc() {
         rm -f localrc
     fi
 
-    DEFAULT_ENABLED_SERVICES=g-api,g-reg,key,n-api,n-crt,n-obj,n-cpu,n-sch,horizon,mysql,rabbit,sysstat,dstat,pidstat
-    DEFAULT_ENABLED_SERVICES+=,s-proxy,s-account,s-container,s-object,cinder,c-api,c-vol,c-sch,n-cond
+    DEFAULT_ENABLED_SERVICES=n-api,n-crt,n-obj,n-cpu,n-sch,n-cond # nova, n-net left out
+    DEFAULT_ENABLED_SERVICES+=,g-api,g-reg # glance
+    DEFAULT_ENABLED_SERVICES+=,key,horizon # keystone & horizon
+    DEFAULT_ENABLED_SERVICES+=,c-api,c-vol,c-sch,c-bak,cinder # NOTE 'cinder' is for legacy compat
+    DEFAULT_ENABLED_SERVICES+=,s-proxy,s-account,s-container,s-object # swift
+    DEFAULT_ENABLED_SERVICES+=,mysql,rabbit,dstat # support services
 
     # Allow optional injection of ENABLED_SERVICES from the calling context
     if [ -z $ENABLED_SERVICES ] ; then
@@ -47,11 +51,14 @@ function setup_localrc() {
         MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,tempest
     fi
 
+    if [ "$DEVSTACK_GATE_CELLS" -eq "1" ]; then
+        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-cell
+    fi
+
     # the exercises we *don't* want to test on for devstack
     SKIP_EXERCISES=boot_from_volume,bundle,client-env,euca
 
     if [ "$LOCALRC_BRANCH" == "stable/havana" ]; then
-        MY_ENABLED_SERVICES+=,c-bak
         # we don't want to enable services for grenade that don't have upgrade support
         # otherwise they can break grenade, especially when they are projects like
         # ceilometer which inject code in other projects
@@ -68,11 +75,7 @@ function setup_localrc() {
         else
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-net
         fi
-        if [ "$DEVSTACK_GATE_CELLS" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-cell
-        fi
     else # master
-        MY_ENABLED_SERVICES+=,c-bak
         # we don't want to enable services for grenade that don't have upgrade support
         # otherwise they can break grenade, especially when they are projects like
         # ceilometer which inject code in other projects
@@ -90,9 +93,6 @@ function setup_localrc() {
         fi
         if [ "$DEVSTACK_GATE_NOVA_API_METADATA_SPLIT" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-api-meta
-        fi
-        if [ "$DEVSTACK_GATE_CELLS" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-cell
         fi
         if [ "$DEVSTACK_GATE_MARCONI" -eq "1" ]; then
             MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,marconi-server
