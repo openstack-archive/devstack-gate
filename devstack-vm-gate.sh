@@ -217,7 +217,7 @@ EOF
     fi
 
     if [ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]; then
-	# NOTE(danms): Temporary transition to =NUM_RESOURCES
+        # NOTE(danms): Temporary transition to =NUM_RESOURCES
         echo "VIRT_DRIVER=fake" >> localrc
         echo "TEMPEST_LARGE_OPS_NUMBER=50" >>localrc
     elif [ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -gt "1" ]; then
@@ -354,7 +354,7 @@ if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         echo "Running slow heat tests"
         sudo -H -u tempest tox -eheat-slow -- --concurrency=$TEMPEST_CONCURRENCY
         res=$?
-    elif [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]] ; then
+    elif [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -ge "1" ]] ; then
         echo "Running large ops tests"
         sudo -H -u tempest tox -elarge-ops -- --concurrency=$TEMPEST_CONCURRENCY
         res=$?
