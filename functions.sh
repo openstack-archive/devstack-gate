@@ -347,10 +347,12 @@ function setup_host {
 
     # Detect OS type
     # Ubuntu has an lsb_release command which allows us to detect if it is Ubuntu
-    if lsb_release -i 2>/dev/null | grep -iq ubuntu
-    then
-        # Temporary work around to install a patched libvirt 0.9.8+
-        enable_latest_libvirt
+    if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "libvirt" ]; then
+        if lsb_release -i 2>/dev/null | grep -iq ubuntu
+        then
+            # Temporary work around to install a patched libvirt 0.9.8+
+            enable_latest_libvirt
+        fi
     fi
 
     # Move the PIP cache into position:
