@@ -65,6 +65,7 @@ function git_has_branch {
                 openstack/swift) return 0 ;;
                 openstack/nova) return 0 ;;
                 openstack/keystone) return 0 ;;
+                opestnack/tempest) return 0 ;;
             esac
     esac
     return 1
@@ -157,6 +158,46 @@ function test_multi_branch_on_master {
     assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZC' $LINENO
     assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'master' $LINENO
     assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'refs/zuul/master/ZC' $LINENO
+}
+
+function test_multi_branch_project_override {
+    # main branch is stable/havana
+    # devstack-gate        master         ZA
+    # devstack-gate        master         ZB
+    # python-glanceclient  master         ZC
+    # glance               stable/havana  ZD
+    # tempest              not in queue (override to master)
+    # oslo.config          not in queue (master because no stable/havana branch)
+    # nova                 not in queue (stable/havana)
+    echo "== Test multi branch project override"
+
+    declare -A TEST_GIT_CHECKOUTS
+    declare -A TEST_ZUUL_REFS
+    ZUUL_PROJECT='openstack/glance'
+    ZUUL_BRANCH='stable/havana'
+    local OVERRIDE_TEMPEST_PROJECT_BRANCH='master'
+    ZUUL_REF='refs/zuul/stable/havana/ZD'
+    TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZA'
+    TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZB'
+    TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZC'
+    TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZD'
+    TEST_ZUUL_REFS[python-glanceclient]+=' refs/zuul/master/ZC'
+    TEST_ZUUL_REFS[python-glanceclient]+=' refs/zuul/master/ZD'
+    TEST_ZUUL_REFS[glance]+=' refs/zuul/stable/havana/ZD'
+
+    setup_project openstack-infra/devstack-gate $ZUUL_BRANCH
+    setup_project openstack/glance $ZUUL_BRANCH
+    setup_project openstack/python-glanceclient $ZUUL_BRANCH
+    setup_project openstack/tempest $ZUUL_BRANCH
+    setup_project openstack/nova $ZUUL_BRANCH
+    setup_project openstack/oslo.config $ZUUL_BRANCH
+
+    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZD' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/stable/havana/ZD' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[tempest]}" 'master' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[nova]}" 'stable/havana' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[oslo.config]}" 'master' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'refs/zuul/master/ZD' $LINENO
 }
 
 function test_multi_branch_on_stable {
@@ -360,6 +401,7 @@ function test_periodic {
 test_two_on_master
 test_one_on_master
 test_multi_branch_on_master
+test_multi_branch_project_override
 test_multi_branch_on_stable
 test_grenade_backward
 test_grenade_forward
