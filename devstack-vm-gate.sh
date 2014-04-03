@@ -282,7 +282,7 @@ else
     # the path are different for fedora and red hat.
     if [ -f /usr/bin/yum ]; then
         POSTGRES_LOG_PATH="-d /var/lib/pgsql"
-        MYSQL_LOG_PATH="-f /var/lib/mysqld.log"
+        MYSQL_LOG_PATH="-f /var/log/mysqld.log"
     else
         POSTGRES_LOG_PATH="-d /var/log/postgresql"
         MYSQL_LOG_PATH="-d /var/log/mysql"
