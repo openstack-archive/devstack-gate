@@ -89,17 +89,19 @@ function git_clone_and_cd {
 
 # Utility function for tests
 function assert_equal {
+    local lineno=`caller 0 | awk '{print $1}'`
+    local function=`caller 0 | awk '{print $2}'`
     if [[ "$1" != "$2" ]]; then
-        echo "$1 != $2 on line $3"
-        exit 1
+        echo "ERROR: $1 != $2 in $function:L$lineno!"
+        ERROR=1
+    else
+        echo "$function:L$lineno - ok"
     fi
 }
 
 # Tests follow:
 function test_one_on_master {
     # devstack-gate  master  ZA
-    echo "== Test one on master"
-
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
     ZUUL_PROJECT='openstack-infra/devstack-gate'
@@ -109,14 +111,12 @@ function test_one_on_master {
 
     setup_project openstack-infra/devstack-gate $ZUUL_BRANCH
 
-    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZA' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZA'
 }
 
 function test_two_on_master {
     # devstack-gate  master  ZA
     # glance         master  ZB
-    echo "== Test two on master"
-
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
     ZUUL_PROJECT='openstack/glance'
@@ -129,16 +129,14 @@ function test_two_on_master {
     setup_project openstack-infra/devstack-gate $ZUUL_BRANCH
     setup_project openstack/glance $ZUUL_BRANCH
 
-    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZB' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/master/ZB' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZB'
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/master/ZB'
 }
 
 function test_multi_branch_on_master {
     # devstack-gate        master         ZA
     # glance               stable/havana  ZB
     # python-glanceclient  master         ZC
-    echo "== Test multi-branch on master"
-
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
     ZUUL_PROJECT='openstack/python-glanceclient'
@@ -155,9 +153,9 @@ function test_multi_branch_on_master {
     setup_project openstack/glance $ZUUL_BRANCH
     setup_project openstack/python-glanceclient $ZUUL_BRANCH
 
-    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZC' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'master' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'refs/zuul/master/ZC' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZC'
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'master'
+    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'refs/zuul/master/ZC'
 }
 
 function test_multi_branch_project_override {
@@ -169,8 +167,6 @@ function test_multi_branch_project_override {
     # tempest              not in queue (override to master)
     # oslo.config          not in queue (master because no stable/havana branch)
     # nova                 not in queue (stable/havana)
-    echo "== Test multi branch project override"
-
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
     ZUUL_PROJECT='openstack/glance'
@@ -192,20 +188,18 @@ function test_multi_branch_project_override {
     setup_project openstack/nova $ZUUL_BRANCH
     setup_project openstack/oslo.config $ZUUL_BRANCH
 
-    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZD' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/stable/havana/ZD' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[tempest]}" 'master' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[nova]}" 'stable/havana' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[oslo.config]}" 'master' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'refs/zuul/master/ZD' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZD'
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/stable/havana/ZD'
+    assert_equal "${TEST_GIT_CHECKOUTS[tempest]}" 'master'
+    assert_equal "${TEST_GIT_CHECKOUTS[nova]}" 'stable/havana'
+    assert_equal "${TEST_GIT_CHECKOUTS[oslo.config]}" 'master'
+    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'refs/zuul/master/ZD'
 }
 
 function test_multi_branch_on_stable {
     # devstack-gate        master         ZA
     # glance               stable/havana  ZB
     # python-glanceclient not in queue
-    echo "== Test multi-branch on stable"
-
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
     ZUUL_PROJECT='openstack/glance'
@@ -219,9 +213,9 @@ function test_multi_branch_on_stable {
     setup_project openstack/glance $ZUUL_BRANCH
     setup_project openstack/python-glanceclient $ZUUL_BRANCH
 
-    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZB' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/stable/havana/ZB' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'master' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZB'
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/stable/havana/ZB'
+    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'master'
 }
 
 function test_grenade_backward {
@@ -232,7 +226,6 @@ function test_grenade_backward {
     # glance               master         ZE
     # swift not in queue
     # python-glanceclient not in queue
-    echo "== Test grenade backward"
     # havana -> master (with changes)
 
     declare -A TEST_GIT_CHECKOUTS
@@ -265,12 +258,12 @@ function test_grenade_backward {
     setup_project openstack/swift $GRENADE_OLD_BRANCH
     setup_project openstack/python-glanceclient $GRENADE_OLD_BRANCH
 
-    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZE' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[nova]}" 'refs/zuul/stable/havana/ZE' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[keystone]}" 'refs/zuul/stable/havana/ZE' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'stable/havana' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[swift]}" 'stable/havana' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'master' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZE'
+    assert_equal "${TEST_GIT_CHECKOUTS[nova]}" 'refs/zuul/stable/havana/ZE'
+    assert_equal "${TEST_GIT_CHECKOUTS[keystone]}" 'refs/zuul/stable/havana/ZE'
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'stable/havana'
+    assert_equal "${TEST_GIT_CHECKOUTS[swift]}" 'stable/havana'
+    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'master'
 
     declare -A TEST_GIT_CHECKOUTS
 
@@ -281,12 +274,12 @@ function test_grenade_backward {
     setup_project openstack/swift $GRENADE_NEW_BRANCH
     setup_project openstack/python-glanceclient $GRENADE_NEW_BRANCH
 
-    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZE' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[nova]}" 'master' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[keystone]}" 'refs/zuul/master/ZE' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/master/ZE' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[swift]}" 'master' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'master' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZE'
+    assert_equal "${TEST_GIT_CHECKOUTS[nova]}" 'master'
+    assert_equal "${TEST_GIT_CHECKOUTS[keystone]}" 'refs/zuul/master/ZE'
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/master/ZE'
+    assert_equal "${TEST_GIT_CHECKOUTS[swift]}" 'master'
+    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'master'
 }
 
 function test_grenade_forward {
@@ -297,7 +290,6 @@ function test_grenade_forward {
     # glance               stable/havana  ZE
     # swift not in queue
     # python-glanceclient not in queue
-    echo "== Test grenade forward"
     # havana (with changes) -> master
 
     declare -A TEST_GIT_CHECKOUTS
@@ -330,12 +322,12 @@ function test_grenade_forward {
     setup_project openstack/swift $GRENADE_OLD_BRANCH
     setup_project openstack/python-glanceclient $GRENADE_OLD_BRANCH
 
-    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZE' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[nova]}" 'stable/havana' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[keystone]}" 'refs/zuul/stable/havana/ZE' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/stable/havana/ZE' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[swift]}" 'stable/havana' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'master' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZE'
+    assert_equal "${TEST_GIT_CHECKOUTS[nova]}" 'stable/havana'
+    assert_equal "${TEST_GIT_CHECKOUTS[keystone]}" 'refs/zuul/stable/havana/ZE'
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/stable/havana/ZE'
+    assert_equal "${TEST_GIT_CHECKOUTS[swift]}" 'stable/havana'
+    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'master'
 
     declare -A TEST_GIT_CHECKOUTS
 
@@ -346,12 +338,12 @@ function test_grenade_forward {
     setup_project openstack/swift $GRENADE_NEW_BRANCH
     setup_project openstack/python-glanceclient $GRENADE_NEW_BRANCH
 
-    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZE' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[nova]}" 'refs/zuul/master/ZE' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[keystone]}" 'refs/zuul/master/ZE' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'master' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[swift]}" 'master' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'master' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZE'
+    assert_equal "${TEST_GIT_CHECKOUTS[nova]}" 'refs/zuul/master/ZE'
+    assert_equal "${TEST_GIT_CHECKOUTS[keystone]}" 'refs/zuul/master/ZE'
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'master'
+    assert_equal "${TEST_GIT_CHECKOUTS[swift]}" 'master'
+    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'master'
 }
 
 function test_branch_override {
@@ -359,7 +351,6 @@ function test_branch_override {
     # devstack-gate        master         ZB
     # swift not in queue
     # python-glanceclient not in queue
-    echo "== Test branch override"
 
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
@@ -376,15 +367,14 @@ function test_branch_override {
     setup_project openstack/swift $OVERRIDE_ZUUL_BRANCH
     setup_project openstack/python-glanceclient $OVERRIDE_ZUUL_BRANCH
 
-    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZB' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/stable/havana/ZB' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[swift]}" 'stable/havana' $LINENO
-    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'master' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZB'
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'refs/zuul/stable/havana/ZB'
+    assert_equal "${TEST_GIT_CHECKOUTS[swift]}" 'stable/havana'
+    assert_equal "${TEST_GIT_CHECKOUTS[python-glanceclient]}" 'master'
 }
 
 function test_periodic {
     # No queue
-    echo "== Test periodic"
 
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
@@ -393,7 +383,7 @@ function test_periodic {
 
     setup_project openstack/glance $ZUUL_BRANCH
 
-    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'stable/havana' $LINENO
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'stable/havana'
 }
 
 # Run tests:
@@ -407,3 +397,14 @@ test_grenade_backward
 test_grenade_forward
 test_branch_override
 test_periodic
+
+if [[ ! -z "$ERROR" ]]; then
+    echo
+    echo "FAIL: Tests have errors! See output above."
+    echo
+    exit 1
+else
+    echo
+    echo "Tests completed successfully!"
+    echo
+fi
