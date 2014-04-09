@@ -187,8 +187,10 @@ function fix_disk_layout {
 # compatibility, then supply that as the argument instead.  This
 # function will try to check out the following (in order):
 #
+#   The zuul ref for the project specific OVERRIDE_$PROJECT_PROJECT_BRANCH if specified
 #   The zuul ref for the indicated branch
 #   The zuul ref for the master branch
+#   The tip of the project specific OVERRIDE_$PROJECT_PROJECT_BRANCH if specified
 #   The tip of the indicated branch
 #   The tip of the master branch
 #
@@ -201,6 +203,14 @@ function setup_project {
     git_clone_and_cd $project $short_project
 
     git_remote_set_url origin https://git.openstack.org/$project
+
+    # allow for possible project branch override
+    local uc_project=`echo $short_project | tr [:lower:] [:upper:] | tr '-' '_' | sed 's/[^A-Z_]//'`
+    local project_branch_var="\$OVERRIDE_${uc_project}_PROJECT_BRANCH"
+    local project_branch=`eval echo ${project_branch_var}`
+    if [[ "$project_branch" != "" ]]; then
+        branch=$project_branch
+    fi
 
     # Try the specified branch before the ZUUL_BRANCH.
     OVERRIDE_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$ZUUL_BRANCH,$branch,")
