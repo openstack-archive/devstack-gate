@@ -33,30 +33,20 @@ function setup_localrc() {
         rm -f localrc
     fi
 
-    DEFAULT_ENABLED_SERVICES=n-api,n-crt,n-obj,n-cpu,n-sch,n-cond # nova, n-net left out
-    DEFAULT_ENABLED_SERVICES+=,g-api,g-reg # glance
-    DEFAULT_ENABLED_SERVICES+=,key,horizon # keystone & horizon
-    DEFAULT_ENABLED_SERVICES+=,c-api,c-vol,c-sch,c-bak,cinder # NOTE 'cinder' is for legacy compat
-    DEFAULT_ENABLED_SERVICES+=,s-proxy,s-account,s-container,s-object # swift
-    DEFAULT_ENABLED_SERVICES+=,mysql,rabbit,dstat # support services
+    MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $LOCALRC_BRANCH`
 
     # Allow optional injection of ENABLED_SERVICES from the calling context
-    if [ -z $ENABLED_SERVICES ] ; then
-        MY_ENABLED_SERVICES=$DEFAULT_ENABLED_SERVICES
-    else
-        MY_ENABLED_SERVICES=$DEFAULT_ENABLED_SERVICES,$ENABLED_SERVICES
-    fi
-
-    if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
-        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,tempest
-    fi
-
-    if [ "$DEVSTACK_GATE_CELLS" -eq "1" ]; then
-        MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-cell
+    if [ ! -z $ENABLED_SERVICES ] ; then
+        MY_ENABLED_SERVICES+=,$ENABLED_SERVICES
     fi
 
     # the exercises we *don't* want to test on for devstack
     SKIP_EXERCISES=boot_from_volume,bundle,client-env,euca
+
+    if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
+        echo "Q_USE_DEBUG_COMMAND=True" >>localrc
+        echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
+    fi
 
     if [ "$LOCALRC_BRANCH" == "stable/havana" ]; then
         # we don't want to enable services for grenade that don't have upgrade support
@@ -64,44 +54,6 @@ function setup_localrc() {
         # ceilometer which inject code in other projects
         if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
             SKIP_EXERCISES=${SKIP_EXERCISES},swift,client-args
-        else
-            MY_ENABLED_SERVICES+=,heat,h-api,h-api-cfn,h-api-cw,h-eng
-            MY_ENABLED_SERVICES+=,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api
-        fi
-        if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn,q-fwaas,q-metering
-            echo "Q_USE_DEBUG_COMMAND=True" >>localrc
-            echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
-        else
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-net
-        fi
-    else # master
-        # we don't want to enable services for grenade that don't have upgrade support
-        # otherwise they can break grenade, especially when they are projects like
-        # ceilometer which inject code in other projects
-        if [ "$DEVSTACK_GATE_GRENADE" -ne "1" ]; then
-            MY_ENABLED_SERVICES+=,heat,h-api,h-api-cfn,h-api-cw,h-eng
-            MY_ENABLED_SERVICES+=,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification
-            MY_ENABLED_SERVICES+=,trove,tr-api,tr-tmgr,tr-cond
-        fi
-        if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn,q-fwaas,q-metering
-            echo "Q_USE_DEBUG_COMMAND=True" >>localrc
-            echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
-        else
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-net
-        fi
-        if [ "$DEVSTACK_GATE_NOVA_API_METADATA_SPLIT" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,n-api-meta
-        fi
-        if [ "$DEVSTACK_GATE_MARCONI" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,marconi-server
-        fi
-        if [ "$DEVSTACK_GATE_IRONIC" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,ir-api,ir-cond
-        fi
-        if [ "$DEVSTACK_GATE_SAHARA" -eq "1" ]; then
-            MY_ENABLED_SERVICES=$MY_ENABLED_SERVICES,sahara
         fi
     fi
 
@@ -150,21 +102,6 @@ EOF
         echo "HEAT_CREATE_TEST_IMAGE=False" >>localrc
         # Use Fedora 20 for heat test image, it has heat-cfntools pre-installed
         echo "HEAT_FETCHED_TEST_IMAGE=Fedora-i386-20-20131211.1-sda" >>localrc
-    fi
-
-    if [ "$DEVSTACK_GATE_POSTGRES" -eq "1" ]; then
-        cat <<\EOF >>localrc
-disable_service mysql
-enable_service postgresql
-EOF
-    fi
-
-    if [ "$DEVSTACK_GATE_MQ_DRIVER" == "zeromq" ]; then
-        echo "disable_service rabbit" >>localrc
-        echo "enable_service zeromq" >>localrc
-    elif [ "$DEVSTACK_GATE_MQ_DRIVER" == "qpid" ]; then
-        echo "disable_service rabbit" >>localrc
-        echo "enable_service qpid" >>localrc
     fi
 
     if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
