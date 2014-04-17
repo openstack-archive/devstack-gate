@@ -200,7 +200,7 @@ if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
         export GRENADE_OLD_BRANCH="stable/havana"
         export GRENADE_NEW_BRANCH="stable/icehouse"
     else # master
-        export GRENADE_OLD_BRANCH="stable/havana"
+        export GRENADE_OLD_BRANCH="stable/icehouse"
         export GRENADE_NEW_BRANCH="master"
     fi
     if [ "$DEVSTACK_GATE_GRENADE_PARTIAL_NCPU" -eq "1" ]; then
@@ -213,6 +213,9 @@ elif [ "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
     export DEVSTACK_GATE_TEMPEST=1
     if [ "$ZUUL_BRANCH" == "stable/havana" ]; then
         export GRENADE_OLD_BRANCH="stable/havana"
+        export GRENADE_NEW_BRANCH="stable/icehouse"
+    elif [ "$ZUUL_BRANCH" == "stable/icehouse" ]; then
+        export GRENADE_OLD_BRANCH="stable/icehouse"
         export GRENADE_NEW_BRANCH="master"
     fi
 fi
