@@ -1,6 +1,6 @@
 config:
   default:
-    master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove]
+    master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
     icehouse: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove]
     havana: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat]
   neutron:
