@@ -34,7 +34,11 @@ def parse_features(fname):
 
 
 def normalize_branch(branch):
-    if branch.startswith("stable/"):
+    if branch.startswith("feature/"):
+        # Feature branches chase master and should be tested
+        # as if they were the master branch.
+        branch = 'master'
+    elif branch.startswith("stable/"):
         branch = branch[len("stable/"):]
     if branch not in ALLOWED_BRANCHES:
         LOG.error("unknown branch name %s" % branch)
