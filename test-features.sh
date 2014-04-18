@@ -48,6 +48,11 @@ function test_full_master {
     assert_list_equal $TEMPEST_FULL_MASTER $results
 }
 
+function test_full_feature_ec {
+    local results=$(DEVSTACK_GATE_TEMPEST=1 ./test-matrix.py -b feature/ec)
+    assert_list_equal $TEMPEST_FULL_MASTER $results
+}
+
 function test_full_havana {
     local results=$(DEVSTACK_GATE_TEMPEST=1 ./test-matrix.py -b stable/havana)
     assert_list_equal $TEMPEST_FULL_HAVANA $results
@@ -74,6 +79,7 @@ function test_grenade_old_master {
 }
 
 test_full_master
+test_full_feature_ec
 test_neutron_master
 test_heat_slow_master
 test_grenade_new_master
