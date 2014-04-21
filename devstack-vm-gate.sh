@@ -213,7 +213,13 @@ else
 
     echo "Running devstack"
     echo "... this takes 5 - 8 minutes (logs in logs/devstacklog.txt.gz)"
+    start=$(date +%s)
     sudo -H -u stack stdbuf -oL -eL ./stack.sh > /dev/null
+    end=$(date +%s)
+    took=$(echo "(($end - $start) / 60)" | bc )
+    if [[ "$took" -gt 15 ]]; then
+        echo "WARNING: devstack run took > 15 minutes, this is a very slow node."
+    fi
 
     # provide a check that the right db was running
     # the path are different for fedora and red hat.
