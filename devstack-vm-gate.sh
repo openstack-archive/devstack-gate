@@ -118,6 +118,49 @@ EOF
         echo "DEFAULT_INSTANCE_TYPE=baremetal" >>localrc
     fi
 
+    if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "xenapi" ]; then
+        if [ ! $DEVSTACK_GATE_XENAPI_DOM0_IP -o ! $DEVSTACK_GATE_XENAPI_DOMU_IP -o ! $DEVSTACK_GATE_XENAPI_PASSWORD ]; then
+            echo "XenAPI must have DEVSTACK_GATE_XENAPI_DOM0_IP, DEVSTACK_GATE_XENAPI_DOMU_IP and DEVSTACK_GATE_XENAPI_PASSWORD all set"
+            exit 1
+        fi
+        cat >> localrc << EOF
+SKIP_EXERCISES=${SKIP_EXERCISES},volumes
+XENAPI_PASSWORD=${DEVSTACK_GATE_XENAPI_PASSWORD}
+XENAPI_CONNECTION_URL=http://${DEVSTACK_GATE_XENAPI_DOM0_IP}
+VNCSERVER_PROXYCLIENT_ADDRESS=${DEVSTACK_GATE_XENAPI_DOM0_IP}
+VIRT_DRIVER=xenserver
+
+# A separate xapi network is created with this name-label
+FLAT_NETWORK_BRIDGE=vmnet
+
+# A separate xapi network on eth4 serves the purpose of the public network
+PUBLIC_INTERFACE=eth4
+
+# The xapi network "vmnet" is connected to eth3 in domU
+# We need to explicitly specify these, as the devstack/xenserver driver
+# sets GUEST_INTERFACE_DEFAULT
+VLAN_INTERFACE=eth3
+FLAT_INTERFACE=eth3
+
+# Explicitly set HOST_IP, so that it will be passed down to xapi,
+# thus it will be able to reach glance
+HOST_IP=${DEVSTACK_GATE_XENAPI_DOMU_IP}
+SERVICE_HOST=${DEVSTACK_GATE_XENAPI_DOMU_IP}
+
+# Disable firewall
+XEN_FIREWALL_DRIVER=nova.virt.firewall.NoopFirewallDriver
+
+# Disable agent
+EXTRA_OPTS=("xenapi_disable_agent=True")
+
+# Add a separate device for volumes
+VOLUME_BACKING_DEVICE=/dev/xvdb
+
+# Set multi-host config
+MULTI_HOST=1
+EOF
+    fi
+
     if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
         # We need to disable ratelimiting when running
         # Tempest tests since so many requests are executed

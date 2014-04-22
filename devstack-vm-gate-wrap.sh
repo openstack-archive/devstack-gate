@@ -217,7 +217,7 @@ elif [ "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
     fi
 fi
 
-# Set the virtualization driver to: libvirt, openvz
+# Set the virtualization driver to: libvirt, openvz, xenapi
 export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
 
 # See switch below for this -- it gets set to 1 when tempest
