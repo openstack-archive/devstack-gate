@@ -261,7 +261,7 @@ else
     start=$(date +%s)
     sudo -H -u stack stdbuf -oL -eL ./stack.sh > /dev/null
     end=$(date +%s)
-    took=$(echo "(($end - $start) / 60)" | bc )
+    took=$[($end - $start) / 60]
     if [[ "$took" -gt 15 ]]; then
         echo "WARNING: devstack run took > 15 minutes, this is a very slow node."
     fi
