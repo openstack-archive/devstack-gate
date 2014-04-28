@@ -219,6 +219,13 @@ EOF
         # For now this is only injected in tempest configuration
         echo "TEMPEST_AUTH_VERSION=v3" >>localrc
     fi
+
+    if [ "$DEVSTACK_GATE_USE_APACHE" -eq "1" ]; then
+        # Configure services running under HTTPD (mod_wsgi) this list should
+        # include all services that should be run under mod_wsgi for a gate
+        # check.
+        echo "APACHE_ENABLED_SERVICES+=key" >> localrc
+    fi
 }
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
