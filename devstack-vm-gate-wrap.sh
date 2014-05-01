@@ -176,6 +176,9 @@ export DEVSTACK_GATE_CONFIGDRIVE=${DEVSTACK_GATE_CONFIGDRIVE:-1}
 # Set to 1 to enable running a keystone v3 based gate
 export DEVSTACK_GATE_KEYSTONE_V3=${DEVSTACK_GATE_KEYSTONE_V3:-0}
 
+# Set to 1 to configure Keystone to run under mod_wsgi and HTTPD
+export DEVSTACK_GATE_USE_APACHE=${DEVSTACK_GATE_USE_APACHE:-0}
+
 # Set the number of threads to run tempest with
 DEFAULT_CONCURRENCY=$(nproc)
 if [ ${DEFAULT_CONCURRENCY} -gt 3 ] ; then
