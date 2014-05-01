@@ -85,6 +85,9 @@ export BASE=/opt/stack
 # The URL from which to fetch ZUUL references
 export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
 
+# sshd may have been compiled with a default path excluding */sbin
+export PATH=$PATH:/usr/local/sbin:/usr/sbin
+
 # Set this variable to skip updating the devstack-gate project itself.
 # Useful in development so you can edit scripts in place and run them
 # directly.  Do not set in production.
