@@ -28,6 +28,8 @@ config:
     features: [sahara]
   ironic:
     features: [ironic]
+  qpid:
+    features: [qpid]
 
 features:
   default:
