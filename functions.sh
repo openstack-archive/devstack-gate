@@ -481,31 +481,33 @@ function cleanup_host {
         sudo cp $BASE/new/tempest/tempest.log $BASE/logs/tempest.log
     fi
 
-    sudo chown -R jenkins:jenkins $BASE/logs/etc/
-    sudo chmod a+r $BASE/logs/etc/
-
-    find $BASE/logs/etc/ -type f -exec rename 's/(.*)/$1.txt/' '{}' \;
-
     # Make sure jenkins can read all the logs and configs
     sudo chown -R jenkins:jenkins $BASE/logs/
-    sudo chmod a+r $BASE/logs/
+    sudo chmod a+r $BASE/logs/ $BASE/logs/etc
 
-    rename 's/\.log$/.txt/' $BASE/logs/*
-    rename 's/(.*)/$1.txt/' $BASE/logs/sudoers.d/*
-    rename 's/\.log$/.txt/' $BASE/logs/rabbitmq/*
+    # rename files to .txt; this is so that when displayed via
+    # logs.openstack.org clicking results in the browser shows the
+    # files, rather than trying to send it to another app or make you
+    # download it, etc.
 
-    if [ -f $BASE/logs/rabbitmq/startup_log ]; then
-        sudo mv $BASE/logs/rabbitmq/startup_log \
-            $BASE/logs/rabbitmq/startup_log.txt
+    # firstly, rename all .log files to .txt files
+    for f in $(find $BASE/logs -name "*.log"); do
+        sudo mv $f ${f/.log/.txt}
+    done
+
+    # append .txt to all config files
+    # (there are some /etc/swift .builder and .ring files that get
+    # caught up which aren't really text, don't worry about that)
+    find $BASE/logs/sudoers.d $BASE/logs/etc -type f -exec mv '{}' '{}'.txt \;
+
+    # rabbitmq 
+    if [ -f $BASE/logs/rabbitmq/ ]; then
+        find $BASE/logs/rabbitmq -type f -exec mv '{}' '{}'.txt \;
     fi
 
     # Remove duplicate logs
     sudo rm $BASE/logs/*.*.txt
-
     if [ -d $BASE/old ]; then
-        sudo rename 's/\.log$/.txt/' $BASE/logs/old/*
-        sudo rename 's/\.log$/.txt/' $BASE/logs/new/*
-        sudo rename 's/\.log$/.txt/' $BASE/logs/grenade/*
         sudo rm $BASE/logs/old/*.*.txt
         sudo rm $BASE/logs/new/*.*.txt
     fi
