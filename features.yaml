@@ -30,6 +30,8 @@ config:
     features: [ironic]
   qpid:
     features: [qpid]
+  zeromq:
+    features: [zeromq]
 
 features:
   default:
