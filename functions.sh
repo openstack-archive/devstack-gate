@@ -332,22 +332,29 @@ function setup_host {
     sudo mkdir -p /var/cache/pip
     sudo mv ~/cache/pip/* /var/cache/pip
 
-    # Start with a fresh syslog
-    sudo stop rsyslog
-    sudo mv /var/log/syslog /var/log/syslog-pre-devstack
-    sudo mv /var/log/kern.log /var/log/kern_log-pre-devstack
-    sudo touch /var/log/syslog
-    sudo chown /var/log/syslog --ref /var/log/syslog-pre-devstack
-    sudo chmod /var/log/syslog --ref /var/log/syslog-pre-devstack
-    sudo chmod a+r /var/log/syslog
-    sudo touch /var/log/kern.log
-    sudo chown /var/log/kern.log --ref /var/log/kern_log-pre-devstack
-    sudo chmod /var/log/kern.log --ref /var/log/kern_log-pre-devstack
-    sudo chmod a+r /var/log/kern.log
-    sudo start rsyslog
-
     # We set some home directories under $BASE, make sure it exists.
     sudo mkdir -p $BASE
+
+    # Start with a fresh syslog
+    if is_ubuntu; then
+        sudo stop rsyslog
+        sudo mv /var/log/syslog /var/log/syslog-pre-devstack
+        sudo mv /var/log/kern.log /var/log/kern_log-pre-devstack
+        sudo touch /var/log/syslog
+        sudo chown /var/log/syslog --ref /var/log/syslog-pre-devstack
+        sudo chmod /var/log/syslog --ref /var/log/syslog-pre-devstack
+        sudo chmod a+r /var/log/syslog
+        sudo touch /var/log/kern.log
+        sudo chown /var/log/kern.log --ref /var/log/kern_log-pre-devstack
+        sudo chmod /var/log/kern.log --ref /var/log/kern_log-pre-devstack
+        sudo chmod a+r /var/log/kern.log
+        sudo start rsyslog
+    elif is_fedora; then
+        # save timestamp and use journalctl to dump everything since
+        # then at the end
+        date +"%Y-%m-%d %H:%M:%S" > $BASE/log-start-timestamp.txt
+    fi
+
     # Create a stack user for devstack to run as, so that we can
     # revoke sudo permissions from that user when appropriate.
     sudo useradd -U -s /bin/bash -d $BASE/new -m stack
@@ -392,13 +399,21 @@ function cleanup_host {
     set -o xtrace
 
     cd $WORKSPACE
-    # No matter what, archive logs and config files
 
     # Sleep to give services a chance to flush their log buffers.
     sleep 2
 
-    sudo cp /var/log/syslog $BASE/logs/syslog.txt
-    sudo cp /var/log/kern.log $BASE/logs/kern_log.txt
+    # No matter what, archive logs and config files
+    if is_ubuntu; then
+        sudo cp /var/log/syslog $BASE/logs/syslog.txt
+        sudo cp /var/log/kern.log $BASE/logs/kern_log.txt
+    elif is_fedora; then
+        # the journal gives us syslog() and kernel output, so is like
+        # a concatenation of the above.
+        sudo journalctl --since="$(cat $BASE/log-start-timestamp.txt)" \
+            > $BASE/logs/syslog.txt
+    fi
+
     sudo cp /var/log/apache2/horizon_error.log $BASE/logs/horizon_error.log
     sudo mkdir $BASE/logs/rabbitmq/
     sudo cp /var/log/rabbitmq/* $BASE/logs/rabbitmq/
