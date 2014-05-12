@@ -390,8 +390,14 @@ function cleanup_host {
     sudo cp /var/log/syslog $BASE/logs/syslog.txt
     sudo cp /var/log/kern.log $BASE/logs/kern_log.txt
     sudo cp /var/log/apache2/horizon_error.log $BASE/logs/horizon_error.log
-    sudo mkdir $BASE/logs/rabbitmq/
-    sudo cp /var/log/rabbitmq/* $BASE/logs/rabbitmq/
+
+    # rabbitmq logs
+    if [ -d /var/log/rabbitmq ]; then
+        sudo mkdir $BASE/logs/rabbitmq/
+        sudo cp /var/log/rabbitmq/* $BASE/logs/rabbitmq/
+    fi
+
+    # libvirt
     if [ -d /var/log/libvirt ] ; then
         sudo cp /var/log/libvirt/libvirtd*.log $BASE/logs/
     fi
@@ -477,8 +483,10 @@ function cleanup_host {
     rename 's/(.*)/$1.txt/' $BASE/logs/sudoers.d/*
     rename 's/\.log$/.txt/' $BASE/logs/rabbitmq/*
 
-    sudo mv $BASE/logs/rabbitmq/startup_log \
-       $BASE/logs/rabbitmq/startup_log.txt
+    if [ -f $BASE/logs/rabbitmq/startup_log ]; then
+        sudo mv $BASE/logs/rabbitmq/startup_log \
+            $BASE/logs/rabbitmq/startup_log.txt
+    fi
 
     # Remove duplicate logs
     sudo rm $BASE/logs/*.*.txt
