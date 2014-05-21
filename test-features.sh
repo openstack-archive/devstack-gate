@@ -22,9 +22,9 @@ TEMPEST_NEUTRON_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,hor
 
 TEMPEST_HEAT_SLOW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,trove,tr-api,tr-tmgr,tr-cond,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn,q-fwaas,q-metering,sahara"
 
-GRENADE_NEW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net"
+GRENADE_NEW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net,heat,h-api,h-api-cfn,h-api-cw,h-eng"
 
-GRENADE_OLD_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net"
+GRENADE_OLD_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net,heat,h-api,h-api-cfn,h-api-cw,h-eng"
 
 TEMPEST_FULL_HAVANA="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,n-net"
 
