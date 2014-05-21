@@ -401,8 +401,9 @@ function cleanup_host {
     if [ -d /var/log/libvirt ] ; then
         sudo cp /var/log/libvirt/libvirtd*.log $BASE/logs/
     fi
-    sudo mkdir $BASE/logs/sudoers.d/
 
+    # sudo config
+    sudo mkdir $BASE/logs/sudoers.d/
     sudo cp /etc/sudoers.d/* $BASE/logs/sudoers.d/
     sudo cp /etc/sudoers $BASE/logs/sudoers.txt
 
