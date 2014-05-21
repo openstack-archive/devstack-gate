@@ -16,6 +16,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Distro check functions
+function is_fedora {
+    lsb_release -i 2>/dev/null | grep -iq "fedora"
+}
+
+function is_ubuntu {
+    lsb_release -i 2>/dev/null | grep -iq "ubuntu"
+}
+
+
 function function_exists {
     type $1 2>/dev/null | grep -q 'is a function'
 }
