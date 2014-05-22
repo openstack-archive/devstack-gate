@@ -441,9 +441,15 @@ function cleanup_host {
         fi
     done
 
+    # copy devstack log files
     if [ -d $BASE/old ]; then
       sudo mkdir -p $BASE/logs/old $BASE/logs/new $BASE/logs/grenade
-      sudo cp $BASE/old/screen-logs/* $BASE/logs/old/
+      # copy all log files, but note that devstack creates a shortened
+      # symlink without timestamp (foo.log -> foo.2014-01-01-000000.log)
+      # for each log to latest log. Thus we just copy the symlinks to
+      # avoid excessively long file-names.
+      find $BASE/old/screen-logs -type l -print0 | \
+          xargs -0 -I {} sudo cp {} $BASE/logs/old
       sudo cp $BASE/old/devstacklog.txt $BASE/logs/old/
       sudo cp $BASE/old/devstack/localrc $BASE/logs/old/localrc.txt
       sudo cp $BASE/old/tempest/etc/tempest.conf $BASE/logs/old/tempest_conf.txt
@@ -452,9 +458,14 @@ function cleanup_host {
     else
       NEWLOGTARGET=$BASE/logs
     fi
-    sudo cp $BASE/new/screen-logs/* $NEWLOGTARGET/
-    sudo cp $BASE/new/devstacklog.txt $NEWLOGTARGET/
+    find $BASE/new/screen-logs -type l -print0 | \
+        xargs -0 -I {} sudo cp {} $NEWLOGTARGET/
     sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
+
+    # $BASE/logs is a link to $WORKSPACE (see
+    # devstack-vm-gate-wrap.sh) so we need to clear out a few extra
+    # logs files we don't want to keep
+    sudo rm $BASE/logs/grenade.sh.log.*
 
     # Copy tempest config file
     sudo cp $BASE/new/tempest/etc/tempest.conf $NEWLOGTARGET/tempest_conf.txt
@@ -518,13 +529,6 @@ function cleanup_host {
     # rabbitmq 
     if [ -f $BASE/logs/rabbitmq/ ]; then
         find $BASE/logs/rabbitmq -type f -exec mv '{}' '{}'.txt \;
-    fi
-
-    # Remove duplicate logs
-    sudo rm $BASE/logs/*.*.txt
-    if [ -d $BASE/old ]; then
-        sudo rm $BASE/logs/old/*.*.txt
-        sudo rm $BASE/logs/new/*.*.txt
     fi
 
     # Compress all text logs
