@@ -104,9 +104,9 @@ function test_one_on_master {
     # devstack-gate  master  ZA
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
-    ZUUL_PROJECT='openstack-infra/devstack-gate'
-    ZUUL_BRANCH='master'
-    ZUUL_REF='refs/zuul/master/ZA'
+    local ZUUL_PROJECT='openstack-infra/devstack-gate'
+    local ZUUL_BRANCH='master'
+    local ZUUL_REF='refs/zuul/master/ZA'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZA'
 
     setup_project openstack-infra/devstack-gate $ZUUL_BRANCH
@@ -119,9 +119,9 @@ function test_two_on_master {
     # glance         master  ZB
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
-    ZUUL_PROJECT='openstack/glance'
-    ZUUL_BRANCH='master'
-    ZUUL_REF='refs/zuul/master/ZB'
+    local ZUUL_PROJECT='openstack/glance'
+    local ZUUL_BRANCH='master'
+    local ZUUL_REF='refs/zuul/master/ZB'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZA'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZB'
     TEST_ZUUL_REFS[glance]+=' refs/zuul/master/ZB'
@@ -139,9 +139,9 @@ function test_multi_branch_on_master {
     # python-glanceclient  master         ZC
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
-    ZUUL_PROJECT='openstack/python-glanceclient'
-    ZUUL_BRANCH='master'
-    ZUUL_REF='refs/zuul/master/ZC'
+    local ZUUL_PROJECT='openstack/python-glanceclient'
+    local ZUUL_BRANCH='master'
+    local ZUUL_REF='refs/zuul/master/ZC'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZA'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZB'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZC'
@@ -169,10 +169,10 @@ function test_multi_branch_project_override {
     # nova                 not in queue (stable/havana)
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
-    ZUUL_PROJECT='openstack/glance'
-    ZUUL_BRANCH='stable/havana'
+    local ZUUL_PROJECT='openstack/glance'
+    local ZUUL_BRANCH='stable/havana'
     local OVERRIDE_TEMPEST_PROJECT_BRANCH='master'
-    ZUUL_REF='refs/zuul/stable/havana/ZD'
+    local ZUUL_REF='refs/zuul/stable/havana/ZD'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZA'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZB'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZC'
@@ -202,9 +202,9 @@ function test_multi_branch_on_stable {
     # python-glanceclient not in queue
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
-    ZUUL_PROJECT='openstack/glance'
-    ZUUL_BRANCH='stable/havana'
-    ZUUL_REF='refs/zuul/stable/havana/ZB'
+    local ZUUL_PROJECT='openstack/glance'
+    local ZUUL_BRANCH='stable/havana'
+    local ZUUL_REF='refs/zuul/stable/havana/ZB'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZA'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZB'
     TEST_ZUUL_REFS[glance]+=' refs/zuul/stable/havana/ZB'
@@ -230,11 +230,11 @@ function test_grenade_backward {
 
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
-    ZUUL_PROJECT='openstack/glance'
-    ZUUL_BRANCH='master'
-    ZUUL_REF='refs/zuul/master/ZE'
-    GRENADE_OLD_BRANCH='stable/havana'
-    GRENADE_NEW_BRANCH='master'
+    local ZUUL_PROJECT='openstack/glance'
+    local ZUUL_BRANCH='master'
+    local ZUUL_REF='refs/zuul/master/ZE'
+    local GRENADE_OLD_BRANCH='stable/havana'
+    local GRENADE_NEW_BRANCH='master'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZA'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZB'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZC'
@@ -294,11 +294,11 @@ function test_grenade_forward {
 
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
-    ZUUL_PROJECT='openstack/glance'
-    ZUUL_BRANCH='stable/havana'
-    ZUUL_REF='refs/zuul/stable/havana/ZE'
-    GRENADE_OLD_BRANCH='stable/havana'
-    GRENADE_NEW_BRANCH='master'
+    local ZUUL_PROJECT='openstack/glance'
+    local ZUUL_BRANCH='stable/havana'
+    local ZUUL_REF='refs/zuul/stable/havana/ZE'
+    local GRENADE_OLD_BRANCH='stable/havana'
+    local GRENADE_NEW_BRANCH='master'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZA'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZB'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZC'
@@ -354,10 +354,10 @@ function test_branch_override {
 
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
-    ZUUL_PROJECT='openstack-infra/devstack-gate'
-    ZUUL_BRANCH='master'
-    ZUUL_REF='refs/zuul/master/ZB'
-    OVERRIDE_ZUUL_BRANCH='stable/havana'
+    local ZUUL_PROJECT='openstack-infra/devstack-gate'
+    local ZUUL_BRANCH='master'
+    local ZUUL_REF='refs/zuul/master/ZB'
+    local OVERRIDE_ZUUL_BRANCH='stable/havana'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZB'
     TEST_ZUUL_REFS[glance]+=' refs/zuul/stable/havana/ZA'
     TEST_ZUUL_REFS[glance]+=' refs/zuul/stable/havana/ZB'
@@ -378,8 +378,8 @@ function test_periodic {
 
     declare -A TEST_GIT_CHECKOUTS
     declare -A TEST_ZUUL_REFS
-    ZUUL_BRANCH='stable/havana'
-    ZUUL_PROJECT='openstack/glance'
+    local ZUUL_BRANCH='stable/havana'
+    local ZUUL_PROJECT='openstack/glance'
 
     setup_project openstack/glance $ZUUL_BRANCH
 
@@ -388,15 +388,15 @@ function test_periodic {
 
 # Run tests:
 #set -o xtrace
-test_two_on_master
-test_one_on_master
-test_multi_branch_on_master
-test_multi_branch_project_override
-test_multi_branch_on_stable
+test_branch_override
 test_grenade_backward
 test_grenade_forward
-test_branch_override
+test_multi_branch_on_master
+test_multi_branch_on_stable
+test_multi_branch_project_override
+test_one_on_master
 test_periodic
+test_two_on_master
 
 if [[ ! -z "$ERROR" ]]; then
     echo
