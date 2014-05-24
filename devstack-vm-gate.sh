@@ -115,6 +115,7 @@ EOF
     if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "ironic" ]; then
         echo "VIRT_DRIVER=ironic" >>localrc
         echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>localrc
+        echo "IRONIC_VM_EPHEMERAL_DISK=1" >>localrc
         echo "DEFAULT_INSTANCE_TYPE=baremetal" >>localrc
     fi
 
