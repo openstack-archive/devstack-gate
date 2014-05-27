@@ -131,10 +131,11 @@ function git_remote_set_url {
 function git_clone_and_cd {
     local project=$1
     local short_project=$2
+    local git_base=${GIT_BASE:-https://git.openstack.org}
 
     if [[ ! -e $short_project ]]; then
         echo "  Need to clone $short_project"
-        git clone https://git.openstack.org/$project
+        git clone $git_base/$project
     fi
     cd $short_project
 }
@@ -208,11 +209,12 @@ function setup_project {
     local project=$1
     local branch=$2
     local short_project=`basename $project`
+    local git_base=${GIT_BASE:-https://git.openstack.org}
 
     echo "Setting up $project @ $branch"
     git_clone_and_cd $project $short_project
 
-    git_remote_set_url origin https://git.openstack.org/$project
+    git_remote_set_url origin $git_base/$project
 
     # allow for possible project branch override
     local uc_project=`echo $short_project | tr [:lower:] [:upper:] | tr '-' '_' | sed 's/[^A-Z_]//'`
