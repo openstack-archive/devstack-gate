@@ -414,7 +414,12 @@ function cleanup_host {
             > $BASE/logs/syslog.txt
     fi
 
-    sudo cp /var/log/apache2/horizon_error.log $BASE/logs/horizon_error.log
+    # horizon
+    if is_ubuntu; then
+        sudo cp /var/log/apache2/horizon_error.log $BASE/logs/horizon_error.log
+    elif is_fedora; then
+        sudo cp /var/log/httpd/horizon_error.log $BASE/logs/horizon_error.log
+    fi
 
     # rabbitmq logs
     if [ -d /var/log/rabbitmq ]; then
