@@ -472,6 +472,12 @@ function cleanup_host {
     # logs files we don't want to keep
     sudo rm $BASE/logs/grenade.sh.log.*
 
+    # Copy failure files if they exist
+    if [ $(ls $BASE/stack/status/*.failure | wc -l) -gt 0 ]; then
+        sudo mkdir -p $BASE/logs/status
+        sudo cp $BASE/status/stack/*.failure $BASE/logs/status/
+    fi
+
     # Copy tempest config file
     sudo cp $BASE/new/tempest/etc/tempest.conf $NEWLOGTARGET/tempest_conf.txt
 
@@ -524,6 +530,11 @@ function cleanup_host {
     # firstly, rename all .log files to .txt files
     for f in $(find $BASE/logs -name "*.log"); do
         sudo mv $f ${f/.log/.txt}
+    done
+
+    #rename all failure files to have .txt
+    for f in $(find $BASE/logs/status -name "*.failure"); do
+        sudo mv $f ${f/.failure/.txt}
     done
 
     # append .txt to all config files
