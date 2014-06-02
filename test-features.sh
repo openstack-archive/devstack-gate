@@ -22,9 +22,11 @@ TEMPEST_NEUTRON_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,hor
 
 TEMPEST_HEAT_SLOW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,trove,tr-api,tr-tmgr,tr-cond,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn,q-fwaas,q-metering,sahara"
 
-GRENADE_NEW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net,heat,h-api,h-api-cfn,h-api-cw,h-eng"
+GRENADE_NEW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification"
 
-GRENADE_OLD_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net,heat,h-api,h-api-cfn,h-api-cw,h-eng"
+GRENADE_HAVANA_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acentral,ceilometer-acompute,ceilometer-api,ceilometer-collector"
+
+GRENADE_ICEHOUSE_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification"
 
 TEMPEST_FULL_HAVANA="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,n-net"
 
@@ -73,9 +75,14 @@ function test_grenade_new_master {
     assert_list_equal $GRENADE_NEW_MASTER $results
 }
 
-function test_grenade_old_master {
+function test_grenade_havana_master {
     local results=$(DEVSTACK_GATE_GRENADE=1 DEVSTACK_GATE_TEMPEST=1 ./test-matrix.py -b stable/havana)
-    assert_list_equal $GRENADE_OLD_MASTER $results
+    assert_list_equal $GRENADE_HAVANA_MASTER $results
+}
+
+function test_grenade_icehouse_master {
+    local results=$(DEVSTACK_GATE_GRENADE=1 DEVSTACK_GATE_TEMPEST=1 ./test-matrix.py -b stable/icehouse)
+    assert_list_equal $GRENADE_ICEHOUSE_MASTER $results
 }
 
 test_full_master
@@ -83,7 +90,8 @@ test_full_feature_ec
 test_neutron_master
 test_heat_slow_master
 test_grenade_new_master
-test_grenade_old_master
+test_grenade_havana_master
+test_grenade_icehouse_master
 test_full_havana
 
 if [[ "$ERRORS" -ne 0 ]]; then
