@@ -467,6 +467,7 @@ function cleanup_host {
     fi
     find $BASE/new/screen-logs -type l -print0 | \
         xargs -0 -I {} sudo cp {} $NEWLOGTARGET/
+    sudo cp $BASE/new/devstacklog.txt $NEWLOGTARGET/
     sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
 
     # $BASE/logs is a link to $WORKSPACE (see
