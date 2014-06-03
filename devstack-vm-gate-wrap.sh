@@ -22,6 +22,9 @@
 # Most of the work of this script is done in functions so that we may
 # easily redirect their stdout / stderr to log files.
 
+GIT_BASE=${GIT_BASE:-https://git.openstack.org}
+GIT_BRANCH=${GIT_BRANCH:-master}
+
 source $WORKSPACE/devstack-gate/functions.sh
 
 start_timer
@@ -107,7 +110,7 @@ if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
         # Since we're early in the script, we need to update the d-g
         # copy in the workspace, not $DEST, which is what will be
         # updated later.
-        setup_project openstack-infra/devstack-gate master
+        setup_project openstack-infra/devstack-gate $GIT_BRANCH
         cd $WORKSPACE
 
         re_exec_devstack_gate
@@ -215,7 +218,7 @@ if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
         export GRENADE_NEW_BRANCH="stable/icehouse"
     else # master
         export GRENADE_OLD_BRANCH="stable/icehouse"
-        export GRENADE_NEW_BRANCH="master"
+        export GRENADE_NEW_BRANCH="$GIT_BRANCH"
     fi
     if [ "$DEVSTACK_GATE_GRENADE_PARTIAL_NCPU" -eq "1" ]; then
         export DO_NOT_UPGRADE_SERVICES=[n-cpu]
@@ -230,7 +233,7 @@ elif [ "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
         export GRENADE_NEW_BRANCH="stable/icehouse"
     elif [ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]; then
         export GRENADE_OLD_BRANCH="stable/icehouse"
-        export GRENADE_NEW_BRANCH="master"
+        export GRENADE_NEW_BRANCH="$GIT_BRANCH"
     fi
 fi
 
