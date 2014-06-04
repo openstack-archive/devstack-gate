@@ -327,6 +327,10 @@ function setup_host {
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
 
+    # capture # of cpus
+    echo "NProc things we have $(nproc) cpus"
+    cat /proc/cpuinfo
+
     # This is necessary to keep sudo from complaining
     fix_etc_hosts
 
@@ -545,7 +549,7 @@ function cleanup_host {
     # caught up which aren't really text, don't worry about that)
     find $BASE/logs/sudoers.d $BASE/logs/etc -type f -exec mv '{}' '{}'.txt \;
 
-    # rabbitmq 
+    # rabbitmq
     if [ -f $BASE/logs/rabbitmq/ ]; then
         find $BASE/logs/rabbitmq -type f -exec mv '{}' '{}'.txt \;
     fi
