@@ -45,6 +45,16 @@ function tsfilter {
 
 # create the start timer for when the job began
 function start_timer {
+    # first make sure the time is right, so we don't go into crazy land
+    # later if the system decides to apply an ntp date and we jump forward
+    # 4 hrs (which has happened)
+    local default_ntp_server=$(
+        grep ^server /etc/ntp.conf | head -1 | awk '{print $2}')
+    local ntp_server=${NTP_SERVER:-$default_ntp_server}
+    sudo service ntp stop
+    sudo /usr/sbin/ntpdate $ntp_server
+    sudo service ntp start
+    sleep 1
     START_TIME=`date +%s`
 }
 
@@ -545,7 +555,7 @@ function cleanup_host {
     # caught up which aren't really text, don't worry about that)
     find $BASE/logs/sudoers.d $BASE/logs/etc -type f -exec mv '{}' '{}'.txt \;
 
-    # rabbitmq 
+    # rabbitmq
     if [ -f $BASE/logs/rabbitmq/ ]; then
         find $BASE/logs/rabbitmq -type f -exec mv '{}' '{}'.txt \;
     fi
