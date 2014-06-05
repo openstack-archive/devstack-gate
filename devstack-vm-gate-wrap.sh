@@ -292,7 +292,7 @@ tsfilter setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
     echo "Setting up the new (migrate to) workspace"
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
-    tsfilter setup_workspace $GRENADE_NEW_BRANCH $BASE/new &> \
+    tsfilter setup_workspace $GRENADE_NEW_BRANCH $BASE/new copycache &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
     echo "Setting up the old (migrate from) workspace ..."
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-old.txt.gz)"
