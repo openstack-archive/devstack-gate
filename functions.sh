@@ -526,9 +526,26 @@ function cleanup_host {
         sudo chown jenkins:jenkins $BASE/logs/subunit_log.txt.gz
         sudo chmod a+r $BASE/logs/subunit_log.txt.gz
     fi
+    if [ -f $BASE/old/tempest/.testrepository/0 ]; then
+        sudo cp $BASE/old/tempest/.testrepository/0 $BASE/logs/old/subunit_log.txt
+        sudo python /usr/local/jenkins/slave_scripts/subunit2html.py $BASE/logs/old/subunit_log.txt $BASE/logs/old/testr_results.html
+        sudo gzip -9 $BASE/logs/old/subunit_log.txt
+        sudo gzip -9 $BASE/logs/old/testr_results.html
+        sudo chown jenkins:jenkins $BASE/logs/old/subunit_log.txt.gz $BASE/logs/old/testr_results.html.gz
+        sudo chmod a+r $BASE/logs/old/subunit_log.txt.gz $BASE/logs/old/testr_results.html.gz
+    elif [ -f $BASE/old/tempest/.testrepository/tmp* ]; then
+        # If testr timed out, collect temp file from testr
+        sudo cp $BASE/old/tempest/.testrepository/tmp* $BASE/logs/old/subunit_log.txt
+        sudo gzip -9 $BASE/logs/old/subunit_log.txt
+        sudo chown jenkins:jenkins $BASE/logs/old/subunit_log.txt.gz
+        sudo chmod a+r $BASE/logs/old/subunit_log.txt.gz
+    fi
 
     if [ -f $BASE/new/tempest/tempest.log ] ; then
         sudo cp $BASE/new/tempest/tempest.log $BASE/logs/tempest.log
+    fi
+    if [ -f $BASE/old/tempest/tempest.log ] ; then
+        sudo cp $BASE/old/tempest/tempest.log $BASE/logs/old/tempest.log
     fi
 
     # Make sure jenkins can read all the logs and configs
