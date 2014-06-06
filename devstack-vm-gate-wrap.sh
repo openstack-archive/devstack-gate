@@ -121,6 +121,9 @@ fi
 rm -rf $WORKSPACE/logs
 mkdir -p $WORKSPACE/logs
 
+# The feature matrix to select devstack-gate components
+export DEVSTACK_GATE_FEATURE_MATRIX=${DEVSTACK_GATE_FEATURE_MATRIX:-features.yaml}
+
 # Set to 1 to run the Tempest test suite
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 

@@ -21,7 +21,7 @@ import sys
 import yaml
 
 GRID = None
-ALLOWED_BRANCHES = ('havana', 'icehouse', 'master')
+ALLOWED_BRANCHES = []
 
 FORMAT = '%(asctime)s %(levelname)s: %(message)s'
 logging.basicConfig(format=FORMAT)
@@ -37,7 +37,7 @@ def normalize_branch(branch):
     if branch.startswith("feature/"):
         # Feature branches chase master and should be tested
         # as if they were the master branch.
-        branch = 'master'
+        branch = GRID['branches']['default']
     elif branch.startswith("stable/"):
         branch = branch[len("stable/"):]
     if branch not in ALLOWED_BRANCHES:
@@ -112,8 +112,10 @@ of environmental feature definitions and flags.
 
 def main():
     global GRID
+    global ALLOWED_BRANCHES
     opts = get_opts()
     GRID = parse_features(opts.features)
+    ALLOWED_BRANCHES = GRID['branches']['allowed']
     branch = normalize_branch(opts.branch)
 
     features = calc_features(branch, configs_from_env())

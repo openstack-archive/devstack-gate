@@ -33,7 +33,7 @@ function setup_localrc() {
         rm -f localrc
     fi
 
-    MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $LOCALRC_BRANCH`
+    MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $LOCALRC_BRANCH -f $DEVSTACK_GATE_FEATURE_MATRIX`
 
     # Allow optional injection of ENABLED_SERVICES from the calling context
     if [ ! -z $ENABLED_SERVICES ] ; then

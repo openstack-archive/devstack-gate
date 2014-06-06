@@ -33,6 +33,12 @@ config:
   zeromq:
     features: [zeromq]
 
+branches:
+  # The value of ""default" is the name of the "trunk" branch
+  default: master
+  # Normalized branch names only here, e.g. stable/icehouse => icehouse
+  allowed: [master, icehouse, havana]
+
 features:
   default:
     base:
