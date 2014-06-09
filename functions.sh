@@ -493,7 +493,7 @@ function cleanup_host {
     sudo rm $BASE/logs/grenade.sh.log.*
 
     # Copy failure files if they exist
-    if [ $(ls $BASE/stack/status/*.failure | wc -l) -gt 0 ]; then
+    if [ $(ls $BASE/status/stack/*.failure | wc -l) -gt 0 ]; then
         sudo mkdir -p $BASE/logs/status
         sudo cp $BASE/status/stack/*.failure $BASE/logs/status/
     fi
