@@ -455,18 +455,21 @@ function setup_project {
         FALLBACK_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$branch,master,")
     fi
 
+    if git_has_branch $project $branch; then
+        git_checkout $project $branch
+    else
+        git_checkout $project master
+    fi
+
     # See if Zuul prepared a ref for this project
     if git_fetch_at_ref $project $OVERRIDE_ZUUL_REF || \
         git_fetch_at_ref $project $FALLBACK_ZUUL_REF; then
 
-        # It's there, so check it out.
-        git_checkout $project FETCH_HEAD
-    else
-        if git_has_branch $project $branch; then
-            git_checkout $project $branch
-        else
-            git_checkout $project master
-        fi
+        git config --global user.email "openstack@citrix.com"
+        git config --global user.name "Citrix CI"
+
+        # It's there, so merge it
+        git merge FETCH_HEAD
     fi
 }
 
