@@ -227,6 +227,9 @@ EOF
         # check.
         echo "APACHE_ENABLED_SERVICES+=key" >> localrc
     fi
+    if [ "$DEVSTACK_GATE_TEMPEST_NOVA_V3" -eq "1" ]; then
+        echo "TEMPEST_NOVA_API_V3=True" >> localrc
+    fi
 }
 
 if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
