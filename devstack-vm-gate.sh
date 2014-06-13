@@ -90,7 +90,6 @@ USE_GET_PIP=1
 # Don't reset the requirements.txt files after g-r updates
 UNDO_REQUIREMENTS=False
 CINDER_PERIODIC_INTERVAL=10
-CEILOMETER_PIPELINE_INTERVAL=15
 export OS_NO_CACHE=True
 EOF
 
