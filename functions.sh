@@ -495,11 +495,6 @@ function cleanup_host {
     sudo cp $BASE/new/devstacklog.txt $NEWLOGTARGET/
     sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
 
-    # $BASE/logs is a link to $WORKSPACE (see
-    # devstack-vm-gate-wrap.sh) so we need to clear out a few extra
-    # logs files we don't want to keep
-    sudo rm $BASE/logs/grenade.sh.log.*
-
     # Copy failure files if they exist
     if [ $(ls $BASE/status/stack/*.failure | wc -l) -gt 0 ]; then
         sudo mkdir -p $BASE/logs/status
