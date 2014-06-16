@@ -455,6 +455,19 @@ function cleanup_host {
         sudo cp /var/log/rabbitmq/* $BASE/logs/rabbitmq/
     fi
 
+    # db logs
+    if [ -d /var/log/postgresql ] ; then
+        # Rename log so it doesn't have an additional '.' so it won't get
+        # deleted
+        sudo cp /var/log/postgresql/*log $BASE/logs/postgres.log
+    fi
+    if [ -f /var/log/mysql.err ] ; then
+        sudo cp /var/log/mysql.err $BASE/logs/mysql_err.log
+    fi
+    if [ -f /var/log/mysql.log ] ; then
+        sudo cp /var/log/mysql.log $BASE/logs/
+    fi
+
     # libvirt
     if [ -d /var/log/libvirt ] ; then
         sudo cp /var/log/libvirt/libvirtd*.log $BASE/logs/
