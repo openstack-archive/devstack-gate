@@ -82,6 +82,7 @@ function setup_localrc {
     fi
 
     cat <<EOF >>localrc
+USE_SCREEN=False
 DEST=$BASE/$LOCALRC_OLDNEW
 ACTIVE_TIMEOUT=90
 BOOT_TIMEOUT=90
@@ -235,10 +236,6 @@ EOF
         # keystone deployed with mod wsgi cannot be upgraded or migrated
         # until https://launchpad.net/bugs/1365105 is resolved.
         echo "KEYSTONE_USE_MOD_WSGI=False" >> localrc
-    else
-        # Grenade needs screen, so only turn this off if we aren't
-        # running grenade.
-        echo "USE_SCREEN=False" >>localrc
     fi
 
     if [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]]; then
