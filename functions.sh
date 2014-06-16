@@ -379,7 +379,7 @@ function setup_host {
     elif is_fedora; then
         # save timestamp and use journalctl to dump everything since
         # then at the end
-        date +"%Y-%m-%d %H:%M:%S" > $BASE/log-start-timestamp.txt
+        date +"%Y-%m-%d %H:%M:%S" | sudo tee $BASE/log-start-timestamp.txt
     fi
 
     # Create a stack user for devstack to run as, so that we can
@@ -437,8 +437,9 @@ function cleanup_host {
     elif is_fedora; then
         # the journal gives us syslog() and kernel output, so is like
         # a concatenation of the above.
-        sudo journalctl --since="$(cat $BASE/log-start-timestamp.txt)" \
-            > $BASE/logs/syslog.txt
+        sudo journalctl --no-pager \
+            --since="$(cat $BASE/log-start-timestamp.txt)" \
+            | sudo tee $BASE/logs/syslog.txt > /dev/null
     fi
 
     # horizon
