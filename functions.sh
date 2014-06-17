@@ -352,6 +352,10 @@ function setup_host {
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
 
+    # capture # of cpus
+    echo "NProc things we have $(nproc) cpus"
+    cat /proc/cpuinfo
+
     # This is necessary to keep sudo from complaining
     fix_etc_hosts
 
