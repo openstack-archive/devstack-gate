@@ -29,30 +29,30 @@ function setup_localrc() {
 
     # Allow calling context to pre-populate the localrc file
     # with additional values
-    if [ -z $KEEP_LOCALRC ] ; then
+    if [[ -z $KEEP_LOCALRC ]] ; then
         rm -f localrc
     fi
 
     MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $LOCALRC_BRANCH -f $DEVSTACK_GATE_FEATURE_MATRIX`
 
     # Allow optional injection of ENABLED_SERVICES from the calling context
-    if [ ! -z $ENABLED_SERVICES ] ; then
+    if [[ ! -z $ENABLED_SERVICES ]] ; then
         MY_ENABLED_SERVICES+=,$ENABLED_SERVICES
     fi
 
     # the exercises we *don't* want to test on for devstack
     SKIP_EXERCISES=boot_from_volume,bundle,client-env,euca
 
-    if [ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]; then
+    if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
         echo "Q_USE_DEBUG_COMMAND=True" >>localrc
         echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
     fi
 
-    if [ "$LOCALRC_BRANCH" == "stable/havana" ]; then
+    if [[ "$LOCALRC_BRANCH" == "stable/havana" ]]; then
         # we don't want to enable services for grenade that don't have upgrade support
         # otherwise they can break grenade, especially when they are projects like
         # ceilometer which inject code in other projects
-        if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
+        if [[ "$DEVSTACK_GATE_GRENADE" -eq "1" ]]; then
             SKIP_EXERCISES=${SKIP_EXERCISES},swift,client-args
         fi
     fi
@@ -93,17 +93,17 @@ CINDER_PERIODIC_INTERVAL=10
 export OS_NO_CACHE=True
 EOF
 
-    if [ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]; then
+    if [[ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]]; then
         echo "CINDER_SECURE_DELETE=False" >>localrc
     fi
 
-    if [ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]; then
+    if [[ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]]; then
         echo "HEAT_CREATE_TEST_IMAGE=False" >>localrc
         # Use Fedora 20 for heat test image, it has heat-cfntools pre-installed
         echo "HEAT_FETCHED_TEST_IMAGE=Fedora-i386-20-20131211.1-sda" >>localrc
     fi
 
-    if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
+    if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]]; then
         echo "SKIP_EXERCISES=${SKIP_EXERCISES},volumes" >>localrc
         echo "DEFAULT_INSTANCE_TYPE=m1.small" >>localrc
         echo "DEFAULT_INSTANCE_USER=root" >>localrc
@@ -111,14 +111,14 @@ EOF
         echo "DEFAULT_INSTANCE_USER=root" >>exerciserc
     fi
 
-    if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "ironic" ]; then
+    if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "ironic" ]]; then
         echo "VIRT_DRIVER=ironic" >>localrc
         echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>localrc
         echo "IRONIC_VM_EPHEMERAL_DISK=1" >>localrc
         echo "DEFAULT_INSTANCE_TYPE=baremetal" >>localrc
     fi
 
-    if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "xenapi" ]; then
+    if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "xenapi" ]]; then
         if [ ! $DEVSTACK_GATE_XENAPI_DOM0_IP -o ! $DEVSTACK_GATE_XENAPI_DOMU_IP -o ! $DEVSTACK_GATE_XENAPI_PASSWORD ]; then
             echo "XenAPI must have DEVSTACK_GATE_XENAPI_DOM0_IP, DEVSTACK_GATE_XENAPI_DOMU_IP and DEVSTACK_GATE_XENAPI_PASSWORD all set"
             exit 1
@@ -161,7 +161,7 @@ MULTI_HOST=1
 EOF
     fi
 
-    if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
+    if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
         # We need to disable ratelimiting when running
         # Tempest tests since so many requests are executed
         echo "API_RATE_LIMIT=False" >> localrc
@@ -178,14 +178,14 @@ EOF
         echo "TEMPEST_HTTP_IMAGE=http://127.0.0.1/" >> localrc
     fi
 
-    if [ "$DEVSTACK_GATE_TEMPEST_DISABLE_TENANT_ISOLATION" -eq "1" ]; then
+    if [[ "$DEVSTACK_GATE_TEMPEST_DISABLE_TENANT_ISOLATION" -eq "1" ]]; then
         echo "TEMPEST_ALLOW_TENANT_ISOLATION=False" >>localrc
     fi
 
-    if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
+    if [[ "$DEVSTACK_GATE_GRENADE" -eq "1" ]]; then
         echo "DATA_DIR=/opt/stack/data" >> localrc
         echo "SWIFT_DATA_DIR=/opt/stack/data/swift" >> localrc
-        if [ "$LOCALRC_OLDNEW" == "old" ]; then
+        if [[ "$LOCALRC_OLDNEW" == "old" ]]; then
             echo "GRENADE_PHASE=base" >> localrc
         else
             echo "GRENADE_PHASE=target" >> localrc
@@ -196,11 +196,11 @@ EOF
         echo "USE_SCREEN=False" >>localrc
     fi
 
-    if [ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]; then
+    if [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]]; then
         # NOTE(danms): Temporary transition to =NUM_RESOURCES
         echo "VIRT_DRIVER=fake" >> localrc
         echo "TEMPEST_LARGE_OPS_NUMBER=50" >>localrc
-    elif [ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -gt "1" ]; then
+    elif [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -gt "1" ]]; then
         # use fake virt driver and 10 copies of nova-compute
         echo "VIRT_DRIVER=fake" >> localrc
         # To make debugging easier, disabled until bug 1218575 is fixed.
@@ -209,30 +209,30 @@ EOF
 
     fi
 
-    if [ "$DEVSTACK_GATE_CONFIGDRIVE" -eq "1" ]; then
+    if [[ "$DEVSTACK_GATE_CONFIGDRIVE" -eq "1" ]]; then
         echo "FORCE_CONFIG_DRIVE=always" >>localrc
     else
         echo "FORCE_CONFIG_DRIVE=False" >>localrc
     fi
-    if [ "$DEVSTACK_GATE_KEYSTONE_V3" -eq "1" ]; then
+    if [[ "$DEVSTACK_GATE_KEYSTONE_V3" -eq "1" ]]; then
         # Run gate using only keystone v3
         # For now this is only injected in tempest configuration
         echo "TEMPEST_AUTH_VERSION=v3" >>localrc
     fi
 
-    if [ "$DEVSTACK_GATE_USE_APACHE" -eq "0" ]; then
+    if [[ "$DEVSTACK_GATE_USE_APACHE" -eq "0" ]]; then
         # Disable running services that can run under alternatives from Apache
         # (e.g. Keystone under eventlet) from being configured to run under
         # Apache. This will affect all services that run under HTTPD (mod_wsgi)
         # by default.
         echo "APACHE_ENABLED_SERVICES=" >> localrc
     fi
-    if [ "$DEVSTACK_GATE_TEMPEST_NOVA_V3_API" -eq "1" ]; then
+    if [[ "$DEVSTACK_GATE_TEMPEST_NOVA_V3_API" -eq "1" ]]; then
         echo "TEMPEST_NOVA_API_V3=True" >> localrc
     fi
 }
 
-if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
+if [[ "$DEVSTACK_GATE_GRENADE" -eq "1" ]]; then
     cd $BASE/old/devstack
     setup_localrc "old" "$GRENADE_OLD_BRANCH"
 
@@ -282,20 +282,20 @@ else
 
     # provide a check that the right db was running
     # the path are different for fedora and red hat.
-    if [ -f /usr/bin/yum ]; then
+    if [[ -f /usr/bin/yum ]]; then
         POSTGRES_LOG_PATH="-d /var/lib/pgsql"
         MYSQL_LOG_PATH="-f /var/log/mysqld.log"
     else
         POSTGRES_LOG_PATH="-d /var/log/postgresql"
         MYSQL_LOG_PATH="-d /var/log/mysql"
     fi
-    if [ "$DEVSTACK_GATE_POSTGRES" -eq "1" ]; then
-        if [ ! $POSTGRES_LOG_PATH ]; then
+    if [[ "$DEVSTACK_GATE_POSTGRES" -eq "1" ]]; then
+        if [[ ! $POSTGRES_LOG_PATH ]]; then
             echo "Postgresql should have been used, but there are no logs"
             exit 1
         fi
     else
-        if [ ! $MYSQL_LOG_PATH ]; then
+        if [[ ! $MYSQL_LOG_PATH ]]; then
             echo "Mysql should have been used, but there are no logs"
             exit 1
         fi
@@ -305,22 +305,22 @@ fi
 echo "Removing sudo privileges for devstack user"
 sudo rm /etc/sudoers.d/50_stack_sh
 
-if [ "$DEVSTACK_GATE_EXERCISES" -eq "1" ]; then
+if [[ "$DEVSTACK_GATE_EXERCISES" -eq "1" ]]; then
     echo "Running devstack exercises"
     sudo -H -u stack ./exercise.sh
 fi
 
-if [ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]; then
+if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     # under tempest isolation tempest will need to write .tox dir, log files
-    if [ -d "$BASE/new/tempest" ]; then
+    if [[ -d "$BASE/new/tempest" ]]; then
         sudo chown -R tempest:stack $BASE/new/tempest
     fi
     # our lock files are in data, so we need to be able to write over there
-    if [ -d /opt/stack/data/tempest ]; then
+    if [[ -d /opt/stack/data/tempest ]]; then
         sudo chown -R tempest:stack /opt/stack/data/tempest
     fi
     # ensure the cirros image files are accessible
-    if [ -d /opt/stack/new/devstack/files ]; then
+    if [[ -d /opt/stack/new/devstack/files ]]; then
         sudo chmod -R o+rx /opt/stack/new/devstack/files
     fi
 
