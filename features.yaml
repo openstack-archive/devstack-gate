@@ -33,6 +33,8 @@ config:
     features: [qpid]
   zeromq:
     features: [zeromq]
+  ceph:
+    features: [ceph]
 
 branches:
   # The value of ""default" is the name of the "trunk" branch
@@ -132,3 +134,7 @@ features:
     base:
       services: [qpid]
       rm-services: [rabbit]
+
+  ceph:
+    base:
+      services: [ceph]
