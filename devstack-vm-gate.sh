@@ -251,13 +251,15 @@ TARGET_RUN_SMOKE=False
 SAVE_DIR=\$BASE_RELEASE_DIR/save
 DO_NOT_UPGRADE_SERVICES=$DO_NOT_UPGRADE_SERVICES
 TEMPEST_CONCURRENCY=$TEMPEST_CONCURRENCY
+VERBOSE=False
 EOF
     # Make the workspace owned by the stack user
     sudo chown -R stack:stack $BASE
 
     cd $BASE/new/grenade
     echo "Running grenade ..."
-    sudo -H -u stack ./grenade.sh
+    echo "This takes a good 30 minutes or more"
+    sudo -H -u stack stdbuf -oL -eL ./grenade.sh
     cd $BASE/new/devstack
 
 else
