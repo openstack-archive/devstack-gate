@@ -23,7 +23,7 @@ set -o errexit
 
 echo $PPID > $WORKSPACE/gate.pid
 
-function setup_localrc() {
+function setup_localrc {
     LOCALRC_OLDNEW=$1;
     LOCALRC_BRANCH=$2;
 

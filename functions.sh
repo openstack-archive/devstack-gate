@@ -533,36 +533,36 @@ function cleanup_host {
 
     # copy devstack log files
     if [ -d $BASE/old ]; then
-      sudo mkdir -p $BASE/logs/old $BASE/logs/new
+        sudo mkdir -p $BASE/logs/old $BASE/logs/new
 
-      # copy all log files, but note that devstack creates a shortened
-      # symlink without timestamp (foo.log -> foo.2014-01-01-000000.log)
-      # for each log to latest log. Thus we just copy the symlinks to
-      # avoid excessively long file-names.
-      find $BASE/old/screen-logs -type l -print0 | \
-          xargs -0 -I {} sudo cp {} $BASE/logs/old
-      sudo cp $BASE/old/devstacklog.txt $BASE/logs/old/
-      sudo cp $BASE/old/devstack/localrc $BASE/logs/old/localrc.txt
-      sudo cp $BASE/old/tempest/etc/tempest.conf $BASE/logs/old/tempest_conf.txt
+        # copy all log files, but note that devstack creates a shortened
+        # symlink without timestamp (foo.log -> foo.2014-01-01-000000.log)
+        # for each log to latest log. Thus we just copy the symlinks to
+        # avoid excessively long file-names.
+        find $BASE/old/screen-logs -type l -print0 | \
+            xargs -0 -I {} sudo cp {} $BASE/logs/old
+        sudo cp $BASE/old/devstacklog.txt $BASE/logs/old/
+        sudo cp $BASE/old/devstack/localrc $BASE/logs/old/localrc.txt
+        sudo cp $BASE/old/tempest/etc/tempest.conf $BASE/logs/old/tempest_conf.txt
 
-      # grenade logs
-      sudo cp $BASE/new/grenade/localrc $BASE/logs/grenade_localrc.txt
-      # grenade logs directly and uses similar timestampped files to
-      # devstack.  So temporarily copy out & rename the latest log
-      # files from the short-symlinks into grenade/, clean-up left
-      # over time-stampped files and put the interesting logs back at
-      # top-level for easy access
-      sudo mkdir -p $BASE/logs/grenade
-      sudo cp $BASE/logs/grenade.sh.log $BASE/logs/grenade/
-      sudo cp $BASE/logs/grenade.sh.log.summary \
-          $BASE/logs/grenade/grenade.sh.summary.log
-      sudo rm $BASE/logs/grenade.sh.*
-      sudo mv $BASE/logs/grenade/*.log $BASE/logs
-      sudo rm -rf $BASE/logs/grenade
+        # grenade logs
+        sudo cp $BASE/new/grenade/localrc $BASE/logs/grenade_localrc.txt
+        # grenade logs directly and uses similar timestampped files to
+        # devstack.  So temporarily copy out & rename the latest log
+        # files from the short-symlinks into grenade/, clean-up left
+        # over time-stampped files and put the interesting logs back at
+        # top-level for easy access
+        sudo mkdir -p $BASE/logs/grenade
+        sudo cp $BASE/logs/grenade.sh.log $BASE/logs/grenade/
+        sudo cp $BASE/logs/grenade.sh.log.summary \
+            $BASE/logs/grenade/grenade.sh.summary.log
+        sudo rm $BASE/logs/grenade.sh.*
+        sudo mv $BASE/logs/grenade/*.log $BASE/logs
+        sudo rm -rf $BASE/logs/grenade
 
-      NEWLOGTARGET=$BASE/logs/new
+        NEWLOGTARGET=$BASE/logs/new
     else
-      NEWLOGTARGET=$BASE/logs
+        NEWLOGTARGET=$BASE/logs
     fi
     find $BASE/new/screen-logs -type l -print0 | \
         xargs -0 -I {} sudo cp {} $NEWLOGTARGET/
@@ -577,8 +577,8 @@ function cleanup_host {
 
     # Copy Ironic nodes console logs if they exist
     if [ -d $BASE/new/ironic-bm-logs ] ; then
-      sudo mkdir -p $BASE/logs/ironic-bm-logs
-      sudo cp $BASE/new/ironic-bm-logs/*.log $BASE/logs/ironic-bm-logs/
+        sudo mkdir -p $BASE/logs/ironic-bm-logs
+        sudo cp $BASE/new/ironic-bm-logs/*.log $BASE/logs/ironic-bm-logs/
     fi
 
     # Copy tempest config file
@@ -591,14 +591,14 @@ function cleanup_host {
         $WORKSPACE/pip-freeze.txt $BASE/logs/
 
     if [ `command -v dpkg` ]; then
-      dpkg -l> $WORKSPACE/dpkg-l.txt
-      gzip -9 dpkg-l.txt
-      sudo mv $WORKSPACE/dpkg-l.txt.gz $BASE/logs/
+        dpkg -l> $WORKSPACE/dpkg-l.txt
+        gzip -9 dpkg-l.txt
+        sudo mv $WORKSPACE/dpkg-l.txt.gz $BASE/logs/
     fi
     if [ `command -v rpm` ]; then
-      rpm -qa > $WORKSPACE/rpm-qa.txt
-      gzip -9 rpm-qa.txt
-      sudo mv $WORKSPACE/rpm-qa.txt.gz $BASE/logs/
+        rpm -qa > $WORKSPACE/rpm-qa.txt
+        gzip -9 rpm-qa.txt
+        sudo mv $WORKSPACE/rpm-qa.txt.gz $BASE/logs/
     fi
 
     # Process testr artifacts.
