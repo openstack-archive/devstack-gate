@@ -475,6 +475,10 @@ function cleanup_host {
     # libvirt
     if [ -d /var/log/libvirt ] ; then
         sudo cp /var/log/libvirt/libvirtd*.log $BASE/logs/
+        if [ -d /var/log/libvirt/qemu ] ; then
+            sudo mkdir $BASE/logs/qemu
+            sudo cp /var/log/libvirt/qemu/* $BASE/logs/qemu/
+        fi
     fi
 
     # sudo config
