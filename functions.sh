@@ -43,6 +43,39 @@ function tsfilter {
     }'
 }
 
+function _ping_check {
+    local host=$1
+    local times=${2:-20}
+    echo "Testing ICMP connectivit to $host"
+    ping -c $times $host
+}
+
+function _http_check {
+    local url=$1
+    local dl='wget --progress=bar -O /dev/null'
+    if [[ `which curl` ]]; then
+        dl='curl -# -o /dev/null'
+    fi
+
+    # do a pypi http fetch, to make sure that we're good
+    for i in `seq 1 10`; do
+        echo "HTTP check of $url - attempt #$i"
+        $dl $url || /bin/true
+    done
+}
+
+# do a few network tests to baseline how bad we are
+function network_sanity_check {
+    echo "Performing network sanity check..."
+    # pypi.openstack.org
+    _ping_check pypi.openstack.org
+    _http_check http://pypi.openstack.org/openstack/
+
+    # rax ubuntu mirror
+    _ping_check mirror.rackspace.com
+    _http_check http://mirror.rackspace.com/ubuntu/dists/trusty/Release.gpg
+}
+
 # create the start timer for when the job began
 function start_timer {
     # first make sure the time is right, so we don't go into crazy land
@@ -420,6 +453,11 @@ function setup_host {
     if [ -f $DEVSTACK_GATE_SELECT_MIRROR ] ; then
         select_mirror
     fi
+
+    # perform network sanity check so that we can characterize the
+    # state of the world
+    network_sanity_check
+
     # Disable detailed logging as we return to the main script
     $xtrace
 }
