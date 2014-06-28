@@ -263,10 +263,6 @@ export DEVSTACK_GATE_TEMPEST_REGEX=${DEVSTACK_GATE_TEMPEST_REGEX:-""}
 # Set to 1 if running the openstack/requirements integration test
 export DEVSTACK_GATE_REQS_INTEGRATION=${DEVSTACK_GATE_REQS_INTEGRATION:-0}
 
-# Set this variable to override the mirror selection script. Set to a
-# nonexistant location to disable mirror selection
-export DEVSTACK_GATE_SELECT_MIRROR=${DEVSTACK_GATE_SELECT_MIRROR:-/usr/local/jenkins/slave_scripts/select-mirror.sh}
-
 # Set to 0 to disable clean logs enforcement (3rd party CI might want to do this
 # until they get their driver cleaned up)
 export DEVSTACK_GATE_CLEAN_LOGS=${DEVSTACK_GATE_CLEAN_LOGS:-1}
