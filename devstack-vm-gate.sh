@@ -115,6 +115,7 @@ EOF
         echo "VIRT_DRIVER=ironic" >>localrc
         echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>localrc
         echo "IRONIC_VM_EPHEMERAL_DISK=1" >>localrc
+        echo "IRONIC_VM_LOG_DIR=$BASE/$LOCALRC_OLDNEW/ironic-bm-logs" >>localrc
         echo "DEFAULT_INSTANCE_TYPE=baremetal" >>localrc
     fi
 
