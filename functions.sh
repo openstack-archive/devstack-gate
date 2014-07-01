@@ -535,7 +535,8 @@ function cleanup_host {
 
     # copy devstack log files
     if [ -d $BASE/old ]; then
-      sudo mkdir -p $BASE/logs/old $BASE/logs/new $BASE/logs/grenade
+      sudo mkdir -p $BASE/logs/old $BASE/logs/new
+
       # copy all log files, but note that devstack creates a shortened
       # symlink without timestamp (foo.log -> foo.2014-01-01-000000.log)
       # for each log to latest log. Thus we just copy the symlinks to
@@ -545,7 +546,22 @@ function cleanup_host {
       sudo cp $BASE/old/devstacklog.txt $BASE/logs/old/
       sudo cp $BASE/old/devstack/localrc $BASE/logs/old/localrc.txt
       sudo cp $BASE/old/tempest/etc/tempest.conf $BASE/logs/old/tempest_conf.txt
-      sudo cp $BASE/new/grenade/localrc $BASE/logs/grenade/localrc.txt
+
+      # grenade logs
+      sudo cp $BASE/new/grenade/localrc $BASE/logs/grenade_localrc.txt
+      # grenade logs directly and uses similar timestampped files to
+      # devstack.  So temporarily copy out & rename the latest log
+      # files from the short-symlinks into grenade/, clean-up left
+      # over time-stampped files and put the interesting logs back at
+      # top-level for easy access
+      sudo mkdir -p $BASE/logs/grenade
+      sudo cp $BASE/logs/grenade.sh.log $BASE/logs/grenade/
+      sudo cp $BASE/logs/grenade.sh.log.summary \
+          $BASE/logs/grenade/grenade.sh.summary.log
+      sudo rm $BASE/logs/grenade.sh.*
+      sudo mv $BASE/logs/grenade/*.log $BASE/logs
+      sudo rm -rf $BASE/logs/grenade
+
       NEWLOGTARGET=$BASE/logs/new
     else
       NEWLOGTARGET=$BASE/logs
