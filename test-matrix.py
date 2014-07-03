@@ -40,6 +40,22 @@ def normalize_branch(branch):
         branch = GRID['branches']['default']
     elif branch.startswith("stable/"):
         branch = branch[len("stable/"):]
+    elif branch.startswith("proposed/"):
+        branch = branch[len("proposed/"):]
+        for allowed in GRID['branches']['allowed']:
+            # If the branch name starts with one of our known
+            # named integrated release names treat that branch
+            # as belonging to the integrated release. This means
+            # proposed/foo* will be treated as the foo release.
+            if branch.startswith(allowed):
+                branch = allowed
+                break
+        else:
+            # Releases that are not named integreated releases
+            # should be tested as if they were the master branch
+            # as they occur between integrated releases when other
+            # projects are developing master.
+            branch = GRID['branches']['default']
     if branch not in ALLOWED_BRANCHES:
         LOG.error("unknown branch name %s" % branch)
         sys.exit(1)

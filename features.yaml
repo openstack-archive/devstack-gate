@@ -1,6 +1,7 @@
 config:
   default:
     master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
+    juno: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
     icehouse: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove]
     havana: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat]
   neutron:
@@ -37,7 +38,7 @@ branches:
   # The value of ""default" is the name of the "trunk" branch
   default: master
   # Normalized branch names only here, e.g. stable/icehouse => icehouse
-  allowed: [master, icehouse, havana]
+  allowed: [master, juno, icehouse, havana]
 
 features:
   default:
