@@ -533,6 +533,18 @@ function cleanup_host {
         fi
     done
 
+    # Archive Apache config files
+    sudo mkdir $BASE/logs/apache_config
+    if is_ubuntu; then
+        if [[ -d /etc/apache2/sites-enabled ]]; then
+            sudo cp /etc/apache2/sites-enabled/* $BASE/logs/apache_config
+        fi
+    elif is_fedora; then
+        if [[ -d /etc/apache2/httpd/conf.d ]]; then
+            sudo cp /etc/httpd/conf.d/* $BASE/logs/apache_config
+        fi
+    fi
+
     # copy devstack log files
     if [ -d $BASE/old ]; then
       sudo mkdir -p $BASE/logs/old $BASE/logs/new
