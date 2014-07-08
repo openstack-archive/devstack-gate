@@ -221,12 +221,11 @@ EOF
         echo "TEMPEST_AUTH_VERSION=v3" >>localrc
     fi
 
-    if [[ "$DEVSTACK_GATE_USE_APACHE" -eq "0" ]]; then
-        # Disable running services that can run under alternatives from Apache
-        # (e.g. Keystone under eventlet) from being configured to run under
-        # Apache. This will affect all services that run under HTTPD (mod_wsgi)
-        # by default.
-        echo "APACHE_ENABLED_SERVICES=" >> localrc
+    if [[ "$DEVSTACK_GATE_ENABLE_HTTPD_MOD_WSGI_SERVICES" -eq "0" ]]; then
+        # Services that default to run under Apache + mod_wsgi will use alternatives
+        # (e.g. Keystone under eventlet) if available. This will affect all services
+        # that run under HTTPD (mod_wsgi) by default.
+        echo "ENABLE_HTTPD_MOD_WSGI_SERVICES=False" >> localrc
     fi
     if [[ "$DEVSTACK_GATE_TEMPEST_NOVA_V3_API" -eq "1" ]]; then
         echo "TEMPEST_NOVA_API_V3=True" >> localrc
