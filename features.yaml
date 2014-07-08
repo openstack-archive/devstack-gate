@@ -108,6 +108,7 @@ features:
   ironic:
     base:
       services: [ir-api, ir-cond]
+      rm-services: [cinder, c-api, c-vol, c-sch, c-bak]
 
   sahara:
     base:
