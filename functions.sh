@@ -386,7 +386,7 @@ function setup_host {
     set -o xtrace
 
     # capture # of cpus
-    echo "NProc things we have $(nproc) cpus"
+    echo "NProc has discovered $(nproc) CPUs"
     cat /proc/cpuinfo
 
     # This is necessary to keep sudo from complaining
