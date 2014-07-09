@@ -354,30 +354,17 @@ function setup_workspace {
     $xtrace
 }
 
-function select_mirror {
+function copy_mirror_config {
 
-    if [ "$DEVSTACK_GATE_REQS_INTEGRATION" -eq "0" ]; then
+    sudo install -D -m0644 -o root -g root ~/.pydistutils.cfg ~root/.pydistutils.cfg
+    sudo install -D -m0644 -o root -g root ~/.pip/pip.conf ~root/.pip/pip.conf
 
-        ORG=$(dirname $ZUUL_PROJECT)
-        SHORT_PROJECT=$(basename $ZUUL_PROJECT)
-        $DEVSTACK_GATE_SELECT_MIRROR $ORG $SHORT_PROJECT
+    sudo install -D -m0644 -o stack -g stack ~/.pydistutils.cfg ~stack/.pydistutils.cfg
+    sudo install -D -m0644 -o stack -g stack ~/.pip/pip.conf ~stack/.pip/pip.conf
 
-        sudo cp ~/.pydistutils.cfg ~root/.pydistutils.cfg
-        sudo cp ~/.pydistutils.cfg ~stack/.pydistutils.cfg
-        sudo chown stack:stack ~stack/.pydistutils.cfg
-        sudo cp ~/.pydistutils.cfg ~tempest/.pydistutils.cfg
-        sudo chown tempest:tempest ~tempest/.pydistutils.cfg
+    sudo install -D -m0644 -o tempest -g tempest ~/.pydistutils.cfg ~tempest/.pydistutils.cfg
+    sudo install -D -m0644 -o tempest -g tempest ~/.pip/pip.conf ~tempest/.pip/pip.conf
 
-        sudo -u stack mkdir -p ~stack/.pip
-        sudo -u root mkdir -p ~root/.pip
-        sudo -u tempest mkdir -p ~tempest/.pip
-
-        sudo -u root cp ~/.pip/pip.conf ~root/.pip/pip.conf
-        sudo cp ~/.pip/pip.conf ~stack/.pip/pip.conf
-        sudo chown stack:stack ~stack/.pip/pip.conf
-        sudo cp ~/.pip/pip.conf ~tempest/.pip/pip.conf
-        sudo chown tempest:tempest ~tempest/.pip/pip.conf
-    fi
 }
 
 function setup_host {
@@ -442,17 +429,16 @@ function setup_host {
     sudo mv $TEMPFILE /etc/sudoers.d/51_tempest_sh
 
     # Future useradd calls should strongly consider also updating
-    # ~/.pip/pip.conf and ~/.pydisutils.cfg in the select_mirror function if
-    # tox/pip will be used at all.
+    # ~/.pip/pip.conf and ~/.pydisutils.cfg in the copy_mirror_config
+    # function if tox/pip will be used at all.
 
     # If we will be testing OpenVZ, make sure stack is a member of the vz group
     if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
         sudo usermod -a -G vz stack
     fi
 
-    if [ -f $DEVSTACK_GATE_SELECT_MIRROR ] ; then
-        select_mirror
-    fi
+    # Ensure that all of the users have the openstack mirror config
+    copy_mirror_config
 
     # perform network sanity check so that we can characterize the
     # state of the world
