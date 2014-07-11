@@ -190,8 +190,9 @@ export DEVSTACK_GATE_CONFIGDRIVE=${DEVSTACK_GATE_CONFIGDRIVE:-1}
 # Set to 1 to enable running a keystone v3 based gate
 export DEVSTACK_GATE_KEYSTONE_V3=${DEVSTACK_GATE_KEYSTONE_V3:-0}
 
-# Set to 1 to configure Keystone to run under mod_wsgi and HTTPD
-export DEVSTACK_GATE_USE_APACHE=${DEVSTACK_GATE_USE_APACHE:-0}
+# Set to 0 to run services that default under Apache + mod_wsgi under alternatives (e.g. eventlet)
+# if possible
+export DEVSTACK_GATE_ENABLE_HTTPD_MOD_WSGI_SERVICES=${DEVSTACK_GATE_ENABLE_HTTPD_MOD_WSGI_SERVICES:-1}
 
 # Set to 1 to enable the Nova v3 API tests
 export DEVSTACK_GATE_TEMPEST_NOVA_V3_API=${DEVSTACK_GATE_TEMPEST_NOVA_V3_API:-0}
