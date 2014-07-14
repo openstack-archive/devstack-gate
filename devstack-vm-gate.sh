@@ -230,6 +230,10 @@ EOF
     if [[ "$DEVSTACK_GATE_TEMPEST_NOVA_V3_API" -eq "1" ]]; then
         echo "TEMPEST_NOVA_API_V3=True" >> localrc
     fi
+    if [[ "$DEVSTACK_GATE_INSTALL_TESTONLY" -eq "1" ]]; then
+        # Sometimes we do want the test packages
+        echo "INSTALL_TESTONLY_PACKAGES=True" >> localrc
+    fi
 }
 
 if [[ "$DEVSTACK_GATE_GRENADE" -eq "1" ]]; then
