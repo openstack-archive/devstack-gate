@@ -31,15 +31,21 @@ TOP_DIR=$(cd $(dirname "$0") && pwd)
 source $TOP_DIR/functions.sh
 
 echo $PPID > $WORKSPACE/gate.pid
+source `dirname "$(readlink -f "$0")"`/functions.sh
+
+FIXED_RANGE=${DEVSTACK_GATE_FIXED_RANGE:-10.1.0.0/20}
+FLOATING_RANGE=${DEVSTACK_GATE_FLOATING_RANGE:-172.24.4.0/24}
 
 function setup_localrc {
-    LOCALRC_OLDNEW=$1;
-    LOCALRC_BRANCH=$2;
+    local localrc_oldnew=$1;
+    local localrc_branch=$2;
+    local localrc_file=$3
+    local role=$4
 
     # Allow calling context to pre-populate the localrc file
     # with additional values
     if [[ -z $KEEP_LOCALRC ]] ; then
-        rm -f localrc
+        rm -f $localrc_file
     fi
 
     # Install PyYaml for test-matrix.py
@@ -49,7 +55,18 @@ function setup_localrc {
     elif is_fedora; then
         sudo yum install -y PyYAML
     fi
-    MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $LOCALRC_BRANCH -f $DEVSTACK_GATE_FEATURE_MATRIX`
+    MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $localrc_branch -f $DEVSTACK_GATE_FEATURE_MATRIX`
+    local original_enabled_services=$MY_ENABLED_SERVICES
+
+    # TODO(afazekas): Move to the feature grid
+    # TODO(afazekas): add c-vol
+    if [[ $role = sub ]]; then
+        if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
+            MY_ENABLED_SERVICES="q-agt,n-cpu,ceilometer-acompute"
+        else
+            MY_ENABLED_SERVICES="n-cpu,ceilometer-acompute"
+        fi
+    fi
 
     # Allow optional injection of ENABLED_SERVICES from the calling context
     if [[ ! -z $ENABLED_SERVICES ]] ; then
@@ -57,26 +74,26 @@ function setup_localrc {
     fi
 
     if [[ "$DEVSTACK_GATE_CEPH" == "1" ]]; then
-        echo "CINDER_ENABLED_BACKENDS=ceph:ceph" >>localrc
-        echo "TEMPEST_STORAGE_PROTOCOL=ceph" >>localrc
-        echo "CEPH_LOOPBACK_DISK_SIZE=8G" >>localrc
+        echo "CINDER_ENABLED_BACKENDS=ceph:ceph" >>"$localrc_file"
+        echo "TEMPEST_STORAGE_PROTOCOL=ceph" >>"$localrc_file"
+        echo "CEPH_LOOPBACK_DISK_SIZE=8G" >>"$localrc_file"
     fi
 
     # the exercises we *don't* want to test on for devstack
     SKIP_EXERCISES=boot_from_volume,bundle,client-env,euca
 
     if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
-        echo "Q_USE_DEBUG_COMMAND=True" >>localrc
-        echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
+        echo "Q_USE_DEBUG_COMMAND=True" >>"$localrc_file"
+        echo "NETWORK_GATEWAY=10.1.0.1" >>"$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
-        echo "Q_DVR_MODE=dvr_snat" >>localrc
+        echo "Q_DVR_MODE=dvr_snat" >>"$localrc_file"
     fi
 
-    cat <<EOF >>localrc
+    cat <<EOF >>"$localrc_file"
 USE_SCREEN=False
-DEST=$BASE/$LOCALRC_OLDNEW
+DEST=$BASE/$localrc_oldnew
 # move DATA_DIR outside of DEST to keep DEST a bit cleaner
 DATA_DIR=$BASE/data
 ACTIVE_TIMEOUT=90
@@ -97,10 +114,11 @@ SKIP_EXERCISES=$SKIP_EXERCISES
 SERVICE_HOST=127.0.0.1
 # Screen console logs will capture service logs.
 SYSLOG=False
-SCREEN_LOGDIR=$BASE/$LOCALRC_OLDNEW/screen-logs
-LOGFILE=$BASE/$LOCALRC_OLDNEW/devstacklog.txt
+SCREEN_LOGDIR=$BASE/$localrc_oldnew/screen-logs
+LOGFILE=$BASE/$localrc_oldnew/devstacklog.txt
 VERBOSE=True
-FIXED_RANGE=10.1.0.0/20
+FIXED_RANGE=$FIXED_RANGE
+FLOATING_RANGE=$FLOATING_RANGE
 FIXED_NETWORK_SIZE=4096
 VIRT_DRIVER=$DEVSTACK_GATE_VIRT_DRIVER
 SWIFT_REPLICAS=1
@@ -119,45 +137,45 @@ ZAQAR_BACKEND=$DEVSTACK_GATE_ZAQAR_BACKEND
 EOF
 
     if [[ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]]; then
-        echo "CINDER_SECURE_DELETE=False" >>localrc
+        echo "CINDER_SECURE_DELETE=False" >>"$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]]; then
-        echo "HEAT_CREATE_TEST_IMAGE=False" >>localrc
+        echo "HEAT_CREATE_TEST_IMAGE=False" >>"$localrc_file"
         # Use Fedora 20 for heat test image, it has heat-cfntools pre-installed
-        echo "HEAT_FETCHED_TEST_IMAGE=Fedora-i386-20-20131211.1-sda" >>localrc
+        echo "HEAT_FETCHED_TEST_IMAGE=Fedora-i386-20-20131211.1-sda" >>"$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]]; then
-        echo "SKIP_EXERCISES=${SKIP_EXERCISES},volumes" >>localrc
-        echo "DEFAULT_INSTANCE_TYPE=m1.small" >>localrc
-        echo "DEFAULT_INSTANCE_USER=root" >>localrc
+        echo "SKIP_EXERCISES=${SKIP_EXERCISES},volumes" >>"$localrc_file"
+        echo "DEFAULT_INSTANCE_TYPE=m1.small" >>"$localrc_file"
+        echo "DEFAULT_INSTANCE_USER=root" >>"$localrc_file"
         echo "DEFAULT_INSTANCE_TYPE=m1.small" >>exerciserc
         echo "DEFAULT_INSTANCE_USER=root" >>exerciserc
     fi
 
     if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "ironic" ]]; then
-        echo "VIRT_DRIVER=ironic" >>localrc
-        echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>localrc
-        echo "IRONIC_VM_LOG_DIR=$BASE/$LOCALRC_OLDNEW/ironic-bm-logs" >>localrc
-        echo "DEFAULT_INSTANCE_TYPE=baremetal" >>localrc
-        echo "BUILD_TIMEOUT=300" >>localrc
+        echo "VIRT_DRIVER=ironic" >>"$localrc_file"
+        echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>"$localrc_file"
+        echo "IRONIC_VM_LOG_DIR=$BASE/$LOCALRC_OLDNEW/ironic-bm-logs" >>"$localrc_file"
+        echo "DEFAULT_INSTANCE_TYPE=baremetal" >>"$localrc_file"
+        echo "BUILD_TIMEOUT=300" >>"$localrc_file"
         if [[ "$DEVSTACK_GATE_IRONIC_BUILD_RAMDISK" -eq 0 ]]; then
-            echo "IRONIC_BUILD_DEPLOY_RAMDISK=False" >>localrc
+            echo "IRONIC_BUILD_DEPLOY_RAMDISK=False" >>"$localrc_file"
         fi
         if [[ "$DEVSTACK_GATE_IRONIC_DRIVER" == "agent_ssh" ]]; then
-            echo "SWIFT_ENABLE_TEMPURLS=True" >>localrc
-            echo "SWIFT_TEMPURL_KEY=secretkey" >>localrc
-            echo "IRONIC_ENABLED_DRIVERS=fake,agent_ssh,agent_ipmitool" >>localrc
-            echo "IRONIC_DEPLOY_DRIVER=agent_ssh" >>localrc
+            echo "SWIFT_ENABLE_TEMPURLS=True" >>"$localrc_file"
+            echo "SWIFT_TEMPURL_KEY=secretkey" >>"$localrc_file"
+            echo "IRONIC_ENABLED_DRIVERS=fake,agent_ssh,agent_ipmitool" >>"$localrc_file"
+            echo "IRONIC_DEPLOY_DRIVER=agent_ssh" >>"$localrc_file"
             # agent driver doesn't support ephemeral volumes yet
-            echo "IRONIC_VM_EPHEMERAL_DISK=0" >>localrc
+            echo "IRONIC_VM_EPHEMERAL_DISK=0" >>"$localrc_file"
             # agent CoreOS ramdisk is a little heavy
-            echo "IRONIC_VM_SPECS_RAM=1024" >>localrc
-            echo "IRONIC_VM_COUNT=1" >>localrc
+            echo "IRONIC_VM_SPECS_RAM=1024" >>"$localrc_file"
+            echo "IRONIC_VM_COUNT=1" >>"$localrc_file"
         else
-            echo "IRONIC_VM_EPHEMERAL_DISK=1" >>localrc
-            echo "IRONIC_VM_COUNT=3" >>localrc
+            echo "IRONIC_VM_EPHEMERAL_DISK=1" >>"$localrc_file"
+            echo "IRONIC_VM_COUNT=3" >>"$localrc_file"
         fi
     fi
 
@@ -166,7 +184,7 @@ EOF
             echo "XenAPI must have DEVSTACK_GATE_XENAPI_DOM0_IP, DEVSTACK_GATE_XENAPI_DOMU_IP and DEVSTACK_GATE_XENAPI_PASSWORD all set"
             exit 1
         fi
-        cat >> localrc << EOF
+        cat >> "$localrc_file" << EOF
 SKIP_EXERCISES=${SKIP_EXERCISES},volumes
 XENAPI_PASSWORD=${DEVSTACK_GATE_XENAPI_PASSWORD}
 XENAPI_CONNECTION_URL=http://${DEVSTACK_GATE_XENAPI_DOM0_IP}
@@ -209,76 +227,98 @@ EOF
         # Tempest tests since so many requests are executed
         # TODO(mriedem): Remove this when stable/juno is our oldest
         # supported branch since devstack no longer uses it since Juno.
-        echo "API_RATE_LIMIT=False" >> localrc
+        echo "API_RATE_LIMIT=False" >> "$localrc_file"
         # Volume tests in Tempest require a number of volumes
         # to be created, each of 1G size. Devstack's default
         # volume backing file size is 10G.
         #
         # The 24G setting is expected to be enough even
         # in parallel run.
-        echo "VOLUME_BACKING_FILE_SIZE=24G" >> localrc
+        echo "VOLUME_BACKING_FILE_SIZE=24G" >> "$localrc_file"
         # in order to ensure glance http tests don't time out, we
         # specify the TEMPEST_HTTP_IMAGE address to be horrizon's
         # front page. Kind of hacky, but it works.
-        echo "TEMPEST_HTTP_IMAGE=http://127.0.0.1/static/dashboard/img/favicon.ico" >> localrc
+        echo "TEMPEST_HTTP_IMAGE=http://127.0.0.1/static/dashboard/img/favicon.ico" >> "$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_TEMPEST_DISABLE_TENANT_ISOLATION" -eq "1" ]]; then
-        echo "TEMPEST_ALLOW_TENANT_ISOLATION=False" >>localrc
+        echo "TEMPEST_ALLOW_TENANT_ISOLATION=False" >>"$localrc_file"
     fi
 
     if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
         if [[ "$LOCALRC_OLDNEW" == "old" ]]; then
-            echo "GRENADE_PHASE=base" >> localrc
+            echo "GRENADE_PHASE=base" >> "$localrc_file"
         else
-            echo "GRENADE_PHASE=target" >> localrc
+            echo "GRENADE_PHASE=target" >> "$localrc_file"
         fi
         # keystone deployed with mod wsgi cannot be upgraded or migrated
         # until https://launchpad.net/bugs/1365105 is resolved.
-        echo "KEYSTONE_USE_MOD_WSGI=False" >> localrc
+        echo "KEYSTONE_USE_MOD_WSGI=False" >> "$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]]; then
         # NOTE(danms): Temporary transition to =NUM_RESOURCES
-        echo "VIRT_DRIVER=fake" >> localrc
-        echo "TEMPEST_LARGE_OPS_NUMBER=50" >>localrc
+        echo "VIRT_DRIVER=fake" >> "$localrc_file"
+        echo "TEMPEST_LARGE_OPS_NUMBER=50" >>"$localrc_file"
     elif [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -gt "1" ]]; then
         # use fake virt driver and 10 copies of nova-compute
-        echo "VIRT_DRIVER=fake" >> localrc
+        echo "VIRT_DRIVER=fake" >> "$localrc_file"
         # To make debugging easier, disabled until bug 1218575 is fixed.
-        # echo "NUMBER_FAKE_NOVA_COMPUTE=10" >>localrc
-        echo "TEMPEST_LARGE_OPS_NUMBER=$DEVSTACK_GATE_TEMPEST_LARGE_OPS" >>localrc
+        # echo "NUMBER_FAKE_NOVA_COMPUTE=10" >>"$localrc_file"
+        echo "TEMPEST_LARGE_OPS_NUMBER=$DEVSTACK_GATE_TEMPEST_LARGE_OPS" >>"$localrc_file"
 
     fi
 
     if [[ "$DEVSTACK_GATE_CONFIGDRIVE" -eq "1" ]]; then
-        echo "FORCE_CONFIG_DRIVE=always" >>localrc
+        echo "FORCE_CONFIG_DRIVE=always" >>"$localrc_file"
     else
-        echo "FORCE_CONFIG_DRIVE=False" >>localrc
+        echo "FORCE_CONFIG_DRIVE=False" >>"$localrc_file"
     fi
     if [[ "$DEVSTACK_GATE_KEYSTONE_V3" -eq "1" ]]; then
         # Run gate using only keystone v3
         # For now this is only injected in tempest configuration
-        echo "TEMPEST_AUTH_VERSION=v3" >>localrc
+        echo "TEMPEST_AUTH_VERSION=v3" >>"$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_ENABLE_HTTPD_MOD_WSGI_SERVICES" -eq "0" ]]; then
         # Services that default to run under Apache + mod_wsgi will use alternatives
         # (e.g. Keystone under eventlet) if available. This will affect all services
         # that run under HTTPD (mod_wsgi) by default.
-        echo "ENABLE_HTTPD_MOD_WSGI_SERVICES=False" >> localrc
+        echo "ENABLE_HTTPD_MOD_WSGI_SERVICES=False" >> "$localrc_file"
     fi
 
     if [[ "$CEILOMETER_NOTIFICATION_TOPICS" ]]; then
         # Add specified ceilometer notification topics to localrc
         # Set to notifications,profiler to enable profiling
-        echo "CEILOMETER_NOTIFICATION_TOPICS=$CEILOMETER_NOTIFICATION_TOPICS" >>localrc
+        echo "CEILOMETER_NOTIFICATION_TOPICS=$CEILOMETER_NOTIFICATION_TOPICS" >>"$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_INSTALL_TESTONLY" -eq "1" ]]; then
         # Sometimes we do want the test packages
-        echo "INSTALL_TESTONLY_PACKAGES=True" >> localrc
+        echo "INSTALL_TESTONLY_PACKAGES=True" >> "$localrc_file"
     fi
+
+    if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
+        local primary_node=`cat /etc/nodepool/primary_node_private`
+        echo "SERVICE_HOST=$primary_node" >>"$localrc_file"
+    fi
+    if [[ "$role" = sub ]]; then
+        if [[ $original_enabled_services  =~ "qpid" ]]; then
+            echo "QPID_HOST=$primary_node" >>"$localrc_file"
+        fi
+        if [[ $original_enabled_services =~ "rabbit" ]]; then
+            echo "RABBIT_HOST=$primary_node" >>"$localrc_file"
+        fi
+        echo "DATABASE_HOST=$primary_node" >>"$localrc_file"
+        if [[ $original_enabled_services =~ "mysql" ]]; then
+             echo "DATABASE_TYPE=mysql"  >>"$localrc_file"
+        else
+             echo "DATABASE_TYPE=postgresql"  >>"$localrc_file"
+        fi
+        echo "GLANCE_HOSTPORT=$primary_node:9292" >>"$localrc_file"
+        echo "Q_HOST=$primary_node" >>"$localrc_file"
+    fi
+
 }
 
 if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
@@ -295,7 +335,7 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
         export DEVSTACK_GATE_NEUTRON=0
     fi
     cd $BASE/old/devstack
-    setup_localrc "old" "$GRENADE_OLD_BRANCH"
+    setup_localrc "old" "$GRENADE_OLD_BRANCH" "localrc" "primary"
 
     if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-ironic" ]]; then
         # Set ironic and virt driver settings to those initially set
@@ -308,7 +348,7 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
         export DEVSTACK_GATE_NEUTRON=$TMP_DEVSTACK_GATE_NEUTRON
     fi
     cd $BASE/new/devstack
-    setup_localrc "new" "$GRENADE_OLD_BRANCH"
+    setup_localrc "new" "$GRENADE_OLD_BRANCH" "localrc" "primary"
 
     cat <<EOF >$BASE/new/grenade/localrc
 BASE_RELEASE=old
@@ -344,8 +384,41 @@ EOF
 
 else
     cd $BASE/new/devstack
-    setup_localrc "new" "$OVERRIDE_ZUUL_BRANCH"
+    setup_localrc "new" "$OVERRIDE_ZUUL_BRANCH" "localrc" "primary"
 
+    if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
+        set -x  # for now enabling debug and do not turn it off
+        setup_localrc "new" "$OVERRIDE_ZUUL_BRANCH" "sub_localrc" "sub"
+        sudo mkdir -p $BASE/new/.ssh
+        sudo cp /etc/nodepool/id_rsa.pub $BASE/new/.ssh/authorized_keys
+        sudo cp /etc/nodepool/id_rsa $BASE/new/.ssh/
+        sudo chmod 600 $BASE/new/.ssh/authorized_keys
+        sudo chmod 400 $BASE/new/.ssh/id_rsa
+        for NODE in `cat /etc/nodepool/sub_nodes`; do
+            echo "Copy Files to  $NODE"
+            remote_copy_dir $NODE $BASE/new/devstack-gate $WORKSPACE
+            remote_copy_file $WORKSPACE/test_env.sh $NODE:$WORKSPACE/test_env.sh
+            echo "Preparing $NODE"
+            remote_command $NODE "source $WORKSPACE/test_env.sh; $WORKSPACE/devstack-gate/sub_node_prepare.sh"
+            remote_copy_file /etc/nodepool/id_rsa "$NODE:$BASE/new/.ssh/"
+            remote_command $NODE sudo chmod 400 "$BASE/new/.ssh/*"
+        done
+        PRIMARY_NODE=`cat /etc/nodepool/primary_node_private`
+        SUB_NODES=`cat /etc/nodepool/sub_nodes_private`
+        NODES="$PRIMARY_NODE $SUB_NODES"
+        if [[ "$DEVSTACK_GATE_NEUTRON" -ne '1' ]]; then
+            (source $BASE/new/devstack/functions-common; install_package bridge-utils)
+            gre_bridge "pub_if" 1 $NODES
+            cat <<EOF >>"$BASE/new/devstack/sub_localrc"
+FLAT_INTERFACE=pub_if
+PUBLIC_INTERFACE=pub_if
+EOF
+            cat <<EOF >>"$BASE/new/devstack/localrc"
+FLAT_INTERFACE=pub_if
+PUBLIC_INTERFACE=pub_if
+EOF
+        fi
+    fi
     # Make the workspace owned by the stack user
     sudo chown -R stack:stack $BASE
 
@@ -377,6 +450,29 @@ else
         if [[ ! $MYSQL_LOG_PATH ]]; then
             echo "Mysql should have been used, but there are no logs"
             exit 1
+        fi
+    fi
+
+    if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
+        echo "Preparing cross node connectivity"
+        # test ssh connection and populete know_hosts and allow connection from the fixed ip
+        for NODE in `cat /etc/nodepool/sub_nodes`; do
+            echo "Running devstack on $NODE"
+            remote_copy_file sub_localrc $NODE:$BASE/new/devstack/localrc
+            remote_command $NODE sudo chown -R stack:stack $BASE
+        done
+
+        for NODE in `cat /etc/nodepool/sub_nodes`; do
+            echo "Running devstack on $NODE"
+            remote_command $NODE "cd $BASE/new/devstack; source $WORKSPACE/test_env.sh; export -n PROJECTS; sudo -H -u stack stdbuf -oL -eL ./stack.sh > /dev/null"
+        done
+
+       if [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
+            # NOTE(afazekas): The cirros lp#1301958 does not support MTU setting via dhcp,
+            # simplest way the have tunneling working, with dvsm, without increasing the host system MTU
+            # is to decreasion the MTU on br-ex
+            # TODO(afazekas): Configure the mtu smarter on the devstack side
+            sudo ip link set mtu 1450 dev br-ex
         fi
     fi
 fi
