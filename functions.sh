@@ -667,6 +667,9 @@ function cleanup_host {
         find $BASE/logs/rabbitmq -type f -exec mv '{}' '{}'.txt \;
     fi
 
+    # final memory usage and process list
+    ps -eo user,pid,ppid,lwp,%cpu,%mem,size,rss,cmd > $BASE/logs/ps.txt
+
     # Compress all text logs
     sudo find $BASE/logs -iname '*.txt' -execdir gzip -9 {} \+
     sudo find $BASE/logs -iname '*.dat' -execdir gzip -9 {} \+
