@@ -477,6 +477,17 @@ function cleanup_host {
         sudo cp /var/log/httpd/horizon_error.log $BASE/logs/horizon_error.log
     fi
 
+    # apache2
+    if is_ubuntu; then
+        if [ -f /var/log/apache2/error.log ] ; then
+            sudo cp /var/log/apache2/error.log $BASE/logs/apache2_error.log
+        fi
+    elif is_fedora; then
+        if [ -f /var/log/httpd/error.log ] ; then
+            sudo cp /var/log/httpd/error.log $BASE/logs/apache2_error.log
+        fi
+    fi
+
     # rabbitmq logs
     if [ -d /var/log/rabbitmq ]; then
         sudo mkdir $BASE/logs/rabbitmq/
