@@ -280,6 +280,10 @@ export DEVSTACK_GATE_TIMEOUT=${DEVSTACK_GATE_TIMEOUT:-60}
 # single-branch checkouts; not used for grenade)
 export OVERRIDE_ZUUL_BRANCH=${OVERRIDE_ZUUL_BRANCH:-$ZUUL_BRANCH}
 
+# Set Ceilometer backend to override the default one. It could be mysql,
+# postgresql, mongodb.
+export DEVSTACK_GATE_CEILOMETER_BACKEND=${DEVSTACK_GATE_CEILOMETER_BACKEND:-mysql}
+
 if ! function_exists "gate_hook"; then
   # the command we use to run the gate
   function gate_hook {
