@@ -48,6 +48,10 @@ function setup_localrc() {
         echo "NETWORK_GATEWAY=10.1.0.1" >>localrc
     fi
 
+    if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
+        echo "Q_DVR_MODE=dvr_snat" >>localrc
+    fi
+
     if [[ "$LOCALRC_BRANCH" == "stable/havana" ]]; then
         # we don't want to enable services for grenade that don't have upgrade support
         # otherwise they can break grenade, especially when they are projects like

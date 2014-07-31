@@ -167,6 +167,9 @@ export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
 # Only applicable to master branch
 export DEVSTACK_GATE_NEUTRON=${DEVSTACK_GATE_NEUTRON:-0}
 
+# Set to 1 to run neutron distributed virtual routing
+export DEVSTACK_GATE_NEUTRON_DVR=${DEVSTACK_GATE_NEUTRON_DVR:-0}
+
 # Set to 1 to run nova in cells mode instead of the default mode
 export DEVSTACK_GATE_CELLS=${DEVSTACK_GATE_CELLS:-0}
 
