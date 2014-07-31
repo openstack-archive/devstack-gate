@@ -211,45 +211,61 @@ if [ ${DEFAULT_CONCURRENCY} -gt 3 ] ; then
 fi
 export TEMPEST_CONCURRENCY=${TEMPEST_CONCURRENCY:-${DEFAULT_CONCURRENCY}}
 
-# The following variables are set for different directions of Grenade updating
+# The following variable is set for different directions of Grenade updating
 # for a stable branch we want to both try to upgrade forward n => n+1 as
 # well as upgrade from last n-1 => n.
 #
 # i.e. stable/icehouse:
-#   DGG=1 means stable/havana => stable/icehouse
-#   DGGF=1 means stable/icehouse => master (or stable/juno if that's out)
-export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-0}
-export DEVSTACK_GATE_GRENADE_FORWARD=${DEVSTACK_GATE_GRENADE_FORWARD:-0}
-# DGGPN=1 means upgrade everything but n-cpu.
+#   pullup means stable/havana => stable/icehouse
+#   forward means stable/icehouse => master (or stable/juno if that's out)
+#   partial-ncpu means stable/havana => stable/icehouse but keep nova
+#       compute at stable/havana
+#   sideways-ironic means stable/icehouse with nova baremetal =>
+#       stable/icehouse with ironic
+#   sideways-neutron means stable/icehouse with nova network =>
+#       stable/icehouse with neutron
+export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-}
+# This is here for backward compat.
+# TODO(clarkb) remove this once job defs are updated.
 export DEVSTACK_GATE_GRENADE_PARTIAL_NCPU=${DEVSTACK_GATE_GRENADE_PARTIAL_NCPU:-0}
 
 # the branch name for selecting grenade branches
 GRENADE_BASE_BRANCH=${OVERRIDE_ZUUL_BRANCH:-${ZUUL_BRANCH}}
 
-if [ "$DEVSTACK_GATE_GRENADE" -eq "1" ]; then
+# TODO(clarkb) clean up condition once job defs are updated.
+if [[ "$DEVSTACK_GATE_GRENADE" == "pullup" ]] || [[ "$DEVSTACK_GATE_GRENADE" -eq "1" ]]; then
     export DEVSTACK_GATE_TEMPEST=1
-    if [ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]; then
+    if [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
         export GRENADE_OLD_BRANCH="stable/havana"
         export GRENADE_NEW_BRANCH="stable/icehouse"
     else # master
         export GRENADE_OLD_BRANCH="stable/icehouse"
         export GRENADE_NEW_BRANCH="$GIT_BRANCH"
     fi
-    if [ "$DEVSTACK_GATE_GRENADE_PARTIAL_NCPU" -eq "1" ]; then
-        export DO_NOT_UPGRADE_SERVICES=[n-cpu]
-    else
-        export DO_NOT_UPGRADE_SERVICES=
-    fi
-    # the roll forward case
-elif [ "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
+# TODO(clarkb) clean up condition once job defs are updated.
+elif [[ "$DEVSTACK_GATE_GRENADE" == "partial-ncpu" ]] || [[ "$DEVSTACK_GATE_GRENADE_PARTIAL_NCPU" -eq "1" ]]; then
     export DEVSTACK_GATE_TEMPEST=1
-    if [ "$GRENADE_BASE_BRANCH" == "stable/havana" ]; then
+    export DO_NOT_UPGRADE_SERVICES=[n-cpu]
+    if [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
         export GRENADE_OLD_BRANCH="stable/havana"
         export GRENADE_NEW_BRANCH="stable/icehouse"
-    elif [ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]; then
+    else # master
         export GRENADE_OLD_BRANCH="stable/icehouse"
         export GRENADE_NEW_BRANCH="$GIT_BRANCH"
     fi
+elif [[ "$DEVSTACK_GATE_GRENADE" == "forward" ]]; then
+    export DEVSTACK_GATE_TEMPEST=1
+    if [[ "$GRENADE_BASE_BRANCH" == "stable/havana" ]]; then
+        export GRENADE_OLD_BRANCH="stable/havana"
+        export GRENADE_NEW_BRANCH="stable/icehouse"
+    elif [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
+        export GRENADE_OLD_BRANCH="stable/icehouse"
+        export GRENADE_NEW_BRANCH="$GIT_BRANCH"
+    fi
+elif [[ "$DEVSTACK_GATE_GRENADE" =~ "sideways" ]]; then
+    export DEVSTACK_GATE_TEMPEST=1
+    export GRENADE_OLD_BRANCH="$GRENADE_BASE_BRANCH"
+    export GRENADE_NEW_BRANCH="$GRENADE_BASE_BRANCH"
 fi
 
 # Set the virtualization driver to: libvirt, openvz, xenapi
@@ -300,7 +316,7 @@ echo "Setting up the host"
 echo "... this takes a few seconds (logs at logs/devstack-gate-setup-host.txt.gz)"
 tsfilter setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 
-if [ "$DEVSTACK_GATE_GRENADE" -eq "1" -o "$DEVSTACK_GATE_GRENADE_FORWARD" -eq "1" ]; then
+if [ -n "$DEVSTACK_GATE_GRENADE" ]; then
     echo "Setting up the new (migrate to) workspace"
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
     tsfilter setup_workspace $GRENADE_NEW_BRANCH $BASE/new copycache &> \

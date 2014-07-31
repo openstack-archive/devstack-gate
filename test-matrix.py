@@ -22,6 +22,7 @@ import yaml
 
 GRID = None
 ALLOWED_BRANCHES = []
+FALSE_VALUES = [None, '', '0', 'false', 'False', 'FALSE']
 
 FORMAT = '%(asctime)s %(levelname)s: %(message)s'
 logging.basicConfig(format=FORMAT)
@@ -66,7 +67,7 @@ def configs_from_env():
     configs = []
     for k, v in os.environ.iteritems():
         if k.startswith('DEVSTACK_GATE_'):
-            if v == '1':
+            if v not in FALSE_VALUES:
                 f = k.split('DEVSTACK_GATE_')[1]
                 configs.append(f.lower())
     return configs
