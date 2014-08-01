@@ -18,7 +18,9 @@
 
 # Distro check functions
 function is_fedora {
-    lsb_release -i 2>/dev/null | grep -iq "fedora"
+    # note we consider CentOS 7 as fedora for now
+    lsb_release -i 2>/dev/null | grep -iq "fedora" || \
+        lsb_release -i 2>/dev/null | grep -iq "CentOS"
 }
 
 function is_ubuntu {
