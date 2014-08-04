@@ -232,6 +232,13 @@ EOF
         # that run under HTTPD (mod_wsgi) by default.
         echo "ENABLE_HTTPD_MOD_WSGI_SERVICES=False" >> localrc
     fi
+
+    if [[ "$CEILOMETER_NOTIFICATION_TOPICS" ]]; then
+        # Add specified ceilometer notification topics to localrc
+        # Set to notifications,profiler to enable profiling
+        echo "CEILOMETER_NOTIFICATION_TOPICS=$CEILOMETER_NOTIFICATION_TOPICS" >>localrc
+    fi
+
     if [[ "$DEVSTACK_GATE_TEMPEST_NOVA_V3_API" -eq "1" ]]; then
         echo "TEMPEST_NOVA_API_V3=True" >> localrc
     fi
