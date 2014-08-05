@@ -40,6 +40,10 @@ function setup_localrc() {
         MY_ENABLED_SERVICES+=,$ENABLED_SERVICES
     fi
 
+    if [[ "$DEVSTACK_GATE_CEPH" == "1" ]]; then
+        echo "CINDER_ENABLED_BACKENDS=ceph:ceph" >>localrc
+    fi
+
     # the exercises we *don't* want to test on for devstack
     SKIP_EXERCISES=boot_from_volume,bundle,client-env,euca
 
