@@ -71,7 +71,7 @@ function network_sanity_check {
     echo "Performing network sanity check..."
     # pypi.openstack.org
     _ping_check pypi.openstack.org
-    _http_check http://pypi.openstack.org/openstack/
+    _http_check http://pypi.openstack.org/simple/
 
     # rax ubuntu mirror
     _ping_check mirror.rackspace.com
