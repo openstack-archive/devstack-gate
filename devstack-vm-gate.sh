@@ -366,6 +366,9 @@ EOF
             exit 1
         fi
         cat >> "$localrc_file" << EOF
+# Need to force devstack to run because we currently use saucy
+FORCE=yes
+
 SKIP_EXERCISES=${SKIP_EXERCISES},volumes
 XENAPI_PASSWORD=${DEVSTACK_GATE_XENAPI_PASSWORD}
 XENAPI_CONNECTION_URL=http://${DEVSTACK_GATE_XENAPI_DOM0_IP}
@@ -606,13 +609,13 @@ else
     echo "... this takes 10 - 15 minutes (logs in logs/devstacklog.txt.gz)"
     start=$(date +%s)
     $ANSIBLE primary -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "cd '$BASE/new/devstack' && sudo -H -u stack stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
+        -a "cd '$BASE/new/devstack' && sudo -H -u stack FORCE=yes stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
         &> "$WORKSPACE/logs/devstack-early.txt"
     # Run non controller setup after controller is up. This is necessary
     # because services like nova apparently expect to have the controller in
     # place before anything else.
     $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "cd '$BASE/new/devstack' && sudo -H -u stack stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
+        -a "cd '$BASE/new/devstack' && sudo -H -u stack FORCE=yes stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
         &> "$WORKSPACE/logs/devstack-subnodes-early.txt"
     end=$(date +%s)
     took=$((($end - $start) / 60))
