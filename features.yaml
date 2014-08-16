@@ -25,6 +25,8 @@ config:
     features: [trove]
   marconi:
     features: [marconi]
+  zaqar:
+    features: [zaqar]
   sahara:
     features: [sahara]
   ironic:
@@ -112,6 +114,10 @@ features:
       services: [sahara]
 
   marconi:
+    base:
+      services: [marconi-server]
+
+  zaqar:
     base:
       services: [marconi-server]
 
