@@ -60,7 +60,7 @@ function setup_localrc {
         # we don't want to enable services for grenade that don't have upgrade support
         # otherwise they can break grenade, especially when they are projects like
         # ceilometer which inject code in other projects
-        if [[ "$DEVSTACK_GATE_GRENADE" -eq "1" ]]; then
+        if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
             SKIP_EXERCISES=${SKIP_EXERCISES},swift,client-args
         fi
     fi
@@ -192,7 +192,7 @@ EOF
         echo "TEMPEST_ALLOW_TENANT_ISOLATION=False" >>localrc
     fi
 
-    if [[ "$DEVSTACK_GATE_GRENADE" -eq "1" ]]; then
+    if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
         echo "DATA_DIR=/opt/stack/data" >> localrc
         echo "SWIFT_DATA_DIR=/opt/stack/data/swift" >> localrc
         if [[ "$LOCALRC_OLDNEW" == "old" ]]; then
@@ -252,10 +252,32 @@ EOF
     fi
 }
 
-if [[ "$DEVSTACK_GATE_GRENADE" -eq "1" ]]; then
+if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
+    if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-ironic" ]]; then
+        # Disable ironic when generating the "old" localrc.
+        local tmp_DEVSTACK_GATE_IRONIC=$DEVSTACK_GATE_IRONIC
+        local tmp_DEVSTACK_GATE_VIRT_DRIVER=$DEVSTACK_GATE_VIRT_DRIVER
+        export DEVSTACK_GATE_IRONIC=0
+        export DEVSTACK_GATE_VIRT_DRIVER="fake"
+    fi
+    if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-neutron" ]]; then
+        # Use nova network when generating "old" localrc.
+        local tmp_DEVSTACK_GATE_NEUTRON=$DEVSTACK_GATE_NEUTRON
+        export DEVSTACK_GATE_NEUTRON=0
+    fi
     cd $BASE/old/devstack
     setup_localrc "old" "$GRENADE_OLD_BRANCH"
 
+    if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-ironic" ]]; then
+        # Set ironic and virt driver settings to those initially set
+        # by the job.
+        export DEVSTACK_GATE_IRONIC=$tmp_DEVSTACK_GATE_IRONIC
+        export DEVSTACK_GATE_VIRT_DRIVER=$tmp_DEVSTACK_GATE_VIRT_DRIVER
+    fi
+    if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-neutron" ]]; then
+        # Set neutron setting to that initially set by the job.
+        export DEVSTACK_GATE_NEUTRON=$tmp_DEVSTACK_GATE_NEUTRON
+    fi
     cd $BASE/new/devstack
     setup_localrc "new" "$GRENADE_OLD_BRANCH"
 

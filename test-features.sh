@@ -71,17 +71,17 @@ function test_heat_slow_master {
 }
 
 function test_grenade_new_master {
-    local results=$(DEVSTACK_GATE_TEMPEST_HEAT_SLOW=1 DEVSTACK_GATE_GRENADE=1 DEVSTACK_GATE_TEMPEST=1 ./test-matrix.py)
+    local results=$(DEVSTACK_GATE_TEMPEST_HEAT_SLOW=1 DEVSTACK_GATE_GRENADE=pullup DEVSTACK_GATE_TEMPEST=1 ./test-matrix.py)
     assert_list_equal $GRENADE_NEW_MASTER $results
 }
 
 function test_grenade_havana_master {
-    local results=$(DEVSTACK_GATE_GRENADE=1 DEVSTACK_GATE_TEMPEST=1 ./test-matrix.py -b stable/havana)
+    local results=$(DEVSTACK_GATE_GRENADE=pullup DEVSTACK_GATE_TEMPEST=1 ./test-matrix.py -b stable/havana)
     assert_list_equal $GRENADE_HAVANA_MASTER $results
 }
 
 function test_grenade_icehouse_master {
-    local results=$(DEVSTACK_GATE_GRENADE=1 DEVSTACK_GATE_TEMPEST=1 ./test-matrix.py -b stable/icehouse)
+    local results=$(DEVSTACK_GATE_GRENADE=pullup DEVSTACK_GATE_TEMPEST=1 ./test-matrix.py -b stable/icehouse)
     assert_list_equal $GRENADE_ICEHOUSE_MASTER $results
 }
 
