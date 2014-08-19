@@ -119,7 +119,7 @@ features:
 
   zaqar:
     base:
-      services: [marconi-server]
+      services: [zaqar-server]
 
   tempest:
     base:
