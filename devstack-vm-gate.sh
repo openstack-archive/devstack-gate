@@ -123,6 +123,7 @@ EOF
     if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "ironic" ]]; then
         echo "VIRT_DRIVER=ironic" >>localrc
         echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>localrc
+        echo "IRONIC_VM_COUNT=3" >>localrc
         echo "IRONIC_VM_EPHEMERAL_DISK=1" >>localrc
         echo "IRONIC_VM_LOG_DIR=$BASE/$LOCALRC_OLDNEW/ironic-bm-logs" >>localrc
         echo "DEFAULT_INSTANCE_TYPE=baremetal" >>localrc
@@ -200,6 +201,9 @@ EOF
         else
             echo "GRENADE_PHASE=target" >> localrc
         fi
+        # keystone deployed with mod wsgi cannot be upgraded or migrated
+        # until https://launchpad.net/bugs/1365105 is resolved.
+        echo "KEYSTONE_USE_MOD_WSGI=False" >> localrc
     else
         # Grenade needs screen, so only turn this off if we aren't
         # running grenade.
@@ -296,6 +300,14 @@ DO_NOT_UPGRADE_SERVICES=$DO_NOT_UPGRADE_SERVICES
 TEMPEST_CONCURRENCY=$TEMPEST_CONCURRENCY
 VERBOSE=False
 EOF
+
+    if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-ironic" ]]; then
+        # sideways-ironic migrates from a fake environment, avoid exercising
+        # base.
+        echo "BASE_RUN_SMOKE=False" >> $BASE/new/grenade/localrc
+        echo "RUN_JAVELIN=False" >> $BASE/new/grenade/localrc
+    fi
+
     # Make the workspace owned by the stack user
     sudo chown -R stack:stack $BASE
 
