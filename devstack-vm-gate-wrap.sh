@@ -183,6 +183,9 @@ export DEVSTACK_GATE_NOVA_API_METADATA_SPLIT=${DEVSTACK_GATE_NOVA_API_METADATA_S
 # Set to 1 to run ironic baremetal provisioning service.
 export DEVSTACK_GATE_IRONIC=${DEVSTACK_GATE_IRONIC:-0}
 
+# Set to "agent_ssh" to run ironic with the ironic-python-agent driver
+export DEVSTACK_GATE_IRONIC_DRIVER=${DEVSTACK_GATE_IRONIC_DRIVER:-pxe_ssh}
+
 # Set to 1 to run sahara
 export DEVSTACK_GATE_SAHARA=${DEVSTACK_GATE_SAHARA:-0}
 
