@@ -261,14 +261,14 @@ EOF
 if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
     if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-ironic" ]]; then
         # Disable ironic when generating the "old" localrc.
-        local tmp_DEVSTACK_GATE_IRONIC=$DEVSTACK_GATE_IRONIC
-        local tmp_DEVSTACK_GATE_VIRT_DRIVER=$DEVSTACK_GATE_VIRT_DRIVER
+        TMP_DEVSTACK_GATE_IRONIC=$DEVSTACK_GATE_IRONIC
+        TMP_DEVSTACK_GATE_VIRT_DRIVER=$DEVSTACK_GATE_VIRT_DRIVER
         export DEVSTACK_GATE_IRONIC=0
         export DEVSTACK_GATE_VIRT_DRIVER="fake"
     fi
     if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-neutron" ]]; then
         # Use nova network when generating "old" localrc.
-        local tmp_DEVSTACK_GATE_NEUTRON=$DEVSTACK_GATE_NEUTRON
+        TMP_DEVSTACK_GATE_NEUTRON=$DEVSTACK_GATE_NEUTRON
         export DEVSTACK_GATE_NEUTRON=0
     fi
     cd $BASE/old/devstack
@@ -277,12 +277,12 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
     if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-ironic" ]]; then
         # Set ironic and virt driver settings to those initially set
         # by the job.
-        export DEVSTACK_GATE_IRONIC=$tmp_DEVSTACK_GATE_IRONIC
-        export DEVSTACK_GATE_VIRT_DRIVER=$tmp_DEVSTACK_GATE_VIRT_DRIVER
+        export DEVSTACK_GATE_IRONIC=$TMP_DEVSTACK_GATE_IRONIC
+        export DEVSTACK_GATE_VIRT_DRIVER=$TMP_DEVSTACK_GATE_VIRT_DRIVER
     fi
     if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-neutron" ]]; then
         # Set neutron setting to that initially set by the job.
-        export DEVSTACK_GATE_NEUTRON=$tmp_DEVSTACK_GATE_NEUTRON
+        export DEVSTACK_GATE_NEUTRON=$TMP_DEVSTACK_GATE_NEUTRON
     fi
     cd $BASE/new/devstack
     setup_localrc "new" "$GRENADE_OLD_BRANCH"
