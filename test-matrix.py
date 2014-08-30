@@ -95,7 +95,10 @@ def calc_services(branch, features):
 def calc_features(branch, configs=[]):
     LOG.debug("Branch: %s" % branch)
     LOG.debug("Configs: %s" % configs)
-    features = set(GRID['config']['default'][branch])
+    if os.environ.get('DEVSTACK_GATE_NO_SERVICES') not in FALSE_VALUES:
+        features = set(GRID['config']['default']['no_services'])
+    else:
+        features = set(GRID['config']['default'][branch])
     # do all the adds first
     for config in configs:
         if config in GRID['config']:

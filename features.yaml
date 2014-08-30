@@ -4,6 +4,9 @@ config:
     juno: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
     icehouse: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove]
     havana: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat]
+    # This can be used by functional jobs that only want their dependencies installed
+    # and don't need to incur the overhead of installing all services in the process.
+    no_services: [default]
   neutron:
     features: [neutron]
   # different backends
