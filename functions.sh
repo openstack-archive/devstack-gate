@@ -616,32 +616,32 @@ function cleanup_host {
 
     # Process testr artifacts.
     if [ -f $BASE/new/tempest/.testrepository/0 ]; then
-        sudo cp $BASE/new/tempest/.testrepository/0 $BASE/logs/subunit_log.txt
-        sudo python /usr/local/jenkins/slave_scripts/subunit2html.py $BASE/logs/subunit_log.txt $BASE/logs/testr_results.html
-        sudo gzip -9 $BASE/logs/subunit_log.txt
+        sudo cp $BASE/new/tempest/.testrepository/0 $BASE/logs/testrepository.subunit
+        sudo python /usr/local/jenkins/slave_scripts/subunit2html.py $BASE/logs/testrepository.subunit $BASE/logs/testr_results.html
+        sudo gzip -9 $BASE/logs/testrepository.subunit
         sudo gzip -9 $BASE/logs/testr_results.html
-        sudo chown jenkins:jenkins $BASE/logs/subunit_log.txt.gz $BASE/logs/testr_results.html.gz
-        sudo chmod a+r $BASE/logs/subunit_log.txt.gz $BASE/logs/testr_results.html.gz
+        sudo chown jenkins:jenkins $BASE/logs/testrepository.subunit.gz $BASE/logs/testr_results.html.gz
+        sudo chmod a+r $BASE/logs/testrepository.subunit.gz $BASE/logs/testr_results.html.gz
     elif [ -f $BASE/new/tempest/.testrepository/tmp* ]; then
         # If testr timed out, collect temp file from testr
-        sudo cp $BASE/new/tempest/.testrepository/tmp* $BASE/logs/subunit_log.txt
-        sudo gzip -9 $BASE/logs/subunit_log.txt
-        sudo chown jenkins:jenkins $BASE/logs/subunit_log.txt.gz
-        sudo chmod a+r $BASE/logs/subunit_log.txt.gz
+        sudo cp $BASE/new/tempest/.testrepository/tmp* $BASE/logs/testrepository.subunit
+        sudo gzip -9 $BASE/logs/testrepository.subunit
+        sudo chown jenkins:jenkins $BASE/logs/testrepository.subunit.gz
+        sudo chmod a+r $BASE/logs/testrepository.subunit.gz
     fi
     if [ -f $BASE/old/tempest/.testrepository/0 ]; then
-        sudo cp $BASE/old/tempest/.testrepository/0 $BASE/logs/old/subunit_log.txt
-        sudo python /usr/local/jenkins/slave_scripts/subunit2html.py $BASE/logs/old/subunit_log.txt $BASE/logs/old/testr_results.html
-        sudo gzip -9 $BASE/logs/old/subunit_log.txt
+        sudo cp $BASE/old/tempest/.testrepository/0 $BASE/logs/old/testrepository.subunit
+        sudo python /usr/local/jenkins/slave_scripts/subunit2html.py $BASE/logs/old/testrepository.subunit $BASE/logs/old/testr_results.html
+        sudo gzip -9 $BASE/logs/old/testrepository.subunit
         sudo gzip -9 $BASE/logs/old/testr_results.html
-        sudo chown jenkins:jenkins $BASE/logs/old/subunit_log.txt.gz $BASE/logs/old/testr_results.html.gz
-        sudo chmod a+r $BASE/logs/old/subunit_log.txt.gz $BASE/logs/old/testr_results.html.gz
+        sudo chown jenkins:jenkins $BASE/logs/old/testrepository.subunit.gz $BASE/logs/old/testr_results.html.gz
+        sudo chmod a+r $BASE/logs/old/testrepository.subunit.gz $BASE/logs/old/testr_results.html.gz
     elif [ -f $BASE/old/tempest/.testrepository/tmp* ]; then
         # If testr timed out, collect temp file from testr
-        sudo cp $BASE/old/tempest/.testrepository/tmp* $BASE/logs/old/subunit_log.txt
-        sudo gzip -9 $BASE/logs/old/subunit_log.txt
-        sudo chown jenkins:jenkins $BASE/logs/old/subunit_log.txt.gz
-        sudo chmod a+r $BASE/logs/old/subunit_log.txt.gz
+        sudo cp $BASE/old/tempest/.testrepository/tmp* $BASE/logs/old/testrepository.subunit
+        sudo gzip -9 $BASE/logs/old/testrepository.subunit
+        sudo chown jenkins:jenkins $BASE/logs/old/testrepository.subunit.gz
+        sudo chmod a+r $BASE/logs/old/testrepository.subunit.gz
     fi
 
     if [ -f $BASE/new/tempest/tempest.log ] ; then
