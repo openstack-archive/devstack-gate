@@ -350,6 +350,10 @@ else
     fi
 fi
 
+if [[ "$DEVSTACK_GATE_UNSTACK" -eq "1" ]]; then
+   sudo -H -u stack ./unstack.sh
+fi
+
 echo "Removing sudo privileges for devstack user"
 sudo rm /etc/sudoers.d/50_stack_sh
 

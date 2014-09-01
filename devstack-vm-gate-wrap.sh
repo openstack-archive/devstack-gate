@@ -304,6 +304,11 @@ export DEVSTACK_GATE_CLEAN_LOGS=${DEVSTACK_GATE_CLEAN_LOGS:-1}
 # to run before being aborted (default 60).
 export DEVSTACK_GATE_TIMEOUT=${DEVSTACK_GATE_TIMEOUT:-60}
 
+# Set to 1 to unstack immediately after devstack installation.  This
+# is intended to be a stop-gap until devstack can support
+# dependency-only installation.
+export DEVSTACK_GATE_UNSTACK=${DEVSTACK_GATE_UNSTACK:-0}
+
 # Set this to override the branch selected for testing (in
 # single-branch checkouts; not used for grenade)
 export OVERRIDE_ZUUL_BRANCH=${OVERRIDE_ZUUL_BRANCH:-$ZUUL_BRANCH}
