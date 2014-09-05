@@ -189,6 +189,9 @@ export DEVSTACK_GATE_IRONIC=${DEVSTACK_GATE_IRONIC:-0}
 # Set to "agent_ssh" to run ironic with the ironic-python-agent driver
 export DEVSTACK_GATE_IRONIC_DRIVER=${DEVSTACK_GATE_IRONIC_DRIVER:-pxe_ssh}
 
+# Set to 0 to avoid building Ironic deploy ramdisks
+export DEVSTACK_GATE_IRONIC_BUILD_RAMDISK=${DEVSTACK_GATE_IRONIC_BUILD_RAMDISK:-1}
+
 # Set to 1 to run sahara
 export DEVSTACK_GATE_SAHARA=${DEVSTACK_GATE_SAHARA:-0}
 
