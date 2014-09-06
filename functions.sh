@@ -572,6 +572,9 @@ function cleanup_host {
         sudo rm $BASE/logs/grenade.sh.*
         sudo mv $BASE/logs/grenade/*.log $BASE/logs
         sudo rm -rf $BASE/logs/grenade
+        if [ -f $BASE/new/grenade/javelin.log ] ; then
+            sudo cp $BASE/new/grenade/javelin.log $BASE/logs/javelin.log
+        fi
 
         NEWLOGTARGET=$BASE/logs/new
     else
