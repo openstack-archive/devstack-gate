@@ -21,6 +21,15 @@
 
 set -o errexit
 
+# Keep track of the devstack directory
+TOP_DIR=$(cd $(dirname "$0") && pwd)
+
+# Prepare the environment
+# -----------------------
+
+# Import common functions
+source $TOP_DIR/functions.sh
+
 echo $PPID > $WORKSPACE/gate.pid
 
 function setup_localrc {
@@ -33,6 +42,13 @@ function setup_localrc {
         rm -f localrc
     fi
 
+    # Install PyYaml for test-matrix.py
+    if is_ubuntu; then
+        sudo apt-get update
+        sudo apt-get install python-yaml
+    elif is_fedora; then
+        sudo yum install PyYAML
+    fi
     MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $LOCALRC_BRANCH -f $DEVSTACK_GATE_FEATURE_MATRIX`
 
     # Allow optional injection of ENABLED_SERVICES from the calling context
