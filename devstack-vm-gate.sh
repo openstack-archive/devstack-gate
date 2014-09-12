@@ -126,6 +126,9 @@ EOF
         echo "IRONIC_VM_EPHEMERAL_DISK=1" >>localrc
         echo "IRONIC_VM_LOG_DIR=$BASE/$LOCALRC_OLDNEW/ironic-bm-logs" >>localrc
         echo "DEFAULT_INSTANCE_TYPE=baremetal" >>localrc
+        if [[ "$DEVSTACK_GATE_IRONIC_BUILD_RAMDISK" -eq 0 ]]; then
+            echo "IRONIC_BUILD_DEPLOY_RAMDISK=False" >>localrc
+        fi
         if [[ "$DEVSTACK_GATE_IRONIC_DRIVER" == "agent_ssh" ]]; then
             echo "SWIFT_ENABLE_TEMPURLS=True" >>localrc
             echo "IRONIC_ENABLED_DRIVERS=fake,agent_ssh,agent_ipmitool" >>localrc
