@@ -136,6 +136,8 @@ EOF
             echo "IRONIC_DEPLOY_DRIVER=agent_ssh" >>localrc
             # agent driver doesn't support ephemeral volumes yet
             echo "IRONIC_VM_EPHEMERAL_DISK=0" >>localrc
+            # agent driver is a bit slow
+            echo "BUILD_TIMEOUT=300" >>localrc
         else
             echo "IRONIC_VM_EPHEMERAL_DISK=1" >>localrc
         fi
