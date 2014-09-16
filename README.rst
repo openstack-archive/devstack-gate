@@ -166,7 +166,7 @@ a current kernel::
   && config/install_puppet.sh && config/install_modules.sh \
   && puppet apply --modulepath=/root/config/modules:/etc/puppet/modules \
   -e "class { openstack_project::single_use_slave: install_users => false,
-  ssh_key => \"$( cat .ssh/authorized_keys )\" }" \
+  ssh_key => \"$( cat .ssh/id_rsa.pub | awk '{print $2}' )\" }" \
   && echo "jenkins ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
   && reboot
 
