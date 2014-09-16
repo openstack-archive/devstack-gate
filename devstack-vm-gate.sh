@@ -428,16 +428,6 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
         sudo -H -u tempest tox -esmoke -- --concurrency=$TEMPEST_CONCURRENCY
     fi
 
-    if [[ "$DEVSTACK_GATE_CLEAN_LOGS" -eq "0" ]] ; then
-        # if we don't want to enforce clean logs, just turn off
-        # errexit on this final command
-        set +o errexit
-    fi
-
-    echo "Running log checker"
-    tools/check_logs.py -d $BASE/new/screen-logs
-
-
 else
     # Jenkins expects at least one nosetests file.  If we're not running
     # tempest, then write a fake one that indicates the tests pass (since
