@@ -205,6 +205,8 @@ EOF
     if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
         # We need to disable ratelimiting when running
         # Tempest tests since so many requests are executed
+        # TODO(mriedem): Remove this when stable/juno is our oldest
+        # supported branch since devstack no longer uses it since Juno.
         echo "API_RATE_LIMIT=False" >> localrc
         # Volume tests in Tempest require a number of volumes
         # to be created, each of 1G size. Devstack's default
