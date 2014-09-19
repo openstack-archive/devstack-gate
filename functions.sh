@@ -681,6 +681,9 @@ function cleanup_host {
     # rabbitmq
     if [ -f $BASE/logs/rabbitmq/ ]; then
         find $BASE/logs/rabbitmq -type f -exec mv '{}' '{}'.txt \;
+        for X in `find $BASE/logs/rabbitmq -type f` ; do
+            mv "$X" "${X/@/_at_}"
+        done
     fi
 
     # final memory usage and process list
