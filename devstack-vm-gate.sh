@@ -218,7 +218,7 @@ EOF
         # in order to ensure glance http tests don't time out, we
         # specify the TEMPEST_HTTP_IMAGE address to be horrizon's
         # front page. Kind of hacky, but it works.
-        echo "TEMPEST_HTTP_IMAGE=http://127.0.0.1/" >> localrc
+        echo "TEMPEST_HTTP_IMAGE=http://127.0.0.1/static/dashboard/img/favicon.ico" >> localrc
     fi
 
     if [[ "$DEVSTACK_GATE_TEMPEST_DISABLE_TENANT_ISOLATION" -eq "1" ]]; then
