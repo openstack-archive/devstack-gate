@@ -401,6 +401,59 @@ function test_workspace_branch_arg {
     assert_raises setup_workspace
 }
 
+function test_call_hook_if_defined {
+
+    local filename=test_call_hook_if_defined.txt
+    local save_dir=`pwd`/tmp
+
+    mkdir -p $save_dir
+
+    function demo_script {
+        local filename=$1
+        local save_dir=$2
+        # Clean up any files from previous tests
+        rm -f $save_dir/$filename
+        call_hook_if_defined test_hook $filename $save_dir
+        ret_val=$?
+        return $ret_val
+    }
+
+    # No hook defined returns success 0 & no file created
+    demo_script $filename $save_dir
+    ret_val=$?
+    assert_equal "$ret_val" "0"
+
+    [[ -e $save_dir/$filename ]]
+    file_exists=$?
+    assert_equal $file_exists 1
+
+    # Hook defined returns its error code and file with output
+    function test_hook {
+        echo "hello test_hook"
+        return 123
+    }
+    demo_script $filename $save_dir
+    ret_val=$?
+    assert_equal "$ret_val" "123"
+
+    [[ -e $save_dir/$filename ]]
+    file_exists=$?
+    assert_equal $file_exists 0
+
+    # Make sure the expected contents has length > 0
+    result_expected=`cat $save_dir/$filename | grep "hello test_hook"`
+    [[ ${#result_expected} -eq "0" ]]
+    assert_equal $? 1
+
+    # Hook defined with invalid file fails
+    demo_script /invalid/file.txt $save_dir
+    ret_val=$?
+    assert_equal "$ret_val" "1"
+
+    # Clean up
+    rm -rf $save_dir
+}
+
 # Run tests:
 #set -o xtrace
 test_branch_override
@@ -413,6 +466,7 @@ test_one_on_master
 test_periodic
 test_two_on_master
 test_workspace_branch_arg
+test_call_hook_if_defined
 
 if [[ ! -z "$ERROR" ]]; then
     echo

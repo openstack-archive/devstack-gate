@@ -41,6 +41,23 @@ function function_exists {
     type $1 2>/dev/null | grep -q 'is a function'
 }
 
+function call_hook_if_defined {
+    local hook_name=$1
+    local filename=${2-$WORKSPACE/devstack-gate-$hook_name.txt}
+    local save_dir=${3-$BASE/logs/}
+    if function_exists $hook_name; then
+        echo "Running $hook_name"
+        xtrace=$(set +o | grep xtrace)
+        set -o xtrace -o pipefail
+        tsfilter $hook_name | tee $filename
+        local ret_val=$?
+        mv $filename $save_dir
+        set +o pipefail
+        $xtrace
+        return $ret_val
+    fi
+}
+
 # awk filter to timestamp the stream, including stderr merging
 function tsfilter {
     $@ 2>&1 | awk '

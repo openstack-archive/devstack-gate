@@ -391,14 +391,7 @@ fi
 export DEVSTACK_GATE_TOPOLOGY=${DEVSTACK_GATE_TOPOLOGY:-aio}
 
 # Run pre test hook if we have one
-if function_exists "pre_test_hook"; then
-    echo "Running pre_test_hook"
-    xtrace=$(set +o | grep xtrace)
-    set -o xtrace
-    tsfilter pre_test_hook | tee $WORKSPACE/devstack-gate-pre-test-hook.txt
-    sudo mv $WORKSPACE/devstack-gate-pre-test-hook.txt $BASE/logs/
-    $xtrace
-fi
+call_hook_if_defined "pre_test_hook"
 
 # Run the gate function
 echo "Running gate_hook"
@@ -412,15 +405,10 @@ if [ $GATE_RETVAL -ne 0 ]; then
 fi
 
 # Run post test hook if we have one
-if [ $GATE_RETVAL -eq 0 ] && function_exists "post_test_hook"; then
-    echo "Running post_test_hook"
-    xtrace=$(set +o | grep xtrace)
-    set -o xtrace -o pipefail
-    tsfilter post_test_hook | tee $WORKSPACE/devstack-gate-post-test-hook.txt
+if [ $GATE_RETVAL -eq 0 ]; then
+    # Run post_test_hook if we have one
+    call_hook_if_defined "post_test_hook"
     RETVAL=$?
-    sudo mv $WORKSPACE/devstack-gate-post-test-hook.txt $BASE/logs/
-    set +o pipefail
-    $xtrace
 fi
 
 if [ $GATE_RETVAL -eq 137 ] && [ -f $WORKSPACE/gate.pid ] ; then
