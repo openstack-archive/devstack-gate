@@ -431,9 +431,6 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     elif [[ "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite"
         sudo -H -u tempest tox -efull -- --concurrency=$TEMPEST_CONCURRENCY
-    elif [[ "$DEVSTACK_GATE_TEMPEST_TESTR_FULL" -eq "1" ]]; then
-        echo "Running tempest full test suite with testr"
-        sudo -H -u tempest tox -etestr-full -- --concurrency=$TEMPEST_CONCURRENCY
     elif [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] ; then
         echo "Running stress tests"
         sudo -H -u tempest tox -estress
