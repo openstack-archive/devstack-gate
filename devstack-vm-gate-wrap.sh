@@ -245,6 +245,9 @@ export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-}
 # TODO(clarkb) remove this once job defs are updated.
 export DEVSTACK_GATE_GRENADE_PARTIAL_NCPU=${DEVSTACK_GATE_GRENADE_PARTIAL_NCPU:-0}
 
+# are we pulling any libraries from git
+export DEVSTACK_PROJECT_FROM_GIT=${DEVSTACK_PROJECT_FROM_GIT:-}
+
 # the branch name for selecting grenade branches
 GRENADE_BASE_BRANCH=${OVERRIDE_ZUUL_BRANCH:-${ZUUL_BRANCH}}
 
