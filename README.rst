@@ -200,9 +200,9 @@ Switch to the workspace and get a copy of devstack-gate::
 
 At this point you're ready to set the same environment variables and run
 the same commands/scripts as used in the desired job. The definitions
-for these are found in the openstack-infra/config project under the
-modules/openstack_project/files/jenkins_job_builder/config directory in
-a file named devstack-gate.yaml. It will probably look something like::
+for these are found in the openstack-infra/project-config project under
+the jenkins/jobs directory in a file named devstack-gate.yaml. It will
+probably look something like::
 
   export PYTHONUNBUFFERED=true
   export DEVSTACK_GATE_TIMEOUT=120
@@ -214,10 +214,9 @@ a file named devstack-gate.yaml. It will probably look something like::
 
 If you're trying to figure out which devstack gate jobs run for a given
 project+branch combination, this is encoded in the
-openstack-infra/config project under the
-modules/openstack_project/files/zuul directory in a file named
-layout.yaml. You'll want to look in the "projects" section for a list of
-jobs run on a given project in the "gate" pipeline, and then consult the
+openstack-infra/project-config project under the zuul/ directory in a file
+named layout.yaml. You'll want to look in the "projects" section for a list
+of jobs run on a given project in the "gate" pipeline, and then consult the
 "jobs" section of the file to see if there are any overrides indicating
 which branches qualify for the job and whether or not its voting is
 disabled.
@@ -247,6 +246,7 @@ the relevant repository::
     https://git.openstack.org/cgit/openstack-infra/devstack-gate
     https://git.openstack.org/cgit/openstack-infra/nodepool
     https://git.openstack.org/cgit/openstack-infra/config
+    https://git.openstack.org/cgit/openstack-infra/project-config
 
 You can file bugs on the openstack-ci project::
 
