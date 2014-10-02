@@ -83,6 +83,8 @@ function setup_localrc {
 
     cat <<EOF >>localrc
 DEST=$BASE/$LOCALRC_OLDNEW
+# move DATA_DIR outside of DEST to keep DEST a bit cleaner
+DATA_DIR=$BASE/data
 ACTIVE_TIMEOUT=90
 BOOT_TIMEOUT=90
 ASSOCIATE_TIMEOUT=60
@@ -226,8 +228,6 @@ EOF
     fi
 
     if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
-        echo "DATA_DIR=/opt/stack/data" >> localrc
-        echo "SWIFT_DATA_DIR=/opt/stack/data/swift" >> localrc
         if [[ "$LOCALRC_OLDNEW" == "old" ]]; then
             echo "GRENADE_PHASE=base" >> localrc
         else
@@ -405,9 +405,11 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     if [[ -d "$BASE/new/tempest" ]]; then
         sudo chown -R tempest:stack $BASE/new/tempest
     fi
-    # our lock files are in data, so we need to be able to write over there
-    if [[ -d /opt/stack/data/tempest ]]; then
-        sudo chown -R tempest:stack /opt/stack/data/tempest
+
+    # Make sure tempest user can write to its directory for
+    # lock-files.
+    if [[ -d $BASE/data/tempest ]]; then
+        sudo chown -R tempest:stack $BASE/data/tempest
     fi
     # ensure the cirros image files are accessible
     if [[ -d /opt/stack/new/devstack/files ]]; then
