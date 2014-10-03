@@ -218,17 +218,22 @@ function fix_disk_layout {
             DEV='/dev/xvde'
         fi
         if [ -n "$DEV" ]; then
+            local swap=${DEV}1
+            local lvmvol=${DEV}2
+            local optdev=${DEV}3
             sudo umount ${DEV}
             sudo parted ${DEV} --script -- mklabel msdos
             sudo parted ${DEV} --script -- mkpart primary linux-swap 1 8192
-            sudo parted ${DEV} --script -- mkpart primary ext2 8192 -1
-            sudo mkswap ${DEV}1
-            sudo mkfs.ext4 ${DEV}2
-            sudo swapon ${DEV}1
-            sudo mount ${DEV}2 /mnt
+            sudo parted ${DEV} --script -- mkpart primary ext2 8192 32768
+            sudo parted ${DEV} --script -- mkpart primary ext2 32768 -1
+            sudo mkswap $swap
+            sudo vgcreate stack-volumes-lvmdriver-1 $lvmvol
+            sudo mkfs.ext4 $optdev
+            sudo swapon $swap
+            sudo mount $optdev /mnt
             sudo find /opt/ -mindepth 1 -maxdepth 1 -exec mv {} /mnt/ \;
             sudo umount /mnt
-            sudo mount ${DEV}2 /opt
+            sudo mount $optdev /opt
         fi
     fi
 }
