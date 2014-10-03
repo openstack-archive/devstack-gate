@@ -145,6 +145,7 @@ EOF
         echo "IRONIC_VM_COUNT=3" >>localrc
         echo "IRONIC_VM_LOG_DIR=$BASE/$LOCALRC_OLDNEW/ironic-bm-logs" >>localrc
         echo "DEFAULT_INSTANCE_TYPE=baremetal" >>localrc
+        echo "BUILD_TIMEOUT=300" >>localrc
         if [[ "$DEVSTACK_GATE_IRONIC_BUILD_RAMDISK" -eq 0 ]]; then
             echo "IRONIC_BUILD_DEPLOY_RAMDISK=False" >>localrc
         fi
@@ -154,8 +155,6 @@ EOF
             echo "IRONIC_DEPLOY_DRIVER=agent_ssh" >>localrc
             # agent driver doesn't support ephemeral volumes yet
             echo "IRONIC_VM_EPHEMERAL_DISK=0" >>localrc
-            # agent driver is a bit slow
-            echo "BUILD_TIMEOUT=300" >>localrc
         else
             echo "IRONIC_VM_EPHEMERAL_DISK=1" >>localrc
         fi
