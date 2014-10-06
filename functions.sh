@@ -69,9 +69,15 @@ function _http_check {
 # do a few network tests to baseline how bad we are
 function network_sanity_check {
     echo "Performing network sanity check..."
-    # pypi.openstack.org
-    _ping_check pypi.openstack.org
-    _http_check http://pypi.openstack.org/simple/
+    PIP_CONFIG_FILE=$HOME/.pip/pip.conf
+    if [[ -f $PIP_CONFIG_FILE ]]; then
+        line=$(cat $PIP_CONFIG_FILE|grep index-url)
+        pypi_url=${line#*=}
+        pypi_host=$(echo $pypi_url|grep -Po '.*?//\K.*?(?=/)')
+
+        _ping_check $pypi_host
+        _http_check $pypi_url
+    fi
 
     # rax ubuntu mirror
     _ping_check mirror.rackspace.com
