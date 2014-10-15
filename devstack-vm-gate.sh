@@ -58,6 +58,7 @@ function setup_localrc {
 
     if [[ "$DEVSTACK_GATE_CEPH" == "1" ]]; then
         echo "CINDER_ENABLED_BACKENDS=ceph:ceph" >>localrc
+        echo "TEMPEST_STORAGE_PROTOCOL=ceph" >>localrc
     fi
 
     # the exercises we *don't* want to test on for devstack
