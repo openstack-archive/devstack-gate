@@ -145,7 +145,6 @@ EOF
     if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "ironic" ]]; then
         echo "VIRT_DRIVER=ironic" >>localrc
         echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>localrc
-        echo "IRONIC_VM_COUNT=3" >>localrc
         echo "IRONIC_VM_LOG_DIR=$BASE/$LOCALRC_OLDNEW/ironic-bm-logs" >>localrc
         echo "DEFAULT_INSTANCE_TYPE=baremetal" >>localrc
         echo "BUILD_TIMEOUT=300" >>localrc
@@ -158,8 +157,12 @@ EOF
             echo "IRONIC_DEPLOY_DRIVER=agent_ssh" >>localrc
             # agent driver doesn't support ephemeral volumes yet
             echo "IRONIC_VM_EPHEMERAL_DISK=0" >>localrc
+            # agent CoreOS ramdisk is a little heavy
+            echo "IRONIC_VM_SPECS_RAM=1024" >>localrc
+            echo "IRONIC_VM_COUNT=1" >>localrc
         else
             echo "IRONIC_VM_EPHEMERAL_DISK=1" >>localrc
+            echo "IRONIC_VM_COUNT=3" >>localrc
         fi
     fi
 
