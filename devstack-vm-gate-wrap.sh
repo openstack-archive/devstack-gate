@@ -231,15 +231,15 @@ export DEVSTACK_PROJECT_FROM_GIT=${DEVSTACK_PROJECT_FROM_GIT:-}
 # for a stable branch we want to both try to upgrade forward n => n+1 as
 # well as upgrade from last n-1 => n.
 #
-# i.e. stable/icehouse:
-#   pullup means stable/havana => stable/icehouse
-#   forward means stable/icehouse => master (or stable/juno if that's out)
-#   partial-ncpu means stable/havana => stable/icehouse but keep nova
-#       compute at stable/havana
-#   sideways-ironic means stable/icehouse with nova baremetal =>
-#       stable/icehouse with ironic
-#   sideways-neutron means stable/icehouse with nova network =>
-#       stable/icehouse with neutron
+# i.e. stable/juno:
+#   pullup means stable/icehouse => stable/juno
+#   forward means stable/juno => master (or stable/kilo if that's out)
+#   partial-ncpu means stable/icehouse => stable/juno but keep nova
+#       compute at stable/icehouse
+#   sideways-ironic means stable/juno with nova baremetal =>
+#       stable/juno with ironic
+#   sideways-neutron means stable/juno with nova network =>
+#       stable/juno with neutron
 export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-}
 
 # the branch name for selecting grenade branches
@@ -250,8 +250,11 @@ if [[ "$DEVSTACK_GATE_GRENADE" == "pullup" ]]; then
     if [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
         export GRENADE_OLD_BRANCH="stable/havana"
         export GRENADE_NEW_BRANCH="stable/icehouse"
-    else # master
+    elif [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
         export GRENADE_OLD_BRANCH="stable/icehouse"
+        export GRENADE_NEW_BRANCH="stable/juno"
+    else # master
+        export GRENADE_OLD_BRANCH="stable/juno"
         export GRENADE_NEW_BRANCH="$GIT_BRANCH"
     fi
 elif [[ "$DEVSTACK_GATE_GRENADE" == "partial-ncpu" ]]; then
@@ -260,8 +263,11 @@ elif [[ "$DEVSTACK_GATE_GRENADE" == "partial-ncpu" ]]; then
     if [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
         export GRENADE_OLD_BRANCH="stable/havana"
         export GRENADE_NEW_BRANCH="stable/icehouse"
-    else # master
+    elif [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
         export GRENADE_OLD_BRANCH="stable/icehouse"
+        export GRENADE_NEW_BRANCH="stable/juno"
+    else # master
+        export GRENADE_OLD_BRANCH="stable/juno"
         export GRENADE_NEW_BRANCH="$GIT_BRANCH"
     fi
 elif [[ "$DEVSTACK_GATE_GRENADE" == "forward" ]]; then
@@ -271,6 +277,9 @@ elif [[ "$DEVSTACK_GATE_GRENADE" == "forward" ]]; then
         export GRENADE_NEW_BRANCH="stable/icehouse"
     elif [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
         export GRENADE_OLD_BRANCH="stable/icehouse"
+        export GRENADE_NEW_BRANCH="stable/juno"
+    elif [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
+        export GRENADE_OLD_BRANCH="stable/juno"
         export GRENADE_NEW_BRANCH="$GIT_BRANCH"
     fi
 elif [[ "$DEVSTACK_GATE_GRENADE" =~ "sideways" ]]; then
