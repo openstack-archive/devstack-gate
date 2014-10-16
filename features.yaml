@@ -1,6 +1,7 @@
 config:
   default:
     master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
+    kilo: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
     juno: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
     icehouse: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove]
     # This can be used by functional jobs that only want their dependencies installed
@@ -44,7 +45,7 @@ branches:
   # The value of ""default" is the name of the "trunk" branch
   default: master
   # Normalized branch names only here, e.g. stable/icehouse => icehouse
-  allowed: [master, juno, icehouse]
+  allowed: [master, kilo, juno, icehouse]
 
 features:
   default:
