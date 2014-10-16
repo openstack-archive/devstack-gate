@@ -3,7 +3,6 @@ config:
     master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
     juno: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
     icehouse: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove]
-    havana: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat]
     # This can be used by functional jobs that only want their dependencies installed
     # and don't need to incur the overhead of installing all services in the process.
     no_services: [default]
@@ -45,7 +44,7 @@ branches:
   # The value of ""default" is the name of the "trunk" branch
   default: master
   # Normalized branch names only here, e.g. stable/icehouse => icehouse
-  allowed: [master, juno, icehouse, havana]
+  allowed: [master, juno, icehouse]
 
 features:
   default:
@@ -55,8 +54,6 @@ features:
   ceilometer:
     base:
       services: [ceilometer-acompute, ceilometer-acentral, ceilometer-collector, ceilometer-api, ceilometer-alarm-notifier, ceilometer-alarm-evaluator, ceilometer-anotification]
-    havana:
-      rm-services: [ceilometer-alarm-notifier, ceilometer-alarm-evaluator, ceilometer-anotification]
 
   glance:
     base:
@@ -73,8 +70,6 @@ features:
   nova:
     base:
       services: [n-api, n-cond, n-cpu, n-crt, n-net, n-obj, n-sch]
-    havana:
-      rm-compute-ext:
     icehouse:
       compute-ext:
 
