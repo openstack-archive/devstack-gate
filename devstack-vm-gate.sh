@@ -153,6 +153,7 @@ EOF
         fi
         if [[ "$DEVSTACK_GATE_IRONIC_DRIVER" == "agent_ssh" ]]; then
             echo "SWIFT_ENABLE_TEMPURLS=True" >>localrc
+            echo "SWIFT_TEMPURL_KEY=secretkey" >>localrc
             echo "IRONIC_ENABLED_DRIVERS=fake,agent_ssh,agent_ipmitool" >>localrc
             echo "IRONIC_DEPLOY_DRIVER=agent_ssh" >>localrc
             # agent driver doesn't support ephemeral volumes yet
