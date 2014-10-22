@@ -224,6 +224,9 @@ if [ ${DEFAULT_CONCURRENCY} -gt 3 ] ; then
 fi
 export TEMPEST_CONCURRENCY=${TEMPEST_CONCURRENCY:-${DEFAULT_CONCURRENCY}}
 
+# are we pulling any libraries from git
+export DEVSTACK_PROJECT_FROM_GIT=${DEVSTACK_PROJECT_FROM_GIT:-}
+
 # The following variable is set for different directions of Grenade updating
 # for a stable branch we want to both try to upgrade forward n => n+1 as
 # well as upgrade from last n-1 => n.
@@ -238,18 +241,11 @@ export TEMPEST_CONCURRENCY=${TEMPEST_CONCURRENCY:-${DEFAULT_CONCURRENCY}}
 #   sideways-neutron means stable/icehouse with nova network =>
 #       stable/icehouse with neutron
 export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-}
-# This is here for backward compat.
-# TODO(clarkb) remove this once job defs are updated.
-export DEVSTACK_GATE_GRENADE_PARTIAL_NCPU=${DEVSTACK_GATE_GRENADE_PARTIAL_NCPU:-0}
-
-# are we pulling any libraries from git
-export DEVSTACK_PROJECT_FROM_GIT=${DEVSTACK_PROJECT_FROM_GIT:-}
 
 # the branch name for selecting grenade branches
 GRENADE_BASE_BRANCH=${OVERRIDE_ZUUL_BRANCH:-${ZUUL_BRANCH}}
 
-# TODO(clarkb) clean up condition once job defs are updated.
-if [[ "$DEVSTACK_GATE_GRENADE" == "pullup" ]] || [[ "$DEVSTACK_GATE_GRENADE" -eq "1" ]]; then
+if [[ "$DEVSTACK_GATE_GRENADE" == "pullup" ]]; then
     export DEVSTACK_GATE_TEMPEST=1
     if [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
         export GRENADE_OLD_BRANCH="stable/havana"
@@ -258,8 +254,7 @@ if [[ "$DEVSTACK_GATE_GRENADE" == "pullup" ]] || [[ "$DEVSTACK_GATE_GRENADE" -eq
         export GRENADE_OLD_BRANCH="stable/icehouse"
         export GRENADE_NEW_BRANCH="$GIT_BRANCH"
     fi
-# TODO(clarkb) clean up condition once job defs are updated.
-elif [[ "$DEVSTACK_GATE_GRENADE" == "partial-ncpu" ]] || [[ "$DEVSTACK_GATE_GRENADE_PARTIAL_NCPU" -eq "1" ]]; then
+elif [[ "$DEVSTACK_GATE_GRENADE" == "partial-ncpu" ]]; then
     export DEVSTACK_GATE_TEMPEST=1
     export DO_NOT_UPGRADE_SERVICES=[n-cpu]
     if [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
