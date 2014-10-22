@@ -247,10 +247,7 @@ GRENADE_BASE_BRANCH=${OVERRIDE_ZUUL_BRANCH:-${ZUUL_BRANCH}}
 
 if [[ "$DEVSTACK_GATE_GRENADE" == "pullup" ]]; then
     export DEVSTACK_GATE_TEMPEST=1
-    if [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
-        export GRENADE_OLD_BRANCH="stable/havana"
-        export GRENADE_NEW_BRANCH="stable/icehouse"
-    elif [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
+    if [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
         export GRENADE_OLD_BRANCH="stable/icehouse"
         export GRENADE_NEW_BRANCH="stable/juno"
     else # master
@@ -260,10 +257,7 @@ if [[ "$DEVSTACK_GATE_GRENADE" == "pullup" ]]; then
 elif [[ "$DEVSTACK_GATE_GRENADE" == "partial-ncpu" ]]; then
     export DEVSTACK_GATE_TEMPEST=1
     export DO_NOT_UPGRADE_SERVICES=[n-cpu]
-    if [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
-        export GRENADE_OLD_BRANCH="stable/havana"
-        export GRENADE_NEW_BRANCH="stable/icehouse"
-    elif [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
+    if [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
         export GRENADE_OLD_BRANCH="stable/icehouse"
         export GRENADE_NEW_BRANCH="stable/juno"
     else # master
@@ -272,10 +266,7 @@ elif [[ "$DEVSTACK_GATE_GRENADE" == "partial-ncpu" ]]; then
     fi
 elif [[ "$DEVSTACK_GATE_GRENADE" == "forward" ]]; then
     export DEVSTACK_GATE_TEMPEST=1
-    if [[ "$GRENADE_BASE_BRANCH" == "stable/havana" ]]; then
-        export GRENADE_OLD_BRANCH="stable/havana"
-        export GRENADE_NEW_BRANCH="stable/icehouse"
-    elif [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
+    if [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
         export GRENADE_OLD_BRANCH="stable/icehouse"
         export GRENADE_NEW_BRANCH="stable/juno"
     elif [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then

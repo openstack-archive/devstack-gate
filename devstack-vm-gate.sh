@@ -74,15 +74,6 @@ function setup_localrc {
         echo "Q_DVR_MODE=dvr_snat" >>localrc
     fi
 
-    if [[ "$LOCALRC_BRANCH" == "stable/havana" ]]; then
-        # we don't want to enable services for grenade that don't have upgrade support
-        # otherwise they can break grenade, especially when they are projects like
-        # ceilometer which inject code in other projects
-        if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
-            SKIP_EXERCISES=${SKIP_EXERCISES},swift,client-args
-        fi
-    fi
-
     cat <<EOF >>localrc
 USE_SCREEN=False
 DEST=$BASE/$LOCALRC_OLDNEW
