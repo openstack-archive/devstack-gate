@@ -58,7 +58,7 @@ def normalize_branch(branch):
             # projects are developing master.
             branch = GRID['branches']['default']
     if branch not in ALLOWED_BRANCHES:
-        LOG.error("unknown branch name %s" % branch)
+        LOG.error("branch not allowed by features matrix: %s" % branch)
         sys.exit(1)
     return branch
 
