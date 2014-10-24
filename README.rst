@@ -140,8 +140,9 @@ By comparison, a provider settings file for HPCloud::
 
 Note: The image regularly changes as new images are uploaded, for the
 specific image name currently used for tests, see
-`nodepool.yaml.erb <http://git.openstack.org/cgit/openstack-infra/config/
-tree/modules/openstack_project/templates/nodepool/nodepool.yaml.erb>`_.
+`nodepool.yaml.erb <http://git.openstack.org/cgit/openstack-infra/
+system-config/tree/modules/openstack_project/templates/nodepool/
+nodepool.yaml.erb>`_.
 
 Source the provider settings, boot a server named "testserver" (chosen
 arbitrarily for this example) with your SSH key allowed, and log into
@@ -162,9 +163,10 @@ Upgrade the server, install git and pip packages, add tox via pip
 a current kernel::
 
   apt-get install -y git \
-  && git clone https://review.openstack.org/p/openstack-infra/config \
-  && config/install_puppet.sh && config/install_modules.sh \
-  && puppet apply --modulepath=/root/config/modules:/etc/puppet/modules \
+  && git clone https://review.openstack.org/p/openstack-infra/system-config \
+  && system-config/install_puppet.sh && system-config/install_modules.sh \
+  && puppet apply \
+  --modulepath=/root/system-config/modules:/etc/puppet/modules \
   -e "class { openstack_project::single_use_slave: install_users => false,
   ssh_key => \"$( cat .ssh/id_rsa.pub | awk '{print $2}' )\" }" \
   && echo "jenkins ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers \
@@ -245,7 +247,7 @@ the relevant repository::
 
     https://git.openstack.org/cgit/openstack-infra/devstack-gate
     https://git.openstack.org/cgit/openstack-infra/nodepool
-    https://git.openstack.org/cgit/openstack-infra/config
+    https://git.openstack.org/cgit/openstack-infra/system-config
     https://git.openstack.org/cgit/openstack-infra/project-config
 
 You can file bugs on the openstack-ci project::
