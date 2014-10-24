@@ -27,6 +27,15 @@ function is_ubuntu {
     lsb_release -i 2>/dev/null | grep -iq "ubuntu"
 }
 
+function is_debian {
+    # do not rely on lsb_release because it may be not installed by default
+    cat /etc/*-release | grep ID 2>/dev/null | grep -iq "debian"
+}
+
+function uses_debs {
+    # check if apt-get is installed, valid for debian based
+    type "apt-get" 2>/dev/null
+}
 
 function function_exists {
     type $1 2>/dev/null | grep -q 'is a function'
@@ -91,7 +100,7 @@ function start_timer {
     # 4 hrs (which has happened)
     if is_fedora; then
         local ntp_service='ntpd'
-    elif is_ubuntu; then
+    elif uses_debs; then
         local ntp_service='ntp'
     else
         echo "Unsupported platform, can't determine ntp service"
@@ -403,7 +412,7 @@ function setup_host {
     sudo mkdir -p $BASE
 
     # Start with a fresh syslog
-    if is_ubuntu; then
+    if uses_debs; then
         sudo stop rsyslog
         sudo mv /var/log/syslog /var/log/syslog-pre-devstack
         sudo mv /var/log/kern.log /var/log/kern_log-pre-devstack
@@ -477,7 +486,7 @@ function cleanup_host {
     sleep 2
 
     # No matter what, archive logs and config files
-    if is_ubuntu; then
+    if uses_debs; then
         sudo cp /var/log/syslog $BASE/logs/syslog.txt
         sudo cp /var/log/kern.log $BASE/logs/kern_log.txt
     elif is_fedora; then
@@ -489,7 +498,7 @@ function cleanup_host {
     fi
 
     # apache logs; including wsgi stuff like horizon, keystone, etc.
-    if is_ubuntu; then
+    if uses_debs; then
         local apache_logs=/var/log/apache2
     elif is_fedora; then
         local apache_logs=/var/log/httpd
@@ -534,7 +543,7 @@ function cleanup_host {
 
     # Archive Apache config files
     sudo mkdir $BASE/logs/apache_config
-    if is_ubuntu; then
+    if uses_debs; then
         if [[ -d /etc/apache2/sites-enabled ]]; then
             sudo cp /etc/apache2/sites-enabled/* $BASE/logs/apache_config
         fi
