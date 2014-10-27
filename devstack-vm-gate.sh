@@ -425,7 +425,7 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
         sudo -H -u tempest tox -efull -- --concurrency=$TEMPEST_CONCURRENCY
     elif [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] ; then
         echo "Running stress tests"
-        sudo -H -u tempest tox -estress -- -d 3600 -S -s -t tempest/stress/etc/stress-tox-job.json
+        sudo -H -u tempest tox -estress -- $DEVSTACK_GATE_TEMPEST_STRESS_ARGS
     elif [[ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]] ; then
         echo "Running slow heat tests"
         sudo -H -u tempest tox -eheat-slow -- --concurrency=$TEMPEST_CONCURRENCY
