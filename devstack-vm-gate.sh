@@ -47,7 +47,7 @@ function setup_localrc {
         sudo apt-get update
         sudo apt-get install python-yaml
     elif is_fedora; then
-        sudo yum install PyYAML
+        sudo yum install -y PyYAML
     fi
     MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $LOCALRC_BRANCH -f $DEVSTACK_GATE_FEATURE_MATRIX`
 
