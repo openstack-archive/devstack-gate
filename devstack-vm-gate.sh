@@ -440,11 +440,4 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
         sudo -H -u tempest tox -esmoke -- --concurrency=$TEMPEST_CONCURRENCY
     fi
 
-else
-    # Jenkins expects at least one nosetests file.  If we're not running
-    # tempest, then write a fake one that indicates the tests pass (since
-    # we made it past exercise.sh.
-    cat > $WORKSPACE/nosetests-fake.xml <<EOF
-<?xml version="1.0" encoding="UTF-8"?><testsuite name="nosetests" tests="0" errors="0" failures="0" skip="0"></testsuite>
-EOF
 fi
