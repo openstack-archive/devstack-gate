@@ -316,6 +316,9 @@ export OVERRIDE_ZUUL_BRANCH=${OVERRIDE_ZUUL_BRANCH:-$ZUUL_BRANCH}
 # postgresql, mongodb.
 export DEVSTACK_GATE_CEILOMETER_BACKEND=${DEVSTACK_GATE_CEILOMETER_BACKEND:-mysql}
 
+# Set Zaqar backend to override the default one. It could be mongodb, redis.
+export DEVSTACK_GATE_ZAQAR_BACKEND=${DEVSTACK_GATE_ZAQAR_BACKEND:-mongodb}
+
 if ! function_exists "gate_hook"; then
     # the command we use to run the gate
     function gate_hook {
