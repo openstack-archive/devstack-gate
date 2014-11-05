@@ -48,29 +48,34 @@ function setup_localrc {
         rm -f $localrc_file
     fi
 
-    # Install PyYaml for test-matrix.py
-    if uses_debs; then
-        sudo apt-get update
-        sudo apt-get install python-yaml
-    elif is_fedora; then
-        sudo yum install -y PyYAML
-    fi
-    MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $localrc_branch -f $DEVSTACK_GATE_FEATURE_MATRIX`
-    local original_enabled_services=$MY_ENABLED_SERVICES
-
-    # TODO(afazekas): Move to the feature grid
-    # TODO(afazekas): add c-vol
-    if [[ $role = sub ]]; then
-        if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
-            MY_ENABLED_SERVICES="q-agt,n-cpu,ceilometer-acompute"
-        else
-            MY_ENABLED_SERVICES="n-cpu,ceilometer-acompute"
+    # are we being explicit or additive?
+    if [[ ! -z $OVERRIDE_ENABLED_SERVICES ]]; then
+        MY_ENABLED_SERVICES=${OVERRIDE_ENABLED_SERVICES}
+    else
+        # Install PyYaml for test-matrix.py
+        if uses_debs; then
+            sudo apt-get update
+            sudo apt-get install python-yaml
+        elif is_fedora; then
+            sudo yum install -y PyYAML
         fi
-    fi
+        MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $localrc_branch -f $DEVSTACK_GATE_FEATURE_MATRIX`
+        local original_enabled_services=$MY_ENABLED_SERVICES
 
-    # Allow optional injection of ENABLED_SERVICES from the calling context
-    if [[ ! -z $ENABLED_SERVICES ]] ; then
-        MY_ENABLED_SERVICES+=,$ENABLED_SERVICES
+        # TODO(afazekas): Move to the feature grid
+        # TODO(afazekas): add c-vol
+        if [[ $role = sub ]]; then
+            if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
+                MY_ENABLED_SERVICES="q-agt,n-cpu,ceilometer-acompute"
+            else
+                MY_ENABLED_SERVICES="n-cpu,ceilometer-acompute"
+            fi
+        fi
+
+        # Allow optional injection of ENABLED_SERVICES from the calling context
+        if [[ ! -z $ENABLED_SERVICES ]] ; then
+            MY_ENABLED_SERVICES+=,$ENABLED_SERVICES
+        fi
     fi
 
     if [[ "$DEVSTACK_GATE_CEPH" == "1" ]]; then
