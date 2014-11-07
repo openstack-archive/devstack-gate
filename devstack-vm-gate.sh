@@ -109,6 +109,8 @@ PIP_USE_MIRRORS=False
 USE_GET_PIP=1
 # Don't reset the requirements.txt files after g-r updates
 UNDO_REQUIREMENTS=False
+# Set to soft if the project is using libraries not in g-r
+REQUIREMENTS_MODE=${REQUIREMENTS_MODE}
 CINDER_PERIODIC_INTERVAL=10
 export OS_NO_CACHE=True
 CEILOMETER_BACKEND=$DEVSTACK_GATE_CEILOMETER_BACKEND
