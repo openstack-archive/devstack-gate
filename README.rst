@@ -250,8 +250,8 @@ the relevant repository::
     https://git.openstack.org/cgit/openstack-infra/system-config
     https://git.openstack.org/cgit/openstack-infra/project-config
 
-You can file bugs on the openstack-ci project::
+You can file bugs on the storyboard devstack-gate project::
 
-    https://launchpad.net/openstack-ci
+    https://storyboard.openstack.org/#!/project/712
 
 And you can chat with us on Freenode in #openstack-dev or #openstack-infra.
