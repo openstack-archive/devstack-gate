@@ -299,6 +299,7 @@ EOF
     fi
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
+        echo "NOVA_ALLOW_MOVE_TO_SAME_HOST=False" >> "$localrc_file"
         local primary_node=`cat /etc/nodepool/primary_node_private`
         echo "SERVICE_HOST=$primary_node" >>"$localrc_file"
     fi
