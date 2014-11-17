@@ -302,22 +302,26 @@ EOF
         echo "NOVA_ALLOW_MOVE_TO_SAME_HOST=False" >> "$localrc_file"
         local primary_node=`cat /etc/nodepool/primary_node_private`
         echo "SERVICE_HOST=$primary_node" >>"$localrc_file"
-    fi
-    if [[ "$role" = sub ]]; then
-        if [[ $original_enabled_services  =~ "qpid" ]]; then
-            echo "QPID_HOST=$primary_node" >>"$localrc_file"
-        fi
-        if [[ $original_enabled_services =~ "rabbit" ]]; then
-            echo "RABBIT_HOST=$primary_node" >>"$localrc_file"
-        fi
-        echo "DATABASE_HOST=$primary_node" >>"$localrc_file"
-        if [[ $original_enabled_services =~ "mysql" ]]; then
-             echo "DATABASE_TYPE=mysql"  >>"$localrc_file"
+
+        if [[ "$role" = sub ]]; then
+            if [[ $original_enabled_services  =~ "qpid" ]]; then
+                echo "QPID_HOST=$primary_node" >>"$localrc_file"
+            fi
+            if [[ $original_enabled_services =~ "rabbit" ]]; then
+                echo "RABBIT_HOST=$primary_node" >>"$localrc_file"
+            fi
+            echo "DATABASE_HOST=$primary_node" >>"$localrc_file"
+            if [[ $original_enabled_services =~ "mysql" ]]; then
+                 echo "DATABASE_TYPE=mysql"  >>"$localrc_file"
+            else
+                 echo "DATABASE_TYPE=postgresql"  >>"$localrc_file"
+            fi
+            echo "GLANCE_HOSTPORT=$primary_node:9292" >>"$localrc_file"
+            echo "Q_HOST=$primary_node" >>"$localrc_file"
+            # Set HOST_IP in subnodes before copying localrc to each node
         else
-             echo "DATABASE_TYPE=postgresql"  >>"$localrc_file"
+            echo "HOST_IP=$primary_node" >>"$localrc_file"
         fi
-        echo "GLANCE_HOSTPORT=$primary_node:9292" >>"$localrc_file"
-        echo "Q_HOST=$primary_node" >>"$localrc_file"
     fi
 
 }
@@ -395,7 +399,7 @@ else
         sudo cp /etc/nodepool/id_rsa $BASE/new/.ssh/
         sudo chmod 600 $BASE/new/.ssh/authorized_keys
         sudo chmod 400 $BASE/new/.ssh/id_rsa
-        for NODE in `cat /etc/nodepool/sub_nodes`; do
+        for NODE in `cat /etc/nodepool/sub_nodes_private`; do
             echo "Copy Files to  $NODE"
             remote_copy_dir $NODE $BASE/new/devstack-gate $WORKSPACE
             remote_copy_file $WORKSPACE/test_env.sh $NODE:$WORKSPACE/test_env.sh
@@ -456,15 +460,12 @@ EOF
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
         echo "Preparing cross node connectivity"
-        # test ssh connection and populete know_hosts and allow connection from the fixed ip
-        for NODE in `cat /etc/nodepool/sub_nodes`; do
+        for NODE in `cat /etc/nodepool/sub_nodes_private`; do
             echo "Running devstack on $NODE"
-            remote_copy_file sub_localrc $NODE:$BASE/new/devstack/localrc
+            sudo cp sub_localrc tmp_sub_localrc
+            echo "HOST_IP=$NODE" | sudo tee --append tmp_sub_localrc > /dev/null
+            remote_copy_file tmp_sub_localrc $NODE:$BASE/new/devstack/localrc
             remote_command $NODE sudo chown -R stack:stack $BASE
-        done
-
-        for NODE in `cat /etc/nodepool/sub_nodes`; do
-            echo "Running devstack on $NODE"
             remote_command $NODE "cd $BASE/new/devstack; source $WORKSPACE/test_env.sh; export -n PROJECTS; sudo -H -u stack stdbuf -oL -eL ./stack.sh > /dev/null"
         done
 
