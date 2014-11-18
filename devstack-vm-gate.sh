@@ -157,7 +157,7 @@ EOF
     if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "ironic" ]]; then
         echo "VIRT_DRIVER=ironic" >>"$localrc_file"
         echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>"$localrc_file"
-        echo "IRONIC_VM_LOG_DIR=$BASE/$LOCALRC_OLDNEW/ironic-bm-logs" >>"$localrc_file"
+        echo "IRONIC_VM_LOG_DIR=$BASE/$localrc_oldnew/ironic-bm-logs" >>"$localrc_file"
         echo "DEFAULT_INSTANCE_TYPE=baremetal" >>"$localrc_file"
         echo "BUILD_TIMEOUT=300" >>"$localrc_file"
         if [[ "$DEVSTACK_GATE_IRONIC_BUILD_RAMDISK" -eq 0 ]]; then
@@ -246,7 +246,7 @@ EOF
     fi
 
     if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
-        if [[ "$LOCALRC_OLDNEW" == "old" ]]; then
+        if [[ "$localrc_old" == "old" ]]; then
             echo "GRENADE_PHASE=base" >> "$localrc_file"
         else
             echo "GRENADE_PHASE=target" >> "$localrc_file"
