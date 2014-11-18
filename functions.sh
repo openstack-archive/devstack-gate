@@ -425,6 +425,8 @@ function setup_host {
     # Create a stack user for devstack to run as, so that we can
     # revoke sudo permissions from that user when appropriate.
     sudo useradd -U -s /bin/bash -d $BASE/new -m stack
+    # Use 755 mode on the user dir regarless to the /etc/login.defs setting
+    sudo chmod 755 $BASE/new
     TEMPFILE=`mktemp`
     echo "stack ALL=(root) NOPASSWD:ALL" >$TEMPFILE
     chmod 0440 $TEMPFILE
@@ -715,4 +717,55 @@ function cleanup_host {
 
     # Disable detailed logging as we return to the main script
     $xtrace
+}
+
+function remote_command {
+    local ssh_opts="-tt -o PasswordAuthentication=no -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectionAttempts=4"
+    local dest_host=$1
+    shift
+    ssh $ssh_opts $dest_host "$@"
+}
+
+function remote_copy_dir {
+    local dest_host=$1
+    local src_dir=$2
+    local dest_dir=$3
+    remote_command "$dest_host"  mkdir -p "$dest_dir"
+    rsync -avz "$src_dir" "${dest_host}:$dest_dir"
+}
+
+function remote_copy_file {
+    local ssh_opts="-o PasswordAuthentication=no -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectionAttempts=4"
+    local src=$1
+    local dest=$2
+    shift
+    scp $ssh_opts "$src" "$dest"
+}
+
+# if_name: Interface name on each host
+# offset: starting key value for the gre tunnels (MUST not be overlapping)
+# host_ip: ip address of the bridge host which is reachable for all peer
+# every additinal paramater is considered as a peer host
+function gre_bridge {
+    local if_name=$1
+    local offset=$2
+    local host_ip=$3
+    shift 3
+    local peer_ips=$@
+    sudo brctl addbr ${if_name}_br
+    sudo iptables -I FORWARD -m physdev --physdev-is-bridged -j ACCEPT
+    local key=$offset
+    for node in $peer_ips; do
+        sudo ip link add gretap_$key type gretap local $host_ip remote $node key $key
+        sudo ip link set gretap_$key up
+        remote_command $node sudo -i ip link add ${if_name} type gretap local $node remote $host_ip key $key
+        remote_command $node sudo -i ip link set ${if_name} up
+        sudo brctl addif ${if_name}_br gretap_$key
+        (( key++ ))
+    done
+    sudo ip link add ${if_name}_br_if type veth peer name ${if_name}
+    sudo brctl addif ${if_name}_br ${if_name}_br_if
+    sudo ip link set ${if_name}_br_if up
+    sudo ip link set ${if_name} up
+    sudo ip link set ${if_name}_br up
 }

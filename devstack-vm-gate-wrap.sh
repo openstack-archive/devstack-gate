@@ -355,12 +355,25 @@ else
     tsfilter setup_workspace $OVERRIDE_ZUUL_BRANCH $BASE/new &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
 fi
+# It is in brackets for avoiding inheriting a huge environment variable
+(export PROJECTS; export >$WORKSPACE/test_env.sh)
 
 # relocate and symlink logs into $BASE to save space on the root filesystem
 if [ -d "$WORKSPACE/logs" -a \! -e "$BASE/logs" ]; then
     sudo mv $WORKSPACE/logs $BASE/
     ln -s $BASE/logs $WORKSPACE/
 fi
+
+# The topology of the system determinates the service distribution
+# among the nodes.
+# aio: `all in one` just only one node used
+# aiopcpu: `all in one plus compute` one node will be installed as aio
+# the extra nodes will gets only limited set of services
+# ctrlpcpu: `controller plus compute` One node will gets the controller type
+# services without the compute type of services, the others gets,
+# the compute style services several services can be common,
+# the networking services also presents on the controller [WIP]
+export DEVSTACK_GATE_TOPOLOGY=${DEVSTACK_GATE_TOPOLOGY:-aio}
 
 # Run pre test hook if we have one
 if function_exists "pre_test_hook"; then
@@ -404,6 +417,13 @@ fi
 echo "Cleaning up host"
 echo "... this takes 3 - 4 minutes (logs at logs/devstack-gate-cleanup-host.txt.gz)"
 tsfilter cleanup_host &> $WORKSPACE/devstack-gate-cleanup-host.txt
+if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
+    for NODE in `cat /etc/nodepool/sub_nodes`; do
+        echo "Collecting logs from $NODE"
+        remote_command $NODE "source $WORKSPACE/test_env.sh; source $BASE/new/devstack-gate/functions.sh; cleanup_host"
+        rsync -avz "$NODE:$BASE/logs/"  "$BASE/logs/$NODE/"
+    done
+fi
 sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
 
 exit $RETVAL
