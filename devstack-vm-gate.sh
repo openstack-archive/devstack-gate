@@ -338,6 +338,8 @@ EOF
     if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
         echo "CIRROS_ARCH=i386" >> "$localrc_file"
         echo "NOVA_ALLOW_MOVE_TO_SAME_HOST=False" >> "$localrc_file"
+        echo "export LIVE_MIGRATION_AVAILABLE=True" >> "$localrc_file"
+        echo "export USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION=True" >> "$localrc_file"
         local primary_node=`cat /etc/nodepool/primary_node_private`
         echo "SERVICE_HOST=$primary_node" >>"$localrc_file"
 
