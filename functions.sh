@@ -710,11 +710,6 @@ function cleanup_host {
     sudo find $BASE/logs -iname '*.dat' -execdir gzip -9 {} \+
     sudo find $BASE/logs -iname '*.conf' -execdir gzip -9 {} \+
 
-    # Save the tempest nosetests results
-    sudo cp $BASE/new/tempest/nosetests*.xml $BASE/logs/
-    sudo chown jenkins:jenkins $BASE/logs/nosetests*.xml
-    sudo chmod a+r $BASE/logs/nosetests*.xml
-
     # Disable detailed logging as we return to the main script
     $xtrace
 }

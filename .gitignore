@@ -11,7 +11,6 @@ covhtml
 AUTHORS
 ChangeLog
 pep8.txt
-nosetests.xml
 *.db
 .DS_Store
 build/
