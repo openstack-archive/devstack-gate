@@ -175,6 +175,7 @@ function git_remote_update {
         COUNT=$(($COUNT + 1))
         echo "git remote update failed."
         if [ $COUNT -eq $MAX_ATTEMPTS ]; then
+            echo "Max attempts reached for git remote update; giving up."
             exit 1
         fi
         SLEEP_TIME=$((30 + $RANDOM % 60))
