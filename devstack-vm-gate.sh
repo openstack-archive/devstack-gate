@@ -504,18 +504,23 @@ EOF
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
         echo "Preparing cross node connectivity"
-        # set up ssh_known_host files
+        # set up ssh_known_host files and /etc/hosts
         for NODE in `cat /etc/nodepool/sub_nodes_private`; do
             ssh-keyscan $NODE | sudo tee --append tmp_ssh_known_hosts > /dev/null
+            echo $NODE  `remote_command $NODE hostname -f` | sudo tee --append  tmp_hosts > /dev/null
         done
         ssh-keyscan `cat /etc/nodepool/primary_node_private` | sudo tee --append tmp_ssh_known_hosts > /dev/null
+        echo `cat /etc/nodepool/primary_node_private` `hostname -f` | sudo tee --append tmp_hosts > /dev/null
         sudo cp tmp_ssh_known_hosts /etc/ssh/ssh_known_hosts
+        cat tmp_hosts | sudo tee --append /etc/hosts > /dev/null
         sudo chmod 444 /etc/ssh/ssh_known_hosts
 
         for NODE in `cat /etc/nodepool/sub_nodes_private`; do
             remote_copy_file tmp_ssh_known_hosts $NODE:$BASE/new/tmp_ssh_known_hosts
-            remote_command $NODE sudo mv $BASE/new/tmp_ssh_known_hosts /etc/ssh/ssh_known_hosts
-            remote_command $NODE sudo chmod 444 /etc/ssh/ssh_known_hosts
+            remote_copy_file tmp_hosts $NODE:$BASE/new/tmp_hosts
+            remote_command $NODE "cat $BASE/new/tmp_hosts | sudo tee --append /etc/hosts > /dev/null"
+            remote_command $NODE "sudo mv $BASE/new/tmp_ssh_known_hosts /etc/ssh/ssh_known_hosts"
+            remote_command $NODE "sudo chmod 444 /etc/ssh/ssh_known_hosts"
             sudo cp sub_localrc tmp_sub_localrc
             echo "HOST_IP=$NODE" | sudo tee --append tmp_sub_localrc > /dev/null
             remote_copy_file tmp_sub_localrc $NODE:$BASE/new/devstack/localrc
