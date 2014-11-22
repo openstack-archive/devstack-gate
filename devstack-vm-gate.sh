@@ -504,15 +504,20 @@ EOF
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
         echo "Preparing cross node connectivity"
-        # set up ssh_known_host files and /etc/hosts
+        # set up ssh_known_hosts by IP and /etc/hosts
         for NODE in `cat /etc/nodepool/sub_nodes_private`; do
             ssh-keyscan $NODE | sudo tee --append tmp_ssh_known_hosts > /dev/null
-            echo $NODE  `remote_command $NODE hostname -f` | sudo tee --append  tmp_hosts > /dev/null
+            echo $NODE `remote_command $NODE hostname -f | tr -d '\r'` | sudo tee --append  tmp_hosts > /dev/null
         done
         ssh-keyscan `cat /etc/nodepool/primary_node_private` | sudo tee --append tmp_ssh_known_hosts > /dev/null
         echo `cat /etc/nodepool/primary_node_private` `hostname -f` | sudo tee --append tmp_hosts > /dev/null
+        cat tmp_hosts | sudo tee --append /etc/hosts
+
+        # set up ssh_known_host files based on hostname
+        for HOSTNAME in `cat tmp_hosts | cut -d' ' -f2`; do
+            ssh-keyscan $HOSTNAME | sudo tee --append tmp_ssh_known_hosts > /dev/null
+        done
         sudo cp tmp_ssh_known_hosts /etc/ssh/ssh_known_hosts
-        cat tmp_hosts | sudo tee --append /etc/hosts > /dev/null
         sudo chmod 444 /etc/ssh/ssh_known_hosts
 
         for NODE in `cat /etc/nodepool/sub_nodes_private`; do
