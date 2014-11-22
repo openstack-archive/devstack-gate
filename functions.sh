@@ -488,23 +488,13 @@ function cleanup_host {
             | sudo tee $BASE/logs/syslog.txt > /dev/null
     fi
 
-    # horizon
+    # apache logs; including wsgi stuff like horizon, keystone, etc.
     if is_ubuntu; then
-        sudo cp /var/log/apache2/horizon_error.log $BASE/logs/horizon_error.log
+        local apache_logs=/var/log/apache2
     elif is_fedora; then
-        sudo cp /var/log/httpd/horizon_error.log $BASE/logs/horizon_error.log
+        local apache_logs=/var/log/httpd
     fi
-
-    # apache2
-    if is_ubuntu; then
-        if [ -f /var/log/apache2/error.log ] ; then
-            sudo cp /var/log/apache2/error.log $BASE/logs/apache2_error.log
-        fi
-    elif is_fedora; then
-        if [ -f /var/log/httpd/error.log ] ; then
-            sudo cp /var/log/httpd/error.log $BASE/logs/apache2_error.log
-        fi
-    fi
+    sudo cp -r ${apache_logs} $BASE/logs/apache
 
     # rabbitmq logs
     if [ -d /var/log/rabbitmq ]; then
