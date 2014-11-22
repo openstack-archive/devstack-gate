@@ -508,8 +508,7 @@ function cleanup_host {
 
     # rabbitmq logs
     if [ -d /var/log/rabbitmq ]; then
-        sudo mkdir $BASE/logs/rabbitmq/
-        sudo cp /var/log/rabbitmq/* $BASE/logs/rabbitmq/
+        sudo cp -r /var/log/rabbitmq $BASE/logs
     fi
 
     # db logs
@@ -527,16 +526,11 @@ function cleanup_host {
 
     # libvirt
     if [ -d /var/log/libvirt ] ; then
-        sudo cp /var/log/libvirt/libvirtd*.log $BASE/logs/
-        if [ -d /var/log/libvirt/qemu ] ; then
-            sudo mkdir $BASE/logs/qemu
-            sudo cp /var/log/libvirt/qemu/* $BASE/logs/qemu/
-        fi
+        sudo cp -r /var/log/libvirt $BASE/logs/
     fi
 
     # sudo config
-    sudo mkdir $BASE/logs/sudoers.d/
-    sudo cp /etc/sudoers.d/* $BASE/logs/sudoers.d/
+    sudo cp -r /etc/sudoers.d $BASE/logs/
     sudo cp /etc/sudoers $BASE/logs/sudoers.txt
 
     # Archive config files
