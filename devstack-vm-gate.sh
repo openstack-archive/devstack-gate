@@ -293,6 +293,10 @@ EOF
         echo "CEILOMETER_NOTIFICATION_TOPICS=$CEILOMETER_NOTIFICATION_TOPICS" >>"$localrc_file"
     fi
 
+    if [[ "$DEVSTACK_GATE_NOVA_REPLACE_V2_ENDPOINT_WITH_V21_API" -eq "1" ]]; then
+        echo "NOVA_API_VERSION=v21default" >> "$localrc_file"
+    fi
+
     if [[ "$DEVSTACK_GATE_INSTALL_TESTONLY" -eq "1" ]]; then
         # Sometimes we do want the test packages
         echo "INSTALL_TESTONLY_PACKAGES=True" >> "$localrc_file"
