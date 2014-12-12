@@ -85,16 +85,6 @@ function setup_localrc {
     if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
         echo "Q_USE_DEBUG_COMMAND=True" >>"$localrc_file"
         echo "NETWORK_GATEWAY=10.1.0.1" >>"$localrc_file"
-        # NOTE(mtreinish): This is only temporary and needed for the advanced
-        # services split. It will eventually break tempest on stable branches
-        # when new extension tests are added. The real way to do this is in
-        # progress as part of bp branchless-tempest-extensions
-        NET_API_EXT="agent,allowed-address-pairs,binding,"
-        NET_API_EXT+="dhcp_agent_scheduler,dvr,ext-gw-mode,external-net,"
-        NET_API_EXT+="extra_dhcp_opt,extraroute,l3-ha,l3_agent_scheduler,"
-        NET_API_EXT+="metering,multi-provider,provider,quotas,router,"
-        NET_API_EXT+="security-group,service-type"
-        echo "NETWORK_API_EXTENSIONS=$NET_API_EXT" >>"$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
