@@ -336,6 +336,7 @@ EOF
     fi
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
+        echo "CIRROS_ARCH=i386" >> "$localrc_file"
         echo "NOVA_ALLOW_MOVE_TO_SAME_HOST=False" >> "$localrc_file"
         local primary_node=`cat /etc/nodepool/primary_node_private`
         echo "SERVICE_HOST=$primary_node" >>"$localrc_file"
@@ -437,6 +438,7 @@ else
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
         set -x  # for now enabling debug and do not turn it off
+        echo -e "[[post-config|\$NOVA_CONF]]\n[libvirt]\ncpu_mode=custom\ncpu_model=pentiumpro" >> local.conf
         setup_localrc "new" "$OVERRIDE_ZUUL_BRANCH" "sub_localrc" "sub"
         sudo mkdir -p $BASE/new/.ssh
         sudo cp /etc/nodepool/id_rsa.pub $BASE/new/.ssh/authorized_keys
@@ -536,6 +538,7 @@ EOF
             sudo cp sub_localrc tmp_sub_localrc
             echo "HOST_IP=$NODE" | sudo tee --append tmp_sub_localrc > /dev/null
             remote_copy_file tmp_sub_localrc $NODE:$BASE/new/devstack/localrc
+            remote_copy_file local.conf $NODE:$BASE/new/devstack/local.conf
             remote_command $NODE sudo chown -R stack:stack $BASE
             echo "Running devstack on $NODE"
             remote_command $NODE "cd $BASE/new/devstack; source $WORKSPACE/test_env.sh; export -n PROJECTS; sudo -H -u stack stdbuf -oL -eL ./stack.sh > /dev/null"
