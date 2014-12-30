@@ -443,6 +443,11 @@ function setup_host {
     sudo chown root:root $TEMPFILE
     sudo mv $TEMPFILE /etc/sudoers.d/50_stack_sh
 
+    # Create user's ~/.cache directory with proper permissions, ensuring later
+    # 'sudo pip install's do not create it owned by root.
+    sudo mkdir -p $BASE/new/.cache
+    sudo chown -R stack:stack $BASE/new/.cache
+
     # Create a tempest user for tempest to run as, so that we can
     # revoke sudo permissions from that user when appropriate.
     # NOTE(sdague): we should try to get the state dump to be a
