@@ -324,6 +324,13 @@ EOF
         echo "Q_HOST=$primary_node" >>"$localrc_file"
     fi
 
+    # a way to pass through arbitrary devstack config options so that
+    # we don't need to add new devstack-gate options every time we
+    # want to create a new config.
+    if [[ -n "$DEVSTACK_LOCAL_CONFIG" ]]; then
+        echo "$DEVSTACK_LOCAL_CONFIG" >>"$localrc_file"
+    fi
+
 }
 
 if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
