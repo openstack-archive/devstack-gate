@@ -635,7 +635,7 @@ function cleanup_host {
     # Process testr artifacts.
     if [ -f $BASE/new/tempest/.testrepository/0 ]; then
         pushd $BASE/new/tempest
-        testr last --subunit > $WORKSPACE/testrepository.subunit
+        sudo testr last --subunit > $WORKSPACE/testrepository.subunit
         popd
         sudo mv $WORKSPACE/testrepository.subunit $BASE/logs/testrepository.subunit
         sudo python /usr/local/jenkins/slave_scripts/subunit2html.py $BASE/logs/testrepository.subunit $BASE/logs/testr_results.html
@@ -652,7 +652,7 @@ function cleanup_host {
     fi
     if [ -f $BASE/old/tempest/.testrepository/0 ]; then
         pushd $BASE/old/tempest
-        testr last --subunit > $WORKSPACE/testrepository.subunit
+        sudo testr last --subunit > $WORKSPACE/testrepository.subunit
         popd
         sudo mv $WORKSPACE/testrepository.subunit $BASE/logs/old/testrepository.subunit
         sudo python /usr/local/jenkins/slave_scripts/subunit2html.py $BASE/logs/old/testrepository.subunit $BASE/logs/old/testr_results.html
