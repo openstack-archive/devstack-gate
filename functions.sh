@@ -572,6 +572,9 @@ function cleanup_host {
         sudo cp $BASE/old/devstacklog.txt $BASE/logs/old/
         sudo cp $BASE/old/devstack/localrc $BASE/logs/old/localrc.txt
         sudo cp $BASE/old/tempest/etc/tempest.conf $BASE/logs/old/tempest_conf.txt
+        if -f [ $BASE/old/devstack/tempest.log ] ; then
+            sudo cp $BASE/old/devstack/tempest.log $BASE/logs/old/verify_tempest_conf.log
+        fi
 
         # grenade logs
         sudo cp $BASE/new/grenade/localrc $BASE/logs/grenade_localrc.txt
@@ -599,6 +602,9 @@ function cleanup_host {
         xargs -0 -I {} sudo cp {} $NEWLOGTARGET/
     sudo cp $BASE/new/devstacklog.txt $NEWLOGTARGET/
     sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
+    if [ -f $BASE/new/devstack/tempest.log ]; then
+        sudo cp $BASE/new/devstack/tempest.log $NEWLOGTARGET/verify_tempest_conf.log
+    fi
 
     # Copy failure files if they exist
     if [ $(ls $BASE/status/stack/*.failure | wc -l) -gt 0 ]; then
