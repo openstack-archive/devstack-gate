@@ -518,6 +518,11 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
         sudo chmod -R o+rx /opt/stack/new/devstack/files
     fi
 
+    # if set, we don't need to run Tempest at all
+    if [[ "$DEVSTACK_GATE_TEMPEST_NOTESTS" -eq "1" ]]; then
+        exit 0
+    fi
+
     # From here until the end we rely on the fact that all the code fails if
     # something is wrong, to enforce exit on bad test results.
     set -o errexit
