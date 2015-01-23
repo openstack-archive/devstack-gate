@@ -521,11 +521,19 @@ if [[ "$DEVSTACK_GATE_EXERCISES" -eq "1" ]]; then
 fi
 
 if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
+    if [[ -f /opt/git/openstack/tempest/.testrepository/0 ]]; then
+        pushd /opt/stack/new/tempest/
+        if [[ ! -d /opt/stack/new/tempest/.testrepository ]]; then
+            sudo testr init
+        fi
+        sudo sh -c 'cat /opt/git/openstack/tempest/.testrepository/0 | subunit-1to2 | testr load'
+        popd
+    fi
+
     # under tempest isolation tempest will need to write .tox dir, log files
     if [[ -d "$BASE/new/tempest" ]]; then
         sudo chown -R tempest:stack $BASE/new/tempest
     fi
-
     # Make sure tempest user can write to its directory for
     # lock-files.
     if [[ -d $BASE/data/tempest ]]; then
