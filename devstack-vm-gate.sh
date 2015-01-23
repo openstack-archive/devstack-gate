@@ -123,8 +123,6 @@ FIXED_NETWORK_SIZE=4096
 VIRT_DRIVER=$DEVSTACK_GATE_VIRT_DRIVER
 SWIFT_REPLICAS=1
 LOG_COLOR=False
-PIP_USE_MIRRORS=False
-USE_GET_PIP=1
 # Don't reset the requirements.txt files after g-r updates
 UNDO_REQUIREMENTS=False
 # Set to soft if the project is using libraries not in g-r
