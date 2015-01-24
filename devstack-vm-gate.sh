@@ -166,6 +166,7 @@ EOF
         echo "IRONIC_VM_LOG_DIR=$BASE/$localrc_oldnew/ironic-bm-logs" >>"$localrc_file"
         echo "DEFAULT_INSTANCE_TYPE=baremetal" >>"$localrc_file"
         echo "BUILD_TIMEOUT=300" >>"$localrc_file"
+        echo "IRONIC_CALLBACK_TIMEOUT=240" >>"$localrc_file"
         if [[ "$DEVSTACK_GATE_IRONIC_BUILD_RAMDISK" -eq 0 ]]; then
             echo "IRONIC_BUILD_DEPLOY_RAMDISK=False" >>"$localrc_file"
         fi
