@@ -341,6 +341,11 @@ function setup_workspace {
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
 
+    if [ -z "$base_branch" ]; then
+        echo "ERROR: setup_workspace: base_branch is an empty string!" >&2
+        return 1
+    fi
+
     fix_disk_layout
 
     sudo mkdir -p $DEST

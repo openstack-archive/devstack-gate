@@ -358,16 +358,16 @@ tsfilter setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
 if [ -n "$DEVSTACK_GATE_GRENADE" ]; then
     echo "Setting up the new (migrate to) workspace"
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
-    tsfilter setup_workspace $GRENADE_NEW_BRANCH $BASE/new copycache &> \
+    tsfilter setup_workspace "$GRENADE_NEW_BRANCH" "$BASE/new" copycache &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
     echo "Setting up the old (migrate from) workspace ..."
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-old.txt.gz)"
-    tsfilter setup_workspace $GRENADE_OLD_BRANCH $BASE/old &> \
+    tsfilter setup_workspace "$GRENADE_OLD_BRANCH" "$BASE/old" &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
 else
     echo "Setting up the workspace"
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
-    tsfilter setup_workspace $OVERRIDE_ZUUL_BRANCH $BASE/new &> \
+    tsfilter setup_workspace "$OVERRIDE_ZUUL_BRANCH" "$BASE/new" &> \
         $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
 fi
 # It is in brackets for avoiding inheriting a huge environment variable

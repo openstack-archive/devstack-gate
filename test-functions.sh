@@ -99,6 +99,16 @@ function assert_equal {
     fi
 }
 
+function assert_raises {
+    local lineno=`caller 0 | awk '{print $1}'`
+    local function=`caller 0 | awk '{print $2}'`
+    eval "$@" &>/dev/null
+    if [[ $? -eq 0 ]]; then
+        ERROR=1
+        echo "ERROR: \`\`$@\`\` returned OK instead of error in $function:L$lineno!"
+    fi
+}
+
 # Tests follow:
 function test_one_on_master {
     # devstack-gate  master  ZA
@@ -386,6 +396,11 @@ function test_periodic {
     assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'stable/havana'
 }
 
+# setup_workspace fails without argument
+function test_workspace_branch_arg {
+    assert_raises setup_workspace
+}
+
 # Run tests:
 #set -o xtrace
 test_branch_override
@@ -397,6 +412,7 @@ test_multi_branch_project_override
 test_one_on_master
 test_periodic
 test_two_on_master
+test_workspace_branch_arg
 
 if [[ ! -z "$ERROR" ]]; then
     echo
