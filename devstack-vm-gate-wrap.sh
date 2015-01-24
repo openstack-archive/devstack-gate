@@ -162,6 +162,9 @@ export DEVSTACK_GATE_MQ_DRIVER=${DEVSTACK_GATE_MQ_DRIVER:-"rabbitmq"}
 # Set to 1 to run tempest stress tests
 export DEVSTACK_GATE_TEMPEST_STRESS=${DEVSTACK_GATE_TEMPEST_STRESS:-0}
 
+# This value must be provided when DEVSTACK_GATE_TEMPEST_STRESS is set.
+export DEVSTACK_GATE_TEMPEST_STRESS_ARGS=${DEVSTACK_GATE_TEMPEST_STRESS_ARGS:-""}
+
 # Set to 1 to run tempest heat slow tests
 export DEVSTACK_GATE_TEMPEST_HEAT_SLOW=${DEVSTACK_GATE_TEMPEST_HEAT_SLOW:-0}
 
