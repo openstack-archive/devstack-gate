@@ -143,8 +143,13 @@ mkdir -p $WORKSPACE/logs
 # The feature matrix to select devstack-gate components
 export DEVSTACK_GATE_FEATURE_MATRIX=${DEVSTACK_GATE_FEATURE_MATRIX:-features.yaml}
 
-# Set to 1 to run the Tempest test suite
+# Set to 1 to install, configure and enable the Tempest test suite; more flags may be
+# required to be set to customize the test run, e.g. DEVSTACK_GATE_TEMPEST_STRESS=1
 export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
+
+# Set to 1, in conjunction with DEVSTACK_GATE_TEMPEST, will allow Tempest to be
+# installed and configured, but the tests will be skipped
+export DEVSTACK_GATE_TEMPEST_NOTESTS=${DEVSTACK_GATE_TEMPEST_NOTESTS:-0}
 
 # Set to 1 to run the devstack exercises
 export DEVSTACK_GATE_EXERCISES=${DEVSTACK_GATE_EXERCISES:-0}
