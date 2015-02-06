@@ -1,0 +1,27 @@
+    (172.24.4.2/23)
+        pub_if                Subnode1               flat_if
+          |                                             |
+----------|---------------------------------------------|----------
+          |      g                              g       |
+          |      r                              r       |
+  gretap_pub_if2 e-pub_if_br_if                 e gretap_flat_if1
+               \ |      |                       | /
+                \p    pub_if(172.24.4.1/23)     f/
+                 u                              l
+                 b         Primary Node         a
+                 |                              t
+                /i                   flat_if    |\
+               / f                      |       i \
+  gretap_pub_if4 |                flat_if_br_if-f gretap_flat_if3
+          |      b                              |       |
+          |      r                              b       |
+          |                                     r       |
+----------|---------------------------------------------|----------
+          |                                             |
+        pub_if                Subnode2               flat_if
+    (172.24.4.4/23)
+
+Diagram shows how the primary node acts as two separate network bridges
+for all of the subnodes. Note spanning tree is not necessary because no
+there is no loop between the flat interface bridge and the pub interface
+bridge and there are no loops within each bridge.

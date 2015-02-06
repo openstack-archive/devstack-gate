@@ -786,6 +786,9 @@ function remote_copy_file {
 #                above.
 # host_ip: ip address of the bridge host which is reachable for all peer
 # every additinal paramater is considered as a peer host
+#
+# See the nova_network_multihost_diagram.txt file in this repo for an
+# illustration of what the network ends up looking like.
 function gre_bridge {
     local flat_if_name=$1
     local pub_if_name=$2
