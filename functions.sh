@@ -503,10 +503,49 @@ function setup_host {
     $xtrace
 }
 
+function archive_test_artifact {
+    local filename=$1
+
+    sudo gzip -9 $filename
+    sudo chown jenkins:jenkins $filename.gz
+    sudo chmod a+r $filename.gz
+}
+
+function process_testr_artifacts {
+    local project=$1
+    local path_prefix=${2:-new}
+
+    local project_path=$BASE/$path_prefix/$project
+    local repo_path=$project_path/.testrepository
+    local log_path=$BASE/logs
+    if [[ "$path_prefix" != "new" ]]; then
+        log_path=$BASE/logs/$path_prefix
+    fi
+
+    # Check for an interrupted run first because 0 will always exist
+    if [ -f $repo_path/tmp* ]; then
+        # If testr timed out, collect temp file from testr
+        sudo cp $repo_path/tmp* $log_path/testrepository.subunit
+        archive_test_artifact $log_path/testrepository.subunit
+    elif [ -f $repo_path/0 ]; then
+        pushd $project_path
+        sudo testr last --subunit > $WORKSPACE/testrepository.subunit
+        popd
+        sudo mv $WORKSPACE/testrepository.subunit \
+            $log_path/testrepository.subunit
+        sudo python /usr/local/jenkins/slave_scripts/subunit2html.py \
+            $log_path/testrepository.subunit $log_path/testr_results.html
+        archive_test_artifact $log_path/testrepository.subunit
+        archive_test_artifact $log_path/testr_results.html
+    fi
+}
+
 function cleanup_host {
     # Enabled detailed logging, since output of this function is redirected
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
+
+    local testr_target=$DEVSTACK_GATE_TESTR_ARTIFACT_TARGET
 
     cd $WORKSPACE
 
@@ -660,40 +699,10 @@ function cleanup_host {
         sudo mv $WORKSPACE/rpm-qa.txt.gz $BASE/logs/
     fi
 
-    # Process testr artifacts.
-    if [ -f $BASE/new/tempest/.testrepository/0 ]; then
-        pushd $BASE/new/tempest
-        sudo testr last --subunit > $WORKSPACE/testrepository.subunit
-        popd
-        sudo mv $WORKSPACE/testrepository.subunit $BASE/logs/testrepository.subunit
-        sudo python /usr/local/jenkins/slave_scripts/subunit2html.py $BASE/logs/testrepository.subunit $BASE/logs/testr_results.html
-        sudo gzip -9 $BASE/logs/testrepository.subunit
-        sudo gzip -9 $BASE/logs/testr_results.html
-        sudo chown jenkins:jenkins $BASE/logs/testrepository.subunit.gz $BASE/logs/testr_results.html.gz
-        sudo chmod a+r $BASE/logs/testrepository.subunit.gz $BASE/logs/testr_results.html.gz
-    elif [ -f $BASE/new/tempest/.testrepository/tmp* ]; then
-        # If testr timed out, collect temp file from testr
-        sudo cp $BASE/new/tempest/.testrepository/tmp* $BASE/logs/testrepository.subunit
-        sudo gzip -9 $BASE/logs/testrepository.subunit
-        sudo chown jenkins:jenkins $BASE/logs/testrepository.subunit.gz
-        sudo chmod a+r $BASE/logs/testrepository.subunit.gz
-    fi
-    if [ -f $BASE/old/tempest/.testrepository/0 ]; then
-        pushd $BASE/old/tempest
-        sudo testr last --subunit > $WORKSPACE/testrepository.subunit
-        popd
-        sudo mv $WORKSPACE/testrepository.subunit $BASE/logs/old/testrepository.subunit
-        sudo python /usr/local/jenkins/slave_scripts/subunit2html.py $BASE/logs/old/testrepository.subunit $BASE/logs/old/testr_results.html
-        sudo gzip -9 $BASE/logs/old/testrepository.subunit
-        sudo gzip -9 $BASE/logs/old/testr_results.html
-        sudo chown jenkins:jenkins $BASE/logs/old/testrepository.subunit.gz $BASE/logs/old/testr_results.html.gz
-        sudo chmod a+r $BASE/logs/old/testrepository.subunit.gz $BASE/logs/old/testr_results.html.gz
-    elif [ -f $BASE/old/tempest/.testrepository/tmp* ]; then
-        # If testr timed out, collect temp file from testr
-        sudo cp $BASE/old/tempest/.testrepository/tmp* $BASE/logs/old/testrepository.subunit
-        sudo gzip -9 $BASE/logs/old/testrepository.subunit
-        sudo chown jenkins:jenkins $BASE/logs/old/testrepository.subunit.gz
-        sudo chmod a+r $BASE/logs/old/testrepository.subunit.gz
+    process_testr_artifacts $testr_target
+    if [[ "$testr_target" == "tempest" ]]; then
+        # Attempt to process artifacts from the old grenade path
+        process_testr_artifacts $testr_target old
     fi
 
     if [ -f $BASE/new/tempest/tempest.log ] ; then
