@@ -525,14 +525,25 @@ if [[ "$DEVSTACK_GATE_EXERCISES" -eq "1" ]]; then
     sudo -H -u stack ./exercise.sh
 fi
 
+function load_subunit_stream {
+    local stream=$1;
+    pushd /opt/stack/new/tempest/
+    sudo testr load --force-init $stream
+    popd
+}
+
+
 if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
+    #TODO(mtreinish): This if block can be removed after all the nodepool images
+    # are built using with streams dir instead
     if [[ -f /opt/git/openstack/tempest/.testrepository/0 ]]; then
-        pushd /opt/stack/new/tempest/
-        if [[ ! -d /opt/stack/new/tempest/.testrepository ]]; then
-            sudo testr init
-        fi
-        sudo sh -c 'cat /opt/git/openstack/tempest/.testrepository/0 | subunit-1to2 | testr load'
-        popd
+        temp_stream=`mktemp`
+        subunit-1to2 /opt/git/openstack/tempest/.testrepository/0 > $temp_stream
+        load_subunit_stream $temp_stream
+    elif [[ -d /opt/git/openstack/tempest/preseed-streams ]]; then
+        for stream in /opt/git/openstack/tempest/preseed-streams/* ; do
+            load_subunit_stream $stream
+        done
     fi
 
     # under tempest isolation tempest will need to write .tox dir, log files
