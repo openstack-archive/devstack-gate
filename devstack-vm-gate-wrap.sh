@@ -260,6 +260,8 @@ export DEVSTACK_PROJECT_FROM_GIT=${DEVSTACK_PROJECT_FROM_GIT:-}
 #   forward means stable/juno => master (or stable/kilo if that's out)
 #   partial-ncpu means stable/icehouse => stable/juno but keep nova
 #       compute at stable/icehouse
+#   partial-ironic means stable/icehouse => stable/juno but keep ironic
+#       compute at stable/icehouse
 #   sideways-ironic means stable/juno with nova baremetal =>
 #       stable/juno with ironic
 #   sideways-neutron means stable/juno with nova network =>
@@ -278,9 +280,16 @@ if [[ "$DEVSTACK_GATE_GRENADE" == "pullup" ]]; then
         export GRENADE_OLD_BRANCH="stable/juno"
         export GRENADE_NEW_BRANCH="$GIT_BRANCH"
     fi
-elif [[ "$DEVSTACK_GATE_GRENADE" == "partial-ncpu" ]]; then
+elif [[ "$DEVSTACK_GATE_GRENADE" =~ "partial" ]]; then
+    if [[ "$DEVSTACK_GATE_GRENADE" == "partial-ncpu" ]]; then
+        export DO_NOT_UPGRADE_SERVICES=[n-cpu]
+    elif [[ "$DEVSTACK_GATE_GRENADE" == "partial-ironic" ]]; then
+        export DO_NOT_UPGRADE_SERVICES=[ir-api,ir-cond]
+    else
+        echo "Unsupported partial upgrade: $DEVSTACK_GATE_GRENADE"
+        exit 1
+    fi
     export DEVSTACK_GATE_TEMPEST=1
-    export DO_NOT_UPGRADE_SERVICES=[n-cpu]
     if [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
         export GRENADE_OLD_BRANCH="stable/icehouse"
         export GRENADE_NEW_BRANCH="stable/juno"
