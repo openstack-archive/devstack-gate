@@ -779,30 +779,59 @@ function remote_copy_file {
     scp $ssh_opts "$src" "$dest"
 }
 
-# if_name: Interface name on each host
+# flat_if_name: Interface name on each host for the "flat" network
+# pub_if_name: Interface name on each host for the "public" network.
+#              IPv4 addresses will be assigned to these interfaces using
+#              the details provided below.
 # offset: starting key value for the gre tunnels (MUST not be overlapping)
+#         note that two keys are used for each subnode. one for flat
+#         interface and the other for the pub interface.
+# pub_addr_prefix: The IPv4 address three octet prefix used to give compute
+#                  nodes non conflicting addresses on the pub_if_name'd
+#                  network. Should be provided as X.Y.Z. Offset will be
+#                  applied to this as well as the below mask to get the
+#                  resulting address.
+# pub_addr_mask: the CIDR mask less the '/' for the IPv4 addresses used
+#                above.
 # host_ip: ip address of the bridge host which is reachable for all peer
 # every additinal paramater is considered as a peer host
 function gre_bridge {
-    local if_name=$1
-    local offset=$2
-    local host_ip=$3
-    shift 3
+    local flat_if_name=$1
+    local pub_if_name=$2
+    local offset=$3
+    local pub_addr_prefix=$4
+    local pub_addr_mask=$5
+    local host_ip=$6
+    shift 6
     local peer_ips=$@
-    sudo brctl addbr ${if_name}_br
+    sudo brctl addbr gre_${flat_if_name}_br
+    sudo brctl addbr gre_${pub_if_name}_br
     sudo iptables -I FORWARD -m physdev --physdev-is-bridged -j ACCEPT
     local key=$offset
     for node in $peer_ips; do
-        sudo ip link add gretap_$key type gretap local $host_ip remote $node key $key
-        sudo ip link set gretap_$key up
-        remote_command $node sudo -i ip link add ${if_name} type gretap local $node remote $host_ip key $key
-        remote_command $node sudo -i ip link set ${if_name} up
-        sudo brctl addif ${if_name}_br gretap_$key
+        sudo ip link add gretap_${flat_if_name}${key} type gretap local $host_ip remote $node key $key
+        sudo ip link set gretap_${flat_if_name}${key} up
+        remote_command $node sudo -i ip link add ${flat_if_name} type gretap local $node remote $host_ip key $key
+        remote_command $node sudo -i ip link set ${flat_if_name} up
+        sudo brctl addif gre_${flat_if_name}_br gretap_${flat_if_name}${key}
+        (( key++ ))
+        sudo ip link add gretap_${pub_if_name}${key} type gretap local $host_ip remote $node key $key
+        sudo ip link set gretap_${pub_if_name}${key} up
+        remote_command $node sudo -i ip link add ${pub_if_name} type gretap local $node remote $host_ip key $key
+        remote_command $node sudo -i ip link set ${pub_if_name} up
+        remote_command $node sudo -i ip address add ${pub_addr_prefix}.${key}/${pub_addr_mask} brd + dev ${pub_if_name}
+        sudo brctl addif gre_${pub_if_name}_br gretap_${pub_if_name}${key}
         (( key++ ))
     done
-    sudo ip link add ${if_name}_br_if type veth peer name ${if_name}
-    sudo brctl addif ${if_name}_br ${if_name}_br_if
-    sudo ip link set ${if_name}_br_if up
-    sudo ip link set ${if_name} up
-    sudo ip link set ${if_name}_br up
+    sudo ip link add ${flat_if_name}_br_if type veth peer name ${flat_if_name}
+    sudo brctl addif gre_${flat_if_name}_br ${flat_if_name}_br_if
+    sudo ip link set ${flat_if_name}_br_if up
+    sudo ip link set ${flat_if_name} up
+    sudo ip link set gre_${flat_if_name}_br up
+    sudo ip link add ${pub_if_name}_br_if type veth peer name ${pub_if_name}
+    sudo brctl addif gre_${pub_if_name}_br ${pub_if_name}_br_if
+    sudo ip link set ${pub_if_name}_br_if up
+    sudo ip link set ${pub_if_name} up
+    sudo ip link set gre_${pub_if_name}_br up
+    sudo ip address add ${pub_addr_prefix}.${offset}/${pub_addr_mask} brd + dev ${pub_if_name}
 }

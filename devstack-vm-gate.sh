@@ -34,7 +34,21 @@ echo $PPID > $WORKSPACE/gate.pid
 source `dirname "$(readlink -f "$0")"`/functions.sh
 
 FIXED_RANGE=${DEVSTACK_GATE_FIXED_RANGE:-10.1.0.0/20}
-FLOATING_RANGE=${DEVSTACK_GATE_FLOATING_RANGE:-172.24.4.0/24}
+FLOATING_RANGE=${DEVSTACK_GATE_FLOATING_RANGE:-172.24.5.0/24}
+PUBLIC_NETWORK_GATEWAY=${DEVSTACK_GATE_PUBLIC_NETWORK_GATEWAY:-172.24.5.1}
+# The next two values are used in multinode testing and are related
+# to the floating range. For multinode test envs to know how to route
+# packets to floating IPs on other hosts we put addresses on the compute
+# node interfaces on a network that overlaps the FLOATING_RANGE. This
+# automagically sets up routing in a sane way. By default we put floating
+# IPs on 172.24.5.0/24 and compute nodes get addresses in the 172.24.4/23
+# space. Note that while the FLOATING_RANGE should overlap the
+# FLOATING_HOST_* space you should have enough sequential room starting at
+# the beginning of your FLOATING_HOST range to give one IP address to each
+# compute host without letting compute host IPs run into the FLOATING_RANGE.
+# By default this lets us have 255 compute hosts (172.24.4.1 - 172.24.4.255).
+FLOATING_HOST_PREFIX=${DEVSTACK_GATE_FLOATING_HOST_PREFIX:-172.24.4}
+FLOATING_HOST_MASK=${DEVSTACK_GATE_FLOATING_HOST_MASK:-23}
 
 function setup_localrc {
     local localrc_oldnew=$1;
@@ -124,6 +138,7 @@ LOGFILE=$BASE/$localrc_oldnew/devstacklog.txt
 VERBOSE=True
 FIXED_RANGE=$FIXED_RANGE
 FLOATING_RANGE=$FLOATING_RANGE
+PUBLIC_NETWORK_GATEWAY=$PUBLIC_NETWORK_GATEWAY
 FIXED_NETWORK_SIZE=4096
 VIRT_DRIVER=$DEVSTACK_GATE_VIRT_DRIVER
 SWIFT_REPLICAS=1
@@ -434,13 +449,13 @@ else
         NODES="$PRIMARY_NODE $SUB_NODES"
         if [[ "$DEVSTACK_GATE_NEUTRON" -ne '1' ]]; then
             (source $BASE/new/devstack/functions-common; install_package bridge-utils)
-            gre_bridge "pub_if" 1 $NODES
+            gre_bridge "flat_if" "pub_if" 1 $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK $NODES
             cat <<EOF >>"$BASE/new/devstack/sub_localrc"
-FLAT_INTERFACE=pub_if
+FLAT_INTERFACE=flat_if
 PUBLIC_INTERFACE=pub_if
 EOF
             cat <<EOF >>"$BASE/new/devstack/localrc"
-FLAT_INTERFACE=pub_if
+FLAT_INTERFACE=flat_if
 PUBLIC_INTERFACE=pub_if
 EOF
         fi
