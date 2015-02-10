@@ -82,7 +82,7 @@ function setup_localrc {
             if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
                 MY_ENABLED_SERVICES="q-agt,n-cpu,ceilometer-acompute"
             else
-                MY_ENABLED_SERVICES="n-cpu,ceilometer-acompute"
+                MY_ENABLED_SERVICES="n-cpu,n-net,ceilometer-acompute"
             fi
         fi
 
@@ -453,10 +453,12 @@ else
             cat <<EOF >>"$BASE/new/devstack/sub_localrc"
 FLAT_INTERFACE=flat_if
 PUBLIC_INTERFACE=pub_if
+MULTI_HOST=True
 EOF
             cat <<EOF >>"$BASE/new/devstack/localrc"
 FLAT_INTERFACE=flat_if
 PUBLIC_INTERFACE=pub_if
+MULTI_HOST=True
 EOF
         fi
     fi
