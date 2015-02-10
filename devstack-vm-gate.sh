@@ -82,7 +82,7 @@ function setup_localrc {
             if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
                 MY_ENABLED_SERVICES="q-agt,n-cpu,ceilometer-acompute"
             else
-                MY_ENABLED_SERVICES="n-cpu,n-net,ceilometer-acompute"
+                MY_ENABLED_SERVICES="n-cpu,n-net,n-api-meta,ceilometer-acompute"
             fi
         fi
 
