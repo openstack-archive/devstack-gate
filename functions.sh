@@ -95,7 +95,7 @@ function _http_check {
 # do a few network tests to baseline how bad we are
 function network_sanity_check {
     echo "Performing network sanity check..."
-    PIP_CONFIG_FILE=$HOME/.pip/pip.conf
+    PIP_CONFIG_FILE=/etc/pip.conf
     if [[ -f $PIP_CONFIG_FILE ]]; then
         line=$(cat $PIP_CONFIG_FILE|grep index-url)
         pypi_url=${line#*=}
@@ -402,13 +402,10 @@ function setup_workspace {
 function copy_mirror_config {
 
     sudo install -D -m0644 -o root -g root ~/.pydistutils.cfg ~root/.pydistutils.cfg
-    sudo install -D -m0644 -o root -g root ~/.pip/pip.conf ~root/.pip/pip.conf
 
     sudo install -D -m0644 -o stack -g stack ~/.pydistutils.cfg ~stack/.pydistutils.cfg
-    sudo install -D -m0644 -o stack -g stack ~/.pip/pip.conf ~stack/.pip/pip.conf
 
     sudo install -D -m0644 -o tempest -g tempest ~/.pydistutils.cfg ~tempest/.pydistutils.cfg
-    sudo install -D -m0644 -o tempest -g tempest ~/.pip/pip.conf ~tempest/.pip/pip.conf
 
 }
 
@@ -484,7 +481,7 @@ function setup_host {
     sudo mv $TEMPFILE /etc/sudoers.d/51_tempest_sh
 
     # Future useradd calls should strongly consider also updating
-    # ~/.pip/pip.conf and ~/.pydisutils.cfg in the copy_mirror_config
+    # ~/.pydisutils.cfg in the copy_mirror_config
     # function if tox/pip will be used at all.
 
     # If we will be testing OpenVZ, make sure stack is a member of the vz group
