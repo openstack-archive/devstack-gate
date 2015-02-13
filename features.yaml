@@ -14,7 +14,7 @@ config:
     features: [postgresql]
   # feature changes for different test matrixes
   grenade:
-    rm-features: [trove, sahara]
+    rm-features: [trove, sahara, heat]
   tempest:
     features: [tempest]
   # feature changes for different configs of existing services
