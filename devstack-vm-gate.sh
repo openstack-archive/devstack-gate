@@ -551,6 +551,7 @@ function load_subunit_stream {
 if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     #TODO(mtreinish): This if block can be removed after all the nodepool images
     # are built using with streams dir instead
+    echo "Loading previous tempest runs subunit streams into testr"
     if [[ -f /opt/git/openstack/tempest/.testrepository/0 ]]; then
         temp_stream=`mktemp`
         subunit-1to2 /opt/git/openstack/tempest/.testrepository/0 > $temp_stream
