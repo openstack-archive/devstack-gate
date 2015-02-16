@@ -36,7 +36,7 @@ ahead of time and kept in a pool ready for immediate use. The process
 of preparing the machines ahead of time reduces network traffic and
 external dependencies during the run.
 
-The `Nodepool`_ project is used to maintain this pool of machines.  See
+The `Nodepool`_ project is used to maintain this pool of machines.
 
 .. _Nodepool: https://git.openstack.org/cgit/openstack-infra/nodepool
 
