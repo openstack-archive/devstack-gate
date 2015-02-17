@@ -20,6 +20,8 @@
 
 source functions.sh
 
+SUDO=""
+
 # Mock out the checkout function since the refs we're checking out do
 # not exist.
 function git_checkout {

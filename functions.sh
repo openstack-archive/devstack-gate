@@ -16,6 +16,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+SUDO="sudo"
+
 # Distro check functions
 function is_fedora {
     # note we consider CentOS 7 as fedora for now
@@ -51,7 +53,7 @@ function call_hook_if_defined {
         set -o xtrace -o pipefail
         tsfilter $hook_name | tee $filename
         local ret_val=$?
-        mv $filename $save_dir
+        $SUDO mv $filename $save_dir
         set +o pipefail
         $xtrace
         return $ret_val
