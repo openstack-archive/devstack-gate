@@ -773,13 +773,16 @@ function remote_copy_file {
     scp $ssh_opts "$src" "$dest"
 }
 
-# flat_if_name: Interface name on each host for the "flat" network
-# pub_if_name: Interface name on each host for the "public" network.
-#              IPv4 addresses will be assigned to these interfaces using
-#              the details provided below.
-# offset: starting key value for the gre tunnels (MUST not be overlapping)
-#         note that two keys are used for each subnode. one for flat
-#         interface and the other for the pub interface.
+# This function creates an internal gre bridge to connect all external
+# network bridges across the compute and network nodes.
+# bridge_name: Bridge name on each host for logical l2 network
+#              connectivity.
+# host_ip: ip address of the bridge host which is reachable for all peer
+#          the hub for all of our spokes.
+# set_ips: Whether or not to set l3 addresses on our logical l2 network.
+#          This can be helpful for setting up routing tables.
+# offset: starting value for gre tunnel key and the ip addr suffix
+# The next two parameters are only used if set_ips is "True".
 # pub_addr_prefix: The IPv4 address three octet prefix used to give compute
 #                  nodes non conflicting addresses on the pub_if_name'd
 #                  network. Should be provided as X.Y.Z. Offset will be
@@ -787,48 +790,54 @@ function remote_copy_file {
 #                  resulting address.
 # pub_addr_mask: the CIDR mask less the '/' for the IPv4 addresses used
 #                above.
-# host_ip: ip address of the bridge host which is reachable for all peer
-# every additinal paramater is considered as a peer host
+# every additional parameter is considered as a peer host (spokes)
 #
-# See the nova_network_multihost_diagram.txt file in this repo for an
-# illustration of what the network ends up looking like.
-function gre_bridge {
-    local flat_if_name=$1
-    local pub_if_name=$2
-    local offset=$3
-    local pub_addr_prefix=$4
-    local pub_addr_mask=$5
-    local host_ip=$6
-    shift 6
+function ovs_gre_bridge {
+    local install_ovs_deps="source $BASE/new/devstack/functions-common; \
+                            install_package openvswitch-switch; \
+                            restart_service openvswitch-switch"
+    local mtu=1450
+    local bridge_name=$1
+    local host_ip=$2
+    local set_ips=$3
+    local offset=$4
+    if [[ "$set_ips" == "True" ]] ; then
+        local pub_addr_prefix=$5
+        local pub_addr_mask=$6
+        shift 6
+    else
+        shift 4
+    fi
     local peer_ips=$@
-    sudo brctl addbr gre_${flat_if_name}_br
-    sudo brctl addbr gre_${pub_if_name}_br
-    sudo iptables -I FORWARD -m physdev --physdev-is-bridged -j ACCEPT
-    local key=$offset
-    for node in $peer_ips; do
-        sudo ip link add gretap_${flat_if_name}${key} type gretap local $host_ip remote $node key $key
-        sudo ip link set gretap_${flat_if_name}${key} up
-        remote_command $node sudo -i ip link add ${flat_if_name} type gretap local $node remote $host_ip key $key
-        remote_command $node sudo -i ip link set ${flat_if_name} up
-        sudo brctl addif gre_${flat_if_name}_br gretap_${flat_if_name}${key}
-        (( key++ ))
-        sudo ip link add gretap_${pub_if_name}${key} type gretap local $host_ip remote $node key $key
-        sudo ip link set gretap_${pub_if_name}${key} up
-        remote_command $node sudo -i ip link add ${pub_if_name} type gretap local $node remote $host_ip key $key
-        remote_command $node sudo -i ip link set ${pub_if_name} up
-        remote_command $node sudo -i ip address add ${pub_addr_prefix}.${key}/${pub_addr_mask} brd + dev ${pub_if_name}
-        sudo brctl addif gre_${pub_if_name}_br gretap_${pub_if_name}${key}
-        (( key++ ))
+    eval $install_ovs_deps
+    sudo ovs-vsctl --may-exist add-br $bridge_name
+    sudo ip link set mtu $mtu dev $bridge_name
+    if [[ "$set_ips" == "True" ]] ; then
+        sudo ip addr add ${pub_addr_prefix}.${offset}/${pub_addr_mask} dev ${bridge_name}
+    fi
+    for node_ip in $peer_ips; do
+        (( offset++ ))
+        # Setup the gre tunnel for the Controller/Network Node
+        sudo ovs-vsctl add-port $bridge_name \
+            ${bridge_name}_${node_ip} \
+            -- set interface ${bridge_name}_${node_ip} type=gre \
+            options:remote_ip=${node_ip} \
+            options:key=${offset} \
+            options:local_ip=${host_ip}
+        # Now complete the gre tunnel setup for the Compute Node
+        remote_command $node_ip "$install_ovs_deps"
+        remote_command $node_ip sudo ovs-vsctl --may-exist add-br $bridge_name
+        remote_command $node_ip sudo ip link set mtu $mtu dev $bridge_name
+        remote_command $node_ip sudo ovs-vsctl add-port $bridge_name \
+            ${bridge_name}_${host_ip} \
+            -- set interface ${bridge_name}_${host_ip} type=gre \
+            options:remote_ip=${host_ip} \
+            options:key=${offset} \
+            options:local_ip=${node_ip}
+        if [[ "$set_ips" == "True" ]] ; then
+            remote_command $node_ip \
+                sudo ip addr add ${pub_addr_prefix}.${offset}/${pub_addr_mask} \
+                dev ${bridge_name}
+        fi
     done
-    sudo ip link add ${flat_if_name}_br_if type veth peer name ${flat_if_name}
-    sudo brctl addif gre_${flat_if_name}_br ${flat_if_name}_br_if
-    sudo ip link set ${flat_if_name}_br_if up
-    sudo ip link set ${flat_if_name} up
-    sudo ip link set gre_${flat_if_name}_br up
-    sudo ip link add ${pub_if_name}_br_if type veth peer name ${pub_if_name}
-    sudo brctl addif gre_${pub_if_name}_br ${pub_if_name}_br_if
-    sudo ip link set ${pub_if_name}_br_if up
-    sudo ip link set ${pub_if_name} up
-    sudo ip link set gre_${pub_if_name}_br up
-    sudo ip address add ${pub_addr_prefix}.${offset}/${pub_addr_mask} brd + dev ${pub_if_name}
 }
