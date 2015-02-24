@@ -127,6 +127,11 @@ SERVICE_PASSWORD=secretservice
 SERVICE_TOKEN=111222333444
 SWIFT_HASH=1234123412341234
 ROOTSLEEP=0
+# ERROR_ON_CLONE should never be set to FALSE in gate jobs.
+# Setting up git trees must be done by zuul
+# because it needs specific git references directly from gerrit
+# to correctly do testing. Otherwise you are not testing
+# the code you have posted for review.
 ERROR_ON_CLONE=True
 ENABLED_SERVICES=$MY_ENABLED_SERVICES
 SKIP_EXERCISES=$SKIP_EXERCISES
