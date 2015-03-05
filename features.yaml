@@ -1,9 +1,9 @@
 config:
   default:
-    master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
-    kilo: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
-    juno: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove, sahara]
-    icehouse: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, trove]
+    master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, sahara]
+    kilo: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, sahara]
+    juno: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, sahara]
+    icehouse: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat]
     # This can be used by functional jobs that only want their dependencies installed
     # and don't need to incur the overhead of installing all services in the process.
     no_services: [default]
