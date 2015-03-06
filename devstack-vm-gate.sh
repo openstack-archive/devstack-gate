@@ -301,7 +301,7 @@ EOF
     fi
 
     if [[ "$DEVSTACK_GATE_CONFIGDRIVE" -eq "1" ]]; then
-        echo "FORCE_CONFIG_DRIVE=always" >>"$localrc_file"
+        echo "FORCE_CONFIG_DRIVE=True" >>"$localrc_file"
     else
         echo "FORCE_CONFIG_DRIVE=False" >>"$localrc_file"
     fi
