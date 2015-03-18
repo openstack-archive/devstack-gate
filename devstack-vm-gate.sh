@@ -225,7 +225,9 @@ VIRT_DRIVER=xenserver
 # A separate xapi network is created with this name-label
 FLAT_NETWORK_BRIDGE=vmnet
 
-# A separate xapi network on eth4 serves the purpose of the public network
+# A separate xapi network on eth4 serves the purpose of the public network.
+# This interface is added in Citrix's XenServer environment as an internal
+# interface
 PUBLIC_INTERFACE=eth4
 
 # The xapi network "vmnet" is connected to eth3 in domU
