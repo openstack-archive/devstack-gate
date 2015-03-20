@@ -544,8 +544,6 @@ function cleanup_host {
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
 
-    local testr_target=$DEVSTACK_GATE_TESTR_ARTIFACT_TARGET
-
     cd $WORKSPACE
 
     # Sleep to give services a chance to flush their log buffers.
@@ -698,11 +696,8 @@ function cleanup_host {
         sudo mv $WORKSPACE/rpm-qa.txt.gz $BASE/logs/
     fi
 
-    process_testr_artifacts $testr_target
-    if [[ "$testr_target" == "tempest" ]]; then
-        # Attempt to process artifacts from the old grenade path
-        process_testr_artifacts $testr_target old
-    fi
+    process_testr_artifacts tempest
+    process_testr_artifacts tempest old
 
     if [ -f $BASE/new/tempest/tempest.log ] ; then
         sudo cp $BASE/new/tempest/tempest.log $BASE/logs/tempest.log
