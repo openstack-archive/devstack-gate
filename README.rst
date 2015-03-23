@@ -105,8 +105,8 @@ First, it helps if you have access to a virtual machine from one of the
 providers the OpenStack project is using for gating, since their
 performance characteristics and necessary build parameters are already
 known. The same thing can of course be done locally or on another
-provider, but you'll want to make sure you have a basic Ubuntu 12.04 LTS
-(Precise Pangolin) image with sufficient memory and processor count.
+provider, but you'll want to make sure you have a basic Ubuntu 14.04 LTS
+(Trusty Tahr) image with sufficient memory and processor count.
 These days Tempest testing is requiring in excess of 2GiB RAM (4 should
 be enough but we typically use 8) and completes within an hour on a
 4-CPU virtual machine.
