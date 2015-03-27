@@ -443,6 +443,9 @@ else
         sudo cp /etc/nodepool/id_rsa $BASE/new/.ssh/
         sudo chmod 600 $BASE/new/.ssh/authorized_keys
         sudo chmod 400 $BASE/new/.ssh/id_rsa
+        sudo mkdir -p ~root/.ssh
+        sudo cp /etc/nodepool/id_rsa ~root/.ssh/
+        sudo chmod 400 ~root/.ssh/id_rsa
         for NODE in `cat /etc/nodepool/sub_nodes_private`; do
             echo "Copy Files to  $NODE"
             remote_copy_dir $NODE $BASE/new/devstack-gate $WORKSPACE
@@ -451,6 +454,8 @@ else
             remote_command $NODE "source $WORKSPACE/test_env.sh; $WORKSPACE/devstack-gate/sub_node_prepare.sh"
             remote_copy_file /etc/nodepool/id_rsa "$NODE:$BASE/new/.ssh/"
             remote_command $NODE sudo chmod 400 "$BASE/new/.ssh/*"
+            remote_command $NODE sudo mkdir -p ~root/.ssh
+            remote_command $NODE sudo cp $BASE/new/.ssh/id_rsa ~root/.ssh/id_rsa
         done
         PRIMARY_NODE=`cat /etc/nodepool/primary_node_private`
         SUB_NODES=`cat /etc/nodepool/sub_nodes_private`
