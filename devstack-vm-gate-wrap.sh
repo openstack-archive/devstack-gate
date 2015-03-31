@@ -452,7 +452,7 @@ tsfilter cleanup_host &> $WORKSPACE/devstack-gate-cleanup-host.txt
 if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
     for NODE in `cat /etc/nodepool/sub_nodes_private`; do
         echo "Collecting logs from $NODE"
-        remote_command $NODE "source $WORKSPACE/test_env.sh; source $BASE/new/devstack-gate/functions.sh; cleanup_host"
+        remote_command $NODE "source $WORKSPACE/test_env.sh; source $BASE/new/devstack-gate/functions.sh; tsfilter cleanup_host &> $WORKSPACE/devstack-gate-cleanup-host.txt"
         rsync -avz "$NODE:$BASE/logs/"  "$BASE/logs/$NODE-subnode/"
     done
 fi
