@@ -16,11 +16,11 @@
 
 ERRORS=0
 
-TEMPEST_FULL_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,n-net,sahara"
+TEMPEST_FULL_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,n-net,sahara"
 
-TEMPEST_NEUTRON_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn,q-fwaas,q-metering,sahara"
+TEMPEST_NEUTRON_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn,q-fwaas,q-metering,sahara"
 
-TEMPEST_HEAT_SLOW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn,q-fwaas,q-metering,sahara"
+TEMPEST_HEAT_SLOW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-vpn,q-fwaas,q-metering,sahara"
 
 GRENADE_NEW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification"
 
@@ -28,7 +28,7 @@ GRENADE_JUNO_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizo
 
 GRENADE_ICEHOUSE_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification"
 
-TEMPEST_FULL_JUNO="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,heat,h-api,h-api-cfn,h-api-cw,h-eng,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,n-net,sahara"
+TEMPEST_FULL_JUNO="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,n-net,sahara"
 
 # Utility function for tests
 function assert_list_equal {
