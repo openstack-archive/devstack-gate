@@ -69,7 +69,7 @@ function setup_localrc {
         # Install PyYaml for test-matrix.py
         if uses_debs; then
             sudo apt-get update
-            sudo apt-get install python-yaml
+            sudo apt-get --assume-yes install python-yaml
         elif is_fedora; then
             sudo yum install -y PyYAML
         fi
