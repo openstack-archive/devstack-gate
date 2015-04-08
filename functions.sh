@@ -706,6 +706,14 @@ function cleanup_host {
         sudo cp $BASE/old/tempest/tempest.log $BASE/logs/old/tempest.log
     fi
 
+    # ceph logs and config
+    if [ -d /var/log/ceph ] ; then
+        sudo cp -r /var/log/ceph $BASE/logs/
+    fi
+    if [ -f /etc/ceph/ceph.conf ] ; then
+        sudo cp /etc/ceph/ceph.conf $BASE/logs/ceph_conf.txt
+    fi
+
     # Make sure jenkins can read all the logs and configs
     sudo chown -R jenkins:jenkins $BASE/logs/
     sudo chmod a+r $BASE/logs/ $BASE/logs/etc
