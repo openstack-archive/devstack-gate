@@ -482,13 +482,13 @@ EOF
     sudo chown -R stack:stack $BASE
 
     echo "Running devstack"
-    echo "... this takes 5 - 8 minutes (logs in logs/devstacklog.txt.gz)"
+    echo "... this takes 10 - 15 minutes (logs in logs/devstacklog.txt.gz)"
     start=$(date +%s)
     sudo -H -u stack stdbuf -oL -eL ./stack.sh > /dev/null
     end=$(date +%s)
     took=$((($end - $start) / 60))
-    if [[ "$took" -gt 15 ]]; then
-        echo "WARNING: devstack run took > 15 minutes, this is a very slow node."
+    if [[ "$took" -gt 20 ]]; then
+        echo "WARNING: devstack run took > 20 minutes, this is a very slow node."
     fi
 
     # provide a check that the right db was running
