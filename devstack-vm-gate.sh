@@ -336,7 +336,6 @@ EOF
     fi
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
-        echo "CIRROS_ARCH=i386" >> "$localrc_file"
         echo "NOVA_ALLOW_MOVE_TO_SAME_HOST=False" >> "$localrc_file"
         echo "export LIVE_MIGRATION_AVAILABLE=True" >> "$localrc_file"
         echo "export USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION=True" >> "$localrc_file"
@@ -440,7 +439,7 @@ else
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
         set -x  # for now enabling debug and do not turn it off
-        echo -e "[[post-config|\$NOVA_CONF]]\n[libvirt]\ncpu_mode=custom\ncpu_model=pentiumpro" >> local.conf
+        echo -e "[[post-config|\$NOVA_CONF]]\n[libvirt]\ncpu_mode=custom\ncpu_model=gate64" >> local.conf
         setup_localrc "new" "$OVERRIDE_ZUUL_BRANCH" "sub_localrc" "sub"
         sudo mkdir -p $BASE/new/.ssh
         sudo cp /etc/nodepool/id_rsa.pub $BASE/new/.ssh/authorized_keys
