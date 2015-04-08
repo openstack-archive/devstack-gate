@@ -738,6 +738,14 @@ function cleanup_host {
         done
     fi
 
+    # glusterfs logs and config
+    if [ -d /var/log/glusterfs ] ; then
+        sudo cp -r /var/log/glusterfs $BASE/logs/
+    fi
+    if [ -f /etc/glusterfs/glusterd.vol ] ; then
+        sudo cp /etc/glusterfs/glusterd.vol $BASE/logs/
+    fi
+
     # final memory usage and process list
     ps -eo user,pid,ppid,lwp,%cpu,%mem,size,rss,cmd > $BASE/logs/ps.txt
 
