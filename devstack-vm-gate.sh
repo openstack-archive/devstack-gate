@@ -191,6 +191,8 @@ EOF
         echo "DEFAULT_INSTANCE_TYPE=baremetal" >>"$localrc_file"
         echo "BUILD_TIMEOUT=340" >>"$localrc_file"
         echo "IRONIC_CALLBACK_TIMEOUT=300" >>"$localrc_file"
+        echo "Q_AGENT=openvswitch" >>"$localrc_file"
+        echo "Q_ML2_TENANT_NETWORK_TYPE=vxlan" >>"$localrc_file"
         if [[ "$DEVSTACK_GATE_IRONIC_BUILD_RAMDISK" -eq 0 ]]; then
             echo "IRONIC_BUILD_DEPLOY_RAMDISK=False" >>"$localrc_file"
         fi
