@@ -271,6 +271,20 @@ function fix_disk_layout {
             sudo mount $optdev /opt
         fi
     fi
+
+    # dump vm settings for reference
+    sudo sysctl vm
+    # ensure a standard level of swappiness.  Some platforms
+    # (rax+centos7) come with swappiness of 0 (presumably because the
+    # vm doesn't come with swap setup ... but we just did that above),
+    # which depending on the kernel version can lead to the OOM killer
+    # kicking in on some processes despite swap being available;
+    # particularly things like mysql which have very high ratio of
+    # anonymous-memory to file-backed mappings.
+    #
+    # This sets swappiness low; we really don't want to be relying on
+    # cloud I/O based swap during our runs
+    sudo sysctl -w vm.swappiness 10
 }
 
 # Set up a project in accordance with the future state proposed by
