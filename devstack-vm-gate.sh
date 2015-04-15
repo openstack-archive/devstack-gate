@@ -81,6 +81,13 @@ function setup_localrc {
         if [[ $role = sub ]]; then
             if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
                 MY_ENABLED_SERVICES="q-agt,n-cpu,ceilometer-acompute"
+                if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
+                    # As per reference architecture described in
+                    # https://wiki.openstack.org/wiki/Neutron/DVR
+                    # for DVR multi-node, add the following services
+                    # on all compute nodes (q-fwaas being optional):
+                    MY_ENABLED_SERVICES+=",q-l3,q-fwaas,q-meta"
+                fi
             else
                 MY_ENABLED_SERVICES="n-cpu,n-net,n-api-meta,ceilometer-acompute"
             fi
@@ -107,7 +114,13 @@ function setup_localrc {
     fi
 
     if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
-        echo "Q_DVR_MODE=dvr_snat" >>"$localrc_file"
+        if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]] && [[ $role = sub ]]; then
+            # The role for L3 agents running on compute nodes is 'dvr'
+            echo "Q_DVR_MODE=dvr" >>"$localrc_file"
+        else
+            # The role for L3 agents running on controller nodes is 'dvr_snat'
+            echo "Q_DVR_MODE=dvr_snat" >>"$localrc_file"
+        fi
     fi
 
     cat <<EOF >>"$localrc_file"
@@ -462,20 +475,26 @@ else
         done
         PRIMARY_NODE=`cat /etc/nodepool/primary_node_private`
         SUB_NODES=`cat /etc/nodepool/sub_nodes_private`
-        NODES="$PRIMARY_NODE $SUB_NODES"
         if [[ "$DEVSTACK_GATE_NEUTRON" -ne '1' ]]; then
-            (source $BASE/new/devstack/functions-common; install_package bridge-utils)
-            gre_bridge "flat_if" "pub_if" 1 $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK $NODES
+            ovs_gre_bridge "br_pub" $PRIMARY_NODE "True" 1 \
+                $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
+                $SUB_NODES
+            ovs_gre_bridge "br_flat" $PRIMARY_NODE "False" 128 \
+                $SUB_NODES
             cat <<EOF >>"$BASE/new/devstack/sub_localrc"
-FLAT_INTERFACE=flat_if
-PUBLIC_INTERFACE=pub_if
+FLAT_INTERFACE=br_flat
+PUBLIC_INTERFACE=br_pub
 MULTI_HOST=True
 EOF
             cat <<EOF >>"$BASE/new/devstack/localrc"
-FLAT_INTERFACE=flat_if
-PUBLIC_INTERFACE=pub_if
+FLAT_INTERFACE=br_flat
+PUBLIC_INTERFACE=br_pub
 MULTI_HOST=True
 EOF
+        elif [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq '1' ]]; then
+            ovs_gre_bridge "br-ex" $PRIMARY_NODE "True" 1 \
+                $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
+                $SUB_NODES
         fi
     fi
     # Make the workspace owned by the stack user
