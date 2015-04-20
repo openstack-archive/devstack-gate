@@ -272,45 +272,64 @@ export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-}
 # the branch name for selecting grenade branches
 GRENADE_BASE_BRANCH=${OVERRIDE_ZUUL_BRANCH:-${ZUUL_BRANCH}}
 
-if [[ "$DEVSTACK_GATE_GRENADE" == "pullup" ]]; then
+
+if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
+    # All grenade upgrades get tempest
     export DEVSTACK_GATE_TEMPEST=1
-    if [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
-        export GRENADE_OLD_BRANCH="stable/icehouse"
-        export GRENADE_NEW_BRANCH="stable/juno"
-    else # master
-        export GRENADE_OLD_BRANCH="stable/juno"
-        export GRENADE_NEW_BRANCH="$GIT_BRANCH"
-    fi
-elif [[ "$DEVSTACK_GATE_GRENADE" =~ "partial" ]]; then
-    if [[ "$DEVSTACK_GATE_GRENADE" == "partial-ncpu" ]]; then
-        export DO_NOT_UPGRADE_SERVICES=[n-cpu]
-    elif [[ "$DEVSTACK_GATE_GRENADE" == "partial-ironic" ]]; then
-        export DO_NOT_UPGRADE_SERVICES=[ir-api,ir-cond]
-    else
-        echo "Unsupported partial upgrade: $DEVSTACK_GATE_GRENADE"
-        exit 1
-    fi
-    export DEVSTACK_GATE_TEMPEST=1
-    if [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
-        export GRENADE_OLD_BRANCH="stable/icehouse"
-        export GRENADE_NEW_BRANCH="stable/juno"
-    else # master
-        export GRENADE_OLD_BRANCH="stable/juno"
-        export GRENADE_NEW_BRANCH="$GIT_BRANCH"
-    fi
-elif [[ "$DEVSTACK_GATE_GRENADE" == "forward" ]]; then
-    export DEVSTACK_GATE_TEMPEST=1
-    if [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
-        export GRENADE_OLD_BRANCH="stable/icehouse"
-        export GRENADE_NEW_BRANCH="stable/juno"
-    elif [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
-        export GRENADE_OLD_BRANCH="stable/juno"
-        export GRENADE_NEW_BRANCH="$GIT_BRANCH"
-    fi
-elif [[ "$DEVSTACK_GATE_GRENADE" =~ "sideways" ]]; then
-    export DEVSTACK_GATE_TEMPEST=1
-    export GRENADE_OLD_BRANCH="$GRENADE_BASE_BRANCH"
-    export GRENADE_NEW_BRANCH="$GRENADE_BASE_BRANCH"
+
+    case $DEVSTACK_GATE_GRENADE in
+
+        # sideways upgrades try to move between configurations in the
+        # same release, typically used for migrating between services
+        # or configurations.
+        sideways-*)
+            export GRENADE_OLD_BRANCH="$GRENADE_BASE_BRANCH"
+            export GRENADE_NEW_BRANCH="$GRENADE_BASE_BRANCH"
+            ;;
+
+        # forward upgrades are an attempt to migrate up from an
+        # existing stable branch to the next release.
+        forward)
+            if [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
+                export GRENADE_OLD_BRANCH="stable/icehouse"
+                export GRENADE_NEW_BRANCH="stable/juno"
+            elif [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
+                export GRENADE_OLD_BRANCH="stable/juno"
+                export GRENADE_NEW_BRANCH="$GIT_BRANCH"
+            fi
+            ;;
+
+        # partial upgrades are like normal upgrades except they leave
+        # certain services behind. We use the base 4 operator ';&'
+        # here to fall trhough to the next conditionals
+        partial-*)
+            if [[ "$DEVSTACK_GATE_GRENADE" == "partial-ncpu" ]]; then
+                export DO_NOT_UPGRADE_SERVICES=[n-cpu]
+            elif [[ "$DEVSTACK_GATE_GRENADE" == "partial-ironic" ]]; then
+                export DO_NOT_UPGRADE_SERVICES=[ir-api,ir-cond]
+            fi
+            ;&
+
+        # pullup upgrades are our normal upgrade test. Can you upgrade
+        # to the current patch from the last stable.
+        pullup)
+            if [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
+                export GRENADE_OLD_BRANCH="stable/icehouse"
+                export GRENADE_NEW_BRANCH="stable/juno"
+            else # master
+                export GRENADE_OLD_BRANCH="stable/juno"
+                export GRENADE_NEW_BRANCH="$GIT_BRANCH"
+            fi
+            ;;
+
+        # If we got here, someone typoed a thing, and we should fail
+        # explicitly so they don't accidentally pass in some what that
+        # is unexpected.
+        *)
+            echo "Unsupported upgrade mode: $DEVSTACK_GATE_GRENADE"
+            exit 1
+            ;;
+    esac
 fi
 
 # Set the virtualization driver to: libvirt, openvz, xenapi
