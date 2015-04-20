@@ -1,6 +1,7 @@
 config:
   default:
     master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, sahara]
+    liberty: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, sahara]
     kilo: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, sahara]
     juno: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, sahara]
     icehouse: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat]
