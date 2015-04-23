@@ -469,10 +469,12 @@ echo "Cleaning up host"
 echo "... this takes 3 - 4 minutes (logs at logs/devstack-gate-cleanup-host.txt.gz)"
 tsfilter cleanup_host &> $WORKSPACE/devstack-gate-cleanup-host.txt
 if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
+    COUNTER=1
     for NODE in `cat /etc/nodepool/sub_nodes_private`; do
         echo "Collecting logs from $NODE"
         remote_command $NODE "source $WORKSPACE/test_env.sh; source $BASE/new/devstack-gate/functions.sh; tsfilter cleanup_host &> $WORKSPACE/devstack-gate-cleanup-host.txt"
-        rsync -avz "$NODE:$BASE/logs/"  "$BASE/logs/$NODE-subnode/"
+        rsync -avz "$NODE:$BASE/logs/"  "$BASE/logs/subnode-$COUNTER/"
+        let COUNTER=COUNTER+1
     done
 fi
 sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
