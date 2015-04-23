@@ -559,6 +559,10 @@ function process_testr_artifacts {
 }
 
 function cleanup_host {
+    # TODO: clean this up to be errexit clean
+    local errexit=$(set +o | grep errexit)
+    set +o errexit
+
     # Enabled detailed logging, since output of this function is redirected
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
@@ -783,6 +787,8 @@ function cleanup_host {
 
     # Disable detailed logging as we return to the main script
     $xtrace
+
+    $errexit
 }
 
 function remote_command {

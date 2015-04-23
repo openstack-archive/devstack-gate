@@ -453,27 +453,47 @@ $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m file \
 
 # Run ansible to do setup_host on all nodes.
 echo "Setting up the hosts"
+
+# little helper that runs anything passed in under tsfilter
+function run_command {
+    local fn="$@"
+    local cmd=""
+
+    # note that we want to keep the tsfilter separate; it's a trap for
+    # new-players that errexit isn't applied if we do "&& tsfilter
+    # ..."  and thus we won't pick up any failures in the commands the
+    # function runs.
+    read -r -d '' cmd <<EOF
+source '$WORKSPACE/test_env.sh'
+source '$WORKSPACE/devstack-gate/functions.sh'
+set -o errexit
+tsfilter $fn
+executable=/bin/bash
+EOF
+
+    echo "$cmd"
+}
+
 echo "... this takes a few seconds (logs at logs/devstack-gate-setup-host.txt.gz)"
 $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
-    -a "source '$WORKSPACE/test_env.sh' && source '$WORKSPACE/devstack-gate/functions.sh' && tsfilter setup_host executable=/bin/bash" \
-    &> "$WORKSPACE/logs/devstack-gate-setup-host.txt"
+    -a "$(run_command setup_host)" &> "$WORKSPACE/logs/devstack-gate-setup-host.txt"
 
 if [ -n "$DEVSTACK_GATE_GRENADE" ]; then
     echo "Setting up the new (migrate to) workspace"
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
     $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "source '$WORKSPACE/test_env.sh' && source '$WORKSPACE/devstack-gate/functions.sh' && tsfilter setup_workspace '$GRENADE_NEW_BRANCH' '$BASE/new' copycache executable=/bin/bash" \
+             -a "$(run_command setup_workspace '$GRENADE_NEW_BRANCH' '$BASE/new')" \
         &> "$WORKSPACE/logs/devstack-gate-setup-workspace-new.txt"
     echo "Setting up the old (migrate from) workspace ..."
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-old.txt.gz)"
     $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "source '$WORKSPACE/test_env.sh' && source '$WORKSPACE/devstack-gate/functions.sh' && tsfilter setup_workspace '$GRENADE_OLD_BRANCH' '$BASE/old' executable=/bin/bash" \
+        -a "$(run_command setup_workspace '$GRENADE_OLD_BRANCH' '$BASE/old')" \
         &> "$WORKSPACE/logs/devstack-gate-setup-workspace-old.txt"
 else
     echo "Setting up the workspace"
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
     $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "source '$WORKSPACE/test_env.sh' && source '$WORKSPACE/devstack-gate/functions.sh' && tsfilter setup_workspace '$OVERRIDE_ZUUL_BRANCH' '$BASE/new' executable=/bin/bash" \
+        -a "$(run_command setup_workspace '$OVERRIDE_ZUUL_BRANCH' '$BASE/new')" \
         &> "$WORKSPACE/logs/devstack-gate-setup-workspace-new.txt"
 fi
 
@@ -518,8 +538,7 @@ fi
 echo "Cleaning up host"
 echo "... this takes 3 - 4 minutes (logs at logs/devstack-gate-cleanup-host.txt.gz)"
 $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
-    -a "source '$WORKSPACE/test_env.sh' && source '$WORKSPACE/devstack-gate/functions.sh' && tsfilter cleanup_host executable=/bin/bash" \
-    &> "$WORKSPACE/devstack-gate-cleanup-host.txt"
+    -a "$(run_command cleanup_host)" &> "$WORKSPACE/devstack-gate-cleanup-host.txt"
 $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m synchronize \
     -a "mode=pull src='$BASE/logs/' dest='$BASE/logs/subnode-{{ host_counter }}'"
 sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
