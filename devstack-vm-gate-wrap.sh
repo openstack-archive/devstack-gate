@@ -141,10 +141,6 @@ if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
     fi
 fi
 
-# Make a directory to store logs
-rm -rf $WORKSPACE/logs
-mkdir -p $WORKSPACE/logs
-
 # The feature matrix to select devstack-gate components
 export DEVSTACK_GATE_FEATURE_MATRIX=${DEVSTACK_GATE_FEATURE_MATRIX:-features.yaml}
 
@@ -382,6 +378,17 @@ export DEVSTACK_GATE_CEILOMETER_BACKEND=${DEVSTACK_GATE_CEILOMETER_BACKEND:-mysq
 # Set Zaqar backend to override the default one. It could be mongodb, redis.
 export DEVSTACK_GATE_ZAQAR_BACKEND=${DEVSTACK_GATE_ZAQAR_BACKEND:-mongodb}
 
+# The topology of the system determinates the service distribution
+# among the nodes.
+# aio: `all in one` just only one node used
+# aiopcpu: `all in one plus compute` one node will be installed as aio
+# the extra nodes will gets only limited set of services
+# ctrlpcpu: `controller plus compute` One node will gets the controller type
+# services without the compute type of services, the others gets,
+# the compute style services several services can be common,
+# the networking services also presents on the controller [WIP]
+export DEVSTACK_GATE_TOPOLOGY=${DEVSTACK_GATE_TOPOLOGY:-aio}
+
 # Set to a space-separated list of projects to prepare in the
 # workspace, e.g. 'openstack-dev/devstack openstack/neutron'.
 # Minimizing the number of targeted projects can reduce the setup cost
@@ -405,45 +412,76 @@ echo "Pipeline: $ZUUL_PIPELINE"
 echo "Available disk space on this host:"
 indent df -h
 
-echo "Setting up the host"
+# Enable tracing while we transition to using ansible to run
+# setup across multiple nodes.
+set -x
+# Install ansible
+sudo -H pip install virtualenv
+virtualenv /tmp/ansible
+/tmp/ansible/bin/pip install ansible
+export ANSIBLE=/tmp/ansible/bin/ansible
+
+# Write inventory file with groupings
+echo "[primary]" > "$WORKSPACE/inventory"
+echo "localhost ansible_connection=local" >> "$WORKSPACE/inventory"
+echo "[subnodes]" >> "$WORKSPACE/inventory"
+cat /etc/nodepool/sub_nodes_private >> "$WORKSPACE/inventory"
+
+# NOTE(clarkb): for simplicity we evaluate all bash vars in ansible commands
+# on the node running these scripts, we do not pass through unexpanded
+# vars to ansible shell commands. This may need to change in the future but
+# for now the current setup is simple, consistent and easy to understand.
+
+# Copy bootstrap to remote hosts
+# It is in brackets for avoiding inheriting a huge environment variable
+(export PROJECTS; export > "$WORKSPACE/test_env.sh")
+$ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m copy \
+    -a "src='$WORKSPACE/devstack-gate' dest='$WORKSPACE'"
+$ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m copy \
+    -a "src='$WORKSPACE/test_env.sh' dest='$WORKSPACE/test_env.sh'"
+
+# Make a directory to store logs
+$ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m file \
+    -a "path='$WORKSPACE/logs' state=absent"
+$ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m file \
+    -a "path='$WORKSPACE/logs' state=directory"
+
+# Run ansible to do setup_host on all nodes.
+echo "Setting up the hosts"
 echo "... this takes a few seconds (logs at logs/devstack-gate-setup-host.txt.gz)"
-tsfilter setup_host &> $WORKSPACE/logs/devstack-gate-setup-host.txt
+$ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
+    -a "source '$WORKSPACE/test_env.sh' && source '$WORKSPACE/devstack-gate/functions.sh' && tsfilter setup_host executable=/bin/bash" \
+    &> "$WORKSPACE/logs/devstack-gate-setup-host.txt"
 
 if [ -n "$DEVSTACK_GATE_GRENADE" ]; then
     echo "Setting up the new (migrate to) workspace"
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
-    tsfilter setup_workspace "$GRENADE_NEW_BRANCH" "$BASE/new" copycache &> \
-        $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
+    $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "source '$WORKSPACE/test_env.sh' && source '$WORKSPACE/devstack-gate/functions.sh' && tsfilter setup_workspace '$GRENADE_NEW_BRANCH' '$BASE/new' copycache executable=/bin/bash" \
+        &> "$WORKSPACE/logs/devstack-gate-setup-workspace-new.txt"
     echo "Setting up the old (migrate from) workspace ..."
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-old.txt.gz)"
-    tsfilter setup_workspace "$GRENADE_OLD_BRANCH" "$BASE/old" &> \
-        $WORKSPACE/logs/devstack-gate-setup-workspace-old.txt
+    $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "source '$WORKSPACE/test_env.sh' && source '$WORKSPACE/devstack-gate/functions.sh' && tsfilter setup_workspace '$GRENADE_OLD_BRANCH' '$BASE/old' executable=/bin/bash" \
+        &> "$WORKSPACE/logs/devstack-gate-setup-workspace-old.txt"
 else
     echo "Setting up the workspace"
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
-    tsfilter setup_workspace "$OVERRIDE_ZUUL_BRANCH" "$BASE/new" &> \
-        $WORKSPACE/logs/devstack-gate-setup-workspace-new.txt
+    $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "source '$WORKSPACE/test_env.sh' && source '$WORKSPACE/devstack-gate/functions.sh' && tsfilter setup_workspace '$OVERRIDE_ZUUL_BRANCH' '$BASE/new' executable=/bin/bash" \
+        &> "$WORKSPACE/logs/devstack-gate-setup-workspace-new.txt"
 fi
-# It is in brackets for avoiding inheriting a huge environment variable
-(export PROJECTS; export >$WORKSPACE/test_env.sh)
 
 # relocate and symlink logs into $BASE to save space on the root filesystem
-if [ -d "$WORKSPACE/logs" -a \! -e "$BASE/logs" ]; then
-    sudo mv $WORKSPACE/logs $BASE/
-    ln -s $BASE/logs $WORKSPACE/
-fi
+# TODO: make this more ansibley
+$ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell -a "
+if [ -d '$WORKSPACE/logs' -a \! -e '$BASE/logs' ]; then
+    sudo mv '$WORKSPACE/logs' '$BASE/'
+    ln -s '$BASE/logs' '$WORKSPACE/'
+fi executable=/bin/bash"
 
-# The topology of the system determinates the service distribution
-# among the nodes.
-# aio: `all in one` just only one node used
-# aiopcpu: `all in one plus compute` one node will be installed as aio
-# the extra nodes will gets only limited set of services
-# ctrlpcpu: `controller plus compute` One node will gets the controller type
-# services without the compute type of services, the others gets,
-# the compute style services several services can be common,
-# the networking services also presents on the controller [WIP]
-export DEVSTACK_GATE_TOPOLOGY=${DEVSTACK_GATE_TOPOLOGY:-aio}
-
+# Note that hooks should be multihost aware if necessary.
+# devstack-vm-gate-wrap.sh will not automagically run the hooks on each node.
 # Run pre test hook if we have one
 call_hook_if_defined "pre_test_hook"
 
@@ -473,12 +511,15 @@ fi
 
 echo "Cleaning up host"
 echo "... this takes 3 - 4 minutes (logs at logs/devstack-gate-cleanup-host.txt.gz)"
-tsfilter cleanup_host &> $WORKSPACE/devstack-gate-cleanup-host.txt
+$ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
+    -a "source '$WORKSPACE/test_env.sh' && source '$WORKSPACE/devstack-gate/functions.sh' && tsfilter cleanup_host executable=/bin/bash" \
+    &> "$WORKSPACE/devstack-gate-cleanup-host.txt"
+# TODO(clark) ansiblify this. Fetch can only fetch specifc files no
+# recursive dir fetches.
 if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
     COUNTER=1
     for NODE in `cat /etc/nodepool/sub_nodes_private`; do
         echo "Collecting logs from $NODE"
-        remote_command $NODE "source $WORKSPACE/test_env.sh; source $BASE/new/devstack-gate/functions.sh; tsfilter cleanup_host &> $WORKSPACE/devstack-gate-cleanup-host.txt"
         rsync -avz "$NODE:$BASE/logs/"  "$BASE/logs/subnode-$COUNTER/"
         let COUNTER=COUNTER+1
     done

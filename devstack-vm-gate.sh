@@ -50,6 +50,16 @@ PUBLIC_NETWORK_GATEWAY=${DEVSTACK_GATE_PUBLIC_NETWORK_GATEWAY:-172.24.5.1}
 FLOATING_HOST_PREFIX=${DEVSTACK_GATE_FLOATING_HOST_PREFIX:-172.24.4}
 FLOATING_HOST_MASK=${DEVSTACK_GATE_FLOATING_HOST_MASK:-23}
 
+function setup_ssh {
+    local path=$1
+    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m file \
+        -a "path='$path' mode=0700 state=directory"
+    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
+        -a "src=/etc/nodepool/id_rsa.pub dest='$path/authorized_keys' mode=0600"
+    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
+        -a "src=/etc/nodepool/id_rsa dest='$path/id_rsa' mode=0400"
+}
+
 function setup_localrc {
     local localrc_oldnew=$1;
     local localrc_branch=$2;
@@ -438,7 +448,9 @@ EOF
     fi
 
     # Make the workspace owned by the stack user
-    sudo chown -R stack:stack $BASE
+    # It is not clear if the ansible file module can do this for us
+    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "chown -R stack:stack '$BASE'"
 
     cd $BASE/new/grenade
     echo "Running grenade ..."
@@ -454,28 +466,10 @@ else
         set -x  # for now enabling debug and do not turn it off
         echo -e "[[post-config|\$NOVA_CONF]]\n[libvirt]\ncpu_mode=custom\ncpu_model=gate64" >> local.conf
         setup_localrc "new" "$OVERRIDE_ZUUL_BRANCH" "sub_localrc" "sub"
-        sudo mkdir -p $BASE/new/.ssh
-        sudo cp /etc/nodepool/id_rsa.pub $BASE/new/.ssh/authorized_keys
-        sudo cp /etc/nodepool/id_rsa $BASE/new/.ssh/
-        sudo chmod 600 $BASE/new/.ssh/authorized_keys
-        sudo chmod 400 $BASE/new/.ssh/id_rsa
-        sudo mkdir -p ~root/.ssh
-        sudo cp /etc/nodepool/id_rsa ~root/.ssh/
-        sudo chmod 400 ~root/.ssh/id_rsa
-        for NODE in `cat /etc/nodepool/sub_nodes_private`; do
-            echo "Copy Files to  $NODE"
-            remote_copy_dir $NODE $BASE/new/devstack-gate $WORKSPACE
-            remote_copy_file $WORKSPACE/test_env.sh $NODE:$WORKSPACE/test_env.sh
-            echo "Preparing $NODE"
-            remote_command $NODE "source $WORKSPACE/test_env.sh; $WORKSPACE/devstack-gate/sub_node_prepare.sh"
-            remote_copy_file /etc/nodepool/id_rsa "$NODE:$BASE/new/.ssh/"
-            remote_command $NODE sudo chmod 400 "$BASE/new/.ssh/*"
-            remote_command $NODE sudo mkdir -p ~root/.ssh
-            remote_command $NODE sudo cp $BASE/new/.ssh/id_rsa ~root/.ssh/id_rsa
-        done
         PRIMARY_NODE=`cat /etc/nodepool/primary_node_private`
         SUB_NODES=`cat /etc/nodepool/sub_nodes_private`
         if [[ "$DEVSTACK_GATE_NEUTRON" -ne '1' ]]; then
+            # TODO (clarkb): figure out how to make bridge setup sane with ansible.
             ovs_gre_bridge "br_pub" $PRIMARY_NODE "True" 1 \
                 $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
                 $SUB_NODES
@@ -496,14 +490,54 @@ EOF
                 $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
                 $SUB_NODES
         fi
+
+        echo "Preparing cross node connectivity"
+        setup_ssh $BASE/new/.ssh
+        setup_ssh ~root/.ssh
+        # TODO (clarkb) ansiblify the /etc/hosts and known_hosts changes
+        # set up ssh_known_hosts by IP and /etc/hosts
+        for NODE in $SUB_NODES; do
+            ssh-keyscan $NODE >> /tmp/tmp_ssh_known_hosts
+            echo $NODE `remote_command $NODE hostname -f | tr -d '\r'` >> /tmp/tmp_hosts
+        done
+        ssh-keyscan `cat /etc/nodepool/primary_node_private` >> /tmp/tmp_ssh_known_hosts
+        echo `cat /etc/nodepool/primary_node_private` `hostname -f` >> /tmp/tmp_hosts
+        cat /tmp/tmp_hosts | sudo tee --append /etc/hosts
+
+        # set up ssh_known_host files based on hostname
+        for HOSTNAME in `cat /tmp/tmp_hosts | cut -d' ' -f2`; do
+            ssh-keyscan $HOSTNAME >> /tmp/tmp_ssh_known_hosts
+        done
+        $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
+            -a "src=/tmp/tmp_ssh_known_hosts dest=/etc/ssh/ssh_known_hosts mode=0444"
+
+        for NODE in $SUB_NODES; do
+            remote_copy_file /tmp/tmp_hosts $NODE:/tmp/tmp_hosts
+            remote_command $NODE "cat /tmp/tmp_hosts | sudo tee --append /etc/hosts > /dev/null"
+            cp sub_localrc /tmp/tmp_sub_localrc
+            echo "HOST_IP=$NODE" >> /tmp/tmp_sub_localrc
+            remote_copy_file /tmp/tmp_sub_localrc $NODE:$BASE/new/devstack/localrc
+            remote_copy_file local.conf $NODE:$BASE/new/devstack/local.conf
+        done
+
     fi
     # Make the workspace owned by the stack user
-    sudo chown -R stack:stack $BASE
+    # It is not clear if the ansible file module can do this for us
+    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "chown -R stack:stack '$BASE'"
 
     echo "Running devstack"
     echo "... this takes 10 - 15 minutes (logs in logs/devstacklog.txt.gz)"
     start=$(date +%s)
-    sudo -H -u stack stdbuf -oL -eL ./stack.sh > /dev/null
+    $ANSIBLE primary -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "cd '$BASE/new/devstack' && sudo -H -u stack stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
+        > /dev/null
+    # Run non controller setup after controller is up. This is necessary
+    # because services like nova apparently expect to have the controller in
+    # place before anything else.
+    $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "cd '$BASE/new/devstack' && sudo -H -u stack stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
+        > /dev/null
     end=$(date +%s)
     took=$((($end - $start) / 60))
     if [[ "$took" -gt 20 ]]; then
@@ -531,59 +565,33 @@ EOF
         fi
     fi
 
-    if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
-        echo "Preparing cross node connectivity"
-        # set up ssh_known_hosts by IP and /etc/hosts
-        for NODE in `cat /etc/nodepool/sub_nodes_private`; do
-            ssh-keyscan $NODE | sudo tee --append tmp_ssh_known_hosts > /dev/null
-            echo $NODE `remote_command $NODE hostname -f | tr -d '\r'` | sudo tee --append  tmp_hosts > /dev/null
-        done
-        ssh-keyscan `cat /etc/nodepool/primary_node_private` | sudo tee --append tmp_ssh_known_hosts > /dev/null
-        echo `cat /etc/nodepool/primary_node_private` `hostname -f` | sudo tee --append tmp_hosts > /dev/null
-        cat tmp_hosts | sudo tee --append /etc/hosts
-
-        # set up ssh_known_host files based on hostname
-        for HOSTNAME in `cat tmp_hosts | cut -d' ' -f2`; do
-            ssh-keyscan $HOSTNAME | sudo tee --append tmp_ssh_known_hosts > /dev/null
-        done
-        sudo cp tmp_ssh_known_hosts /etc/ssh/ssh_known_hosts
-        sudo chmod 444 /etc/ssh/ssh_known_hosts
-
-        for NODE in `cat /etc/nodepool/sub_nodes_private`; do
-            remote_copy_file tmp_ssh_known_hosts $NODE:$BASE/new/tmp_ssh_known_hosts
-            remote_copy_file tmp_hosts $NODE:$BASE/new/tmp_hosts
-            remote_command $NODE "cat $BASE/new/tmp_hosts | sudo tee --append /etc/hosts > /dev/null"
-            remote_command $NODE "sudo mv $BASE/new/tmp_ssh_known_hosts /etc/ssh/ssh_known_hosts"
-            remote_command $NODE "sudo chmod 444 /etc/ssh/ssh_known_hosts"
-            sudo cp sub_localrc tmp_sub_localrc
-            echo "HOST_IP=$NODE" | sudo tee --append tmp_sub_localrc > /dev/null
-            remote_copy_file tmp_sub_localrc $NODE:$BASE/new/devstack/localrc
-            remote_copy_file local.conf $NODE:$BASE/new/devstack/local.conf
-            remote_command $NODE sudo chown -R stack:stack $BASE
-            echo "Running devstack on $NODE"
-            remote_command $NODE "cd $BASE/new/devstack; source $WORKSPACE/test_env.sh; export -n PROJECTS; sudo -H -u stack stdbuf -oL -eL ./stack.sh > /dev/null"
-        done
-
-       if [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
-            # NOTE(afazekas): The cirros lp#1301958 does not support MTU setting via dhcp,
-            # simplest way the have tunneling working, with dvsm, without increasing the host system MTU
-            # is to decreasion the MTU on br-ex
-            # TODO(afazekas): Configure the mtu smarter on the devstack side
-            sudo ip link set mtu 1450 dev br-ex
+    if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]] && [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
+        # NOTE(afazekas): The cirros lp#1301958 does not support MTU setting via dhcp,
+        # simplest way the have tunneling working, with dvsm, without increasing the host system MTU
+        # is to decreasion the MTU on br-ex
+        # TODO(afazekas): Configure the mtu smarter on the devstack side
+        MTU_NODES=primary
+        if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
+            MTU_NODES=all
         fi
+        $ANSIBLE "$MTU_NODES" -f 5 -i "$WORKSPACE/inventory" -m shell \
+                -a "sudo ip link set mtu 1450 dev br-ex"
     fi
 fi
 
 if [[ "$DEVSTACK_GATE_UNSTACK" -eq "1" ]]; then
-   sudo -H -u stack ./unstack.sh
+    $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "cd '$BASE/new/devstack' && sudo -H -u stack ./unstack.sh"
 fi
 
 echo "Removing sudo privileges for devstack user"
-sudo rm /etc/sudoers.d/50_stack_sh
+$ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m file \
+    -a "path=/etc/sudoers.d/50_stack_sh state=absent"
 
 if [[ "$DEVSTACK_GATE_EXERCISES" -eq "1" ]]; then
     echo "Running devstack exercises"
-    sudo -H -u stack ./exercise.sh
+    $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "cd '$BASE/new/devstack' && sudo -H -u stack ./exercise.sh"
 fi
 
 function load_subunit_stream {
