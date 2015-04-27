@@ -422,10 +422,15 @@ virtualenv /tmp/ansible
 export ANSIBLE=/tmp/ansible/bin/ansible
 
 # Write inventory file with groupings
+COUNTER=1
 echo "[primary]" > "$WORKSPACE/inventory"
-echo "localhost ansible_connection=local" >> "$WORKSPACE/inventory"
+echo "localhost ansible_connection=local host_counter=$COUNTER" >> "$WORKSPACE/inventory"
 echo "[subnodes]" >> "$WORKSPACE/inventory"
-cat /etc/nodepool/sub_nodes_private >> "$WORKSPACE/inventory"
+SUBNODES=$(cat /etc/nodepool/sub_nodes_private)
+for SUBNODE in $SUBNODES ; do
+    let COUNTER=COUNTER+1
+    echo "$SUBNODE host_counter=$COUNTER" >> "$WORKSPACE/inventory"
+done
 
 # NOTE(clarkb): for simplicity we evaluate all bash vars in ansible commands
 # on the node running these scripts, we do not pass through unexpanded
@@ -514,16 +519,8 @@ echo "... this takes 3 - 4 minutes (logs at logs/devstack-gate-cleanup-host.txt.
 $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
     -a "source '$WORKSPACE/test_env.sh' && source '$WORKSPACE/devstack-gate/functions.sh' && tsfilter cleanup_host executable=/bin/bash" \
     &> "$WORKSPACE/devstack-gate-cleanup-host.txt"
-# TODO(clark) ansiblify this. Fetch can only fetch specifc files no
-# recursive dir fetches.
-if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
-    COUNTER=1
-    for NODE in `cat /etc/nodepool/sub_nodes_private`; do
-        echo "Collecting logs from $NODE"
-        rsync -avz "$NODE:$BASE/logs/"  "$BASE/logs/subnode-$COUNTER/"
-        let COUNTER=COUNTER+1
-    done
-fi
+$ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m synchronize \
+    -a "mode=pull src='$BASE/logs/' dest='$BASE/logs/subnode-{{ host_counter }}'"
 sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
 
 exit $RETVAL
