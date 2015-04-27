@@ -89,8 +89,9 @@ function setup_localrc {
         # TODO(afazekas): Move to the feature grid
         # TODO(afazekas): add c-vol
         if [[ $role = sub ]]; then
+            MY_ENABLED_SERVICES="n-cpu,ceilometer-acompute,dstat"
             if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
-                MY_ENABLED_SERVICES="q-agt,n-cpu,ceilometer-acompute"
+                MY_ENABLED_SERVICES+=",q-agt"
                 if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
                     # As per reference architecture described in
                     # https://wiki.openstack.org/wiki/Neutron/DVR
@@ -99,7 +100,7 @@ function setup_localrc {
                     MY_ENABLED_SERVICES+=",q-l3,q-fwaas,q-meta"
                 fi
             else
-                MY_ENABLED_SERVICES="n-cpu,n-net,n-api-meta,ceilometer-acompute"
+                MY_ENABLED_SERVICES+=",n-net,n-api-meta"
             fi
         fi
 
