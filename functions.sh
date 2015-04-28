@@ -142,6 +142,10 @@ function remaining_time {
     local elapsed=$(((now - START_TIME) / 60))
     REMAINING_TIME=$((DEVSTACK_GATE_TIMEOUT - elapsed - 5))
     echo "Job timeout set to: $REMAINING_TIME minutes"
+    if [ ${REMAINING_TIME} -le 0 ]; then
+        echo "Already timed out."
+        exit 1
+    fi
 }
 
 # indent the output of a command 4 spaces, useful for distinguishing
