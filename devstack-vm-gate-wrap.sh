@@ -504,6 +504,7 @@ if [ $GATE_RETVAL -eq 0 ]; then
 fi
 
 if [ $GATE_RETVAL -eq 137 ] && [ -f $WORKSPACE/gate.pid ] ; then
+    echo "Job timed out"
     GATEPID=`cat $WORKSPACE/gate.pid`
     echo "Killing process group ${GATEPID}"
     sudo kill -s 9 -${GATEPID}
