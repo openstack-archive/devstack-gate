@@ -256,7 +256,11 @@ function fix_disk_layout {
             local swap=${DEV}1
             local lvmvol=${DEV}2
             local optdev=${DEV}3
-            sudo umount ${DEV}
+            if mount | grep ${DEV} > /dev/null; then
+                echo "*** ${DEV} appears to already be mounted"
+                mount
+                return 1
+            fi
             sudo parted ${DEV} --script -- mklabel msdos
             sudo parted ${DEV} --script -- mkpart primary linux-swap 1 8192
             sudo parted ${DEV} --script -- mkpart primary ext2 8192 32768
