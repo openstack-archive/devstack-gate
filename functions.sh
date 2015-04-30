@@ -71,6 +71,8 @@ function tsfilter {
         print
         fflush()
     }'
+    # make sure we return the command status, not the awk status
+    return ${PIPESTATUS[0]}
 }
 
 function _ping_check {
