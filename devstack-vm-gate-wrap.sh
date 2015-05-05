@@ -225,18 +225,8 @@ export DEVSTACK_GATE_ZAQAR=${DEVSTACK_GATE_ZAQAR:-0}
 # Set to 0 to disable config_drive and use the metadata server instead
 export DEVSTACK_GATE_CONFIGDRIVE=${DEVSTACK_GATE_CONFIGDRIVE:-1}
 
-# Set to 1 to enable running a keystone v3 based gate
-export DEVSTACK_GATE_KEYSTONE_V3=${DEVSTACK_GATE_KEYSTONE_V3:-0}
-
 # Set to 1 to enable installing test requirements
 export DEVSTACK_GATE_INSTALL_TESTONLY=${DEVSTACK_GATE_INSTALL_TESTONLY:-0}
-
-# Set to 0 to run services that default under Apache + mod_wsgi under alternatives (e.g. eventlet)
-# if possible
-export DEVSTACK_GATE_ENABLE_HTTPD_MOD_WSGI_SERVICES=${DEVSTACK_GATE_ENABLE_HTTPD_MOD_WSGI_SERVICES:-1}
-
-# Set to 1 to replace Nova V2 endpoint with V2.1 API
-export DEVSTACK_GATE_NOVA_REPLACE_V2_ENDPOINT_WITH_V21_API=${DEVSTACK_GATE_NOVA_REPLACE_V2_ENDPOINT_WITH_V21_API:-0}
 
 # Set the number of threads to run tempest with
 DEFAULT_CONCURRENCY=$(nproc)

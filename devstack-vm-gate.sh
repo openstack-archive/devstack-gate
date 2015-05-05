@@ -338,27 +338,11 @@ EOF
     else
         echo "FORCE_CONFIG_DRIVE=False" >>"$localrc_file"
     fi
-    if [[ "$DEVSTACK_GATE_KEYSTONE_V3" -eq "1" ]]; then
-        # Run gate using only keystone v3
-        # For now this is only injected in tempest configuration
-        echo "TEMPEST_AUTH_VERSION=v3" >>"$localrc_file"
-    fi
-
-    if [[ "$DEVSTACK_GATE_ENABLE_HTTPD_MOD_WSGI_SERVICES" -eq "0" ]]; then
-        # Services that default to run under Apache + mod_wsgi will use alternatives
-        # (e.g. Keystone under eventlet) if available. This will affect all services
-        # that run under HTTPD (mod_wsgi) by default.
-        echo "ENABLE_HTTPD_MOD_WSGI_SERVICES=False" >> "$localrc_file"
-    fi
 
     if [[ "$CEILOMETER_NOTIFICATION_TOPICS" ]]; then
         # Add specified ceilometer notification topics to localrc
         # Set to notifications,profiler to enable profiling
         echo "CEILOMETER_NOTIFICATION_TOPICS=$CEILOMETER_NOTIFICATION_TOPICS" >>"$localrc_file"
-    fi
-
-    if [[ "$DEVSTACK_GATE_NOVA_REPLACE_V2_ENDPOINT_WITH_V21_API" -eq "1" ]]; then
-        echo "NOVA_API_VERSION=v21default" >> "$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_INSTALL_TESTONLY" -eq "1" ]]; then
