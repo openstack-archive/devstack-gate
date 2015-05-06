@@ -825,6 +825,9 @@ function remote_copy_file {
 #                above.
 # every additional parameter is considered as a peer host (spokes)
 #
+# For OVS troubleshooting needs:
+#   http://www.yet.org/2014/09/openvswitch-troubleshooting/
+#
 function ovs_gre_bridge {
     local install_ovs_deps="source $BASE/new/devstack/functions-common; \
                             install_package openvswitch-switch; \
@@ -843,21 +846,33 @@ function ovs_gre_bridge {
     fi
     local peer_ips=$@
     eval $install_ovs_deps
+    # create a bridge, just like you would with 'brctl addbr'
+    # if the bridge exists, --may-exist prevents ovs from returning an error
     sudo ovs-vsctl --may-exist add-br $bridge_name
+    # as for the mtu, look for notes on lp#1301958 in devstack-vm-gate.sh
     sudo ip link set mtu $mtu dev $bridge_name
     if [[ "$set_ips" == "True" ]] ; then
         sudo ip addr add ${pub_addr_prefix}.${offset}/${pub_addr_mask} dev ${bridge_name}
     fi
     for node_ip in $peer_ips; do
         (( offset++ ))
-        # Setup the gre tunnel for the Controller/Network Node
+        # For reference on how to setup a tunnel using OVS see:
+        #   http://openvswitch.org/support/config-cookbooks/port-tunneling/
+        # The command below is equivalent to the sequence of ip/brctl commands
+        # where an interface of gre type is created first, and then plugged into
+        # the bridge; options are command specific configuration key-value pairs.
+        #
+        # Create the gre tunnel for the Controller/Network Node:
+        #  This establishes a tunnel between remote $node_ip to local $host_ip
+        #  uniquely identified by a key $offset
         sudo ovs-vsctl add-port $bridge_name \
             ${bridge_name}_${node_ip} \
             -- set interface ${bridge_name}_${node_ip} type=gre \
             options:remote_ip=${node_ip} \
             options:key=${offset} \
             options:local_ip=${host_ip}
-        # Now complete the gre tunnel setup for the Compute Node
+        # Now complete the gre tunnel setup for the Compute Node:
+        #  Similarly this establishes the tunnel in the reverse direction
         remote_command $node_ip "$install_ovs_deps"
         remote_command $node_ip sudo ovs-vsctl --may-exist add-br $bridge_name
         remote_command $node_ip sudo ip link set mtu $mtu dev $bridge_name
