@@ -272,8 +272,11 @@ function fix_disk_layout {
         fi
     fi
 
-    # dump vm settings for reference
-    sudo sysctl vm
+    # dump vm settings for reference (Ubuntu 12 era procps can get
+    # confused with certain proc trigger nodes that are write-only and
+    # return a EPERM; ignore this)
+    sudo sysctl vm || true
+
     # ensure a standard level of swappiness.  Some platforms
     # (rax+centos7) come with swappiness of 0 (presumably because the
     # vm doesn't come with swap setup ... but we just did that above),
