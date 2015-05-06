@@ -1,10 +1,10 @@
 config:
   default:
-    master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, sahara]
-    liberty: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, sahara]
-    kilo: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, sahara]
-    juno: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat, sahara]
-    icehouse: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, heat]
+    master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, sahara]
+    liberty: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, sahara]
+    kilo: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, sahara]
+    juno: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone, sahara]
+    icehouse: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
     # This can be used by functional jobs that only want their dependencies installed
     # and don't need to incur the overhead of installing all services in the process.
     no_services: [default]
@@ -15,7 +15,7 @@ config:
     features: [postgresql]
   # feature changes for different test matrixes
   grenade:
-    rm-features: [trove, sahara, heat]
+    rm-features: [trove, sahara]
   tempest:
     features: [tempest]
   # feature changes for different configs of existing services
