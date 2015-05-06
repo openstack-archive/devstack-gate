@@ -440,10 +440,6 @@ function setup_host {
     # This is necessary to keep sudo from complaining
     fix_etc_hosts
 
-    # Move the PIP cache into position:
-    sudo mkdir -p /var/cache/pip
-    sudo mv ~/cache/pip/* /var/cache/pip
-
     # We set some home directories under $BASE, make sure it exists.
     sudo mkdir -p $BASE
 
