@@ -425,13 +425,15 @@ function setup_workspace {
 }
 
 function copy_mirror_config {
+    # The pydistutils.cfg file is added by Puppet. Some CIs may not rely on
+    # Puppet to do the base node installation
+    if [ -f ~/.pydistutils.cfg ]; then
+        sudo install -D -m0644 -o root -g root ~/.pydistutils.cfg ~root/.pydistutils.cfg
 
-    sudo install -D -m0644 -o root -g root ~/.pydistutils.cfg ~root/.pydistutils.cfg
+        sudo install -D -m0644 -o stack -g stack ~/.pydistutils.cfg ~stack/.pydistutils.cfg
 
-    sudo install -D -m0644 -o stack -g stack ~/.pydistutils.cfg ~stack/.pydistutils.cfg
-
-    sudo install -D -m0644 -o tempest -g tempest ~/.pydistutils.cfg ~tempest/.pydistutils.cfg
-
+        sudo install -D -m0644 -o tempest -g tempest ~/.pydistutils.cfg ~tempest/.pydistutils.cfg
+    fi
 }
 
 function setup_host {
