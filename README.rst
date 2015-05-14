@@ -233,9 +233,9 @@ one.
 Refer to the `Jenkins Job Builder`_ and Zuul_ documentation for more
 information on their configuration file formats.
 
-.. _`Jenkins Job Builder`: http://ci.openstack.org/jjb.html
+.. _`Jenkins Job Builder`: http://docs.openstack.org/infra/system-config/jjb.html
 
-.. _Zuul: http://ci.openstack.org/zuul.html
+.. _Zuul: http://docs.openstack.org/infra/system-config/zuul.html
 
 Contributions Welcome
 =====================
