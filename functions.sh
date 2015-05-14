@@ -196,25 +196,33 @@ function git_has_branch {
 }
 
 function git_prune {
-    git remote prune origin
+    git_timed remote prune origin
 }
 
 function git_remote_update {
-    # Attempt a git remote update. Run for up to 5 minutes before killing.
-    # If first SIGTERM does not kill the process wait a minute then SIGKILL.
-    # If update fails try again for up to a total of 3 attempts.
-    MAX_ATTEMPTS=3
-    COUNT=0
-    until timeout -k 1m 5m git remote update; do
-        COUNT=$(($COUNT + 1))
-        echo "git remote update failed."
-        if [ $COUNT -eq $MAX_ATTEMPTS ]; then
-            echo "Max attempts reached for git remote update; giving up."
+    git_timed remote update
+}
+
+# git can sometimes get itself infinitely stuck with transient network
+# errors or other issues with the remote end.  This wraps git in a
+# timeout/retry loop and is intended to watch over non-local git
+# processes that might hang. Run for up to 5 minutes before killing.
+# If first SIGTERM does not kill the process wait a minute then SIGKILL.
+# If the git operation fails try again for up to a total of 3 attempts.
+# usage: git_timed <git-command>
+function git_timed {
+    local max_attempts=3
+    local count=0
+    until timeout -k 1m 5m git "$@"; do
+        count=$(($count + 1))
+        echo "git $@ failed."
+        if [ $count -eq $max_attempts ]; then
+            echo "Max attempts reached for git $@; giving up."
             exit 1
         fi
-        SLEEP_TIME=$((30 + $RANDOM % 60))
-        echo "sleep $SLEEP_TIME before retrying."
-        sleep $SLEEP_TIME
+        local sleep_time=$((30 + $RANDOM % 60))
+        echo "sleep $sleep_time before retrying."
+        sleep $sleep_time
     done
 }
 
