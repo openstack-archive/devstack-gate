@@ -41,6 +41,8 @@ config:
     features: [zeromq]
   ceph:
     features: [ceph]
+  heat:
+    features: [heat]
 
 branches:
   # The value of ""default" is the name of the "trunk" branch
