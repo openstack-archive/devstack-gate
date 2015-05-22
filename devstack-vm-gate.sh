@@ -299,13 +299,7 @@ EOF
         fi
         # keystone deployed with mod wsgi cannot be upgraded or migrated
         # until https://launchpad.net/bugs/1365105 is resolved.
-        case $GRENADE_BASE_BRANCH in
-            "stable/icehouse")
-                ;&
-            "stable/juno")
-                echo "KEYSTONE_USE_MOD_WSGI=False" >> "$localrc_file"
-                ;;
-        esac
+        echo "KEYSTONE_USE_MOD_WSGI=False" >> "$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]]; then
