@@ -210,7 +210,6 @@ probably look something like::
   export DEVSTACK_GATE_TIMEOUT=120
   export DEVSTACK_GATE_TEMPEST=1
   export DEVSTACK_GATE_TEMPEST_FULL=1
-  export RE_EXEC=true
   cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
   ./safe-devstack-vm-gate-wrap.sh
 

@@ -368,12 +368,6 @@ function setup_project {
     fi
 }
 
-function re_exec_devstack_gate {
-    export RE_EXEC="true"
-    echo "This build includes a change to devstack-gate; re-execing this script."
-    exec $WORKSPACE/devstack-gate/devstack-vm-gate-wrap.sh
-}
-
 function setup_workspace {
     local base_branch=$1
     local DEST=$2
