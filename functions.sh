@@ -661,6 +661,13 @@ function cleanup_host {
 
         # grenade logs
         sudo cp $BASE/new/grenade/localrc $BASE/logs/grenade_localrc.txt
+
+        # grenade pluginrc - external grenade plugins use this file to
+        # communicate with grenade, capture for posterity
+        if -f [ $BASE/new/grenade/pluginrc ]; then
+            sudo cp $BASE/new/grenade/pluginrc $BASE/logs/grenade_pluginrc.txt
+        fi
+
         # grenade logs directly and uses similar timestampped files to
         # devstack.  So temporarily copy out & rename the latest log
         # files from the short-symlinks into grenade/, clean-up left
