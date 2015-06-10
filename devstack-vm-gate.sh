@@ -433,6 +433,7 @@ SAVE_DIR=\$BASE_RELEASE_DIR/save
 DO_NOT_UPGRADE_SERVICES=$DO_NOT_UPGRADE_SERVICES
 TEMPEST_CONCURRENCY=$TEMPEST_CONCURRENCY
 VERBOSE=False
+PLUGIN_DIR=\$TARGET_RELEASE_DIR
 EOF
 
     if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-ironic" ]]; then
@@ -440,6 +441,13 @@ EOF
         # base.
         echo "BASE_RUN_SMOKE=False" >> $BASE/new/grenade/localrc
         echo "RUN_JAVELIN=False" >> $BASE/new/grenade/localrc
+    fi
+
+    # Create a pass through variable that can add content to the
+    # grenade pluginrc. Needed for grenade external plugins in gate
+    # jobs.
+    if [[ -n "$GRENADE_PLUGINRC" ]]; then
+        echo "$GRENADE_PLUGINRC" >>$BASE/new/grenade/pluginrc
     fi
 
     # Make the workspace owned by the stack user
