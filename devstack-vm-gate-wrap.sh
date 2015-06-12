@@ -497,6 +497,18 @@ if [ -d '$WORKSPACE/logs' -a \! -e '$BASE/logs' ]; then
     ln -s '$BASE/logs' '$WORKSPACE/'
 fi executable=/bin/bash"
 
+# The DEVSTACK_GATE_SETTINGS variable may contain a path to a script that
+# should be sourced after the environment has been set up.  This is useful for
+# allowing projects to provide a script in their repo that sets some custom
+# environment variables.
+if [ -n "${DEVSTACK_GATE_SETTINGS}" ] ; then
+    if [ -f "${DEVSTACK_GATE_SETTINGS}" ] ; then
+        source ${DEVSTACK_GATE_SETTINGS}
+    else
+        echo "WARNING: DEVSTACK_GATE_SETTINGS file does not exist: '${DEVSTACK_GATE_SETTINGS}'"
+    fi
+fi
+
 # Note that hooks should be multihost aware if necessary.
 # devstack-vm-gate-wrap.sh will not automagically run the hooks on each node.
 # Run pre test hook if we have one
