@@ -313,7 +313,7 @@ EOF
     fi
 
     if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
-        if [[ "$localrc_old" == "old" ]]; then
+        if [[ "$localrc_oldnew" == "old" ]]; then
             echo "GRENADE_PHASE=base" >> "$localrc_file"
         else
             echo "GRENADE_PHASE=target" >> "$localrc_file"
