@@ -122,6 +122,11 @@ function setup_localrc {
     if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
         echo "Q_USE_DEBUG_COMMAND=True" >>"$localrc_file"
         echo "NETWORK_GATEWAY=10.1.0.1" >>"$localrc_file"
+        # TODO(armax): get rid of this if as soon as bugs #1464612 and #1432189 get resolved
+        if [[ "$DEVSTACK_GATE_NEUTRON_UNSTABLE" -eq "0" ]]; then
+            echo "MYSQL_DRIVER=MySQL-python" >>"$localrc_file"
+            echo "API_WORKERS=0" >>"$localrc_file"
+        fi
     fi
 
     if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
