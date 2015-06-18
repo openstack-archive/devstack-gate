@@ -391,6 +391,27 @@ export DEVSTACK_GATE_TOPOLOGY=${DEVSTACK_GATE_TOPOLOGY:-aio}
 # for jobs that know exactly which repos they need.
 export DEVSTACK_GATE_PROJECTS_OVERRIDE=${DEVSTACK_GATE_PROJECTS_OVERRIDE:-""}
 
+# Set this to enable remote logging of the console via UDP packets to
+# a specified ipv4 ip:port (note; not hostname -- ip address only).
+# This can be extremely useful if a host is oopsing or dropping off
+# the network amd you are not getting any useful logs from jenkins.
+#
+# To capture these logs, enable a netcat/socat type listener to
+# capture UDP packets at the specified remote ip.  For example:
+#
+#  $ nc -v -u -l -p 6666 | tee save-output.log
+# or
+#  $ socat udp-recv:6666 - | tee save-output.log
+#
+# One further trick is to send interesting data to /dev/ksmg; this
+# data will get out over the netconsole even if the main interfaces
+# have been disabled, etc.  e.g.
+#
+#  $ ip addr | sudo tee /dev/ksmg
+#
+export DEVSTACK_GATE_NETCONSOLE=${DEVSTACK_GATE_NETCONSOLE:-""}
+enable_netconsole
+
 if [ -n "$DEVSTACK_GATE_PROJECTS_OVERRIDE" ]; then
     PROJECTS=$DEVSTACK_GATE_PROJECTS_OVERRIDE
 fi
