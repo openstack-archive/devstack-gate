@@ -527,6 +527,8 @@ RETVAL=$GATE_RETVAL
 if [ $GATE_RETVAL -ne 0 ]; then
     echo "ERROR: the main setup script run by this job failed - exit code: $GATE_RETVAL"
     echo "    please look at the relevant log files to determine the root cause"
+    echo "Running devstack worlddump.py"
+    sudo $BASE/new/devstack/tools/worlddump.py -d $BASE/logs
 fi
 
 # Run post test hook if we have one
