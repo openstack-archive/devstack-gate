@@ -398,6 +398,19 @@ function test_periodic {
     assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'stable/havana'
 }
 
+# Run setup_project without setting a ZUUL_BRANCH which is how a subset of
+# periodic jobs operate
+function test_periodic_no_branch {
+
+    declare -A TEST_GIT_CHECKOUTS
+    declare -A TEST_ZUUL_REF
+    local ZUUL_PROJECT='openstack/glance'
+
+    setup_project openstack/glance 'master'
+
+    assert_equal "${TEST_GIT_CHECKOUTS[glance]}" 'master'
+}
+
 # setup_workspace fails without argument
 function test_workspace_branch_arg {
     assert_raises setup_workspace
@@ -466,6 +479,7 @@ test_multi_branch_on_stable
 test_multi_branch_project_override
 test_one_on_master
 test_periodic
+test_periodic_no_branch
 test_two_on_master
 test_workspace_branch_arg
 test_call_hook_if_defined
