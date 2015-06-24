@@ -345,7 +345,12 @@ function setup_project {
     fi
 
     # Try the specified branch before the ZUUL_BRANCH.
-    OVERRIDE_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$ZUUL_BRANCH,$branch,")
+    if [[ ! -z $ZUUL_BRANCH ]]; then
+        OVERRIDE_ZUUL_REF=$(echo $ZUUL_REF | sed -e "s,$ZUUL_BRANCH,$branch,")
+    else
+        OVERRIDE_ZUUL_REF=""
+    fi
+
 
     # Update git remotes
     git_remote_update
