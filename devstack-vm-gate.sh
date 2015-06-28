@@ -323,13 +323,17 @@ EOF
         else
             echo "GRENADE_PHASE=target" >> "$localrc_file"
         fi
-        # keystone deployed with mod wsgi cannot be upgraded or migrated
+        # services deployed with mod wsgi cannot be upgraded or migrated
         # until https://launchpad.net/bugs/1365105 is resolved.
         case $GRENADE_NEW_BRANCH in
             "stable/icehouse")
                 ;&
             "stable/juno")
                 echo "KEYSTONE_USE_MOD_WSGI=False" >> "$localrc_file"
+                echo "CEILOMETER_USE_MOD_WSGI=False" >> "$localrc_file"
+                ;;
+            "stable/kilo")
+                echo "CEILOMETER_USE_MOD_WSGI=False" >> "$localrc_file"
                 ;;
             "stable/kilo")
                 # while both juno and kilo can run under wsgi, they
