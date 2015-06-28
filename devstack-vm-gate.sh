@@ -330,10 +330,6 @@ EOF
                 ;&
             "stable/juno")
                 echo "KEYSTONE_USE_MOD_WSGI=False" >> "$localrc_file"
-                echo "CEILOMETER_USE_MOD_WSGI=False" >> "$localrc_file"
-                ;;
-            "stable/kilo")
-                echo "CEILOMETER_USE_MOD_WSGI=False" >> "$localrc_file"
                 ;;
             "stable/kilo")
                 # while both juno and kilo can run under wsgi, they
@@ -345,6 +341,7 @@ EOF
                 echo "KEYSTONE_USE_MOD_WSGI=False" >> "$localrc_file"
                 ;;
         esac
+        echo "CEILOMETER_USE_MOD_WSGI=False" >> "$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]]; then
