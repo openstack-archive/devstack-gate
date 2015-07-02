@@ -755,6 +755,10 @@ function cleanup_host {
         sudo cp /etc/ceph/ceph.conf $BASE/logs/ceph_conf.txt
     fi
 
+    if [ -d /var/log/openvswitch ] ; then
+        sudo cp -r /var/log/openvswitch $BASE/logs/
+    fi
+
     # Make sure jenkins can read all the logs and configs
     sudo chown -R jenkins:jenkins $BASE/logs/
     sudo chmod a+r $BASE/logs/ $BASE/logs/etc
