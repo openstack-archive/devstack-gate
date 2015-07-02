@@ -35,8 +35,8 @@ def parse_features(fname):
 
 
 def normalize_branch(branch):
-    if branch.startswith("feature/"):
-        # Feature branches chase master and should be tested
+    if branch.startswith(("feature/", "bug/")):
+        # Feature and bug branches chase master and should be tested
         # as if they were the master branch.
         branch = GRID['branches']['default']
     elif branch.startswith("stable/"):
