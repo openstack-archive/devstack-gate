@@ -294,7 +294,9 @@ function fix_disk_layout {
     # kicking in on some processes despite swap being available;
     # particularly things like mysql which have very high ratio of
     # anonymous-memory to file-backed mappings.
-    #
+
+    # make sure reload of sysctl doesn't reset this
+    sudo sed -i '/vm.swappiness/d' /etc/sysctl.conf
     # This sets swappiness low; we really don't want to be relying on
     # cloud I/O based swap during our runs
     sudo sysctl -w vm.swappiness=10
