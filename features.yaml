@@ -9,13 +9,13 @@ config:
     # and don't need to incur the overhead of installing all services in the process.
     no_services: [default]
   neutron:
-    features: [neutron]
+    features: [neutron, neutron-adv]
   # different backends
   postgres:
     features: [postgresql]
   # feature changes for different test matrixes
   grenade:
-    rm-features: [trove, sahara]
+    rm-features: [trove, sahara, neutron-adv]
   tempest:
     features: [tempest]
   # feature changes for different configs of existing services
@@ -88,7 +88,12 @@ features:
 
   neutron:
     base:
-      services: [quantum, q-svc, q-agt, q-dhcp, q-l3, q-meta, q-lbaas, q-fwaas, q-metering]
+      services: [quantum, q-svc, q-agt, q-dhcp, q-l3, q-meta, q-metering]
+      rm-services: [n-net]
+
+  neutron-adv:
+    base:
+      services: [q-lbaas, q-fwaas]
       rm-services: [n-net]
 
   swift:
