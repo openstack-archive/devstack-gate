@@ -253,10 +253,13 @@ function fix_disk_layout {
     # disk and mount it on /opt, syncing the previous contents of /opt
     # over.
     if [ `grep SwapTotal /proc/meminfo | awk '{ print $2; }'` -eq 0 ]; then
-        if [ -b /dev/vdb ]; then
-            DEV='/dev/vdb'
-        elif [ -b /dev/xvde ]; then
+        if [ -b /dev/xvde ]; then
             DEV='/dev/xvde'
+        else
+            EPHEMERAL_DEV=$(blkid -L ephemeral0 || true)
+            if [ -n "$EPHEMERAL_DEV" -a -b "$EPHEMERAL_DEV" ]; then
+                DEV=$EPHEMERAL_DEV
+            fi
         fi
         if [ -n "$DEV" ]; then
             local swap=${DEV}1
