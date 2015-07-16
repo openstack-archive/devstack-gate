@@ -267,8 +267,8 @@ function fix_disk_layout {
             local optdev=${DEV}3
             if mount | grep ${DEV} > /dev/null; then
                 echo "*** ${DEV} appears to already be mounted"
-                mount
-                return 1
+                echo "*** ${DEV} unmounting and reformating"
+                sudo umount ${DEV}
             fi
             sudo parted ${DEV} --script -- mklabel msdos
             sudo parted ${DEV} --script -- mkpart primary linux-swap 1 8192
