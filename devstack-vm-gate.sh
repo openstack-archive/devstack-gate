@@ -527,10 +527,10 @@ EOF
         # set up ssh_known_hosts by IP and /etc/hosts
         for NODE in $SUB_NODES; do
             ssh-keyscan $NODE >> /tmp/tmp_ssh_known_hosts
-            echo $NODE `remote_command $NODE hostname -f | tr -d '\r'` >> /tmp/tmp_hosts
+            echo $NODE `remote_command $NODE hostname | tr -d '\r'` >> /tmp/tmp_hosts
         done
         ssh-keyscan `cat /etc/nodepool/primary_node_private` >> /tmp/tmp_ssh_known_hosts
-        echo `cat /etc/nodepool/primary_node_private` `hostname -f` >> /tmp/tmp_hosts
+        echo `cat /etc/nodepool/primary_node_private` `hostname` >> /tmp/tmp_hosts
         cat /tmp/tmp_hosts | sudo tee --append /etc/hosts
 
         # set up ssh_known_host files based on hostname
