@@ -43,6 +43,21 @@ function function_exists {
     type $1 2>/dev/null | grep -q 'is a function'
 }
 
+function apt_get_install {
+    # fetch the updates in a loop to ensure that we're update to
+    # date. Only do this once per run. Give up to 5 minutes to succeed
+    # here.
+    if [[ -z "$APT_UPDATED" ]]; then
+        if ! timeout 300 sh -c "while ! sudo apt-get update; do sleep 30; done"; then
+            echo "Failed to update apt repos, we're dead now"
+            exit 1
+        fi
+        APT_UPDATED=1
+    fi
+
+    sudo apt-get --assume-yes install $@
+}
+
 function call_hook_if_defined {
     local hook_name=$1
     local filename=${2-$WORKSPACE/devstack-gate-$hook_name.txt}

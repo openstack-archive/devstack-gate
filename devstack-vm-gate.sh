@@ -78,10 +78,13 @@ function setup_localrc {
     else
         # Install PyYaml for test-matrix.py
         if uses_debs; then
-            sudo apt-get update
-            sudo apt-get --assume-yes install python-yaml
+            if ! dpkg -s python-yaml > /dev/null; then
+                apt_get_install python-yaml
+            fi
         elif is_fedora; then
-            sudo yum install -y PyYAML
+            if ! rpm --quiet -q "PyYAML"; then
+                sudo yum install -y PyYAML
+            fi
         fi
         MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $localrc_branch -f $DEVSTACK_GATE_FEATURE_MATRIX`
         local original_enabled_services=$MY_ENABLED_SERVICES
