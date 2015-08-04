@@ -316,9 +316,9 @@ EOF
         # in parallel run.
         echo "VOLUME_BACKING_FILE_SIZE=24G" >> "$localrc_file"
         # in order to ensure glance http tests don't time out, we
-        # specify the TEMPEST_HTTP_IMAGE address to be horrizon's
-        # front page. Kind of hacky, but it works.
-        echo "TEMPEST_HTTP_IMAGE=http://127.0.0.1/static/dashboard/img/favicon.ico" >> "$localrc_file"
+        # specify the TEMPEST_HTTP_IMAGE address that's in infra on a
+        # service we need to be up for anything to work anyway.
+        echo "TEMPEST_HTTP_IMAGE=http://git.openstack.org/static/openstack.png" >> "$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_TEMPEST_DISABLE_TENANT_ISOLATION" -eq "1" ]]; then
