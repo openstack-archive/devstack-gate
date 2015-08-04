@@ -864,6 +864,45 @@ function remote_copy_file {
     scp $ssh_opts "$src" "$dest"
 }
 
+# enable_netconsole
+function enable_netconsole {
+
+    # do nothing if not set
+    if [[ $DEVSTACK_GATE_NETCONSOLE = "" ]]; then
+        return
+    fi
+
+    local remote_ip=$(echo $DEVSTACK_GATE_NETCONSOLE | awk -F: -e '{print $1}')
+    local remote_port=$(echo $DEVSTACK_GATE_NETCONSOLE | awk -F: -e '{print $2}')
+
+    # netconsole requires the device to send and the destitation MAC,
+    # which is obviously on the same subnet.  The way to get packets
+    # out to the world is specify the default gw as the remote
+    # destination.
+    local default_gw=$(ip route | grep default | awk '{print $3}')
+    local gw_mac=$(arp $default_gw | grep $default_gw | awk '{print $3}')
+    local gw_dev=$(ip route | grep default | awk '{print $5}')
+
+    # turn up message output
+    sudo dmesg -n 8
+
+    sudo modprobe configfs
+    sudo modprobe netconsole
+
+    sudo mount none -t configfs /sys/kernel/config
+
+    sudo mkdir /sys/kernel/config/netconsole/target1
+
+    pushd /sys/kernel/config/netconsole/target1
+    echo "$gw_dev" | sudo tee ./dev_name
+    echo "$remote_ip" | sudo tee ./remote_ip
+    echo "$gw_mac" | sudo tee ./remote_mac
+    echo "$remote_port" | sudo tee ./remote_port
+    echo 1 | sudo tee ./enabled
+    popd
+}
+
+
 # This function creates an internal gre bridge to connect all external
 # network bridges across the compute and network nodes.
 # bridge_name: Bridge name on each host for logical l2 network
