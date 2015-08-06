@@ -62,9 +62,14 @@ function setup_ssh {
 
 function setup_localrc {
     local localrc_oldnew=$1;
-    local localrc_branch=$2;
-    local localrc_file=$3
-    local role=$4
+    local localrc_file=$2
+    local role=$3
+
+    # The branch we use to compute the feature matrix is pretty
+    # straight forward. If it's a GRENADE job, we use the
+    # GRENADE_OLD_BRANCH, otherwise the branch ZUUL has told is it's
+    # running on.
+    local branch_for_matrix=${GRENADE_OLD_BRANCH:-$OVERRIDE_ZUUL_BRANCH}
 
     # Allow calling context to pre-populate the localrc file
     # with additional values
@@ -86,7 +91,7 @@ function setup_localrc {
                 sudo yum install -y PyYAML
             fi
         fi
-        MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $localrc_branch -f $DEVSTACK_GATE_FEATURE_MATRIX`
+        MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $branch_for_matrix -f $DEVSTACK_GATE_FEATURE_MATRIX`
         local original_enabled_services=$MY_ENABLED_SERVICES
 
         # TODO(afazekas): Move to the feature grid
@@ -433,7 +438,7 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
         export DEVSTACK_GATE_NEUTRON=0
     fi
     cd $BASE/old/devstack
-    setup_localrc "old" "$GRENADE_OLD_BRANCH" "localrc" "primary"
+    setup_localrc "old" "localrc" "primary"
 
     if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-ironic" ]]; then
         # Set ironic and virt driver settings to those initially set
@@ -446,7 +451,7 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
         export DEVSTACK_GATE_NEUTRON=$TMP_DEVSTACK_GATE_NEUTRON
     fi
     cd $BASE/new/devstack
-    setup_localrc "new" "$GRENADE_OLD_BRANCH" "localrc" "primary"
+    setup_localrc "new" "localrc" "primary"
 
     cat <<EOF >$BASE/new/grenade/localrc
 BASE_RELEASE=old
@@ -492,12 +497,12 @@ EOF
 
 else
     cd $BASE/new/devstack
-    setup_localrc "new" "$OVERRIDE_ZUUL_BRANCH" "localrc" "primary"
+    setup_localrc "new" "localrc" "primary"
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
         set -x  # for now enabling debug and do not turn it off
         echo -e "[[post-config|\$NOVA_CONF]]\n[libvirt]\ncpu_mode=custom\ncpu_model=gate64" >> local.conf
-        setup_localrc "new" "$OVERRIDE_ZUUL_BRANCH" "sub_localrc" "sub"
+        setup_localrc "new" "sub_localrc" "sub"
         PRIMARY_NODE=`cat /etc/nodepool/primary_node_private`
         SUB_NODES=`cat /etc/nodepool/sub_nodes_private`
         if [[ "$DEVSTACK_GATE_NEUTRON" -ne '1' ]]; then
