@@ -652,6 +652,7 @@ function cleanup_host {
     # libvirt
     if [ -d /var/log/libvirt ] ; then
         sudo cp -r /var/log/libvirt $BASE/logs/
+        sudo cp -r /usr/share/libvirt/cpu_map.xml $BASE/logs/libvirt/cpu_map.xml
     fi
 
     # sudo config
