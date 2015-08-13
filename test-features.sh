@@ -20,6 +20,8 @@ TEMPEST_FULL_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizo
 
 TEMPEST_NEUTRON_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-fwaas,q-metering"
 
+TEMPEST_NEUTRON_KILO="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-fwaas,q-metering,q-vpn"
+
 TEMPEST_HEAT_SLOW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,quantum,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-lbaas,q-fwaas,q-metering"
 
 GRENADE_NEW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification"
@@ -65,6 +67,11 @@ function test_neutron_master {
     assert_list_equal $TEMPEST_NEUTRON_MASTER $results
 }
 
+function test_neutron_kilo {
+    local results=$(DEVSTACK_GATE_NEUTRON=1 DEVSTACK_GATE_TEMPEST=1 ./test-matrix.py -b stable/kilo)
+    assert_list_equal $TEMPEST_NEUTRON_KILO $results
+}
+
 function test_heat_slow_master {
     local results=$(DEVSTACK_GATE_TEMPEST_HEAT_SLOW=1 DEVSTACK_GATE_NEUTRON=1 DEVSTACK_GATE_TEMPEST=1 ./test-matrix.py)
     assert_list_equal $TEMPEST_HEAT_SLOW_MASTER $results
@@ -88,6 +95,7 @@ function test_grenade_icehouse_master {
 test_full_master
 test_full_feature_ec
 test_neutron_master
+test_neutron_kilo
 test_heat_slow_master
 test_grenade_new_master
 test_grenade_juno_master
