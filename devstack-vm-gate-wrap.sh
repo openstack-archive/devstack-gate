@@ -367,6 +367,11 @@ export DEVSTACK_GATE_CLEAN_LOGS=${DEVSTACK_GATE_CLEAN_LOGS:-1}
 # to run before being aborted (default 60).
 export DEVSTACK_GATE_TIMEOUT=${DEVSTACK_GATE_TIMEOUT:-60}
 
+# Set to 1 to remove the stack users blanket sudo permissions forcing
+# openstack services running as the stack user to rely on rootwrap rulesets
+# instead of raw sudo. Do this to ensure rootwrap works. This is the default.
+export DEVSTACK_GATE_REMOVE_STACK_SUDO=${DEVSTACK_GATE_REMOVE_STACK_SUDO:-1}
+
 # Set to 1 to unstack immediately after devstack installation.  This
 # is intended to be a stop-gap until devstack can support
 # dependency-only installation.
