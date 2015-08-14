@@ -90,6 +90,8 @@ features:
     base:
       services: [quantum, q-svc, q-agt, q-dhcp, q-l3, q-meta, q-lbaas, q-fwaas, q-metering]
       rm-services: [n-net]
+    kilo:
+      services: [q-vpn]
 
   swift:
     base:
