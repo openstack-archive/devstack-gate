@@ -284,14 +284,6 @@ ZAQAR_BACKEND=$DEVSTACK_GATE_ZAQAR_BACKEND
 DATABASE_QUERY_LOGGING=True
 EOF
 
-    # TODO(jeblair): Remove when this has been added to jobs in
-    # project-config. It's *super important* that this happens after
-    # DEST is set, as enable_plugin uses DEST value
-    if [[ ",$MY_ENABLED_SERVICES," =~ ,trove, ]]; then
-        echo "enable_plugin trove git://git.openstack.org/openstack/trove" >>"$localrc_file"
-    fi
-
-
     if [[ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]]; then
         echo "CINDER_SECURE_DELETE=False" >>"$localrc_file"
     fi
