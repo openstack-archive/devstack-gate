@@ -590,7 +590,7 @@ function process_testr_artifacts {
         popd
         sudo mv $WORKSPACE/testrepository.subunit \
             $log_path/testrepository.subunit
-        sudo python /usr/local/jenkins/slave_scripts/subunit2html.py \
+        sudo /usr/os-testr-env/bin/subunit2html \
             $log_path/testrepository.subunit $log_path/testr_results.html
         archive_test_artifact $log_path/testrepository.subunit
         archive_test_artifact $log_path/testr_results.html
