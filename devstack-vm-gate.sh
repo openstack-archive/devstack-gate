@@ -661,9 +661,11 @@ if [[ "$DEVSTACK_GATE_UNSTACK" -eq "1" ]]; then
         -a "cd '$BASE/new/devstack' && sudo -H -u stack ./unstack.sh"
 fi
 
-echo "Removing sudo privileges for devstack user"
-$ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m file \
-    -a "path=/etc/sudoers.d/50_stack_sh state=absent"
+if [[ "$DEVSTACK_GATE_REMOVE_STACK_SUDO" -eq 1 ]]; then
+    echo "Removing sudo privileges for devstack user"
+    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m file \
+        -a "path=/etc/sudoers.d/50_stack_sh state=absent"
+fi
 
 if [[ "$DEVSTACK_GATE_EXERCISES" -eq "1" ]]; then
     echo "Running devstack exercises"
