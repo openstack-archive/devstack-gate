@@ -201,10 +201,6 @@ export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
 # Only applicable to master branch
 export DEVSTACK_GATE_NEUTRON=${DEVSTACK_GATE_NEUTRON:-0}
 
-# Set to 1 to run neutron with features that make it unstable
-# TODO(armax): get rid of this if as soon as bugs #1464612 and #1432189 get resolved
-export DEVSTACK_GATE_NEUTRON_UNSTABLE=${DEVSTACK_GATE_NEUTRON_UNSTABLE:-0}
-
 # Set to 1 to run neutron distributed virtual routing
 export DEVSTACK_GATE_NEUTRON_DVR=${DEVSTACK_GATE_NEUTRON_DVR:-0}
 
