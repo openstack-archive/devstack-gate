@@ -7,7 +7,6 @@ NODE_IP_ADDR=$1
 cat >$WORKSPACE/test-env.sh <<EOF
 export WORKSPACE=/home/jenkins/workspace
 export DEVSTACK_GATE_PREFIX=wip-
-export SKIP_DEVSTACK_GATE_PROJECT=1
 export DEVSTACK_GATE_TEMPEST=1
 export ZUUL_BRANCH=master
 export ZUUL_PROJECT=testing

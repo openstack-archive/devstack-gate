@@ -32,6 +32,7 @@ source $WORKSPACE/devstack-gate/functions.sh
 
 start_timer
 
+PROJECTS="openstack-infra/devstack-gate $PROJECTS"
 PROJECTS="openstack-dev/devstack $PROJECTS"
 PROJECTS="openstack-dev/grenade $PROJECTS"
 PROJECTS="openstack-dev/pbr $PROJECTS"
@@ -127,28 +128,6 @@ export BASE=/opt/stack
 
 # The URL from which to fetch ZUUL references
 export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
-
-# Set this variable to skip updating the devstack-gate project itself.
-# Useful in development so you can edit scripts in place and run them
-# directly.  Do not set in production.
-# Normally not set, and we do include devstack-gate with the rest of
-# the projects.
-if [ -z "$SKIP_DEVSTACK_GATE_PROJECT" ]; then
-    PROJECTS="openstack-infra/devstack-gate $PROJECTS"
-
-    # Also, if we're testing devstack-gate, re-exec this script once so
-    # that we can test the new version of it.
-    if [[ $ZUUL_CHANGES =~ "openstack-infra/devstack-gate" ]] && [[ $RE_EXEC != "true" ]]; then
-        echo "This build includes a change to devstack-gate; updating working copy."
-        # Since we're early in the script, we need to update the d-g
-        # copy in the workspace, not $DEST, which is what will be
-        # updated later.
-        setup_project openstack-infra/devstack-gate $GIT_BRANCH
-        cd $WORKSPACE
-
-        re_exec_devstack_gate
-    fi
-fi
 
 # The feature matrix to select devstack-gate components
 export DEVSTACK_GATE_FEATURE_MATRIX=${DEVSTACK_GATE_FEATURE_MATRIX:-features.yaml}
