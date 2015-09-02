@@ -48,7 +48,7 @@ branches:
   # The value of ""default" is the name of the "trunk" branch
   default: master
   # Normalized branch names only here, e.g. stable/icehouse => icehouse
-  allowed: [master, kilo, juno, icehouse]
+  allowed: [master, liberty, kilo, juno, icehouse]
 
 features:
   default:
