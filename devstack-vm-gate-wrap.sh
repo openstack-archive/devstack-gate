@@ -218,11 +218,6 @@ export DEVSTACK_GATE_SAHARA=${DEVSTACK_GATE_SAHARA:-0}
 # Set to 1 to run trove
 export DEVSTACK_GATE_TROVE=${DEVSTACK_GATE_TROVE:-0}
 
-# Set to 1 to run marconi/zaqar
-# TODO remove marconi when safe to do so
-export DEVSTACK_GATE_MARCONI=${DEVSTACK_GATE_MARCONI:-0}
-export DEVSTACK_GATE_ZAQAR=${DEVSTACK_GATE_ZAQAR:-0}
-
 # Set to 0 to disable config_drive and use the metadata server instead
 export DEVSTACK_GATE_CONFIGDRIVE=${DEVSTACK_GATE_CONFIGDRIVE:-1}
 
@@ -365,9 +360,6 @@ export OVERRIDE_ZUUL_BRANCH=${OVERRIDE_ZUUL_BRANCH:-$ZUUL_BRANCH}
 # Set Ceilometer backend to override the default one. It could be mysql,
 # postgresql, mongodb.
 export DEVSTACK_GATE_CEILOMETER_BACKEND=${DEVSTACK_GATE_CEILOMETER_BACKEND:-mysql}
-
-# Set Zaqar backend to override the default one. It could be mongodb, redis.
-export DEVSTACK_GATE_ZAQAR_BACKEND=${DEVSTACK_GATE_ZAQAR_BACKEND:-mongodb}
 
 # The topology of the system determinates the service distribution
 # among the nodes.
