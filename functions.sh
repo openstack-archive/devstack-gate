@@ -55,7 +55,7 @@ function apt_get_install {
         APT_UPDATED=1
     fi
 
-    sudo apt-get --assume-yes install $@
+    sudo DEBIAN_FRONTEND=noninteractive apt-get --assume-yes install $@
 }
 
 function call_hook_if_defined {
