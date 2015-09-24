@@ -401,9 +401,9 @@ fi
 if ! function_exists "gate_hook"; then
     # the command we use to run the gate
     function gate_hook {
-        remaining_time
-        timeout -s 9 ${REMAINING_TIME}m $BASE/new/devstack-gate/devstack-vm-gate.sh
+        $BASE/new/devstack-gate/devstack-vm-gate.sh
     }
+    export -f gate_hook
 fi
 
 echo "Triggered by: https://review.openstack.org/$ZUUL_CHANGE patchset $ZUUL_PATCHSET"
@@ -519,11 +519,11 @@ fi
 # Note that hooks should be multihost aware if necessary.
 # devstack-vm-gate-wrap.sh will not automagically run the hooks on each node.
 # Run pre test hook if we have one
-call_hook_if_defined "pre_test_hook"
+timeout_hook call_hook_if_defined "pre_test_hook"
 
 # Run the gate function
 echo "Running gate_hook"
-gate_hook
+timeout_hook "gate_hook"
 GATE_RETVAL=$?
 RETVAL=$GATE_RETVAL
 
@@ -537,7 +537,7 @@ fi
 # Run post test hook if we have one
 if [ $GATE_RETVAL -eq 0 ]; then
     # Run post_test_hook if we have one
-    call_hook_if_defined "post_test_hook"
+    timeout_hook call_hook_if_defined "post_test_hook"
     RETVAL=$?
 fi
 
