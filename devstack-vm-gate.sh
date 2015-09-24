@@ -60,6 +60,26 @@ function setup_ssh {
         -a "src=/etc/nodepool/id_rsa dest='$path/id_rsa' mode=0400"
 }
 
+function setup_nova_net_networking {
+    local localrc=$1
+    local primary_node=$2
+    shift 2
+    local sub_nodes=$@
+    # We always setup multinode connectivity to work around an
+    # issue with nova net configuring br100 to take over eth0
+    # by default.
+    # TODO (clarkb): figure out how to make bridge setup sane with ansible.
+    ovs_gre_bridge "br_pub" $primary_node "True" 1 \
+                   $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
+                   $sub_nodes
+    ovs_gre_bridge "br_flat" $primary_node "False" 128 \
+                   $sub_nodes
+    cat <<EOF >>"$localrc"
+FLAT_INTERFACE=br_flat
+PUBLIC_INTERFACE=br_pub
+EOF
+}
+
 function setup_multinode_connectivity {
     local mode=${1:-"devstack"}
     # Multinode setup variables:
@@ -86,29 +106,24 @@ function setup_multinode_connectivity {
     set -x  # for now enabling debug and do not turn it off
     setup_localrc $old_or_new "$sub_localrc" "sub"
 
-    PRIMARY_NODE=`cat /etc/nodepool/primary_node_private`
-    SUB_NODES=`cat /etc/nodepool/sub_nodes_private`
+    local primary_node
+    primary_node=$(cat /etc/nodepool/primary_node_private)
+    local sub_nodes
+    sub_nodes=$(cat /etc/nodepool/sub_nodes_private)
     if [[ "$DEVSTACK_GATE_NEUTRON" -ne '1' ]]; then
-        # TODO (clarkb): figure out how to make bridge setup sane with ansible.
-        ovs_gre_bridge "br_pub" $PRIMARY_NODE "True" 1 \
-                       $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
-                       $SUB_NODES
-        ovs_gre_bridge "br_flat" $PRIMARY_NODE "False" 128 \
-                       $SUB_NODES
+        setup_nova_net_networking $localrc $primary_node $sub_nodes
         cat <<EOF >>"$sub_localrc"
 FLAT_INTERFACE=br_flat
 PUBLIC_INTERFACE=br_pub
 MULTI_HOST=True
 EOF
         cat <<EOF >>"$localrc"
-FLAT_INTERFACE=br_flat
-PUBLIC_INTERFACE=br_pub
 MULTI_HOST=True
 EOF
     elif [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq '1' ]]; then
-        ovs_gre_bridge "br-ex" $PRIMARY_NODE "True" 1 \
+        ovs_gre_bridge "br-ex" $primary_node "True" 1 \
                        $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
-                       $SUB_NODES
+                       $sub_nodes
     fi
 
     echo "Preparing cross node connectivity"
@@ -116,7 +131,7 @@ EOF
     setup_ssh ~root/.ssh
     # TODO (clarkb) ansiblify the /etc/hosts and known_hosts changes
     # set up ssh_known_hosts by IP and /etc/hosts
-    for NODE in $SUB_NODES; do
+    for NODE in $sub_nodes; do
         ssh-keyscan $NODE >> /tmp/tmp_ssh_known_hosts
         echo $NODE `remote_command $NODE hostname | tr -d '\r'` >> /tmp/tmp_hosts
     done
@@ -132,7 +147,7 @@ EOF
     $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
              -a "src=/tmp/tmp_ssh_known_hosts dest=/etc/ssh/ssh_known_hosts mode=0444"
 
-    for NODE in $SUB_NODES; do
+    for NODE in $sub_nodes; do
         remote_copy_file /tmp/tmp_hosts $NODE:/tmp/tmp_hosts
         remote_command $NODE "cat /tmp/tmp_hosts | sudo tee --append /etc/hosts > /dev/null"
         cp $sub_localrc /tmp/tmp_sub_localrc
@@ -140,6 +155,18 @@ EOF
         remote_copy_file /tmp/tmp_sub_localrc $NODE:$devstack_dir/localrc
         remote_copy_file $localconf $NODE:$localconf
     done
+}
+
+function setup_networking {
+    local mode=${1:-"devstack"}
+    # Neutron in single node setups does not need any special
+    # sauce to function.
+    if [[ "$DEVSTACK_GATE_TOPOLOGY" != "multinode" ]] && \
+        [[ "$DEVSTACK_GATE_NEUTRON" -ne '1' ]]; then
+        setup_nova_net_networking "localrc" "127.0.0.1"
+    elif [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]]; then
+        setup_multinode_connectivity $mode
+    fi
 }
 
 function setup_localrc {
@@ -559,8 +586,6 @@ EOF
         # get this in our base config
         cp local.conf $BASE/old/devstack
 
-        setup_multinode_connectivity "grenade"
-
         # build the post-stack.sh config, this will be run as stack user so no sudo required
         cat > $BASE/new/grenade/post-stack.sh <<EOF
 #!/bin/bash
@@ -572,6 +597,8 @@ $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m shell \
 EOF
         sudo chmod a+x $BASE/new/grenade/post-stack.sh
     fi
+
+    setup_networking "grenade"
 
     # Make the workspace owned by the stack user
     # It is not clear if the ansible file module can do this for us
@@ -587,11 +614,12 @@ EOF
 else
     cd $BASE/new/devstack
     setup_localrc "new" "localrc" "primary"
-
-    if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]]; then
+    if [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]]; then
         echo -e "[[post-config|\$NOVA_CONF]]\n[libvirt]\ncpu_mode=custom\ncpu_model=gate64" >> local.conf
-        setup_multinode_connectivity
     fi
+
+    setup_networking
+
     # Make the workspace owned by the stack user
     # It is not clear if the ansible file module can do this for us
     $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m shell \
