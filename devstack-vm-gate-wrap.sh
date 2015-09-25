@@ -519,11 +519,11 @@ fi
 # Note that hooks should be multihost aware if necessary.
 # devstack-vm-gate-wrap.sh will not automagically run the hooks on each node.
 # Run pre test hook if we have one
-timeout_hook call_hook_if_defined "pre_test_hook"
+with_timeout call_hook_if_defined "pre_test_hook"
 
 # Run the gate function
 echo "Running gate_hook"
-timeout_hook "gate_hook"
+with_timeout "gate_hook"
 GATE_RETVAL=$?
 RETVAL=$GATE_RETVAL
 
@@ -537,7 +537,7 @@ fi
 # Run post test hook if we have one
 if [ $GATE_RETVAL -eq 0 ]; then
     # Run post_test_hook if we have one
-    timeout_hook call_hook_if_defined "post_test_hook"
+    with_timeout call_hook_if_defined "post_test_hook"
     RETVAL=$?
 fi
 

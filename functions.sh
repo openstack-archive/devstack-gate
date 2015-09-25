@@ -991,7 +991,7 @@ function ovs_gre_bridge {
 # Timeout hook calls implemented as bash functions. Note this
 # forks and execs a new bash in order to use the timeout utility
 # which cannot operate on bash functions directly.
-function timeout_hook {
+function with_timeout {
     local cmd=$@
     remaining_time
     timeout -s 9 ${REMAINING_TIME}m bash -c "source $WORKSPACE/devstack-gate/functions.sh && $cmd"
