@@ -697,6 +697,11 @@ function cleanup_host {
             sudo cp $BASE/old/devstack/tempest.log $BASE/logs/old/verify_tempest_conf.log
         fi
 
+        # dstat CSV log
+        if [ -f $BASE/old/dstat-csv.log ]; then
+            sudo cp $BASE/old/dstat-csv.log $BASE/logs/old/
+        fi
+
         # grenade logs
         sudo cp $BASE/new/grenade/localrc $BASE/logs/grenade_localrc.txt
 
@@ -748,6 +753,11 @@ function cleanup_host {
 
     # Copy tempest config file
     sudo cp $BASE/new/tempest/etc/tempest.conf $NEWLOGTARGET/tempest_conf.txt
+
+    # Copy dstat CSV log if it exists
+    if [ -f $BASE/new/dstat-csv.log ]; then
+        sudo cp $BASE/new/dstat-csv.log $BASE/logs/
+    fi
 
     sudo iptables-save > $WORKSPACE/iptables.txt
     df -h > $WORKSPACE/df.txt
