@@ -937,9 +937,19 @@ function enable_netconsole {
 #   http://www.yet.org/2014/09/openvswitch-troubleshooting/
 #
 function ovs_gre_bridge {
+    if is_fedora; then
+        local ovs_package='openvswitch'
+        local ovs_service='openvswitch'
+    elif uses_debs; then
+        local ovs_package='openvswitch-switch'
+        local ovs_service='openvswitch-switch'
+    else
+        echo "Unsupported platform, can't determine ntp service"
+        exit 1
+    fi
     local install_ovs_deps="source $BASE/new/devstack/functions-common; \
-                            install_package openvswitch-switch; \
-                            restart_service openvswitch-switch"
+                            install_package ${ovs_package}; \
+                            restart_service ${ovs_service}"
     local mtu=1450
     local bridge_name=$1
     local host_ip=$2
