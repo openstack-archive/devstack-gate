@@ -246,6 +246,21 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
     # All grenade upgrades get tempest
     export DEVSTACK_GATE_TEMPEST=1
 
+    # NOTE(sdague): Adjusting grenade branches for a release.
+    #
+    # When we get to the point of the release where we should adjust
+    # the grenade branches, the order of doing so is important.
+    #
+    # 1. stable/foo on all projects in devstack
+    # 2. stable/foo on devstack
+    # 3. stable/foo on grenade
+    # 4. adjust branches in devstack-gate
+    #
+    # The devstack-gate branch logic going last means that it will be
+    # tested before thrust upon the jobs. For both the stable/kilo and
+    # stable/liberty releases real release issues were found in this
+    # process. So this should be done as early as possible.
+
     case $DEVSTACK_GATE_GRENADE in
 
         # sideways upgrades try to move between configurations in the
@@ -297,11 +312,6 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
             elif [[ "$GRENADE_BASE_BRANCH" == "stable/liberty" ]]; then
                 export GRENADE_OLD_BRANCH="stable/kilo"
                 export GRENADE_NEW_BRANCH="stable/liberty"
-            elif [[ "$GRENADE_BASE_BRANCH" == "stable/mitaka" ]]; then
-                # not used yet, but will be used when we cut the
-                # stable mitaka branch
-                export GRENADE_OLD_BRANCH="stable/liberty"
-                export GRENADE_NEW_BRANCH="stable/mitaka"
             else # master
                 export GRENADE_OLD_BRANCH="stable/liberty"
                 export GRENADE_NEW_BRANCH="$GIT_BRANCH"
