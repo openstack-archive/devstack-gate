@@ -1,0 +1,144 @@
+The basic requirement we have for running multinode openstack tests is that
+tempest must be able to ssh and ping the nested VMs booted by openstack and
+these nested VMs need to be able to talk to each other. This is due to how
+the tests are run by tempest.
+
+We run devstack-gate on multiple public clouds. In order to meet the above
+requirement we need some control over l2 and l3 networking in the test envs,
+but not all of our clouds provide this control. To work around this we setup
+overlay networks across the VMs using software bridges and tunnels between
+the hosts. This provides routing for the floating IP network between tempest
+and VMs and between VMs themselves.
+
+To map against a real deployment the overlay networks would be the networking
+provided by your datacenter for OpenStack and the existing eth0 for each test
+node is a management interface or ILO. We just have to set up our own
+datacenter networking because we are running in clouds.
+
+Some useful IP ranges:
+172.24.4.0/23 This is our "public" IP range. Test nodes get IPs in the first
+half of this subnet.
+172.24.5.0/24 This is our floating IP range. VMs get assigned floating IPs
+from this range. The test nodes know how to "route" to these VMs due to the
+interfaces on 172.24.4.0/23.
+
+Now to network solution specifics. Nova network and neutron are different
+enough that they deserve their own specific documentation below.
+
+Nova Network
+============
+
+           Subnode1                      Primary Node                   Subnode2
++--------------------------+   +--------------------------+   +--------------------------+
+|                          |   |                          |   |                          |
+|                          |   |                          |   |                          |
+|                          |   |                          |   |                          |
+|172.24.4.2/23             |   |172.24.4.1/23             |   |172.24.4.3/23             |
+|+------+      +--------+  |   |+-------+      +-------+  |   |+-------+      +-------+  |
+||br_pub|      | br_flat|  |   ||br_pub |      |br_flat|  |   ||br_pub |      |br_flat|  |
+|+--+---+      +---+----+  |   |+---+---+      +---+---+  |   |+---+---+      +---+---+  |
+|   |              |       |   |    |              |      |   |    |              |      |
+|   |              +-------------------gre-tunnel--+-----------------gre-tunnel---+      |
+|   |                      |   |    |                     |   |    |                     |
+|   +----------gre-tunnel-----------+----------gre-tunnel----------+                     |
+|                          |   |                          |   |                          |
++--------------------------+   +--------------------------+   +--------------------------+
+
+In addition to the requirement for floating IP connectivity above nova net
+also requires that the the private network for the VMs be shared so that the
+nested VMs can get access to nova services like dhcp and metadata. While not
+strictly necessary when using nova net multihost we support both and this
+allows nested VM to nested VM communication over private IP.
+
+In this setup we have two soft bridges on the primary node (the controller).
+The br_flat bridge handles the l2 traffic for the VMs private interfaces.
+The br_pub bridge is where floating IPs are configured and allows for test
+node to nested VM communication and nested VM to nested VM communication.
+We cannot share the l2 bridge for separate l3 communication because nova net
+uses ebtables to prevent public IPs from talking to private IPs and we lose
+packets on a shared bridge as a result.
+
+This is what it all looks like after you run devstack and boot some nodes.
+
+           Subnode1                      Primary Node                   Subnode2
++--------------------------+   +--------------------------+   +--------------------------+
+| +--+         +-----+     |   | +--+          +-----+    |   | +--+          +-----+    |
+| |vm|---------|br100|     |   | |vm|----------|br100|    |   | |vm|----------|br100|    |
+| +--+         +-----+     |   | +--+          +-----+    |   | +--+          +-----+    |
+|   |              |       |   |   |               |      |   |   |               |      |
+|172.25.5.1/24     |       |   |172.25.5.2/24      |      |   |172.25.5.3/24      |      |
+|172.24.4.2/23     |       |   |172.24.4.1/23      |      |   |172.24.4.3/23      |      |
+|+------+      +--------+  |   |+-------+      +-------+  |   |+-------+      +-------+  |
+||br_pub|      | br_flat|  |   ||br_pub |      |br_flat|  |   ||br_pub |      |br_flat|  |
+|+--+---+      +---+----+  |   |+---+---+      +---+---+  |   |+---+---+      +---+---+  |
+|   |              |       |   |    |              |      |   |    |              |      |
+|   |              +-------------------gre-tunnel--+-----------------gre-tunnel---+      |
+|   |                      |   |    |                     |   |    |                     |
+|   +----------gre-tunnel-----------+----------gre-tunnel----------+                     |
+|                          |   |                          |   |                          |
++--------------------------+   +--------------------------+   +--------------------------+
+
+Neutron
+=======
+
+Neutron is a bit different and comes in two flavors. The base case is
+neutron without DVR. In this case all of the l3 networking runs on the
+primary node. The other case is with DVR where each test node handles
+l3 for the nested VMs running on that test node.
+
+For the non DVR case we don't need to do anything special. Devstack and
+neutron setup br-int between the nodes for us and all public floating
+IP traffic is backhauled over br-int to the primary node where br-ex
+exists. br-ex is created on the primary node as it is on the single node
+tests and all tempest to floating IP and nested VM to nested VM communication
+happens here.
+
+           Subnode1                      Primary Node                   Subnode2
++--------------------------+   +--------------------------+   +--------------------------+
+|                          |   |                          |   |                          |
+|                          |   |                          |   |                          |
+|                          |   |                          |   |                          |
+|172.24.4.2/23             |   |172.24.4.1/23             |   |172.24.4.3/23             |
+|+------+                  |   |+-------+                 |   |+-------+                 |
+||br-ex |                  |   ||br-ex  |                 |   ||br-ex  |                 |
+|+--+---+                  |   |+---+---+                 |   |+---+---+                 |
+|   |                      |   |    |                     |   |    |                     |
+|   |                      |   |    |                     |   |    |                     |
+|   +----------gre-tunnel-----------+----------gre-tunnel----------+                     |
+|                          |   |                          |   |                          |
++--------------------------+   +--------------------------+   +--------------------------+
+
+The DVR case is a bit more complicated. Devstack and neutron still configure
+br-int for us so we don't need two overlay networks like with nova net, but
+do need an overlay for floating IP public networking due to our original
+requirements. If floating IPs are configured on arbitrary test nodes we need
+to know how to get packets to them.
+
+Neutron uses br-ex for the floating IP network; unfortunately, Devstack and
+neutron do not configure br-ex except for in the trivial detached from
+everything case described earlier. This means we have to configure br-ex
+ourselves and the simplest way to do that is to just make br-ex the overlay
+itself. Doing this allows neutron to work properly with nested VMs talking
+to nested VMs and it also allows the test nodes to talk to VMs over br-ex as
+well.
+
+This is what it all looks like after you run devstack and boot some nodes.
+
+           Subnode1                      Primary Node                   Subnode2
++--------------------------+   +--------------------------+   +--------------------------+
+|                +------+  |   |                +------+  |   |                +------+  |
+|                |br-tun|--------tunnel---------|br-tun|--------tunnel---------|br-tun|  |
+|                +------+  |   |                +------+  |   |                +------+  |
+|                |br-int|  |   |                |br-int|  |   |                |br-int|  |
+|                +------+  |   |                +------+  |   |                +------+  |
+|                     |    |   |                     |    |   |                     |    |
+|172.24.4.2/23       +--+  |   |172.24.4.1/23       +--+  |   |172.24.4.3/23       +--+  |
+|172.24.5.1/24--NAT--|vm|  |   |172.24.5.2/24--NAT--|vm|  |   |172.24.5.3/24--NAT--|vm|  |
+|+------+            +--+  |   |+-------+           +--+  |   |+-------+           +--+  |
+||br-ex |                  |   ||br-ex  |                 |   ||br-ex  |                 |
+|+--+---+                  |   |+---+---+                 |   |+---+---+                 |
+|   |                      |   |    |                     |   |    |                     |
+|   |                      |   |    |                     |   |    |                     |
+|   +----------gre-tunnel-----------+----------gre-tunnel----------+                     |
+|                          |   |                          |   |                          |
++--------------------------+   +--------------------------+   +--------------------------+
