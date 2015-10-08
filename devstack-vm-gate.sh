@@ -624,19 +624,22 @@ else
     # It is not clear if the ansible file module can do this for us
     $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m shell \
         -a "chown -R stack:stack '$BASE'"
+    # allow us to add logs
+    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "chmod 777 '$WORKSPACE/logs'"
 
     echo "Running devstack"
     echo "... this takes 10 - 15 minutes (logs in logs/devstacklog.txt.gz)"
     start=$(date +%s)
     $ANSIBLE primary -f 5 -i "$WORKSPACE/inventory" -m shell \
         -a "cd '$BASE/new/devstack' && sudo -H -u stack stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
-        > /dev/null
+        &> "$WORKSPACE/logs/devstack-early.txt"
     # Run non controller setup after controller is up. This is necessary
     # because services like nova apparently expect to have the controller in
     # place before anything else.
     $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m shell \
         -a "cd '$BASE/new/devstack' && sudo -H -u stack stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
-        > /dev/null
+        &> "$WORKSPACE/logs/devstack-subnodes-early.txt"
     end=$(date +%s)
     took=$((($end - $start) / 60))
     if [[ "$took" -gt 20 ]]; then
