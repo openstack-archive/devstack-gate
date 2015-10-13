@@ -630,17 +630,25 @@ function process_testr_artifacts {
         log_path=$BASE/logs/$path_prefix
     fi
 
+    if  [[ -f $BASE/devstack.subunit ]]; then
+        sudo cp $BASE/devstack.subunit $log_path/testrepository.subunit
+    fi
+
     # Check for an interrupted run first because 0 will always exist
     if [ -f $repo_path/tmp* ]; then
         # If testr timed out, collect temp file from testr
-        sudo cp $repo_path/tmp* $log_path/testrepository.subunit
-        archive_test_artifact $log_path/testrepository.subunit
+        sudo cat $repo_path/tmp* >> $WORKSPACE/tempest.subunit
+        archive_test_artifact $WORKSPACE/tempest.subunit
     elif [ -f $repo_path/0 ]; then
         pushd $project_path
-        sudo testr last --subunit > $WORKSPACE/testrepository.subunit
+        sudo testr last --subunit > $WORKSPACE/tempest.subunit
         popd
-        sudo mv $WORKSPACE/testrepository.subunit \
-            $log_path/testrepository.subunit
+    fi
+    if [[ -f $log_path/testrepository.subunit ]] ; then
+        if [[ -f $WORKSPACE/tempest.subunit ]] ; then
+            sudo cat $WORKSPACE/tempest.subunit \
+                | sudo tee -a $log_path/testrepository.subunit > /dev/null
+        fi
         sudo /usr/os-testr-env/bin/subunit2html \
             $log_path/testrepository.subunit $log_path/testr_results.html
         archive_test_artifact $log_path/testrepository.subunit
