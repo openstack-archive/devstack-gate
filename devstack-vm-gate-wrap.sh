@@ -33,7 +33,6 @@ source $WORKSPACE/devstack-gate/functions.sh
 start_timer
 
 PROJECTS="openstack-dev/devstack $PROJECTS"
-PROJECTS="openstack-dev/grenade $PROJECTS"
 PROJECTS="openstack-dev/pbr $PROJECTS"
 PROJECTS="openstack-infra/jeepyb $PROJECTS"
 PROJECTS="openstack-infra/os-loganalyze $PROJECTS"
