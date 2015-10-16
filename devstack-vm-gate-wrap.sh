@@ -123,6 +123,10 @@ PROJECTS="openstack/tripleo-image-elements $PROJECTS"
 PROJECTS="openstack/tripleo-incubator $PROJECTS"
 PROJECTS="openstack/trove $PROJECTS"
 
+# Remove duplicates as they result in errors when managing
+# git state.
+PROJECTS=$(echo $PROJECTS | tr '[:space:]' '\n' | sort -u)
+
 
 export BASE=/opt/stack
 
