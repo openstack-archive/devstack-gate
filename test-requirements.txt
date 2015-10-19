@@ -1,1 +1,0 @@
-bashate>=0.2 # Apache-2.0

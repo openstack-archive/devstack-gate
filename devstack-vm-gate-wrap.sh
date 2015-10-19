@@ -494,7 +494,7 @@ if [ -n "$DEVSTACK_GATE_GRENADE" ]; then
     echo "Setting up the new (migrate to) workspace"
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
     $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
-             -a "$(run_command setup_workspace '$GRENADE_NEW_BRANCH' '$BASE/new')" \
+            -a "$(run_command setup_workspace '$GRENADE_NEW_BRANCH' '$BASE/new')" \
         &> "$WORKSPACE/logs/devstack-gate-setup-workspace-new.txt"
     echo "Setting up the old (migrate from) workspace ..."
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-old.txt.gz)"
