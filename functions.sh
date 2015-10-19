@@ -414,8 +414,8 @@ function setup_project {
 function setup_workspace {
     local base_branch=$1
     local DEST=$2
-    local copy_cache=$3
     local xtrace=$(set +o | grep xtrace)
+    local cache_dir=$BASE/cache/files/
 
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
@@ -447,15 +447,19 @@ function setup_workspace {
     # It's important we are back at DEST for the rest of the script
     cd $DEST
 
-    if [ -n "$copy_cache" ] ; then
-        # The vm template update job should cache some images in ~/cache.
-        # Move them to where devstack expects:
-        find ~/cache/files/ -mindepth 1 -maxdepth 1 -exec cp {} $DEST/devstack/files/ \;
-    else
-        # The vm template update job should cache some images in ~/cache.
-        # Move them to where devstack expects:
-        find ~/cache/files/ -mindepth 1 -maxdepth 1 -exec mv {} $DEST/devstack/files/ \;
+    # Populate the cache for devstack (this will typically be vm images)
+    #
+    # If it's still in home, move it to /opt, this will make sure we
+    # have the artifacts in the same filesystem as devstack.
+    if [ -d ~/cache/files ]; then
+        sudo mkdir -p $cache_dir
+        sudo chown -R jenkins:jenkins $cache_dir
+        find ~/cache/files/ -mindepth 1 -maxdepth 1 -exec mv {} $cache_dir \;
+        rm -rf ~/cache/files/
     fi
+
+    # copy them to where devstack expects with hardlinks to save space
+    find $cache_dir -mindepth 1 -maxdepth 1 -exec cp -l {} $DEST/devstack/files/ \;
 
     # Disable detailed logging as we return to the main script
     $xtrace
