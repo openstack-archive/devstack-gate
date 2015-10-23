@@ -490,6 +490,7 @@ $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
     -a "$(run_command setup_host)" &> "$WORKSPACE/logs/devstack-gate-setup-host.txt"
 
 if [ -n "$DEVSTACK_GATE_GRENADE" ]; then
+    start=$(date +%s)
     echo "Setting up the new (migrate to) workspace"
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
     $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
@@ -500,12 +501,23 @@ if [ -n "$DEVSTACK_GATE_GRENADE" ]; then
     $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
         -a "$(run_command setup_workspace '$GRENADE_OLD_BRANCH' '$BASE/old')" \
         &> "$WORKSPACE/logs/devstack-gate-setup-workspace-old.txt"
+    end=$(date +%s)
+    took=$((($end - $start) / 60))
+    if [[ "$took" -gt 20 ]]; then
+        echo "WARNING: setup of 2 workspaces took > 20 minutes, this is a very slow node."
+    fi
 else
     echo "Setting up the workspace"
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
+    start=$(date +%s)
     $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
         -a "$(run_command setup_workspace '$OVERRIDE_ZUUL_BRANCH' '$BASE/new')" \
         &> "$WORKSPACE/logs/devstack-gate-setup-workspace-new.txt"
+    end=$(date +%s)
+    took=$((($end - $start) / 60))
+    if [[ "$took" -gt 10 ]]; then
+        echo "WARNING: setup workspace took > 10 minutes, this is a very slow node."
+    fi
 fi
 
 # relocate and symlink logs into $BASE to save space on the root filesystem
