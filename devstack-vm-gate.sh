@@ -581,8 +581,6 @@ EOF
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]]; then
         echo -e "[[post-config|\$NOVA_CONF]]\n[libvirt]\ncpu_mode=custom\ncpu_model=gate64" >> local.conf
-        # this pins everything to the rpc version of the stable side
-        echo -e "[upgrade_levels]\ncompute=$(basename $GRENADE_OLD_BRANCH)" >> local.conf
         # get this in our base config
         cp local.conf $BASE/old/devstack
 
