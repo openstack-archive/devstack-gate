@@ -176,7 +176,14 @@ export DEVSTACK_GATE_TEMPEST_DISABLE_TENANT_ISOLATION=${DEVSTACK_GATE_TEMPEST_DI
 # Set to 1 to enable Cinder secure delete.
 # False by default to avoid dd problems on Precise.
 # https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1023755
+# TODO(mriedem): CINDER_SECURE_DELETE is deprecated in devstack as of liberty.
+# Remove after kilo-eol happens in devstack.
 export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
+
+# Should cinder perform secure deletion of volumes?
+# Defaults to none to avoid bug 1023755. Can also be set to zero or shred.
+# Only applicable to stable/liberty+ devstack.
+export DEVSTACK_CINDER_VOLUME_CLEAR=${DEVSTACK_CINDER_VOLUME_CLEAR:-none}
 
 # Set to 1 to run neutron instead of nova network
 # Only applicable to master branch
