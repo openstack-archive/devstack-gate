@@ -1018,3 +1018,8 @@ function with_timeout {
     remaining_time
     timeout -s 9 ${REMAINING_TIME}m bash -c "source $WORKSPACE/devstack-gate/functions.sh && $cmd"
 }
+
+# Iniset imported from devstack
+function iniset {
+    $(source $BASE/new/devstack/inc/ini-config; iniset $@)
+}

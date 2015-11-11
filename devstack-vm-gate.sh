@@ -737,6 +737,12 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
         exit 0
     fi
 
+    # in future we might want to force higher numbers here, but this
+    # ensures the multinode tests at least touch 2 nodes.
+    if [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]]; then
+        iniset -sudo $BASE/new/tempest/etc/tempest.conf compute min_compute_nodes 2
+    fi
+
     # From here until the end we rely on the fact that all the code fails if
     # something is wrong, to enforce exit on bad test results.
     set -o errexit
