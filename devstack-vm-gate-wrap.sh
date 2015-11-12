@@ -348,13 +348,6 @@ export DEVSTACK_GATE_TEMPEST_ALL_PLUGINS=${DEVSTACK_GATE_TEMPEST_ALL_PLUGINS:-0}
 # Set to 1 if running the openstack/requirements integration test
 export DEVSTACK_GATE_REQS_INTEGRATION=${DEVSTACK_GATE_REQS_INTEGRATION:-0}
 
-# Set to 1 if running the project is using libraries not specified
-# in global requirements
-export REQUIREMENTS_MODE=${REQUIREMENTS_MODE:-strict}
-
-# Set to False to disable USE_CONSTRAINTS and run without known-good test pins.
-export USE_CONSTRAINTS=${USE_CONSTRAINTS:-True}
-
 # Set to 0 to disable clean logs enforcement (3rd party CI might want to do this
 # until they get their driver cleaned up)
 export DEVSTACK_GATE_CLEAN_LOGS=${DEVSTACK_GATE_CLEAN_LOGS:-1}
