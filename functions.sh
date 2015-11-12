@@ -707,6 +707,13 @@ function cleanup_host {
         # grenade logs
         sudo cp $BASE/new/grenade/localrc $BASE/logs/grenade_localrc.txt
 
+        # grenade saved state files - resources created during upgrade tests
+        # use this directory to dump arbitrary configuration/state files.
+        if [ -d $BASE/save ]; then
+            sudo mkdir -p $BASE/logs/grenade_save
+            sudo cp -r $BASE/save/* $BASE/logs/grenade_save/
+        fi
+
         # grenade pluginrc - external grenade plugins use this file to
         # communicate with grenade, capture for posterity
         if -f [ $BASE/new/grenade/pluginrc ]; then
