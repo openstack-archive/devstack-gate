@@ -520,13 +520,6 @@ EOF
 }
 
 if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
-    if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-ironic" ]]; then
-        # Disable ironic when generating the "old" localrc.
-        TMP_DEVSTACK_GATE_IRONIC=$DEVSTACK_GATE_IRONIC
-        TMP_DEVSTACK_GATE_VIRT_DRIVER=$DEVSTACK_GATE_VIRT_DRIVER
-        export DEVSTACK_GATE_IRONIC=0
-        export DEVSTACK_GATE_VIRT_DRIVER="fake"
-    fi
     if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-neutron" ]]; then
         # Use nova network when generating "old" localrc.
         TMP_DEVSTACK_GATE_NEUTRON=$DEVSTACK_GATE_NEUTRON
@@ -535,12 +528,6 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
     cd $BASE/old/devstack
     setup_localrc "old" "localrc" "primary"
 
-    if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-ironic" ]]; then
-        # Set ironic and virt driver settings to those initially set
-        # by the job.
-        export DEVSTACK_GATE_IRONIC=$TMP_DEVSTACK_GATE_IRONIC
-        export DEVSTACK_GATE_VIRT_DRIVER=$TMP_DEVSTACK_GATE_VIRT_DRIVER
-    fi
     if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-neutron" ]]; then
         # Set neutron setting to that initially set by the job.
         export DEVSTACK_GATE_NEUTRON=$TMP_DEVSTACK_GATE_NEUTRON
@@ -564,13 +551,6 @@ TEMPEST_CONCURRENCY=$TEMPEST_CONCURRENCY
 VERBOSE=False
 PLUGIN_DIR=\$TARGET_RELEASE_DIR
 EOF
-
-    if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-ironic" ]]; then
-        # sideways-ironic migrates from a fake environment, avoid exercising
-        # base.
-        echo "BASE_RUN_SMOKE=False" >> $BASE/new/grenade/localrc
-        echo "RUN_JAVELIN=False" >> $BASE/new/grenade/localrc
-    fi
 
     # Create a pass through variable that can add content to the
     # grenade pluginrc. Needed for grenade external plugins in gate
