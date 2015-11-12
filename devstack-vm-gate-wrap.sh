@@ -468,6 +468,9 @@ $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m file \
 $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m file \
     -a "path='$WORKSPACE/logs' state=directory"
 
+# Record a file to reproduce this build
+reproduce
+
 # Run ansible to do setup_host on all nodes.
 echo "Setting up the hosts"
 

@@ -169,6 +169,44 @@ function remaining_time {
     fi
 }
 
+# Create a script to reproduce this build
+function reproduce {
+    cat > $WORKSPACE/logs/reproduce.sh <<EOF
+#!/bin/bash -xe
+
+exec 0</dev/null
+
+EOF
+
+    export | grep '\(DEVSTACK\|ZUUL\)' >> $WORKSPACE/logs/reproduce.sh
+
+    cat >> $WORKSPACE/logs/reproduce.sh <<EOF
+
+mkdir -p workspace/$JOB_NAME
+cd workspace/$JOB_NAME
+export WORKSPACE=\`pwd\`
+
+if [[ ! -e /usr/zuul-env ]]; then
+  virtualenv /usr/zuul-env
+  /usr/zuul-env/bin/pip install zuul
+fi
+
+cat > clonemap.yaml << IEOF
+clonemap:
+  - name: openstack-infra/devstack-gate
+    dest: devstack-gate
+IEOF
+
+/usr/zuul-env/bin/zuul-cloner -m clonemap.yaml --cache-dir /opt/git git://git.openstack.org openstack-infra/devstack-gate
+
+cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
+./safe-devstack-vm-gate-wrap.sh
+
+EOF
+
+    chmod a+x $WORKSPACE/logs/reproduce.sh
+}
+
 # indent the output of a command 4 spaces, useful for distinguishing
 # the output of a command from the command itself
 function indent {
