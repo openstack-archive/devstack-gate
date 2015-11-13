@@ -163,7 +163,7 @@ Upgrade the server, install git and pip packages, add tox via pip
 a current kernel::
 
   apt-get install -y git \
-  && git clone https://review.openstack.org/p/openstack-infra/system-config \
+  && git clone https://git.openstack.org/openstack-infra/system-config \
   && system-config/install_puppet.sh && system-config/install_modules.sh \
   && puppet apply \
   --modulepath=/root/system-config/modules:/etc/puppet/modules \
@@ -176,7 +176,7 @@ Wait a few moments for the reboot to complete, then log back in with
 ``nova ssh --login jenkins testserver`` or ``ssh jenkins@<ip_address>``
 and set up parts of the environment expected by devstack-gate testing::
 
-  export REPO_URL=https://review.openstack.org/p
+  export REPO_URL=https://git.openstack.org
   export ZUUL_URL=/home/jenkins/workspace-cache
   export ZUUL_REF=HEAD
   export WORKSPACE=/home/jenkins/workspace/testing
