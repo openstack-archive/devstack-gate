@@ -691,7 +691,7 @@ fi
 
 function load_subunit_stream {
     local stream=$1;
-    pushd /opt/stack/new/tempest/
+    pushd $BASE/new/tempest/
     sudo testr load --force-init $stream
     popd
 }
@@ -721,8 +721,8 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
         sudo chown -R tempest:stack $BASE/data/tempest
     fi
     # ensure the cirros image files are accessible
-    if [[ -d /opt/stack/new/devstack/files ]]; then
-        sudo chmod -R o+rx /opt/stack/new/devstack/files
+    if [[ -d $BASE/new/devstack/files ]]; then
+        sudo chmod -R o+rx $BASE/new/devstack/files
     fi
 
     # if set, we don't need to run Tempest at all
