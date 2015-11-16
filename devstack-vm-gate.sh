@@ -291,13 +291,6 @@ SWIFT_REPLICAS=1
 LOG_COLOR=False
 # Don't reset the requirements.txt files after g-r updates
 UNDO_REQUIREMENTS=False
-# Set to soft if the project is using libraries not in g-r
-# (pre-liberty)
-REQUIREMENTS_MODE=${REQUIREMENTS_MODE}
-# Set to False to disable the use of upper-constraints.txt
-# if you want to experience the wild freedom of uncapped
-# dependencies from PyPI
-USE_CONSTRAINTS=${USE_CONSTRAINTS}
 CINDER_PERIODIC_INTERVAL=10
 export OS_NO_CACHE=True
 CEILOMETER_BACKEND=$DEVSTACK_GATE_CEILOMETER_BACKEND
