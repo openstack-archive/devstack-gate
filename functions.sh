@@ -426,7 +426,7 @@ function setup_workspace {
     fix_disk_layout
 
     sudo mkdir -p $DEST
-    sudo chown -R jenkins:jenkins $DEST
+    sudo chown -R $USER:$USER $DEST
 
     #TODO(jeblair): remove when this is no longer created by the image
     rm -fr ~/workspace-cache/
@@ -451,7 +451,7 @@ function setup_workspace {
     # have the artifacts in the same filesystem as devstack.
     if [ -d ~/cache/files ]; then
         sudo mkdir -p $cache_dir
-        sudo chown -R jenkins:jenkins $cache_dir
+        sudo chown -R $USER:$USER $cache_dir
         find ~/cache/files/ -mindepth 1 -maxdepth 1 -exec mv {} $cache_dir \;
         rm -rf ~/cache/files/
     fi
@@ -566,7 +566,7 @@ function archive_test_artifact {
     local filename=$1
 
     sudo gzip -9 $filename
-    sudo chown jenkins:jenkins $filename.gz
+    sudo chown $USER:$USER $filename.gz
     sudo chmod a+r $filename.gz
 }
 
@@ -807,8 +807,8 @@ function cleanup_host {
         sudo cp -r /var/log/openvswitch $BASE/logs/
     fi
 
-    # Make sure jenkins can read all the logs and configs
-    sudo chown -R jenkins:jenkins $BASE/logs/
+    # Make sure the current user can read all the logs and configs
+    sudo chown -R $USER:$USER $BASE/logs/
     sudo chmod a+r $BASE/logs/ $BASE/logs/etc
 
     # rename files to .txt; this is so that when displayed via
