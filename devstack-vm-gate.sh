@@ -163,7 +163,11 @@ function setup_networking {
     # sauce to function.
     if [[ "$DEVSTACK_GATE_TOPOLOGY" != "multinode" ]] && \
         [[ "$DEVSTACK_GATE_NEUTRON" -ne '1' ]]; then
-        setup_nova_net_networking "localrc" "127.0.0.1"
+        local localrc=$BASE/new/devstack/localrc
+        if [[ "$mode" == "grenade" ]]; then
+            localrc=$BASE/new/grenade/devstack.localrc
+        fi
+        setup_nova_net_networking "$localrc" "127.0.0.1"
     elif [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]]; then
         setup_multinode_connectivity $mode
     fi
