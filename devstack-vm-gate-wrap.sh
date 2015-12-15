@@ -34,7 +34,6 @@ start_timer
 
 PROJECTS="openstack-infra/devstack-gate $PROJECTS"
 PROJECTS="openstack-dev/devstack $PROJECTS"
-PROJECTS="openstack-dev/grenade $PROJECTS"
 PROJECTS="openstack-dev/pbr $PROJECTS"
 PROJECTS="openstack-infra/tripleo-ci $PROJECTS"
 PROJECTS="openstack/automaton $PROJECTS"
