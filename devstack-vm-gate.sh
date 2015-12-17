@@ -330,7 +330,7 @@ EOF
     fi
 
     if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "ironic" ]]; then
-        export TEMPEST_OS_TEST_TIMEOUT=600
+        export TEMPEST_OS_TEST_TIMEOUT=900
         echo "VIRT_DRIVER=ironic" >>"$localrc_file"
         echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>"$localrc_file"
         echo "IRONIC_VM_LOG_DIR=$BASE/$localrc_oldnew/ironic-bm-logs" >>"$localrc_file"
