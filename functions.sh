@@ -314,11 +314,13 @@ function fix_etc_hosts {
 }
 
 function fix_disk_layout {
-    # HPCloud and Rackspace performance nodes provide no swap, but do
-    # have ephemeral disks we can use.  HPCloud also doesn't have
-    # enough space on / for two devstack installs, so we partition the
-    # disk and mount it on /opt, syncing the previous contents of /opt
-    # over.
+    # HPCloud and Rackspace performance nodes provide no swap, but do have
+    # ephemeral disks we can use. For providers with no ephemeral disks, such
+    # as OVH or Internap, create and use a sparse swapfile on the root
+    # filesystem.
+    # HPCloud also doesn't have enough space on / for two devstack installs,
+    # so we partition the disk and mount it on /opt, syncing the previous
+    # contents of /opt over.
     if [ `grep SwapTotal /proc/meminfo | awk '{ print $2; }'` -eq 0 ]; then
         if [ -b /dev/xvde ]; then
             DEV='/dev/xvde'
@@ -329,6 +331,7 @@ function fix_disk_layout {
             fi
         fi
         if [ -n "$DEV" ]; then
+            # If an ephemeral device is available, use it
             local swap=${DEV}1
             local lvmvol=${DEV}2
             local optdev=${DEV}3
@@ -347,6 +350,14 @@ function fix_disk_layout {
             sudo find /opt/ -mindepth 1 -maxdepth 1 -exec mv {} /mnt/ \;
             sudo umount /mnt
             sudo mount ${DEV}2 /opt
+        else
+            # If no ephemeral devices are available, use root filesystem
+            local lodevice=$(sudo losetup -f)
+            local swapfile='/root/swapfile'
+            sudo dd if=/dev/zero of=${swapfile} bs=1 count=0 seek=8G
+            sudo mkswap ${swapfile}
+            sudo losetup ${lodevice} ${swapfile}
+            sudo swapon ${lodevice}
         fi
     fi
 
