@@ -314,6 +314,10 @@ fi
 # Set the virtualization driver to: libvirt, openvz, xenapi
 export DEVSTACK_GATE_VIRT_DRIVER=${DEVSTACK_GATE_VIRT_DRIVER:-libvirt}
 
+# Use qemu by default for consistency since some providers enable
+# nested virt
+export DEVSTACK_GATE_LIBVIRT_TYPE=${DEVSTACK_GATE_LIBVIRT_TYPE:-qemu}
+
 # See switch below for this -- it gets set to 1 when tempest
 # is the project being gated.
 export DEVSTACK_GATE_TEMPEST_FULL=${DEVSTACK_GATE_TEMPEST_FULL:-0}
