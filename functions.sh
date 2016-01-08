@@ -1028,7 +1028,12 @@ function ovs_gre_bridge {
     # as for the mtu, look for notes on lp#1301958 in devstack-vm-gate.sh
     sudo ip link set mtu $mtu dev $bridge_name
     if [[ "$set_ips" == "True" ]] ; then
-        sudo ip addr add ${pub_addr_prefix}.${offset}/${pub_addr_mask} dev ${bridge_name}
+        echo "Set bridge: ${bridge_name}"
+        if ! sudo ip addr show dev ${bridge_name} | grep -q \
+            ${pub_addr_prefix}.${offset}/${pub_addr_mask} ; then
+                sudo ip addr add ${pub_addr_prefix}.${offset}/${pub_addr_mask} \
+                    dev ${bridge_name}
+        fi
     fi
     for node_ip in $peer_ips; do
         (( offset++ ))
@@ -1041,7 +1046,7 @@ function ovs_gre_bridge {
         # Create the gre tunnel for the Controller/Network Node:
         #  This establishes a tunnel between remote $node_ip to local $host_ip
         #  uniquely identified by a key $offset
-        sudo ovs-vsctl add-port $bridge_name \
+        sudo ovs-vsctl --may-exist add-port $bridge_name \
             ${bridge_name}_${node_ip} \
             -- set interface ${bridge_name}_${node_ip} type=gre \
             options:remote_ip=${node_ip} \
@@ -1052,16 +1057,19 @@ function ovs_gre_bridge {
         remote_command $node_ip "$install_ovs_deps"
         remote_command $node_ip sudo ovs-vsctl --may-exist add-br $bridge_name
         remote_command $node_ip sudo ip link set mtu $mtu dev $bridge_name
-        remote_command $node_ip sudo ovs-vsctl add-port $bridge_name \
+        remote_command $node_ip sudo ovs-vsctl --may-exist add-port $bridge_name \
             ${bridge_name}_${host_ip} \
             -- set interface ${bridge_name}_${host_ip} type=gre \
             options:remote_ip=${host_ip} \
             options:key=${offset} \
             options:local_ip=${node_ip}
         if [[ "$set_ips" == "True" ]] ; then
-            remote_command $node_ip \
-                sudo ip addr add ${pub_addr_prefix}.${offset}/${pub_addr_mask} \
-                dev ${bridge_name}
+            if ! remote_command $node_ip sudo ip addr show dev ${bridge_name} | \
+                grep -q ${pub_addr_prefix}.${offset}/${pub_addr_mask} ; then
+                    remote_command $node_ip sudo ip addr add \
+                        ${pub_addr_prefix}.${offset}/${pub_addr_mask} \
+                        dev ${bridge_name}
+            fi
         fi
     done
 }
