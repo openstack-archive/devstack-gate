@@ -744,7 +744,7 @@ function cleanup_host {
         sudo cp $BASE/old/devstacklog.txt $BASE/logs/old/
         sudo cp $BASE/old/devstack/localrc $BASE/logs/old/localrc.txt
         sudo cp $BASE/old/tempest/etc/tempest.conf $BASE/logs/old/tempest_conf.txt
-        if -f [ $BASE/old/devstack/tempest.log ] ; then
+        if [ -f $BASE/old/devstack/tempest.log ] ; then
             sudo cp $BASE/old/devstack/tempest.log $BASE/logs/old/verify_tempest_conf.log
         fi
 
