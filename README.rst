@@ -253,4 +253,4 @@ You can file bugs on the storyboard devstack-gate project::
 
     https://storyboard.openstack.org/#!/project/712
 
-And you can chat with us on Freenode in #openstack-dev or #openstack-infra.
+And you can chat with us on Freenode in #openstack-qa or #openstack-infra.
