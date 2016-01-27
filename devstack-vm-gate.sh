@@ -518,18 +518,9 @@ EOF
 }
 
 if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
-    if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-neutron" ]]; then
-        # Use nova network when generating "old" localrc.
-        TMP_DEVSTACK_GATE_NEUTRON=$DEVSTACK_GATE_NEUTRON
-        export DEVSTACK_GATE_NEUTRON=0
-    fi
     cd $BASE/old/devstack
     setup_localrc "old" "localrc" "primary"
 
-    if [[ "$DEVSTACK_GATE_GRENADE" == "sideways-neutron" ]]; then
-        # Set neutron setting to that initially set by the job.
-        export DEVSTACK_GATE_NEUTRON=$TMP_DEVSTACK_GATE_NEUTRON
-    fi
     cd $BASE/new/devstack
     setup_localrc "new" "localrc" "primary"
 
