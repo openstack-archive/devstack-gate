@@ -50,6 +50,8 @@ PUBLIC_NETWORK_GATEWAY=${DEVSTACK_GATE_PUBLIC_NETWORK_GATEWAY:-172.24.5.1}
 FLOATING_HOST_PREFIX=${DEVSTACK_GATE_FLOATING_HOST_PREFIX:-172.24.4}
 FLOATING_HOST_MASK=${DEVSTACK_GATE_FLOATING_HOST_MASK:-23}
 
+EXTERNAL_BRIDGE_MTU=1450
+
 function setup_ssh {
     local path=$1
     $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m file \
@@ -557,6 +559,10 @@ EOF
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]]; then
         echo -e "[[post-config|\$NOVA_CONF]]\n[libvirt]\ncpu_mode=custom\ncpu_model=gate64" >> local.conf
+        if [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
+            echo -e "[[post-config|\$NEUTRON_CONF]]\n[DEFAULT]\nnetwork_device_mtu=$EXTERNAL_BRIDGE_MTU" >> local.conf
+        fi
+
         # get this in our base config
         cp local.conf $BASE/old/devstack
 
@@ -590,6 +596,9 @@ else
     setup_localrc "new" "localrc" "primary"
     if [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]]; then
         echo -e "[[post-config|\$NOVA_CONF]]\n[libvirt]\ncpu_mode=custom\ncpu_model=gate64" >> local.conf
+        if [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
+            echo -e "[[post-config|\$NEUTRON_CONF]]\n[DEFAULT]\nnetwork_device_mtu=$EXTERNAL_BRIDGE_MTU" >> local.conf
+        fi
     fi
 
     setup_networking
@@ -651,7 +660,7 @@ else
             MTU_NODES=all
         fi
         $ANSIBLE "$MTU_NODES" -f 5 -i "$WORKSPACE/inventory" -m shell \
-                -a "sudo ip link set mtu 1450 dev br-ex"
+                -a "sudo ip link set mtu $EXTERNAL_BRIDGE_MTU dev br-ex"
     fi
 fi
 
