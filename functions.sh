@@ -1002,7 +1002,7 @@ function enable_netconsole {
 # For OVS troubleshooting needs:
 #   http://www.yet.org/2014/09/openvswitch-troubleshooting/
 #
-function ovs_gre_bridge {
+function ovs_vxlan_bridge {
     if is_fedora; then
         local ovs_package='openvswitch'
         local ovs_service='openvswitch'
@@ -1048,26 +1048,26 @@ function ovs_gre_bridge {
         # For reference on how to setup a tunnel using OVS see:
         #   http://openvswitch.org/support/config-cookbooks/port-tunneling/
         # The command below is equivalent to the sequence of ip/brctl commands
-        # where an interface of gre type is created first, and then plugged into
+        # where an interface of vxlan type is created first, and then plugged into
         # the bridge; options are command specific configuration key-value pairs.
         #
-        # Create the gre tunnel for the Controller/Network Node:
+        # Create the vxlan tunnel for the Controller/Network Node:
         #  This establishes a tunnel between remote $node_ip to local $host_ip
         #  uniquely identified by a key $offset
         sudo ovs-vsctl --may-exist add-port $bridge_name \
             ${bridge_name}_${node_ip} \
-            -- set interface ${bridge_name}_${node_ip} type=gre \
+            -- set interface ${bridge_name}_${node_ip} type=vxlan \
             options:remote_ip=${node_ip} \
             options:key=${offset} \
             options:local_ip=${host_ip}
-        # Now complete the gre tunnel setup for the Compute Node:
+        # Now complete the vxlan tunnel setup for the Compute Node:
         #  Similarly this establishes the tunnel in the reverse direction
         remote_command $node_ip "$install_ovs_deps"
         remote_command $node_ip sudo ovs-vsctl --may-exist add-br $bridge_name
         remote_command $node_ip sudo ip link set mtu $mtu dev $bridge_name
         remote_command $node_ip sudo ovs-vsctl --may-exist add-port $bridge_name \
             ${bridge_name}_${host_ip} \
-            -- set interface ${bridge_name}_${host_ip} type=gre \
+            -- set interface ${bridge_name}_${host_ip} type=vxlan \
             options:remote_ip=${host_ip} \
             options:key=${offset} \
             options:local_ip=${node_ip}

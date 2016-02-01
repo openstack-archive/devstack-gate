@@ -71,10 +71,10 @@ function setup_nova_net_networking {
     # issue with nova net configuring br100 to take over eth0
     # by default.
     # TODO (clarkb): figure out how to make bridge setup sane with ansible.
-    ovs_gre_bridge "br_pub" $primary_node "True" 1 \
+    ovs_vxlan_bridge "br_pub" $primary_node "True" 1 \
                     $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
                     $sub_nodes
-    ovs_gre_bridge "br_flat" $primary_node "False" 128 \
+    ovs_vxlan_bridge "br_flat" $primary_node "False" 128 \
                     $sub_nodes
     cat <<EOF >>"$localrc"
 FLAT_INTERFACE=br_flat
@@ -123,7 +123,7 @@ EOF
 MULTI_HOST=True
 EOF
     elif [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq '1' ]]; then
-        ovs_gre_bridge "br-ex" $primary_node "True" 1 \
+        ovs_vxlan_bridge "br-ex" $primary_node "True" 1 \
                         $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
                         $sub_nodes
     fi
