@@ -334,9 +334,19 @@ export DEVSTACK_GATE_REQS_INTEGRATION=${DEVSTACK_GATE_REQS_INTEGRATION:-0}
 # until they get their driver cleaned up)
 export DEVSTACK_GATE_CLEAN_LOGS=${DEVSTACK_GATE_CLEAN_LOGS:-1}
 
-# Set this to the time in minutes that the gate test should be allowed
-# to run before being aborted (default 60).
-export DEVSTACK_GATE_TIMEOUT=${DEVSTACK_GATE_TIMEOUT:-60}
+# Set this to the time in milliseconds that the entire job should be
+# allowed to run before being aborted (default 120 minutes=7200000ms).
+# This may be supplied by Jenkins based on the configured job timeout
+# which is why it's in this convenient unit.
+export BUILD_TIMEOUT=$(expr ${BUILD_TIMEOUT:-7200000} / 60000)
+
+# Set this to the time in minutes that should be reserved for
+# uploading artifacts at the end after a timeout.  Defaults to 5
+# minutes.
+export DEVSTACK_GATE_TIMEOUT_BUFFER=${DEVSTACK_GATE_TIMEOUT_BUFFER:-5}
+
+# Not user servicable.
+export DEVSTACK_GATE_TIMEOUT=$(expr $BUILD_TIMEOUT - $DEVSTACK_GATE_TIMEOUT_BUFFER)
 
 # Set to 1 to remove the stack users blanket sudo permissions forcing
 # openstack services running as the stack user to rely on rootwrap rulesets
@@ -408,6 +418,8 @@ fi
 
 echo "Triggered by: https://review.openstack.org/$ZUUL_CHANGE patchset $ZUUL_PATCHSET"
 echo "Pipeline: $ZUUL_PIPELINE"
+echo "Timeout set to $DEVSTACK_GATE_TIMEOUT minutes \
+with $DEVSTACK_GATE_TIMEOUT_BUFFER minutes reserved for cleanup."
 echo "Available disk space on this host:"
 indent df -h
 

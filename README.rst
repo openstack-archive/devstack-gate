@@ -207,7 +207,6 @@ the jenkins/jobs directory in a file named devstack-gate.yaml. It will
 probably look something like::
 
   export PYTHONUNBUFFERED=true
-  export DEVSTACK_GATE_TIMEOUT=120
   export DEVSTACK_GATE_TEMPEST=1
   export DEVSTACK_GATE_TEMPEST_FULL=1
   cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
