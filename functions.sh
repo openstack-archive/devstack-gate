@@ -122,7 +122,7 @@ function network_sanity_check {
     echo "Performing network sanity check..."
     PIP_CONFIG_FILE=/etc/pip.conf
     if [[ -f $PIP_CONFIG_FILE ]]; then
-        line=$(cat $PIP_CONFIG_FILE|grep index-url)
+        line=$(cat $PIP_CONFIG_FILE|grep --max-count 1 index-url)
         pypi_url=${line#*=}
         pypi_host=$(echo $pypi_url|grep -Po '.*?//\K.*?(?=/)')
 
