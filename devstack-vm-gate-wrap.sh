@@ -341,9 +341,9 @@ export DEVSTACK_GATE_CLEAN_LOGS=${DEVSTACK_GATE_CLEAN_LOGS:-1}
 export BUILD_TIMEOUT=$(expr ${BUILD_TIMEOUT:-7200000} / 60000)
 
 # Set this to the time in minutes that should be reserved for
-# uploading artifacts at the end after a timeout.  Defaults to 5
+# uploading artifacts at the end after a timeout.  Defaults to 10
 # minutes.
-export DEVSTACK_GATE_TIMEOUT_BUFFER=${DEVSTACK_GATE_TIMEOUT_BUFFER:-5}
+export DEVSTACK_GATE_TIMEOUT_BUFFER=${DEVSTACK_GATE_TIMEOUT_BUFFER:-10}
 
 # Not user servicable.
 export DEVSTACK_GATE_TIMEOUT=$(expr $BUILD_TIMEOUT - $DEVSTACK_GATE_TIMEOUT_BUFFER)
