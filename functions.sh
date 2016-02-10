@@ -352,12 +352,13 @@ function fix_disk_layout {
             sudo mount ${DEV}2 /opt
         else
             # If no ephemeral devices are available, use root filesystem
-            local lodevice=$(sudo losetup -f)
+            # Don't use sparse device to avoid wedging when disk space and
+            # memory are both unavailable.
             local swapfile='/root/swapfile'
-            sudo dd if=/dev/zero of=${swapfile} bs=1 count=0 seek=8G
+            sudo fallocate -l 8192M ${swapfile}
+            sudo chmod 600 ${swapfile}
             sudo mkswap ${swapfile}
-            sudo losetup ${lodevice} ${swapfile}
-            sudo swapon ${lodevice}
+            sudo swapon ${swapfile}
         fi
     fi
 
