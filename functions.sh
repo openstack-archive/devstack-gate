@@ -171,6 +171,7 @@ function remaining_time {
 
 # Create a script to reproduce this build
 function reproduce {
+    JOB_PROJECTS=$1
     cat > $WORKSPACE/logs/reproduce.sh <<EOF
 #!/bin/bash -xe
 
@@ -183,6 +184,9 @@ EOF
     for KEY in $(printenv | grep '\(DEVSTACK\|ZUUL\)' | sed 's/\(.*\)=.*/\1/'); do
         echo "declare -x ${KEY}=\"${!KEY}\"" >> $WORKSPACE/logs/reproduce.sh
     done
+    if [ -n "$JOB_PROJECTS" ] ; then
+        echo "declare -x PROJECTS=\"$JOB_PROJECTS\"" >> $WORKSPACE/logs/reproduce.sh
+    fi
 
     cat >> $WORKSPACE/logs/reproduce.sh <<EOF
 
