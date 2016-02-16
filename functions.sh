@@ -657,6 +657,39 @@ function process_testr_artifacts {
     fi
 }
 
+function process_stackviz {
+    local project=$1
+    local path_prefix=${2:-new}
+
+    local project_path=$BASE/$path_prefix/$project
+    local log_path=$BASE/logs
+    if [[ "$path_prefix" != "new" ]]; then
+        log_path=$BASE/logs/$path_prefix
+    fi
+
+    local stackviz_path=/opt/stackviz
+    if [ -d $stackviz_path/build ]; then
+        sudo pip install -U $stackviz_path
+
+        # static html+js should be prebuilt during image creation
+        cp -r $stackviz_path/build $log_path/stackviz
+
+        pushd $project_path
+        if [ -f $BASE/new/dstat-csv.txt ]; then
+            sudo testr last --subunit | stackviz-export \
+                --dstat $BASE/new/dstat-csv.txt \
+                --end --stdin \
+                $log_path/stackviz/data
+        else
+            sudo testr last --subunit | stackviz-export \
+                --env --stdin \
+                $log_path/stackviz/data
+        fi
+        sudo chown -R $USER:$USER $log_path/stackviz
+        popd
+    fi
+}
+
 function cleanup_host {
     # TODO: clean this up to be errexit clean
     local errexit=$(set +o | grep errexit)
@@ -842,6 +875,8 @@ function cleanup_host {
         gzip -9 rpm-qa.txt
         sudo mv $WORKSPACE/rpm-qa.txt.gz $BASE/logs/
     fi
+
+    process_stackviz tempest
 
     process_testr_artifacts tempest
     process_testr_artifacts tempest old
