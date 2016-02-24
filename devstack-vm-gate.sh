@@ -333,6 +333,7 @@ EOF
 
     if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "ironic" ]]; then
         export TEMPEST_OS_TEST_TIMEOUT=900
+        echo "IRONIC_DEPLOY_DRIVER=$DEVSTACK_GATE_IRONIC_DRIVER" >>"$localrc_file"
         echo "VIRT_DRIVER=ironic" >>"$localrc_file"
         echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>"$localrc_file"
         echo "IRONIC_VM_LOG_DIR=$BASE/$localrc_oldnew/ironic-bm-logs" >>"$localrc_file"
@@ -344,17 +345,17 @@ EOF
         if [[ "$DEVSTACK_GATE_IRONIC_BUILD_RAMDISK" -eq 0 ]]; then
             echo "IRONIC_BUILD_DEPLOY_RAMDISK=False" >>"$localrc_file"
         fi
-        if [[ "$DEVSTACK_GATE_IRONIC_DRIVER" == "agent_ssh" ]]; then
+        if [[ -z "${DEVSTACK_GATE_IRONIC_DRIVER%%agent*}" ]]; then
             echo "SWIFT_ENABLE_TEMPURLS=True" >>"$localrc_file"
             echo "SWIFT_TEMPURL_KEY=secretkey" >>"$localrc_file"
             echo "IRONIC_ENABLED_DRIVERS=fake,agent_ssh,agent_ipmitool" >>"$localrc_file"
-            echo "IRONIC_DEPLOY_DRIVER=agent_ssh" >>"$localrc_file"
             # agent driver doesn't support ephemeral volumes yet
             echo "IRONIC_VM_EPHEMERAL_DISK=0" >>"$localrc_file"
             # agent CoreOS ramdisk is a little heavy
             echo "IRONIC_VM_SPECS_RAM=1024" >>"$localrc_file"
             echo "IRONIC_VM_COUNT=1" >>"$localrc_file"
         else
+            echo "IRONIC_ENABLED_DRIVERS=fake,pxe_ssh,pxe_ipmitool" >>"$localrc_file"
             echo "IRONIC_VM_EPHEMERAL_DISK=1" >>"$localrc_file"
             echo "IRONIC_VM_COUNT=3" >>"$localrc_file"
         fi
@@ -708,7 +709,7 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
         sudo chmod -R o+rx $BASE/new/devstack/files
     fi
 
-    # In the future we might want to increase the number of compute nodes. 
+    # In the future we might want to increase the number of compute nodes.
     # This will ensure that multinode jobs consist of 2 nodes.
     # As a part of tempest configuration, it should be executed
     # before the DEVSTACK_GATE_TEMPEST_NOTESTS check, because the DEVSTACK_GATE_TEMPEST
