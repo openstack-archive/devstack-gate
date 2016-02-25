@@ -25,6 +25,11 @@
 GIT_BASE=${GIT_BASE:-https://git.openstack.org}
 GIT_BRANCH=${GIT_BRANCH:-master}
 
+# We're using enough ansible specific features that it's extremely
+# possible that new ansible releases can break us. As such we should
+# be very deliberate about which ansible we use.
+ANSIBLE_VERSION=${ANSIBLE_VERSION:-2.0.0.2}
+
 # sshd may have been compiled with a default path excluding */sbin
 export PATH=$PATH:/usr/local/sbin:/usr/sbin
 
@@ -429,7 +434,7 @@ set -x
 # Install ansible
 sudo -H pip install virtualenv
 virtualenv /tmp/ansible
-/tmp/ansible/bin/pip install ansible
+/tmp/ansible/bin/pip install ansible==$ANSIBLE_VERSION
 export ANSIBLE=/tmp/ansible/bin/ansible
 
 # Write inventory file with groupings
