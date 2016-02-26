@@ -434,7 +434,7 @@ set -x
 # Install ansible
 sudo -H pip install virtualenv
 virtualenv /tmp/ansible
-/tmp/ansible/bin/pip install ansible==$ANSIBLE_VERSION
+sudo -H /tmp/ansible/bin/pip install ansible==$ANSIBLE_VERSION
 export ANSIBLE=/tmp/ansible/bin/ansible
 
 # Write inventory file with groupings
