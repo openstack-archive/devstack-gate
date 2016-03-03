@@ -50,7 +50,11 @@ PUBLIC_NETWORK_GATEWAY=${DEVSTACK_GATE_PUBLIC_NETWORK_GATEWAY:-172.24.5.1}
 FLOATING_HOST_PREFIX=${DEVSTACK_GATE_FLOATING_HOST_PREFIX:-172.24.4}
 FLOATING_HOST_MASK=${DEVSTACK_GATE_FLOATING_HOST_MASK:-23}
 
-EXTERNAL_BRIDGE_MTU=1450
+# Get the smallest local MTU
+LOCAL_MTU=$(ip link show | sed -ne 's/.*mtu \([0-9]\+\).*/\1/p' | sort -n | head -1)
+# 50 bytes is overhead for vxlan (which is greater than GRE
+# allowing us to use either overlay option with this MTU.
+EXTERNAL_BRIDGE_MTU=$((LOCAL_MTU - 50))
 
 function setup_ssh {
     local path=$1
