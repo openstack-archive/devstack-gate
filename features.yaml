@@ -43,6 +43,8 @@ config:
     features: [ceph]
   heat:
     features: [heat]
+  tlsproxy:
+    features: [tlsproxy]
 
 branches:
   # The value of ""default" is the name of the "trunk" branch
@@ -154,3 +156,7 @@ features:
   ceph:
     base:
       services: [ceph]
+
+  tlsproxy:
+    base:
+      services: [tls-proxy]
