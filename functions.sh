@@ -768,6 +768,12 @@ function cleanup_host {
             sudo cp $BASE/old/devstack/tempest.log $BASE/logs/old/verify_tempest_conf.log
         fi
 
+        # Copy Ironic nodes console logs if they exist
+        if [ -d $BASE/old/ironic-bm-logs ] ; then
+            sudo mkdir -p $BASE/logs/old/ironic-bm-logs
+            sudo cp $BASE/old/ironic-bm-logs/*.log $BASE/logs/old/ironic-bm-logs/
+        fi
+
         # dstat CSV log
         if [ -f $BASE/old/dstat-csv.log ]; then
             sudo cp $BASE/old/dstat-csv.log $BASE/logs/old/
