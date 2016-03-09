@@ -314,14 +314,19 @@ function fix_etc_hosts {
 }
 
 function fix_disk_layout {
-    # HPCloud and Rackspace performance nodes provide no swap, but do have
-    # ephemeral disks we can use. For providers with no ephemeral disks, such
-    # as OVH or Internap, create and use a sparse swapfile on the root
-    # filesystem.
-    # HPCloud also doesn't have enough space on / for two devstack installs,
+    # Don't attempt to fix disk layout more than once
+    [[ -e /etc/fixed_disk_layout ]] && return 0 || sudo touch /etc/fixed_disk_layout
+
+    # Ensure virtual machines from different providers all have at least 8GB of
+    # swap.
+    # Use an ephemeral disk if there is one or create and use a swapfile.
+    # Rackspace also doesn't have enough space on / for two devstack installs,
     # so we partition the disk and mount it on /opt, syncing the previous
     # contents of /opt over.
-    if [ `grep SwapTotal /proc/meminfo | awk '{ print $2; }'` -eq 0 ]; then
+    SWAPSIZE=8192
+    swapcurrent=$(( $(grep SwapTotal /proc/meminfo | awk '{ print $2; }') / 1024 ))
+
+    if [[ $swapcurrent -lt $SWAPSIZE ]]; then
         if [ -b /dev/xvde ]; then
             DEV='/dev/xvde'
         else
@@ -341,7 +346,7 @@ function fix_disk_layout {
                 sudo umount ${DEV}
             fi
             sudo parted ${DEV} --script -- mklabel msdos
-            sudo parted ${DEV} --script -- mkpart primary linux-swap 1 8192
+            sudo parted ${DEV} --script -- mkpart primary linux-swap 1 ${SWAPSIZE}
             sudo parted ${DEV} --script -- mkpart primary ext2 8192 -1
             sudo mkswap ${DEV}1
             sudo mkfs.ext4 ${DEV}2
@@ -350,15 +355,24 @@ function fix_disk_layout {
             sudo find /opt/ -mindepth 1 -maxdepth 1 -exec mv {} /mnt/ \;
             sudo umount /mnt
             sudo mount ${DEV}2 /opt
+
+            # Sanity check
+            grep -q ${DEV}1 /proc/swaps || exit 1
+            grep -q ${DEV}2 /proc/mounts || exit 1
         else
             # If no ephemeral devices are available, use root filesystem
             # Don't use sparse device to avoid wedging when disk space and
             # memory are both unavailable.
             local swapfile='/root/swapfile'
-            sudo fallocate -l 8192M ${swapfile}
+            swapdiff=$(( $SWAPSIZE - $swapcurrent ))
+
+            sudo dd if=/dev/zero of=${swapfile} bs=1M count=${swapdiff}
             sudo chmod 600 ${swapfile}
             sudo mkswap ${swapfile}
             sudo swapon ${swapfile}
+
+            # Sanity check
+            grep -q ${swapfile} /proc/swaps || exit 1
         fi
     fi
 
