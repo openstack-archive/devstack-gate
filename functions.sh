@@ -887,7 +887,7 @@ function cleanup_host {
     # look through. The fancy awk is used instead of a "sort | uniq -c"
     # to preserve the order in which we find the lines in a specific
     # log file.
-    grep -i deprecat $BASE/logs/*.log | \
+    grep -i deprecat $BASE/logs/*.log $BASE/logs/apache/*.log | \
         sed -r 's/[0-9]{1,2}\:[0-9]{1,2}\:[0-9]{1,2}\.[0-9]{1,3}/ /g' | \
         sed -r 's/[0-9]{1,2}\:[0-9]{1,2}\:[0-9]{1,2}/ /g' | \
         sed -r 's/[0-9]{1,4}-[0-9]{1,2}-[0-9]{1,4}/ /g' |
