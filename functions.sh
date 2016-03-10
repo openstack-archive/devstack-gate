@@ -880,6 +880,21 @@ function cleanup_host {
     sudo chown -R $USER:$USER $BASE/logs/
     sudo chmod a+r $BASE/logs/ $BASE/logs/etc
 
+
+    # Collect all the deprecation related messages into a single file.
+    # strip out date(s), timestamp(s), pid(s), context information and
+    # remove duplicates as well so we have a limited set of lines to
+    # look through. The fancy awk is used instead of a "sort | uniq -c"
+    # to preserve the order in which we find the lines in a specific
+    # log file.
+    grep -i deprecat $BASE/logs/*.log | \
+        sed -r 's/[0-9]{1,2}\:[0-9]{1,2}\:[0-9]{1,2}\.[0-9]{1,3}/ /g' | \
+        sed -r 's/[0-9]{1,2}\:[0-9]{1,2}\:[0-9]{1,2}/ /g' | \
+        sed -r 's/[0-9]{1,4}-[0-9]{1,2}-[0-9]{1,4}/ /g' |
+        sed -r 's/\[.*\]/ /g' | \
+        sed -r 's/\s[0-9]+\s/ /g' | \
+        awk '{if ($0 in seen) {seen[$0]++} else {out[++n]=$0;seen[$0]=1}} END { for (i=1; i<=n; i++) print seen[out[i]]" :: " out[i] }' > $BASE/logs/deprecations.log
+
     # rename files to .txt; this is so that when displayed via
     # logs.openstack.org clicking results in the browser shows the
     # files, rather than trying to send it to another app or make you
