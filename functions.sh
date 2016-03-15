@@ -178,7 +178,11 @@ exec 0</dev/null
 
 EOF
 
-    export | grep '\(DEVSTACK\|ZUUL\)' >> $WORKSPACE/logs/reproduce.sh
+    # first get all keys that match our filter and then output the whole line
+    # that will ensure that multi-line env vars are set properly
+    for KEY in $(printenv | grep '\(DEVSTACK\|ZUUL\)' | sed 's/\(.*\)=.*/\1/'); do
+        echo "declare -x ${KEY}=\"${!KEY}\"" >> $WORKSPACE/logs/reproduce.sh
+    done
 
     cat >> $WORKSPACE/logs/reproduce.sh <<EOF
 

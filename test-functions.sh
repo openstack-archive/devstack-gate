@@ -515,6 +515,51 @@ function test_call_hook_if_defined {
     rm -rf $save_dir
 }
 
+# test that reproduce file is populated correctly
+function test_reproduce {
+    # expected result
+    read -d '' EXPECTED_VARS << EOF
+declare -x ZUUL_VAR="zuul-var"
+declare -x DEVSTACK_VAR="devstack-var"
+declare -x ZUUL_VAR_MULTILINE="zuul-var-setting1
+zuul-var-setting2"
+declare -x DEVSTACK_VAR_MULTILINE="devstack-var-setting1
+devstack-var-setting2"
+EOF
+
+    # prepare environment for test
+    WORKSPACE=.
+    export DEVSTACK_VAR=devstack-var
+    export DEVSTACK_VAR_MULTILINE="devstack-var-setting1
+devstack-var-setting2"
+    export ZUUL_VAR=zuul-var
+    export ZUUL_VAR_MULTILINE="zuul-var-setting1
+zuul-var-setting2"
+    JOB_NAME=test-job
+    mkdir $WORKSPACE/logs
+
+    # execute call and assert
+    reproduce
+
+    [[ -e $WORKSPACE/logs/reproduce.sh ]]
+    file_exists=$?
+    assert_equal $file_exists 0
+
+    result_expected=`cat $WORKSPACE/logs/reproduce.sh | grep "$EXPECTED_VARS"`
+    [[ ${#result_expected} -eq "0" ]]
+    assert_equal $? 1
+
+    # clean up environment
+    rm -rf $WORKSPACE/logs
+    rm -rf $WORKSPACE/workspace
+    unset WORKSPACE
+    unset DEVSTACK_VAR
+    unset DEVSTACK_VAR_MULTILINE
+    unset ZUUL_VAR
+    unset ZUUL_VAR_MULTILINE
+    unset JOB_NAME
+}
+
 # Run tests:
 #set -o xtrace
 test_branch_override
@@ -530,6 +575,7 @@ test_periodic_no_branch
 test_two_on_master
 test_workspace_branch_arg
 test_call_hook_if_defined
+test_reproduce
 
 if [[ ! -z "$ERROR" ]]; then
     echo
