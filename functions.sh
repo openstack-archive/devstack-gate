@@ -503,9 +503,6 @@ function setup_workspace {
     sudo mkdir -p $DEST
     sudo chown -R $USER:$USER $DEST
 
-    #TODO(jeblair): remove when this is no longer created by the image
-    rm -fr ~/workspace-cache/
-
     # The vm template update job should cache the git repos
     # Move them to where we expect:
     echo "Using branch: $base_branch"
