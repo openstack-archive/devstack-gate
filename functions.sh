@@ -171,6 +171,9 @@ function remaining_time {
 
 # Create a script to reproduce this build
 function reproduce {
+    local xtrace=$(set +o | grep xtrace)
+    set +o xtrace
+
     JOB_PROJECTS=$1
     cat > $WORKSPACE/logs/reproduce.sh <<EOF
 #!/bin/bash -xe
@@ -222,6 +225,7 @@ cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
 EOF
 
     chmod a+x $WORKSPACE/logs/reproduce.sh
+    $xtrace
 }
 
 # indent the output of a command 4 spaces, useful for distinguishing
