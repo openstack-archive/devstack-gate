@@ -300,7 +300,7 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
                 export GRENADE_OLD_BRANCH="stable/kilo"
                 export GRENADE_NEW_BRANCH="stable/liberty"
             elif [[ "$GRENADE_BASE_BRANCH" == "stable/mitaka" ]]; then
-                export GRENADE_OLD_BRANCH="stable/kilo"
+                export GRENADE_OLD_BRANCH="stable/liberty"
                 export GRENADE_NEW_BRANCH="stable/mitaka"
             else # master
                 export GRENADE_OLD_BRANCH="stable/mitaka"
