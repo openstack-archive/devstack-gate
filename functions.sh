@@ -99,7 +99,7 @@ function tsfilter {
 function _ping_check {
     local host=$1
     local times=${2:-20}
-    echo "Testing ICMP connectivit to $host"
+    echo "Testing ICMP connectivity to $host"
     ping -c $times $host
 }
 
@@ -608,7 +608,7 @@ function setup_host {
     # Create a stack user for devstack to run as, so that we can
     # revoke sudo permissions from that user when appropriate.
     sudo useradd -U -s /bin/bash -d $BASE/new -m stack
-    # Use 755 mode on the user dir regarless to the /etc/login.defs setting
+    # Use 755 mode on the user dir regardless of the /etc/login.defs setting
     sudo chmod 755 $BASE/new
     TEMPFILE=`mktemp`
     echo "stack ALL=(root) NOPASSWD:ALL" >$TEMPFILE
