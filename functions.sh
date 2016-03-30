@@ -586,7 +586,12 @@ function setup_host {
     sudo mkdir -p $BASE
 
     # Start with a fresh syslog
-    if uses_debs; then
+    if which journalctl ; then
+        # save timestamp and use journalctl to dump everything since
+        # then at the end
+        date +"%Y-%m-%d %H:%M:%S" | sudo tee $BASE/log-start-timestamp.txt
+    else
+        # Assume rsyslog, move old logs aside then restart the service.
         sudo stop rsyslog
         sudo mv /var/log/syslog /var/log/syslog-pre-devstack
         sudo mv /var/log/kern.log /var/log/kern_log-pre-devstack
@@ -599,10 +604,6 @@ function setup_host {
         sudo chmod /var/log/kern.log --ref /var/log/kern_log-pre-devstack
         sudo chmod a+r /var/log/kern.log
         sudo start rsyslog
-    elif is_fedora; then
-        # save timestamp and use journalctl to dump everything since
-        # then at the end
-        date +"%Y-%m-%d %H:%M:%S" | sudo tee $BASE/log-start-timestamp.txt
     fi
 
     # Create a stack user for devstack to run as, so that we can
@@ -714,15 +715,16 @@ function cleanup_host {
     sleep 2
 
     # No matter what, archive logs and config files
-    if uses_debs; then
-        sudo cp /var/log/syslog $BASE/logs/syslog.txt
-        sudo cp /var/log/kern.log $BASE/logs/kern_log.txt
-    elif is_fedora; then
+    if which journalctl ; then
         # the journal gives us syslog() and kernel output, so is like
         # a concatenation of the above.
         sudo journalctl --no-pager \
             --since="$(cat $BASE/log-start-timestamp.txt)" \
             | sudo tee $BASE/logs/syslog.txt > /dev/null
+    else
+        # assume rsyslog
+        sudo cp /var/log/syslog $BASE/logs/syslog.txt
+        sudo cp /var/log/kern.log $BASE/logs/kern_log.txt
     fi
 
     # apache logs; including wsgi stuff like horizon, keystone, etc.
