@@ -516,8 +516,20 @@ EOF
     # a way to pass through arbitrary devstack config options so that
     # we don't need to add new devstack-gate options every time we
     # want to create a new config.
-    if [[ -n "$DEVSTACK_LOCAL_CONFIG" ]]; then
-        echo "$DEVSTACK_LOCAL_CONFIG" >>"$localrc_file"
+    if [[ "$role" = sub ]]; then
+        # If we are in a multinode environment, we may want to specify 2
+        # different sets of plugins
+        if [[ -n "$DEVSTACK_SUBNODE_CONFIG" ]]; then
+            echo "$DEVSTACK_SUBNODE_CONFIG" >>"$localrc_file"
+        else
+            if [[ -n "$DEVSTACK_LOCAL_CONFIG" ]]; then
+                echo "$DEVSTACK_LOCAL_CONFIG" >>"$localrc_file"
+            fi
+        fi
+    else
+        if [[ -n "$DEVSTACK_LOCAL_CONFIG" ]]; then
+            echo "$DEVSTACK_LOCAL_CONFIG" >>"$localrc_file"
+        fi
     fi
 
 }
