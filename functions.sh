@@ -173,6 +173,15 @@ function remaining_time {
 function reproduce {
     cat > $WORKSPACE/logs/reproduce.sh <<EOF
 #!/bin/bash -xe
+#
+# Script to reproduce devstack-gate run.
+#
+# Prerequisites:
+# - Fresh install of Ubuntu Trusty, with basic internet access
+# - Must have python-dev, build-essential, and git installed from apt
+# - Must have virtualenv installed from pip
+# - Must be run as root
+#
 
 exec 0</dev/null
 
