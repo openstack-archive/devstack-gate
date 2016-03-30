@@ -140,20 +140,7 @@ function start_timer {
     # first make sure the time is right, so we don't go into crazy land
     # later if the system decides to apply an ntp date and we jump forward
     # 4 hrs (which has happened)
-    if is_fedora; then
-        local ntp_service='ntpd'
-    elif uses_debs; then
-        local ntp_service='ntp'
-    else
-        echo "Unsupported platform, can't determine ntp service"
-        exit 1
-    fi
-    local default_ntp_server=$(
-        grep ^server /etc/ntp.conf | head -1 | awk '{print $2}')
-    local ntp_server=${NTP_SERVER:-$default_ntp_server}
-    sudo service $ntp_service stop
-    sudo /usr/sbin/ntpdate $ntp_server
-    sudo service $ntp_service start
+    sudo /usr/sbin/ntp-wait -v
     sleep 1
     START_TIME=`date +%s`
 }
