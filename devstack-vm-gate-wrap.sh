@@ -37,6 +37,11 @@ source $WORKSPACE/devstack-gate/functions.sh
 
 start_timer
 
+# Save the PROJECTS variable as it was passed in.  This is needed for reproduce.sh
+# incase the job definition contains items that are not in the "global" list
+# below.
+# See: https://bugs.launchpad.net/openstack-gate/+bug/1544827
+JOB_PROJECTS="$PROJECTS"
 PROJECTS="openstack-infra/devstack-gate $PROJECTS"
 PROJECTS="openstack-dev/devstack $PROJECTS"
 PROJECTS="openstack-dev/pbr $PROJECTS"
@@ -474,7 +479,7 @@ $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m file \
     -a "path='$WORKSPACE/logs' state=directory"
 
 # Record a file to reproduce this build
-reproduce
+reproduce "$JOB_PROJECTS"
 
 # Run ansible to do setup_host on all nodes.
 echo "Setting up the hosts"
