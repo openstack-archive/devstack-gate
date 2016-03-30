@@ -579,6 +579,9 @@ function setup_host {
     echo "NProc has discovered $(nproc) CPUs"
     cat /proc/cpuinfo
 
+    # Capture locale configuration
+    locale
+
     # This is necessary to keep sudo from complaining
     fix_etc_hosts
 
