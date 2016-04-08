@@ -416,7 +416,7 @@ fi
 if ! function_exists "gate_hook"; then
     # the command we use to run the gate
     function gate_hook {
-        $BASE/new/devstack-gate/devstack-vm-gate.sh
+        $WORKSPACE/devstack-gate/devstack-vm-gate.sh
     }
     export -f gate_hook
 fi

@@ -375,9 +375,6 @@ XENAPI_CONNECTION_URL=http://${DEVSTACK_GATE_XENAPI_DOM0_IP}
 VNCSERVER_PROXYCLIENT_ADDRESS=${DEVSTACK_GATE_XENAPI_DOM0_IP}
 VIRT_DRIVER=xenserver
 
-# A separate xapi network is created with this name-label
-FLAT_NETWORK_BRIDGE=vmnet
-
 # A separate xapi network on eth4 serves the purpose of the public network.
 # This interface is added in Citrix's XenServer environment as an internal
 # interface
@@ -406,6 +403,14 @@ VOLUME_BACKING_DEVICE=/dev/xvdb
 # Set multi-host config
 MULTI_HOST=1
 EOF
+
+        # neutron network will set FLAT_NETWORK_BRIDGE in pre_test_hook
+        if [[ $DEVSTACK_GATE_NEUTRON -ne "1" ]]; then
+            cat >> "$localrc_file" << EOF
+# A separate xapi network is created with this name-label
+FLAT_NETWORK_BRIDGE=vmnet
+EOF
+        fi
     fi
 
     if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
@@ -609,13 +614,13 @@ else
     echo "... this takes 10 - 15 minutes (logs in logs/devstacklog.txt.gz)"
     start=$(date +%s)
     $ANSIBLE primary -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "cd '$BASE/new/devstack' && sudo -H -u stack FORCE=yes stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
+        -a "cd '$BASE/new/devstack' && sudo -H -u stack stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
         &> "$WORKSPACE/logs/devstack-early.txt"
     # Run non controller setup after controller is up. This is necessary
     # because services like nova apparently expect to have the controller in
     # place before anything else.
     $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "cd '$BASE/new/devstack' && sudo -H -u stack FORCE=yes stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
+        -a "cd '$BASE/new/devstack' && sudo -H -u stack stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
         &> "$WORKSPACE/logs/devstack-subnodes-early.txt"
     end=$(date +%s)
     took=$((($end - $start) / 60))
