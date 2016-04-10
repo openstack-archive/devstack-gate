@@ -764,8 +764,10 @@ function cleanup_host {
     sudo cp /etc/sudoers $BASE/logs/sudoers.txt
 
     # Archive config files
+    # NOTE(mriedem): 'openstack' is added separately since it's not a project
+    # but it is where clouds.yaml is stored in dsvm runs that use it.
     sudo mkdir $BASE/logs/etc/
-    for PROJECT in $PROJECTS; do
+    for PROJECT in $PROJECTS openstack; do
         proj=`basename $PROJECT`
         if [ -d /etc/$proj ]; then
             sudo cp -r /etc/$proj $BASE/logs/etc/
