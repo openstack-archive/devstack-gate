@@ -65,7 +65,7 @@ def normalize_branch(branch):
 
 def configs_from_env():
     configs = []
-    for k, v in os.environ.iteritems():
+    for k, v in os.environ.items():
         if k.startswith('DEVSTACK_GATE_'):
             if v not in FALSE_VALUES:
                 f = k.split('DEVSTACK_GATE_')[1]
@@ -145,7 +145,7 @@ def main():
     LOG.debug("Services: %s " % services)
 
     if opts.mode == "services":
-        print ",".join(services)
+        print(",".join(services))
 
 
 if __name__ == "__main__":
