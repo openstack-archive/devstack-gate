@@ -381,9 +381,15 @@ function fix_disk_layout {
             # Don't use sparse device to avoid wedging when disk space and
             # memory are both unavailable.
             local swapfile='/root/swapfile'
+            sudo touch ${swapfile}
             swapdiff=$(( $SWAPSIZE - $swapcurrent ))
 
-            sudo dd if=/dev/zero of=${swapfile} bs=1M count=${swapdiff}
+            if sudo df -T ${swapfile} | grep -q ext ; then
+                sudo fallocate -l ${swapdiff}M ${swapfile}
+            else
+                # Cannot fallocate on filesystems like XFS
+                sudo dd if=/dev/zero of=${swapfile} bs=1M count=${swapdiff}
+            fi
             sudo chmod 600 ${swapfile}
             sudo mkswap ${swapfile}
             sudo swapon ${swapfile}
