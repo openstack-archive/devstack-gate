@@ -130,9 +130,13 @@ function network_sanity_check {
         _http_check $pypi_url
     fi
 
-    # rax ubuntu mirror
-    _ping_check mirror.rackspace.com
-    _http_check http://mirror.rackspace.com/ubuntu/dists/trusty/Release.gpg
+    # AFS ubuntu mirror
+    source /etc/nodepool/provider
+    NODEPOOL_MIRROR_HOST=${NODEPOOL_MIRROR_HOST:-mirror.$NODEPOOL_REGION.$NODEPOOL_CLOUD.openstack.org}
+    NODEPOOL_MIRROR_HOST=$(echo $NODEPOOL_MIRROR_HOST|tr '[:upper:]' '[:lower:]')
+
+    _ping_check $NODEPOOL_MIRROR_HOST
+    _http_check http://$NODEPOOL_MIRROR_HOST/ubuntu/dists/trusty/Release
 }
 
 # create the start timer for when the job began
