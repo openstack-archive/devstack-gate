@@ -314,6 +314,7 @@ EOF
     if [[ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]]; then
         echo "CINDER_SECURE_DELETE=False" >>"$localrc_file"
     fi
+    echo "CINDER_VOLUME_CLEAR=${DEVSTACK_CINDER_VOLUME_CLEAR}" >>"$localrc_file"
 
     if [[ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]]; then
         echo "HEAT_CREATE_TEST_IMAGE=False" >>"$localrc_file"
