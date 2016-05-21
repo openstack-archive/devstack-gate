@@ -357,11 +357,9 @@ EOF
             echo "IRONIC_VM_EPHEMERAL_DISK=0" >>"$localrc_file"
             # agent CoreOS ramdisk is a little heavy
             echo "IRONIC_VM_SPECS_RAM=1024" >>"$localrc_file"
-            echo "IRONIC_VM_COUNT=1" >>"$localrc_file"
         else
             echo "IRONIC_ENABLED_DRIVERS=fake,pxe_ssh,pxe_ipmitool" >>"$localrc_file"
             echo "IRONIC_VM_EPHEMERAL_DISK=1" >>"$localrc_file"
-            echo "IRONIC_VM_COUNT=3" >>"$localrc_file"
         fi
     fi
 
