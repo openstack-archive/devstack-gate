@@ -223,8 +223,8 @@ function setup_localrc {
                     # As per reference architecture described in
                     # https://wiki.openstack.org/wiki/Neutron/DVR
                     # for DVR multi-node, add the following services
-                    # on all compute nodes (q-fwaas being optional):
-                    MY_ENABLED_SERVICES+=",q-l3,q-fwaas,q-meta"
+                    # on all compute nodes:
+                    MY_ENABLED_SERVICES+=",q-l3,q-meta"
                 fi
             else
                 MY_ENABLED_SERVICES+=",n-net,n-api-meta"
