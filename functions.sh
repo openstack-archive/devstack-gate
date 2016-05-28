@@ -876,6 +876,9 @@ function cleanup_host {
 
     # Copy tempest config file
     sudo cp $BASE/new/tempest/etc/tempest.conf $NEWLOGTARGET/tempest_conf.txt
+    if [ -f $BASE/new/tempest/etc/accounts.yaml ] ; then
+        sudo cp $BASE/new/tempest/etc/accounts.yaml $NEWLOGTARGET/accounts_yaml.txt
+    fi
 
     # Copy dstat CSV log if it exists
     if [ -f $BASE/new/dstat-csv.log ]; then
