@@ -564,7 +564,8 @@ EOF
     fi
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]]; then
-        echo -e "[[post-config|\$NOVA_CONF]]\n[libvirt]\ncpu_mode=custom\ncpu_model=gate64" >> local.conf
+        # ensure local.conf exists to remove conditional logic
+        touch local.conf
         if [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
             echo -e "[[post-config|\$NEUTRON_CONF]]\n[DEFAULT]\nnetwork_device_mtu=$EXTERNAL_BRIDGE_MTU" >> local.conf
         fi
@@ -601,7 +602,8 @@ else
     cd $BASE/new/devstack
     setup_localrc "new" "localrc" "primary"
     if [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]]; then
-        echo -e "[[post-config|\$NOVA_CONF]]\n[libvirt]\ncpu_mode=custom\ncpu_model=gate64" >> local.conf
+        # ensure local.conf exists to remove conditional logic
+        touch local.conf
         if [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
             echo -e "[[post-config|\$NEUTRON_CONF]]\n[DEFAULT]\nnetwork_device_mtu=$EXTERNAL_BRIDGE_MTU" >> local.conf
         fi
