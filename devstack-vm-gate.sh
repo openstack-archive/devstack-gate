@@ -342,7 +342,7 @@ EOF
         echo "IRONIC_BAREMETAL_BASIC_OPS=True" >>"$localrc_file"
         echo "IRONIC_VM_LOG_DIR=$BASE/$localrc_oldnew/ironic-bm-logs" >>"$localrc_file"
         echo "DEFAULT_INSTANCE_TYPE=baremetal" >>"$localrc_file"
-        echo "BUILD_TIMEOUT=600" >>"$localrc_file"
+        echo "BUILD_TIMEOUT=${DEVSTACK_GATE_TEMPEST_BAREMETAL_BUILD_TIMEOUT:-600}" >>"$localrc_file"
         echo "IRONIC_CALLBACK_TIMEOUT=600" >>"$localrc_file"
         echo "Q_AGENT=openvswitch" >>"$localrc_file"
         echo "Q_ML2_TENANT_NETWORK_TYPE=vxlan" >>"$localrc_file"
