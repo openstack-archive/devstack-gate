@@ -47,6 +47,8 @@ config:
     features: [heat]
   tlsproxy:
     features: [tlsproxy]
+  cinder_mn_grenade:
+    features: [cinder-mn-grenade]
 
 branches:
   # The value of ""default" is the name of the "trunk" branch
@@ -109,6 +111,12 @@ features:
   cinder:
     base:
       services: [cinder, c-api, c-vol, c-sch, c-bak]
+
+  # This will be used to disable c-vol on primary node when running multinode grenade
+  # job that will test compatibility of new c-api, c-sch (primary) and old c-vol and c-bak (sub).
+  cinder-mn-grenade:
+    base:
+      rm-services: [c-vol, c-bak]
 
   heat:
     base:

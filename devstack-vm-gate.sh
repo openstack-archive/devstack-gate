@@ -214,9 +214,8 @@ function setup_localrc {
         local original_enabled_services=$MY_ENABLED_SERVICES
 
         # TODO(afazekas): Move to the feature grid
-        # TODO(afazekas): add c-vol
         if [[ $role = sub ]]; then
-            MY_ENABLED_SERVICES="n-cpu,ceilometer-acompute,dstat"
+            MY_ENABLED_SERVICES="n-cpu,ceilometer-acompute,dstat,c-vol,c-bak"
             if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
                 MY_ENABLED_SERVICES+=",q-agt"
                 if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
