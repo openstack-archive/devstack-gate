@@ -228,10 +228,6 @@ export DEVSTACK_PROJECT_FROM_GIT=${DEVSTACK_PROJECT_FROM_GIT:-}
 # i.e. stable/juno:
 #   pullup means stable/icehouse => stable/juno
 #   forward means stable/juno => master (or stable/kilo if that's out)
-#   partial-ncpu means stable/icehouse => stable/juno but keep nova
-#       compute at stable/icehouse
-#   partial-ironic means stable/icehouse => stable/juno but keep ironic
-#       compute at stable/icehouse
 export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-}
 
 # the branch name for selecting grenade branches
@@ -287,17 +283,6 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
                 export GRENADE_NEW_BRANCH="$GIT_BRANCH"
             fi
             ;;
-
-        # partial upgrades are like normal upgrades except they leave
-        # certain services behind. We use the base 4 operator ';&'
-        # here to fall trhough to the next conditionals
-        partial-*)
-            if [[ "$DEVSTACK_GATE_GRENADE" == "partial-ncpu" ]]; then
-                export DO_NOT_UPGRADE_SERVICES=[n-cpu]
-            elif [[ "$DEVSTACK_GATE_GRENADE" == "partial-ironic" ]]; then
-                export DO_NOT_UPGRADE_SERVICES=[ir-api,ir-cond]
-            fi
-            ;&
 
         # pullup upgrades are our normal upgrade test. Can you upgrade
         # to the current patch from the last stable.
