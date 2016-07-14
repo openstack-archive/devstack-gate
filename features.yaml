@@ -97,7 +97,7 @@ features:
 
   neutron-adv:
     base:
-      services: [q-lbaas, q-fwaas]
+      services: [q-lbaas]
       rm-services: [n-net]
     kilo:
       services: [q-vpn]
