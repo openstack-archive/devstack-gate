@@ -568,7 +568,7 @@ EOF
         # ensure local.conf exists to remove conditional logic
         touch local.conf
         if [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
-            echo -e "[[post-config|\$NEUTRON_CONF]]\n[DEFAULT]\nnetwork_device_mtu=$EXTERNAL_BRIDGE_MTU" >> local.conf
+            echo -e "[[post-config|\$NEUTRON_CONF]]\n[DEFAULT]\nglobal_physnet_mtu=$EXTERNAL_BRIDGE_MTU" >> local.conf
         fi
 
         # get this in our base config
@@ -606,7 +606,7 @@ else
         # ensure local.conf exists to remove conditional logic
         touch local.conf
         if [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
-            echo -e "[[post-config|\$NEUTRON_CONF]]\n[DEFAULT]\nnetwork_device_mtu=$EXTERNAL_BRIDGE_MTU" >> local.conf
+            echo -e "[[post-config|\$NEUTRON_CONF]]\n[DEFAULT]\nglobal_physnet_mtu=$EXTERNAL_BRIDGE_MTU" >> local.conf
         fi
     fi
 
