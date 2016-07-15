@@ -311,6 +311,11 @@ DATABASE_QUERY_LOGGING=True
 EBTABLES_RACE_FIX=True
 EOF
 
+    if [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]] && [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
+        # Reduce the MTU on br-ex to match the MTU of underlying tunnels
+        echo "PUBLIC_BRIDGE_MTU=$EXTERNAL_BRIDGE_MTU" >>"$localrc_file"
+    fi
+
     if [[ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]]; then
         echo "CINDER_SECURE_DELETE=False" >>"$localrc_file"
     fi
@@ -657,19 +662,6 @@ else
             echo "Mysql should have been used, but there are no logs"
             exit 1
         fi
-    fi
-
-    if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]] && [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
-        # NOTE(afazekas): The cirros lp#1301958 does not support MTU setting via dhcp,
-        # simplest way the have tunneling working, with dvsm, without increasing the host system MTU
-        # is to decreasion the MTU on br-ex
-        # TODO(afazekas): Configure the mtu smarter on the devstack side
-        MTU_NODES=primary
-        if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
-            MTU_NODES=all
-        fi
-        $ANSIBLE "$MTU_NODES" -f 5 -i "$WORKSPACE/inventory" -m shell \
-                -a "sudo ip link set mtu $EXTERNAL_BRIDGE_MTU dev br-ex"
     fi
 fi
 
