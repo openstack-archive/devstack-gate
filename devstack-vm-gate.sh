@@ -335,6 +335,8 @@ ROOTSLEEP=0
 # to correctly do testing. Otherwise you are not testing
 # the code you have posted for review.
 ERROR_ON_CLONE=True
+# Since git clone can't be used for novnc in gates, force it to install the packages
+NOVNC_FROM_PACKAGE=True
 ENABLED_SERVICES=$MY_ENABLED_SERVICES
 SKIP_EXERCISES=$SKIP_EXERCISES
 SERVICE_HOST=127.0.0.1
