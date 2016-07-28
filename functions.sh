@@ -1060,7 +1060,7 @@ function enable_netconsole {
     # out to the world is specify the default gw as the remote
     # destination.
     local default_gw=$(ip route | grep default | awk '{print $3}')
-    local gw_mac=$(arp $default_gw | grep $default_gw | awk '{print $3}')
+    local gw_mac=$(arp -n $default_gw | grep $default_gw | awk '{print $3}')
     local gw_dev=$(ip route | grep default | awk '{print $5}')
 
     # turn up message output
