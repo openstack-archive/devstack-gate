@@ -140,7 +140,7 @@ function start_timer {
     # first make sure the time is right, so we don't go into crazy land
     # later if the system decides to apply an ntp date and we jump forward
     # 4 hrs (which has happened)
-    sudo /usr/sbin/ntp-wait -v
+    sudo /usr/sbin/ntp-wait -v -n 100
     sleep 1
     START_TIME=`date +%s`
 }
