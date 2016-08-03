@@ -353,6 +353,8 @@ EOF
         echo "Q_ML2_TENANT_NETWORK_TYPE=vxlan" >>"$localrc_file"
         if [[ "$DEVSTACK_GATE_IRONIC_BUILD_RAMDISK" -eq 0 ]]; then
             echo "IRONIC_BUILD_DEPLOY_RAMDISK=False" >>"$localrc_file"
+        else
+            echo "IRONIC_BUILD_DEPLOY_RAMDISK=True" >>"$localrc_file"
         fi
         if [[ -z "${DEVSTACK_GATE_IRONIC_DRIVER%%agent*}" ]]; then
             echo "SWIFT_ENABLE_TEMPURLS=True" >>"$localrc_file"
