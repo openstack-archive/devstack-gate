@@ -1198,3 +1198,8 @@ function with_timeout {
 function iniset {
     $(source $BASE/new/devstack/inc/ini-config; iniset $@)
 }
+
+# Iniget imported from devstack
+function iniget {
+    $(source $BASE/new/devstack/inc/ini-config; iniget $@)
+}

@@ -734,6 +734,16 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
         exit 0
     fi
 
+    # There are some parts of devstack that call the neutron api to verify the
+    # extension. We should not ever trust this for gate testing. This checks to
+    # ensure on master we always are using the default value. (on stable we hard
+    # code a list of available extensions so we can't use this)
+    neutron_extensions=$(iniget "$BASE/new/tempest/etc/tempest.conf" "neutron-feature-enabled" "api_extensions")
+    if [[ $GIT_BRANCH == 'master' && ($neutron_extensions == 'all' || $neutron_extensions == '') ]] ; then
+        echo "Devstack misconfugred tempest and changed the value of api_extensions"
+        exit 1
+    fi
+
     # From here until the end we rely on the fact that all the code fails if
     # something is wrong, to enforce exit on bad test results.
     set -o errexit
