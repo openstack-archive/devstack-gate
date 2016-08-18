@@ -32,6 +32,8 @@ ANSIBLE_VERSION=${ANSIBLE_VERSION:-2.0.0.2}
 
 # sshd may have been compiled with a default path excluding */sbin
 export PATH=$PATH:/usr/local/sbin:/usr/sbin
+# When doing xtrace (set -x / set -o xtrace), provide more debug output
+export PS4='+ ${BASH_SOURCE:-}:${FUNCNAME[0]:-}:L${LINENO:-}:   '
 
 source $WORKSPACE/devstack-gate/functions.sh
 
