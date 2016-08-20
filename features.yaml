@@ -99,8 +99,11 @@ features:
 
   neutron-adv:
     base:
-      services: [q-lbaas]
       rm-services: [n-net]
+    mitaka:
+      services: [q-lbaas]
+    liberty:
+      services: [q-lbaas]
     kilo:
       services: [q-vpn]
 
