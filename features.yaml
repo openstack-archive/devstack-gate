@@ -2,6 +2,7 @@ config:
   default:
     master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
     ocata: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
+    newton: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
     mitaka: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
     liberty: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
     kilo: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
