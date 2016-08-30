@@ -904,7 +904,7 @@ function cleanup_host {
     # Copy Ironic nodes console logs if they exist
     if [ -d $BASE/new/ironic-bm-logs ] ; then
         sudo mkdir -p $BASE/logs/ironic-bm-logs
-        sudo cp $BASE/new/ironic-bm-logs/*.log $BASE/logs/ironic-bm-logs/
+        sudo cp -r $BASE/new/ironic-bm-logs/* $BASE/logs/ironic-bm-logs/
     fi
 
     # Copy tempest config file
