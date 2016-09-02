@@ -57,13 +57,19 @@ LOCAL_MTU=$(ip link show | sed -ne 's/.*mtu \([0-9]\+\).*/\1/p' | sort -n | head
 EXTERNAL_BRIDGE_MTU=$((LOCAL_MTU - 50))
 
 function setup_ssh {
+    # Copy the SSH key from /etc/nodepool/id_rsa{.pub} to the specified
+    # directory on 'all' the nodes. 'all' the nodes consists of the primary
+    # node and all of the subnodes.
     local path=$1
+    local dest_file=${2:-id_rsa}
     $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m file \
         -a "path='$path' mode=0700 state=directory"
     $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
         -a "src=/etc/nodepool/id_rsa.pub dest='$path/authorized_keys' mode=0600"
     $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
-        -a "src=/etc/nodepool/id_rsa dest='$path/id_rsa' mode=0400"
+        -a "src=/etc/nodepool/id_rsa.pub dest='$path/${dest_file}.pub' mode=0600"
+    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
+        -a "src=/etc/nodepool/id_rsa dest='$path/${dest_file}' mode=0400"
 }
 
 function setup_nova_net_networking {
@@ -169,6 +175,16 @@ EOF
         remote_copy_file /tmp/tmp_sub_localrc $NODE:$devstack_dir/localrc
         remote_copy_file $localconf $NODE:$localconf
     done
+
+    # NOTE(vsaienko) we need to have ssh connection among nodes to manage
+    # VMs from ironic-conductor or setup networking from networking-generic-switch
+    if [[ "$DEVSTACK_GATE_IRONIC" -eq '1' ]]; then
+        echo "Copy ironic key among nodes"
+        # NOTE(vsaienko) setup_ssh() set 700 to all parent directories when they doesn't
+        # exist. Keep ironic keys in other directory than /opt/stack/data to avoid setting
+        # 700 on /opt/stack/data
+        setup_ssh $BASE/new/.ssh ironic_key
+    fi
 }
 
 function setup_networking {
