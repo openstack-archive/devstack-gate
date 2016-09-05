@@ -98,8 +98,12 @@ function git_clone_and_cd {
 
 # Utility function for tests
 function assert_equal {
-    local lineno=`caller 0 | awk '{print $1}'`
-    local function=`caller 0 | awk '{print $2}'`
+    local lineno
+    local function
+
+    lineno=$(caller 0 | awk '{print $1}')
+    function=$(caller 0 | awk '{print $2}')
+
     if [[ "$1" != "$2" ]]; then
         echo "ERROR: $1 != $2 in $function:L$lineno!"
         ERROR=1
@@ -109,8 +113,12 @@ function assert_equal {
 }
 
 function assert_raises {
-    local lineno=`caller 0 | awk '{print $1}'`
-    local function=`caller 0 | awk '{print $2}'`
+    local lineno
+    local function
+
+    lineno=$(caller 0 | awk '{print $1}')
+    function=$(caller 0 | awk '{print $2}')
+
     eval "$@" &>/dev/null
     if [[ $? -eq 0 ]]; then
         ERROR=1
@@ -465,8 +473,9 @@ function test_workspace_branch_arg {
 function test_call_hook_if_defined {
 
     local filename=test_call_hook_if_defined.txt
-    local save_dir=`pwd`/tmp
+    local save_dir
 
+    save_dir=$(pwd)/tmp
     mkdir -p $save_dir
 
     function demo_script {

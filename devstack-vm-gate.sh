@@ -314,7 +314,8 @@ function setup_localrc {
 
         TEST_MATRIX='roles/test-matrix/library/test_matrix.py -n'
         MY_ENABLED_SERVICES=$(cd $BASE/new/devstack-gate && $PYTHON_PATH $TEST_MATRIX -b $branch_for_matrix -f $DEVSTACK_GATE_FEATURE_MATRIX -r $test_matrix_role)
-        local original_enabled_services=$(cd $BASE/new/devstack-gate && $PYTHON_PATH $TEST_MATRIX -b $branch_for_matrix -f $DEVSTACK_GATE_FEATURE_MATRIX -r primary)
+        local original_enabled_services
+        original_enabled_services=$(cd $BASE/new/devstack-gate && $PYTHON_PATH $TEST_MATRIX -b $branch_for_matrix -f $DEVSTACK_GATE_FEATURE_MATRIX -r primary)
         echo "MY_ENABLED_SERVICES: ${MY_ENABLED_SERVICES}"
         echo "original_enabled_services: ${original_enabled_services}"
 
@@ -568,7 +569,8 @@ function setup_localrc {
         localrc_set "$localrc_file" "NOVA_ALLOW_MOVE_TO_SAME_HOST" "False"
         localrc_set "$localrc_file" "LIVE_MIGRATION_AVAILABLE" "True"
         localrc_set "$localrc_file" "USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION" "True"
-        local primary_node=`cat /etc/nodepool/primary_node_private`
+        local primary_node
+        primary_node=`cat /etc/nodepool/primary_node_private`
         localrc_set "$localrc_file" "SERVICE_HOST" "$primary_node"
 
         if [[ "$role" = sub ]]; then

@@ -26,8 +26,11 @@ GRENADE_NEW_MASTER="n-api,n-api-meta,n-obj,n-cpu,n-sch,n-cond,n-novnc,n-cauth,g-
 
 # Utility function for tests
 function assert_list_equal {
-    local source=$(echo $1 | awk 'BEGIN{RS=",";} {print $1}' | sort -V | xargs echo)
-    local target=$(echo $2 | awk 'BEGIN{RS=",";} {print $1}' | sort -V | xargs echo)
+    local source
+    local target
+
+    source=$(echo $1 | awk 'BEGIN{RS=",";} {print $1}' | sort -V | xargs echo)
+    target=$(echo $2 | awk 'BEGIN{RS=",";} {print $1}' | sort -V | xargs echo)
     if [[ "$target" != "$source" ]]; then
         echo -n `caller 0 | awk '{print $2}'`
         echo -e " - ERROR\n    $target \n != $source"
@@ -40,27 +43,32 @@ function assert_list_equal {
 }
 
 function test_full_master {
-    local results=$(DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n)
+    local results
+    results=$(DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n)
     assert_list_equal $TEMPEST_FULL_MASTER $results
 }
 
 function test_full_feature_ec {
-    local results=$(DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n -b feature/ec)
+    local results
+    results=$(DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n -b feature/ec)
     assert_list_equal $TEMPEST_FULL_MASTER $results
 }
 
 function test_neutron_master {
-    local results=$(DEVSTACK_GATE_NEUTRON=1 DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n)
+    local results
+    results=$(DEVSTACK_GATE_NEUTRON=1 DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n)
     assert_list_equal $TEMPEST_NEUTRON_MASTER $results
 }
 
 function test_heat_slow_master {
-    local results=$(DEVSTACK_GATE_TEMPEST_HEAT_SLOW=1 DEVSTACK_GATE_NEUTRON=1 DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n)
+    local results
+    results=$(DEVSTACK_GATE_TEMPEST_HEAT_SLOW=1 DEVSTACK_GATE_NEUTRON=1 DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n)
     assert_list_equal $TEMPEST_HEAT_SLOW_MASTER $results
 }
 
 function test_grenade_new_master {
-    local results=$(DEVSTACK_GATE_TEMPEST_HEAT_SLOW=1 DEVSTACK_GATE_GRENADE=pullup DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n)
+    local results
+    results=$(DEVSTACK_GATE_TEMPEST_HEAT_SLOW=1 DEVSTACK_GATE_GRENADE=pullup DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n)
     assert_list_equal $GRENADE_NEW_MASTER $results
 }
 

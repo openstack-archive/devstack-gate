@@ -105,6 +105,7 @@ function tsfilter {
 
 # create the start timer for when the job began
 function start_timer {
+    local default_ntp_server
     # first make sure the time is right, so we don't go into crazy land
     # later if the system decides to apply an ntp date and we jump forward
     # 4 hrs (which has happened)
@@ -116,8 +117,8 @@ function start_timer {
         echo "Unsupported platform, can't determine ntp service"
         exit 1
     fi
-    local default_ntp_server=$(
-        grep ^server /etc/ntp.conf | head -1 | awk '{print $2}')
+    default_ntp_server=$(grep ^server /etc/ntp.conf | \
+                                head -1 | awk '{print $2}')
     local ntp_server=${NTP_SERVER:-$default_ntp_server}
     sudo service $ntp_service stop
     sudo /usr/sbin/ntpdate $ntp_server
@@ -127,8 +128,10 @@ function start_timer {
 }
 
 function remaining_time {
-    local now=`date +%s`
-    local elapsed=$(((now - START_TIME) / 60))
+    local now
+    local elapsed
+    now=`date +%s`
+    elapsed=$(((now - START_TIME) / 60))
     export REMAINING_TIME=$((DEVSTACK_GATE_TIMEOUT - elapsed - 5))
     echo "Job timeout set to: $REMAINING_TIME minutes"
     if [ ${REMAINING_TIME} -le 0 ]; then
@@ -139,7 +142,8 @@ function remaining_time {
 
 # Create a script to reproduce this build
 function reproduce {
-    local xtrace=$(set +o | grep xtrace)
+    local xtrace
+    xtrace=$(set +o | grep xtrace)
     set +o xtrace
 
     JOB_PROJECTS=$1
@@ -295,6 +299,8 @@ function git_remote_update {
 function git_timed {
     local max_attempts=3
     local count=0
+    local sleep_time
+
     until timeout -k 1m 5m git "$@"; do
         count=$(($count + 1))
         echo "git $@ failed."
@@ -302,7 +308,7 @@ function git_timed {
             echo "Max attempts reached for git $@; giving up."
             exit 1
         fi
-        local sleep_time=$((30 + $RANDOM % 60))
+        sleep_time=$((30 + $RANDOM % 60))
         echo "sleep $sleep_time before retrying."
         sleep $sleep_time
     done
@@ -358,18 +364,22 @@ function git_clone_and_cd {
 function setup_project {
     local project=$1
     local branch=$2
-    local short_project=`basename $project`
+    local short_project
+    short_project=$(basename $project)
     local git_base=${GIT_BASE:-https://git.openstack.org}
     # allow for possible project branch override
-    local uc_project=`echo $short_project | tr [:lower:] [:upper:] | tr '-' '_' | sed 's/[^A-Z_]//'`
+    local uc_project
+    uc_project=$(echo $short_project | tr [:lower:] [:upper:] | tr '-' '_' | sed 's/[^A-Z_]//')
     local project_branch_var="\$OVERRIDE_${uc_project}_PROJECT_BRANCH"
-    local project_branch=`eval echo ${project_branch_var}`
+    local project_branch
+    project_branch=$(eval echo ${project_branch_var})
     if [[ "$project_branch" != "" ]]; then
         branch=$project_branch
     fi
     # allow for possible git_base override
     local project_git_base_var="\$OVERRIDE_${uc_project}_GIT_BASE"
-    local project_git_base=`eval echo ${project_git_base_var}`
+    local project_git_base
+    project_git_base=$(eval echo ${project_git_base_var})
     if [[ "$project_git_base" != "" ]]; then
         git_base=$project_git_base
     fi
@@ -420,12 +430,14 @@ function setup_project {
 function setup_workspace {
     local base_branch=$1
     local DEST=$2
-    local xtrace=$(set +o | grep xtrace)
 
     # Note on infra images, this is setup by
     # project-config:nodepool/elements/cache-devstack
     # during image builds.
     local cache_dir=/opt/cache/files/
+    local xtrace
+    xtrace=$(set +o | grep xtrace)
+
 
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
@@ -618,11 +630,13 @@ function save_dir {
 
 function cleanup_host {
     # TODO: clean this up to be errexit clean
-    local errexit=$(set +o | grep errexit)
+    local errexit
+    errexit=$(set +o | grep errexit)
     set +o errexit
 
     # Enabled detailed logging, since output of this function is redirected
-    local xtrace=$(set +o | grep xtrace)
+    local xtrace
+    xtrace=$(set +o | grep xtrace)
     set -o xtrace
 
     cd $WORKSPACE
@@ -952,22 +966,27 @@ function remote_copy_file {
 
 # enable_netconsole
 function enable_netconsole {
+    local remote_ip
+    local remote_port
+    local default_gw
+    local gw_mac
+    local gw_dev
 
     # do nothing if not set
     if [[ $DEVSTACK_GATE_NETCONSOLE = "" ]]; then
         return
     fi
 
-    local remote_ip=$(echo $DEVSTACK_GATE_NETCONSOLE | awk -F: -e '{print $1}')
-    local remote_port=$(echo $DEVSTACK_GATE_NETCONSOLE | awk -F: -e '{print $2}')
+    remote_ip=$(echo $DEVSTACK_GATE_NETCONSOLE | awk -F: -e '{print $1}')
+    remote_port=$(echo $DEVSTACK_GATE_NETCONSOLE | awk -F: -e '{print $2}')
 
     # netconsole requires the device to send and the destitation MAC,
     # which is obviously on the same subnet.  The way to get packets
     # out to the world is specify the default gw as the remote
     # destination.
-    local default_gw=$(ip route | grep default | awk '{print $3}')
-    local gw_mac=$(arp -n $default_gw | grep $default_gw | awk '{print $3}')
-    local gw_dev=$(ip route | grep default | awk '{print $5}')
+    default_gw=$(ip route | grep default | awk '{print $3}')
+    gw_mac=$(arp $default_gw | grep $default_gw | awk '{print $3}')
+    gw_dev=$(ip route | grep default | awk '{print $5}')
 
     # turn up message output
     sudo dmesg -n 8
