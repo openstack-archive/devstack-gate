@@ -1160,7 +1160,7 @@ function ovs_vxlan_bridge {
         fi
     fi
     for node_ip in $peer_ips; do
-        (( offset++ ))
+        offset=$(( offset+1 ))
         # For reference on how to setup a tunnel using OVS see:
         #   http://openvswitch.org/support/config-cookbooks/port-tunneling/
         # The command below is equivalent to the sequence of ip/brctl commands
