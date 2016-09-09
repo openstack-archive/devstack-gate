@@ -1151,6 +1151,8 @@ function ovs_vxlan_bridge {
         shift 4
     fi
     local peer_ips=$@
+    # neutron uses 1:1000 with default devstack configuration, avoid overlap
+    local additional_vni_offset=1000000
     eval $install_ovs_deps
     # create a bridge, just like you would with 'brctl addbr'
     # if the bridge exists, --may-exist prevents ovs from returning an error
@@ -1167,6 +1169,7 @@ function ovs_vxlan_bridge {
     fi
     for node_ip in $peer_ips; do
         offset=$(( offset+1 ))
+        vni=$(( offset + additional_vni_offset ))
         # For reference on how to setup a tunnel using OVS see:
         #   http://openvswitch.org/support/config-cookbooks/port-tunneling/
         # The command below is equivalent to the sequence of ip/brctl commands
@@ -1180,7 +1183,7 @@ function ovs_vxlan_bridge {
             ${bridge_name}_${node_ip} \
             -- set interface ${bridge_name}_${node_ip} type=vxlan \
             options:remote_ip=${node_ip} \
-            options:key=${offset} \
+            options:key=${vni} \
             options:local_ip=${host_ip}
         # Now complete the vxlan tunnel setup for the Compute Node:
         #  Similarly this establishes the tunnel in the reverse direction
@@ -1191,7 +1194,7 @@ function ovs_vxlan_bridge {
             ${bridge_name}_${host_ip} \
             -- set interface ${bridge_name}_${host_ip} type=vxlan \
             options:remote_ip=${host_ip} \
-            options:key=${offset} \
+            options:key=${vni} \
             options:local_ip=${node_ip}
         if [[ "$set_ips" == "True" ]] ; then
             if ! remote_command $node_ip sudo ip addr show dev ${bridge_name} | \
