@@ -757,11 +757,11 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     if [[ "$DEVSTACK_GATE_TEMPEST_REGEX" != "" ]] ; then
         if [[ "$DEVSTACK_GATE_TEMPEST_ALL_PLUGINS" -eq "1" ]]; then
             echo "Running tempest with plugins and a custom regex filter"
-            $TEMPEST_COMMAND -eall-plugin -- --concurrency=$TEMPEST_CONCURRENCY $DEVSTACK_GATE_TEMPEST_REGEX
+            $TEMPEST_COMMAND -eall-plugin -- $DEVSTACK_GATE_TEMPEST_REGEX --concurrency=$TEMPEST_CONCURRENCY
             sudo -H -u tempest .tox/all-plugin/bin/tempest list-plugins
         else
             echo "Running tempest with a custom regex filter"
-            $TEMPEST_COMMAND -eall -- --concurrency=$TEMPEST_CONCURRENCY $DEVSTACK_GATE_TEMPEST_REGEX
+            $TEMPEST_COMMAND -eall -- $DEVSTACK_GATE_TEMPEST_REGEX --concurrency=$TEMPEST_CONCURRENCY
         fi
     elif [[ "$DEVSTACK_GATE_TEMPEST_ALL_PLUGINS" -eq "1" ]]; then
         echo "Running tempest all-plugins test suite"
