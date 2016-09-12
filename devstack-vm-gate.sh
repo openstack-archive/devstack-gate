@@ -337,7 +337,6 @@ ROOTSLEEP=0
 ERROR_ON_CLONE=True
 ENABLED_SERVICES=$MY_ENABLED_SERVICES
 SKIP_EXERCISES=$SKIP_EXERCISES
-SERVICE_HOST=127.0.0.1
 # Screen console logs will capture service logs.
 SYSLOG=False
 SCREEN_LOGDIR=$BASE/$localrc_oldnew/screen-logs
