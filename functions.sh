@@ -180,7 +180,7 @@ EOF
 
     # first get all keys that match our filter and then output the whole line
     # that will ensure that multi-line env vars are set properly
-    for KEY in $(printenv | grep '\(DEVSTACK\|ZUUL\)' | sed 's/\(.*\)=.*/\1/'); do
+    for KEY in $(printenv -0 | grep -z -Z '\(DEVSTACK\|ZUUL\)' | sed -z -n 's/^\([^=]\+\)=.*/\1\n/p'); do
         echo "declare -x ${KEY}=\"${!KEY}\"" >> $WORKSPACE/logs/reproduce.sh
     done
     if [ -n "$JOB_PROJECTS" ] ; then
