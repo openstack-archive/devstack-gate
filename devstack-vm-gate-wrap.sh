@@ -28,7 +28,7 @@ GIT_BRANCH=${GIT_BRANCH:-master}
 # We're using enough ansible specific features that it's extremely
 # possible that new ansible releases can break us. As such we should
 # be very deliberate about which ansible we use.
-ANSIBLE_VERSION=${ANSIBLE_VERSION:-2.0.0.2}
+ANSIBLE_VERSION=${ANSIBLE_VERSION:-2.1.1.0}
 
 # sshd may have been compiled with a default path excluding */sbin
 export PATH=$PATH:/usr/local/sbin:/usr/sbin
@@ -451,7 +451,7 @@ COUNTER=1
 echo "[primary]" > "$WORKSPACE/inventory"
 echo "localhost ansible_connection=local host_counter=$COUNTER" >> "$WORKSPACE/inventory"
 echo "[subnodes]" >> "$WORKSPACE/inventory"
-SUBNODES=$(cat /etc/nodepool/sub_nodes_private)
+export SUBNODES=$(cat /etc/nodepool/sub_nodes_private)
 for SUBNODE in $SUBNODES ; do
     let COUNTER=COUNTER+1
     echo "$SUBNODE host_counter=$COUNTER" >> "$WORKSPACE/inventory"
@@ -462,13 +462,15 @@ done
 # vars to ansible shell commands. This may need to change in the future but
 # for now the current setup is simple, consistent and easy to understand.
 
-# Copy bootstrap to remote hosts
-# It is in brackets for avoiding inheriting a huge environment variable
+# This is in brackets for avoiding inheriting a huge environment variable
 (export PROJECTS; export > "$WORKSPACE/test_env.sh")
-$ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m copy \
-    -a "src='$WORKSPACE/devstack-gate' dest='$WORKSPACE'"
-$ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m copy \
-    -a "src='$WORKSPACE/test_env.sh' dest='$WORKSPACE/test_env.sh'"
+if [ -n "$SUBNODES" ] ; then
+    # Copy bootstrap to remote hosts
+    $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m copy \
+        -a "src='$WORKSPACE/devstack-gate' dest='$WORKSPACE'"
+    $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m copy \
+        -a "src='$WORKSPACE/test_env.sh' dest='$WORKSPACE/test_env.sh'"
+fi
 
 # Make a directory to store logs
 $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m file \
@@ -601,8 +603,10 @@ echo "Cleaning up host"
 echo "... this takes 3 - 4 minutes (logs at logs/devstack-gate-cleanup-host.txt.gz)"
 $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
     -a "$(run_command cleanup_host)" &> "$WORKSPACE/devstack-gate-cleanup-host.txt"
-$ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m synchronize \
-    -a "mode=pull src='$BASE/logs/' dest='$BASE/logs/subnode-{{ host_counter }}'"
+if [ -n "$SUBNODES" ] ; then
+    $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m synchronize \
+        -a "mode=pull src='$BASE/logs/' dest='$BASE/logs/subnode-{{ host_counter }}'"
+fi
 sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
 
 exit $RETVAL
