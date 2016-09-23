@@ -284,6 +284,9 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
                 export GRENADE_NEW_BRANCH="stable/mitaka"
             elif [[ "$GRENADE_BASE_BRANCH" == "stable/mitaka" ]]; then
                 export GRENADE_OLD_BRANCH="stable/mitaka"
+                export GRENADE_NEW_BRANCH="stable/newton"
+            elif [[ "$GRENADE_BASE_BRANCH" == "stable/newton" ]]; then
+                export GRENADE_OLD_BRANCH="stable/newton"
                 export GRENADE_NEW_BRANCH="$GIT_BRANCH"
             fi
             ;;
@@ -303,8 +306,11 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
             elif [[ "$GRENADE_BASE_BRANCH" == "stable/mitaka" ]]; then
                 export GRENADE_OLD_BRANCH="stable/liberty"
                 export GRENADE_NEW_BRANCH="stable/mitaka"
-            else # master
+            elif [[ "$GRENADE_BASE_BRANCH" == "stable/newton" ]]; then
                 export GRENADE_OLD_BRANCH="stable/mitaka"
+                export GRENADE_NEW_BRANCH="stable/newton"
+            else # master
+                export GRENADE_OLD_BRANCH="stable/newton"
                 export GRENADE_NEW_BRANCH="$GIT_BRANCH"
             fi
             ;;
