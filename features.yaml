@@ -174,3 +174,10 @@ features:
   tlsproxy:
     base:
       services: [tls-proxy]
+    # TLS proxy didn't work properly until ocata
+    liberty:
+      rm-services: [tls-proxy]
+    mitaka:
+      rm-services: [tls-proxy]
+    newton:
+      rm-services: [tls-proxy]
