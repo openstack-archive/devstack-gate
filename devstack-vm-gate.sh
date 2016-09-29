@@ -132,6 +132,14 @@ EOF
                         $sub_nodes
     fi
 
+    if [[ "$DEVSTACK_GATE_IRONIC" -eq '1' ]]; then
+        # NOTE(vsaienko) Ironic VMs will be connected to this bridge
+        # in order to have access to VMs on another nodes.
+        ovs_vxlan_bridge "br_ironic_vxlan" $primary_node "False" 128 \
+            $sub_nodes
+
+    fi
+
     echo "Preparing cross node connectivity"
     setup_ssh $BASE/new/.ssh
     setup_ssh ~root/.ssh
