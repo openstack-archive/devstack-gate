@@ -645,28 +645,26 @@ else
     $ANSIBLE primary -f 5 -i "$WORKSPACE/inventory" -m shell \
         -a "cd '$BASE/new/devstack' && sudo -H -u stack stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
         &> "$WORKSPACE/logs/devstack-early.txt"
-    if [ -n "$SUBNODES" ] ; then
-        if [ -d "$BASE/data/CA" ] && [ -f "$BASE/data/ca-bundle.pem" ] ; then
-            # Sync any data files which include certificates to be used if
-            # TLS is enabled
-            $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" --sudo -m file \
-                -a "path='$BASE/data' state=directory owner=stack group=stack mode=0755"
-            $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" --sudo -m file \
-                -a "path='$BASE/data/CA' state=directory owner=stack group=stack mode=0755"
-            $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" \
-                --sudo -m synchronize \
-                -a "mode=push src='$BASE/data/ca-bundle.pem' dest='$BASE/data/ca-bundle.pem'"
-            sudo $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" \
-                --sudo -u $USER -m synchronize \
-                -a "mode=push src='$BASE/data/CA' dest='$BASE/data'"
-        fi
-        # Run non controller setup after controller is up. This is necessary
-        # because services like nova apparently expect to have the controller in
-        # place before anything else.
-        $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m shell \
-            -a "cd '$BASE/new/devstack' && sudo -H -u stack stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
-            &> "$WORKSPACE/logs/devstack-subnodes-early.txt"
+    if [ -d "$BASE/data/CA" ] && [ -f "$BASE/data/ca-bundle.pem" ] ; then
+        # Sync any data files which include certificates to be used if
+        # TLS is enabled
+        $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" --sudo -m file \
+            -a "path='$BASE/data' state=directory owner=stack group=stack mode=0755"
+        $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" --sudo -m file \
+            -a "path='$BASE/data/CA' state=directory owner=stack group=stack mode=0755"
+        $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" \
+            --sudo -m synchronize \
+            -a "mode=push src='$BASE/data/ca-bundle.pem' dest='$BASE/data/ca-bundle.pem'"
+        sudo $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" \
+            --sudo -u $USER -m synchronize \
+            -a "mode=push src='$BASE/data/CA' dest='$BASE/data'"
     fi
+    # Run non controller setup after controller is up. This is necessary
+    # because services like nova apparently expect to have the controller in
+    # place before anything else.
+    $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "cd '$BASE/new/devstack' && sudo -H -u stack stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
+        &> "$WORKSPACE/logs/devstack-subnodes-early.txt"
     end=$(date +%s)
     took=$((($end - $start) / 60))
     if [[ "$took" -gt 20 ]]; then
