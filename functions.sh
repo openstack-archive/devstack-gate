@@ -1171,6 +1171,7 @@ function ovs_vxlan_bridge {
                     dev ${bridge_name}
         fi
     fi
+    sudo ip link set dev $bridge_name up
     for node_ip in $peer_ips; do
         offset=$(( offset+1 ))
         vni=$(( offset + additional_vni_offset ))
@@ -1208,6 +1209,7 @@ function ovs_vxlan_bridge {
                         dev ${bridge_name}
             fi
         fi
+        remote_command $node_ip sudo ip link set dev $bridge_name up
     done
 }
 
