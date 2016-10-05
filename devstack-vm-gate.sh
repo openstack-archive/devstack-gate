@@ -227,6 +227,9 @@ function setup_localrc {
             if [[ "$original_enabled_services" =~ "c-api" ]]; then
                 MY_ENABLED_SERVICES+=",c-vol,c-bak"
             fi
+            if [[ "$original_enabled_services" =~ "tls-proxy" ]]; then
+                MY_ENABLED_SERVICES+=",tls-proxy"
+            fi
             if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
                 MY_ENABLED_SERVICES+=",q-agt"
                 if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
