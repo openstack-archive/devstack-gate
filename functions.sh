@@ -203,6 +203,11 @@ EOF
     if [ -n "$JOB_PROJECTS" ] ; then
         echo "declare -x PROJECTS=\"$JOB_PROJECTS\"" >> $WORKSPACE/logs/reproduce.sh
     fi
+    for fun in pre_test_hook gate_hook post_test_hook ; do
+        if function_exists $fun ; then
+            declare -fp $fun >> $WORKSPACE/logs/reproduce.sh
+        fi
+    done
 
     cat >> $WORKSPACE/logs/reproduce.sh <<EOF
 

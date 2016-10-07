@@ -525,6 +525,11 @@ declare -x ZUUL_VAR_MULTILINE="zuul-var-setting1
 zuul-var-setting2"
 declare -x DEVSTACK_VAR_MULTILINE="devstack-var-setting1
 devstack-var-setting2"
+gate_hook ()
+{
+    echo "The cake is a lie"
+}
+declare -fx gate_hook
 EOF
 
     # prepare environment for test
@@ -535,6 +540,10 @@ devstack-var-setting2"
     export ZUUL_VAR=zuul-var
     export ZUUL_VAR_MULTILINE="zuul-var-setting1
 zuul-var-setting2"
+    function gate_hook {
+        echo "The cake is a lie"
+    }
+    export -f gate_hook
     JOB_NAME=test-job
     mkdir $WORKSPACE/logs
 
@@ -558,6 +567,7 @@ zuul-var-setting2"
     unset ZUUL_VAR
     unset ZUUL_VAR_MULTILINE
     unset JOB_NAME
+    unset gate_hook
 }
 
 # Run tests:
