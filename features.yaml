@@ -50,6 +50,8 @@ config:
     features: [tlsproxy]
   cinder_mn_grenade:
     features: [cinder-mn-grenade]
+  neutron_dvr:
+    features: [neutron-dvr]
 
 branches:
   # The value of ""default" is the name of the "trunk" branch
@@ -57,7 +59,7 @@ branches:
   # Normalized branch names only here, e.g. stable/icehouse => icehouse
   allowed: [master, ocata, newton, mitaka, liberty, kilo, juno, icehouse]
 
-features:
+primary:
   default:
     base:
       services: [mysql, rabbit, dstat]
@@ -170,6 +172,77 @@ features:
   ceph:
     base:
       services: [ceph]
+
+  tlsproxy:
+    base:
+      services: [tls-proxy]
+    # TLS proxy didn't work properly until ocata
+    liberty:
+      rm-services: [tls-proxy]
+    mitaka:
+      rm-services: [tls-proxy]
+    newton:
+      rm-services: [tls-proxy]
+
+subnode:
+  default:
+    base:
+      services: [dstat]
+
+  ceilometer:
+    base:
+      services: [ceilometer-acompute]
+
+  cinder:
+    base:
+      services: [c-vol, c-bak]
+
+  cinder-mn-grenade:
+    base:
+      services: []
+
+  glance:
+    base:
+      services: []
+
+  horizon:
+    base:
+      services: []
+
+  ironic:
+    base:
+      rm-services: [c-vol, c-bak]
+      services: [ir-api, ir-cond]
+
+  keystone:
+    base:
+      services: []
+
+  neutron:
+    base:
+      rm-services: [n-net, n-api-meta]
+      services: [q-agt]
+
+  neutron-adv:
+    base:
+      services: []
+
+  neutron-dvr:
+    base:
+      rm-services: [n-net, n-api-meta]
+      services: [q-agt, q-l3, q-meta]
+
+  nova:
+    base:
+      services: [n-cpu, n-net, n-api-meta]
+
+  swift:
+    base:
+      services: []
+
+  tempest:
+    base:
+      services: []
 
   tlsproxy:
     base:

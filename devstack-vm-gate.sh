@@ -255,34 +255,14 @@ function setup_localrc {
                 sudo yum install -y PyYAML
             fi
         fi
-        MY_ENABLED_SERVICES=`cd $BASE/new/devstack-gate && ./test-matrix.py -b $branch_for_matrix -f $DEVSTACK_GATE_FEATURE_MATRIX`
-        local original_enabled_services=$MY_ENABLED_SERVICES
 
-        # TODO(afazekas): Move to the feature grid
+        local test_matrix_role='primary'
         if [[ $role = sub ]]; then
-            MY_ENABLED_SERVICES="n-cpu,ceilometer-acompute,dstat"
-            if [[ "$original_enabled_services" =~ "c-api" ]]; then
-                MY_ENABLED_SERVICES+=",c-vol,c-bak"
-            fi
-            if [[ "$original_enabled_services" =~ "tls-proxy" ]]; then
-                MY_ENABLED_SERVICES+=",tls-proxy"
-            fi
-            if [[ "$DEVSTACK_GATE_NEUTRON" -eq "1" ]]; then
-                MY_ENABLED_SERVICES+=",q-agt"
-                if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
-                    # As per reference architecture described in
-                    # https://wiki.openstack.org/wiki/Neutron/DVR
-                    # for DVR multi-node, add the following services
-                    # on all compute nodes:
-                    MY_ENABLED_SERVICES+=",q-l3,q-meta"
-                fi
-            else
-                MY_ENABLED_SERVICES+=",n-net,n-api-meta"
-            fi
-            if [[ "$DEVSTACK_GATE_IRONIC" -eq "1" ]]; then
-                MY_ENABLED_SERVICES+=",ir-api,ir-cond"
-            fi
+            test_matrix_role='subnode'
         fi
+
+        MY_ENABLED_SERVICES=$(cd $BASE/new/devstack-gate && ./test-matrix.py -b $branch_for_matrix -f $DEVSTACK_GATE_FEATURE_MATRIX -r $test_matrix_role)
+        local original_enabled_services=$(cd $BASE/new/devstack-gate && ./test-matrix.py -b $branch_for_matrix -f $DEVSTACK_GATE_FEATURE_MATRIX -r primary)
 
         # Allow optional injection of ENABLED_SERVICES from the calling context
         if [[ ! -z $ENABLED_SERVICES ]] ; then
