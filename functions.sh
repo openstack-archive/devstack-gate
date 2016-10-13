@@ -844,6 +844,7 @@ function cleanup_host {
         find $BASE/old/screen-logs -type l -print0 | \
             xargs -0 -I {} sudo cp {} $BASE/logs/old
         sudo cp $BASE/old/devstacklog.txt $BASE/logs/old/
+        sudo cp $BASE/old/devstacklog.txt.summary $BASE/logs/old/devstacklog.summary.txt
         sudo cp $BASE/old/devstack/localrc $BASE/logs/old/localrc.txt
         sudo cp $BASE/old/tempest/etc/tempest.conf $BASE/logs/old/tempest_conf.txt
         if [ -f $BASE/old/devstack/tempest.log ] ; then
@@ -900,6 +901,7 @@ function cleanup_host {
     find $BASE/new/screen-logs -type l -print0 | \
         xargs -0 -I {} sudo cp {} $NEWLOGTARGET/
     sudo cp $BASE/new/devstacklog.txt $NEWLOGTARGET/
+    sudo cp $BASE/new/devstacklog.txt.summary $NEWLOGTARGET/devstacklog.summary.txt
     sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
     if [ -f $BASE/new/devstack/tempest.log ]; then
         sudo cp $BASE/new/devstack/tempest.log $NEWLOGTARGET/verify_tempest_conf.log
