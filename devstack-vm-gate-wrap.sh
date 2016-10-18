@@ -75,6 +75,11 @@ PROJECTS="openstack-infra/tripleo-ci $PROJECTS"
 PROJECTS="openstack/automaton $PROJECTS"
 PROJECTS="openstack/cliff $PROJECTS"
 PROJECTS="openstack/debtcollector $PROJECTS"
+# The devstack heat plugin uses these repos
+if [[ "$DEVSTACK_GATE_HEAT" -eq "1" ]] ; then
+    PROJECTS="openstack/dib-utils $PROJECTS"
+    PROJECTS="openstack/diskimage-builder $PROJECTS"
+fi
 PROJECTS="openstack/django_openstack_auth $PROJECTS"
 PROJECTS="openstack/futurist $PROJECTS"
 PROJECTS="openstack/manila $PROJECTS"
