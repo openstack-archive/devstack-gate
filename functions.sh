@@ -185,8 +185,12 @@ function reproduce {
 # Script to reproduce devstack-gate run.
 #
 # Prerequisites:
-# - Fresh install of Ubuntu Trusty, with basic internet access
-# - Must have python-dev, build-essential, and git installed from apt
+# - Fresh install of current Ubuntu LTS, with basic internet access.
+#   Note we can and do run devstack-gate on other distros double check
+#   where your job ran (will be recorded in console.html) to reproduce
+#   as accurately as possible.
+# - Must have python-all-dev, build-essential, git, libssl-dev installed
+#   from apt, or their equivalents on other distros.
 # - Must have virtualenv installed from pip
 # - Must be run as root
 #
