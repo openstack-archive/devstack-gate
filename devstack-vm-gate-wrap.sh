@@ -190,9 +190,27 @@ export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
 # Only applicable to stable/liberty+ devstack.
 export DEVSTACK_CINDER_VOLUME_CLEAR=${DEVSTACK_CINDER_VOLUME_CLEAR:-none}
 
+# Set this to override the branch selected for testing (in
+# single-branch checkouts; not used for grenade)
+export OVERRIDE_ZUUL_BRANCH=${OVERRIDE_ZUUL_BRANCH:-$ZUUL_BRANCH}
+
+stable_compare="stable/[a-n]"
+
 # Set to 1 to run neutron instead of nova network
-# Only applicable to master branch
-export DEVSTACK_GATE_NEUTRON=${DEVSTACK_GATE_NEUTRON:-0}
+# This is a bit complicated to handle the deprecation of nova net across
+# repos with branches from this branchless job runner.
+if [ -n "$DEVSTACK_GATE_NEUTRON" ] ; then
+    # If someone has made a choice externally honor it
+    export DEVSTACK_GATE_NEUTRON=$DEVSTACK_GATE_NEUTRON
+elif [[ "$OVERRIDE_ZUUL_BRANCH" =~ $stable_compare ]] ; then
+    # Default to no neutron on older stable branches because nova net
+    # was the default all that time.
+    export DEVSTACK_GATE_NEUTRON=0
+else
+    # For everything else there is neutron
+    export DEVSTACK_GATE_NEUTRON=1
+fi
+
 
 # Set to 1 to run neutron distributed virtual routing
 export DEVSTACK_GATE_NEUTRON_DVR=${DEVSTACK_GATE_NEUTRON_DVR:-0}
@@ -384,10 +402,6 @@ export DEVSTACK_GATE_REMOVE_STACK_SUDO=${DEVSTACK_GATE_REMOVE_STACK_SUDO:-1}
 # is intended to be a stop-gap until devstack can support
 # dependency-only installation.
 export DEVSTACK_GATE_UNSTACK=${DEVSTACK_GATE_UNSTACK:-0}
-
-# Set this to override the branch selected for testing (in
-# single-branch checkouts; not used for grenade)
-export OVERRIDE_ZUUL_BRANCH=${OVERRIDE_ZUUL_BRANCH:-$ZUUL_BRANCH}
 
 # Set Ceilometer backend to override the default one. It could be mysql,
 # postgresql, mongodb.
