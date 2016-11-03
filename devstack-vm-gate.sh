@@ -144,6 +144,25 @@ EOF
         ovs_vxlan_bridge "br_ironic_vxlan" $primary_node "False" 128 \
             $sub_nodes
 
+        cat <<EOF >>"$sub_localrc"
+HOST_TOPOLOGY=multinode
+HOST_TOPOLOGY_ROLE=subnode
+# NOTE(vsaienko) we assume for now that we using only 1 subnode,
+# each subnode should have different switch name (bridge) as it is used
+# by networking-generic-switch to uniquely identify switch.
+IRONIC_VM_NETWORK_BRIDGE=sub1brbm
+OVS_PHYSICAL_BRIDGE=sub1brbm
+ENABLE_TENANT_TUNNELS=False
+IRONIC_KEY_FILE="$BASE/new/.ssh/ironic_key"
+EOF
+        cat <<EOF >>"$localrc"
+HOST_TOPOLOGY=multinode
+HOST_TOPOLOGY_ROLE=primary
+HOST_TOPOLOGY_SUBNODES="$sub_nodes"
+IRONIC_KEY_FILE="$BASE/new/.ssh/ironic_key"
+GENERIC_SWITCH_KEY_FILE="$BASE/new/.ssh/ironic_key"
+ENABLE_TENANT_TUNNELS=False
+EOF
     fi
 
     echo "Preparing cross node connectivity"
