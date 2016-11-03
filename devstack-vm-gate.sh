@@ -258,6 +258,9 @@ function setup_localrc {
             else
                 MY_ENABLED_SERVICES+=",n-net,n-api-meta"
             fi
+            if [[ "$DEVSTACK_GATE_IRONIC" -eq "1" ]]; then
+                MY_ENABLED_SERVICES+=",ir-api,ir-cond"
+            fi
         fi
 
         # Allow optional injection of ENABLED_SERVICES from the calling context
