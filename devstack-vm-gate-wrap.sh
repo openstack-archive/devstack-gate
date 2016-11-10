@@ -35,6 +35,12 @@ export PATH=$PATH:/usr/local/sbin:/usr/sbin
 # When doing xtrace (set -x / set -o xtrace), provide more debug output
 export PS4='+ ${BASH_SOURCE:-}:${FUNCNAME[0]:-}:L${LINENO:-}:   '
 
+#check to see if WORKSPACE var is defined
+if [ -z ${WORKSPACE} ]; then
+    echo "The 'WORKSPACE' variable is undefined. It must be defined for this script to work"
+    exit 1
+fi
+
 source $WORKSPACE/devstack-gate/functions.sh
 
 start_timer
