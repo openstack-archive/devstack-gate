@@ -201,9 +201,13 @@ EOF
 
     # first get all keys that match our filter and then output the whole line
     # that will ensure that multi-line env vars are set properly
-    for KEY in $(printenv -0 | grep -z -Z '\(DEVSTACK\|ZUUL\)' | sed -z -n 's/^\([^=]\+\)=.*/\1\n/p'); do
+    for KEY in $(printenv -0 | grep -z -Z '\(DEVSTACK\|GRENADE_PLUGINRC\|ZUUL\)' | sed -z -n 's/^\([^=]\+\)=.*/\1\n/p'); do
         echo "declare -x ${KEY}=\"${!KEY}\"" >> $WORKSPACE/logs/reproduce.sh
     done
+    # If TEMPEST_CONCURRENCY has been explicitly set to 1, then save it in reproduce.sh
+    if [ "${TEMPEST_CONCURRENCY}" -eq 1 ]; then
+        echo "declare -x TEMPEST_CONCURRENCY=\"${TEMPEST_CONCURRENCY}\"" >> $WORKSPACE/logs/reproduce.sh
+    fi
     if [ -n "$JOB_PROJECTS" ] ; then
         echo "declare -x PROJECTS=\"$JOB_PROJECTS\"" >> $WORKSPACE/logs/reproduce.sh
     fi
