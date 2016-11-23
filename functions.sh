@@ -592,16 +592,6 @@ function setup_host {
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
 
-    echo "What's our kernel?"
-    uname -a
-
-    # capture # of cpus
-    echo "NProc has discovered $(nproc) CPUs"
-    cat /proc/cpuinfo
-
-    # Capture locale configuration
-    locale
-
     # This is necessary to keep sudo from complaining
     fix_etc_hosts
 

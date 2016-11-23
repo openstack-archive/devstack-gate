@@ -474,6 +474,7 @@ virtualenv /tmp/ansible
 # https://github.com/ansible/ansible/issues/15665
 /tmp/ansible/bin/pip install paramiko==1.16.0 ansible==$ANSIBLE_VERSION
 export ANSIBLE=/tmp/ansible/bin/ansible
+export ANSIBLE_PLAYBOOK=/tmp/ansible/bin/ansible-playbook
 
 # Write inventory file with groupings
 COUNTER=1
@@ -532,8 +533,10 @@ EOF
 }
 
 echo "... this takes a few seconds (logs at logs/devstack-gate-setup-host.txt.gz)"
+$ANSIBLE_PLAYBOOK -f 5 -i "$WORKSPACE/inventory" "$WORKSPACE/devstack-gate/playbooks/setup_host.yaml" \
+    &> "$WORKSPACE/logs/devstack-gate-setup-host.txt"
 $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
-    -a "$(run_command setup_host)" &> "$WORKSPACE/logs/devstack-gate-setup-host.txt"
+    -a "$(run_command setup_host)" &>> "$WORKSPACE/logs/devstack-gate-setup-host.txt"
 
 if [ -n "$DEVSTACK_GATE_GRENADE" ]; then
     start=$(date +%s)
@@ -631,7 +634,7 @@ echo "... this takes 3 - 4 minutes (logs at logs/devstack-gate-cleanup-host.txt.
 $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
     -a "$(run_command cleanup_host)" &> "$WORKSPACE/devstack-gate-cleanup-host.txt"
 $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m synchronize \
-    -a "mode=pull src='$BASE/logs/' dest='$BASE/logs/subnode-{{ host_counter }}'"
+    -a "mode=pull src='$BASE/logs/' dest='$BASE/logs/subnode-{{ host_counter }}' copy_links=yes"
 sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
 
 exit $RETVAL
