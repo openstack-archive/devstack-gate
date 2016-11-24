@@ -339,18 +339,6 @@ function git_clone_and_cd {
     cd $short_project
 }
 
-function fix_etc_hosts {
-    # HPcloud stopped adding the hostname to /etc/hosts with their
-    # precise images.
-
-    HOSTNAME=`/bin/hostname`
-    if ! grep $HOSTNAME /etc/hosts >/dev/null; then
-        echo "Need to add hostname to /etc/hosts"
-        sudo bash -c 'echo "127.0.1.1 $HOSTNAME" >>/etc/hosts'
-    fi
-
-}
-
 function fix_disk_layout {
     # Don't attempt to fix disk layout more than once
     [[ -e /etc/fixed_disk_layout ]] && return 0 || sudo touch /etc/fixed_disk_layout
@@ -595,9 +583,6 @@ function setup_host {
     # Enabled detailed logging, since output of this function is redirected
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
-
-    # This is necessary to keep sudo from complaining
-    fix_etc_hosts
 
     # We set some home directories under $BASE, make sure it exists.
     sudo mkdir -p $BASE
