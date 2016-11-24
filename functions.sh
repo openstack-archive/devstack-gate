@@ -584,27 +584,6 @@ function setup_host {
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
 
-    # Start with a fresh syslog
-    if which journalctl ; then
-        # save timestamp and use journalctl to dump everything since
-        # then at the end
-        date +"%Y-%m-%d %H:%M:%S" | sudo tee $BASE/log-start-timestamp.txt
-    else
-        # Assume rsyslog, move old logs aside then restart the service.
-        sudo stop rsyslog
-        sudo mv /var/log/syslog /var/log/syslog-pre-devstack
-        sudo mv /var/log/kern.log /var/log/kern_log-pre-devstack
-        sudo touch /var/log/syslog
-        sudo chown /var/log/syslog --ref /var/log/syslog-pre-devstack
-        sudo chmod /var/log/syslog --ref /var/log/syslog-pre-devstack
-        sudo chmod a+r /var/log/syslog
-        sudo touch /var/log/kern.log
-        sudo chown /var/log/kern.log --ref /var/log/kern_log-pre-devstack
-        sudo chmod /var/log/kern.log --ref /var/log/kern_log-pre-devstack
-        sudo chmod a+r /var/log/kern.log
-        sudo start rsyslog
-    fi
-
     # Create a stack user for devstack to run as, so that we can
     # revoke sudo permissions from that user when appropriate.
     sudo useradd -U -s /bin/bash -d $BASE/new -m stack
