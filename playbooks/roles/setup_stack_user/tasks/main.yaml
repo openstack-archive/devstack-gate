@@ -1,0 +1,20 @@
+---
+- name: Create stack group
+  group: name=stack state=present
+  become: yes
+
+- name: Create stack user
+  user: name=stack shell=/bin/bash home={{ BASE }}/new group=stack
+  become: yes
+
+- name: Set home folder permissions
+  file: path={{ BASE }}/new mode=0755
+  become: yes
+
+- name: Copy 50_stack_sh file to /etc/sudoers.d
+  copy: src=50_stack_sh dest=/etc/sudoers.d mode=0440 owner=root group=root
+  become: yes
+
+- name: Create new/.cache folder within BASE
+  file: path={{ BASE }}/new/.cache state=directory owner=stack group=stack
+  become: yes

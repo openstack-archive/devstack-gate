@@ -8,3 +8,4 @@
     - fix_etc_hosts
     - create_base_folder
     - start_fresh_logging
+    - setup_stack_user
