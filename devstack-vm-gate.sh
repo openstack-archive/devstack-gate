@@ -369,14 +369,6 @@ EOF
         fi
     fi
 
-    if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]]; then
-        echo "SKIP_EXERCISES=${SKIP_EXERCISES},volumes" >>"$localrc_file"
-        echo "DEFAULT_INSTANCE_TYPE=m1.small" >>"$localrc_file"
-        echo "DEFAULT_INSTANCE_USER=root" >>"$localrc_file"
-        echo "DEFAULT_INSTANCE_TYPE=m1.small" >>exerciserc
-        echo "DEFAULT_INSTANCE_USER=root" >>exerciserc
-    fi
-
     if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "ironic" ]]; then
         export TEMPEST_OS_TEST_TIMEOUT=${DEVSTACK_GATE_OS_TEST_TIMEOUT:-1200}
         echo "IRONIC_DEPLOY_DRIVER=$DEVSTACK_GATE_IRONIC_DRIVER" >>"$localrc_file"
