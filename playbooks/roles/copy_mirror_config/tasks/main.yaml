@@ -1,0 +1,12 @@
+- name: Get status of pydistutils.cfg file
+  stat: path={{ '~' + CI_USER | expanduser }}/.pydistutils.cfg
+  register: st
+- block:
+    - name: Install CI_USER .pydistutils on root home folder
+      command: install -D -m0644 -o root -g root {{ '~' + CI_USER | expanduser }}/.pydistutils.cfg /root/.pydistutils.cfg
+    - name: Install CI_USER .pydistutils on stack home folder
+      command: install -D -m0644 -o stack -g stack {{ '~' + CI_USER | expanduser }}/.pydistutils.cfg {{ BASE }}/new/.pydistutils.cfg
+    - name: Install CI_USER .pydistutils on tempest home folder
+      command: install -D -m0644 -o tempest -g tempest {{ '~' + CI_USER | expanduser }}/.pydistutils.cfg /home/tempest/.pydistutils.cfg
+  when: st.stat.exists
+  become: yes

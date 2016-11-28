@@ -571,25 +571,10 @@ function setup_workspace {
     $xtrace
 }
 
-function copy_mirror_config {
-    # The pydistutils.cfg file is added by Puppet. Some CIs may not rely on
-    # Puppet to do the base node installation
-    if [ -f ~/.pydistutils.cfg ]; then
-        sudo install -D -m0644 -o root -g root ~/.pydistutils.cfg ~root/.pydistutils.cfg
-
-        sudo install -D -m0644 -o stack -g stack ~/.pydistutils.cfg ~stack/.pydistutils.cfg
-
-        sudo install -D -m0644 -o tempest -g tempest ~/.pydistutils.cfg ~tempest/.pydistutils.cfg
-    fi
-}
-
 function setup_host {
     # Enabled detailed logging, since output of this function is redirected
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
-
-    # Ensure that all of the users have the openstack mirror config
-    copy_mirror_config
 
     # perform network sanity check so that we can characterize the
     # state of the world
