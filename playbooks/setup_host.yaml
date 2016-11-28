@@ -9,3 +9,4 @@
     - create_base_folder
     - start_fresh_logging
     - setup_stack_user
+    - setup_tempest_user

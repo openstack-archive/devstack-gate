@@ -584,23 +584,6 @@ function setup_host {
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
 
-    # Create a tempest user for tempest to run as, so that we can
-    # revoke sudo permissions from that user when appropriate.
-    # NOTE(sdague): we should try to get the state dump to be a
-    # neutron API call in Icehouse to remove this.
-    sudo useradd -U -s /bin/bash -m tempest
-    TEMPFILE=`mktemp`
-    echo "tempest ALL=(root) NOPASSWD:/sbin/ip" >$TEMPFILE
-    echo "tempest ALL=(root) NOPASSWD:/sbin/iptables" >>$TEMPFILE
-    echo "tempest ALL=(root) NOPASSWD:/usr/bin/ovsdb-client" >>$TEMPFILE
-    chmod 0440 $TEMPFILE
-    sudo chown root:root $TEMPFILE
-    sudo mv $TEMPFILE /etc/sudoers.d/51_tempest_sh
-
-    # Future useradd calls should strongly consider also updating
-    # ~/.pydisutils.cfg in the copy_mirror_config
-    # function if tox/pip will be used at all.
-
     # If we will be testing OpenVZ, make sure stack is a member of the vz group
     if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
         sudo usermod -a -G vz stack
