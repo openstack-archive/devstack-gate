@@ -986,10 +986,10 @@ function cleanup_host {
     fi
 
     # Make sure the current user can read all the logs and configs
-    sudo chown -R $USER:$USER $BASE/logs/
+    sudo chown -RL $USER:$USER $BASE/logs/
     # (note X not x ... execute/search only if the file is a directory
     # or already has execute permission for some user)
-    sudo chmod -R a+rX $BASE/logs/
+    sudo find $BASE/logs/ -exec chmod a+rX  {} \;
 
     # Collect all the deprecation related messages into a single file.
     # strip out date(s), timestamp(s), pid(s), context information and
