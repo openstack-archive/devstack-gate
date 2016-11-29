@@ -252,3 +252,7 @@ You can file bugs on the storyboard devstack-gate project::
     https://storyboard.openstack.org/#!/project/712
 
 And you can chat with us on Freenode in #openstack-qa or #openstack-infra.
+
+It's worth noting that, while devstack-gate is generally licensed under the
+Apache license, `playbooks/plugins/callback/devstack.py` is GPLv3 due to having
+derived from the Ansible source code.
