@@ -1,0 +1,5 @@
+---
+- hosts: all
+  gather_facts: yes
+  roles:
+    - gather_host_info

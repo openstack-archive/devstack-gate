@@ -1,0 +1,7 @@
+---
+- debug: msg="The running kernel version is {{ ansible_kernel }}"
+- debug: msg="This instance has {{ ansible_processor_vcpus }} vcpu(s)"
+- command: locale
+  register: locale_out
+- name: "Locale is:"
+  debug: var=locale_out.stdout_lines
