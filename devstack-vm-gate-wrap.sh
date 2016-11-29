@@ -487,6 +487,13 @@ for SUBNODE in $SUBNODES ; do
     echo "$SUBNODE host_counter=$COUNTER" >> "$WORKSPACE/inventory"
 done
 
+# Write ansible config file
+cat > "$WORKSPACE/ansible.cfg" <<EOF
+[defaults]
+callback_plugins = $WORKSPACE/devstack-gate/playbooks/plugins/callback
+stdout_callback = devstack
+EOF
+
 # NOTE(clarkb): for simplicity we evaluate all bash vars in ansible commands
 # on the node running these scripts, we do not pass through unexpanded
 # vars to ansible shell commands. This may need to change in the future but
