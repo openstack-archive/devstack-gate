@@ -985,11 +985,22 @@ function cleanup_host {
         sudo cp -r /var/log/openvswitch $BASE/logs/
     fi
 
+    # glusterfs logs and config
+    if [ -d /var/log/glusterfs ] ; then
+        sudo cp -r /var/log/glusterfs $BASE/logs/
+    fi
+    if [ -f /etc/glusterfs/glusterd.vol ] ; then
+        sudo cp /etc/glusterfs/glusterd.vol $BASE/logs/
+    fi
+
     # Make sure the current user can read all the logs and configs
     sudo chown -RL $USER:$USER $BASE/logs/
     # (note X not x ... execute/search only if the file is a directory
     # or already has execute permission for some user)
     sudo find $BASE/logs/ -exec chmod a+rX  {} \;
+    # Remove all broken symlinks, which point to non existing files
+    # They could be copied by rsync
+    sudo find $BASE/logs/ -type l -exec test ! -e {} \; -delete
 
     # Collect all the deprecation related messages into a single file.
     # strip out date(s), timestamp(s), pid(s), context information and
@@ -1031,14 +1042,6 @@ function cleanup_host {
         for X in `find $BASE/logs/rabbitmq -type f` ; do
             mv "$X" "${X/@/_at_}"
         done
-    fi
-
-    # glusterfs logs and config
-    if [ -d /var/log/glusterfs ] ; then
-        sudo cp -r /var/log/glusterfs $BASE/logs/
-    fi
-    if [ -f /etc/glusterfs/glusterd.vol ] ; then
-        sudo cp /etc/glusterfs/glusterd.vol $BASE/logs/
     fi
 
     # final memory usage and process list
