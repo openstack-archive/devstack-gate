@@ -557,8 +557,6 @@ EOF
 echo "... this takes a few seconds (logs at logs/devstack-gate-setup-host.txt.gz)"
 $ANSIBLE_PLAYBOOK -f 5 -i "$WORKSPACE/inventory" "$WORKSPACE/devstack-gate/playbooks/setup_host.yaml" \
     &> "$WORKSPACE/logs/devstack-gate-setup-host.txt"
-$ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
-    -a "$(run_command setup_host)" &>> "$WORKSPACE/logs/devstack-gate-setup-host.txt"
 
 if [ -n "$DEVSTACK_GATE_GRENADE" ]; then
     start=$(date +%s)
