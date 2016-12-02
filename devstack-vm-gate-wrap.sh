@@ -464,9 +464,6 @@ with $DEVSTACK_GATE_TIMEOUT_BUFFER minutes reserved for cleanup."
 echo "Available disk space on this host:"
 indent df -h
 
-# Enable tracing while we transition to using ansible to run
-# setup across multiple nodes.
-set -x
 # Install ansible
 sudo -H pip install virtualenv
 virtualenv /tmp/ansible
