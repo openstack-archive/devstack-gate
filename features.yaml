@@ -1,7 +1,7 @@
 config:
   default:
-    master: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
-    ocata: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
+    master: [default, ceilometer, glance, horizon, nova, placement, swift, cinder, keystone]
+    ocata: [default, ceilometer, glance, horizon, nova, placement, swift, cinder, keystone]
     newton: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
     mitaka: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
     liberty: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
@@ -94,6 +94,10 @@ primary:
     base:
       services: [n-cell]
       rm-compute-ext: [agregates, hosts]
+
+  placement:
+    base:
+      services: [placement-api]
 
   neutron:
     base:
@@ -235,6 +239,10 @@ subnode:
   nova:
     base:
       services: [n-cpu, n-net, n-api-meta]
+
+  placement:
+    base:
+      services: [placement-client]
 
   swift:
     base:
