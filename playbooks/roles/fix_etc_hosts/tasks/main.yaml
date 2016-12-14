@@ -1,0 +1,11 @@
+---
+- name: Check whether /etc/hosts contains hostname
+  command: grep {{ ansible_hostname }} /etc/hosts
+  changed_when: False
+  failed_when: False
+  register: grep_out
+
+- name: Add hostname to /etc/hosts
+  lineinfile: dest=/etc/hosts insertafter=EOF line='127.0.1.1 {{ ansible_hostname }}'
+  become: yes
+  when: grep_out.rc != 0
