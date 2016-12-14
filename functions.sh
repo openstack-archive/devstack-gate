@@ -130,13 +130,17 @@ function network_sanity_check {
         _http_check $pypi_url
     fi
 
-    # AFS ubuntu mirror
-    source /etc/nodepool/provider
-    NODEPOOL_MIRROR_HOST=${NODEPOOL_MIRROR_HOST:-mirror.$NODEPOOL_REGION.$NODEPOOL_CLOUD.openstack.org}
-    NODEPOOL_MIRROR_HOST=$(echo $NODEPOOL_MIRROR_HOST|tr '[:upper:]' '[:lower:]')
+    if [[ -f /etc/nodepool/provider ]]; then
+        # AFS ubuntu mirror
+        source /etc/nodepool/provider
+        if [[ -n "$NODEPOOL_MIRROR_HOST" || ( -n "$NODEPOOL_REGION" && -n "$NODEPOOL_CLOUD" ) ]]; then
+            NODEPOOL_MIRROR_HOST=${NODEPOOL_MIRROR_HOST:-mirror.$NODEPOOL_REGION.$NODEPOOL_CLOUD.openstack.org}
+            NODEPOOL_MIRROR_HOST=$(echo $NODEPOOL_MIRROR_HOST|tr '[:upper:]' '[:lower:]')
 
-    _ping_check $NODEPOOL_MIRROR_HOST
-    _http_check http://$NODEPOOL_MIRROR_HOST/ubuntu/dists/trusty/Release
+            _ping_check $NODEPOOL_MIRROR_HOST
+            _http_check http://$NODEPOOL_MIRROR_HOST/ubuntu/dists/trusty/Release
+        fi
+    fi
 }
 
 # create the start timer for when the job began
