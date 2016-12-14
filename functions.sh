@@ -584,9 +584,6 @@ function setup_host {
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
 
-    # We set some home directories under $BASE, make sure it exists.
-    sudo mkdir -p $BASE
-
     # Start with a fresh syslog
     if which journalctl ; then
         # save timestamp and use journalctl to dump everything since

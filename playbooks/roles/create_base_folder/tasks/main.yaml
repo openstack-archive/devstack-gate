@@ -1,0 +1,3 @@
+- name: Create BASE folder
+  file: path={{ BASE }} state=directory
+  become: yes
