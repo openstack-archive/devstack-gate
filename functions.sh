@@ -584,22 +584,6 @@ function setup_host {
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
 
-    # Create a stack user for devstack to run as, so that we can
-    # revoke sudo permissions from that user when appropriate.
-    sudo useradd -U -s /bin/bash -d $BASE/new -m stack
-    # Use 755 mode on the user dir regardless of the /etc/login.defs setting
-    sudo chmod 755 $BASE/new
-    TEMPFILE=`mktemp`
-    echo "stack ALL=(root) NOPASSWD:ALL" >$TEMPFILE
-    chmod 0440 $TEMPFILE
-    sudo chown root:root $TEMPFILE
-    sudo mv $TEMPFILE /etc/sudoers.d/50_stack_sh
-
-    # Create user's ~/.cache directory with proper permissions, ensuring later
-    # 'sudo pip install's do not create it owned by root.
-    sudo mkdir -p $BASE/new/.cache
-    sudo chown -R stack:stack $BASE/new/.cache
-
     # Create a tempest user for tempest to run as, so that we can
     # revoke sudo permissions from that user when appropriate.
     # NOTE(sdague): we should try to get the state dump to be a
