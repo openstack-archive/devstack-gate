@@ -469,7 +469,7 @@ sudo -H pip install virtualenv
 virtualenv /tmp/ansible
 # NOTE(emilien): workaround to avoid installing cryptography
 # https://github.com/ansible/ansible/issues/15665
-/tmp/ansible/bin/pip install paramiko==1.16.0 ansible==$ANSIBLE_VERSION
+/tmp/ansible/bin/pip install paramiko==1.16.0 ansible==$ANSIBLE_VERSION ara
 export ANSIBLE=/tmp/ansible/bin/ansible
 export ANSIBLE_PLAYBOOK=/tmp/ansible/bin/ansible-playbook
 
@@ -487,7 +487,7 @@ done
 # Write ansible config file
 cat > "$WORKSPACE/ansible.cfg" <<EOF
 [defaults]
-callback_plugins = $WORKSPACE/devstack-gate/playbooks/plugins/callback
+callback_plugins = $WORKSPACE/devstack-gate/playbooks/plugins/callback:/tmp/ansible/lib/python2.7/site-packages/ara/plugins/callbacks
 stdout_callback = devstack
 EOF
 
@@ -640,5 +640,8 @@ $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
 $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m synchronize \
     -a "mode=pull src='$BASE/logs/' dest='$BASE/logs/subnode-{{ host_counter }}' copy_links=yes"
 sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
+
+# Generate ARA report
+/tmp/ansible/bin/ara generate $BASE/logs/ara
 
 exit $RETVAL
