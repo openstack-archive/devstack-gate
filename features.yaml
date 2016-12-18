@@ -110,6 +110,10 @@ primary:
     kilo:
       services: [q-vpn]
 
+  neutron-dvr:
+    base:
+      services: []
+
   swift:
     base:
       services: [s-proxy, s-account, s-container, s-object]

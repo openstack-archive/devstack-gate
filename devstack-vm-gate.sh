@@ -263,6 +263,8 @@ function setup_localrc {
 
         MY_ENABLED_SERVICES=$(cd $BASE/new/devstack-gate && ./test-matrix.py -b $branch_for_matrix -f $DEVSTACK_GATE_FEATURE_MATRIX -r $test_matrix_role)
         local original_enabled_services=$(cd $BASE/new/devstack-gate && ./test-matrix.py -b $branch_for_matrix -f $DEVSTACK_GATE_FEATURE_MATRIX -r primary)
+        echo "MY_ENABLED_SERVICES: ${MY_ENABLED_SERVICES}"
+        echo "original_enabled_services: ${original_enabled_services}"
 
         # Allow optional injection of ENABLED_SERVICES from the calling context
         if [[ ! -z $ENABLED_SERVICES ]] ; then
