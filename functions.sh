@@ -588,11 +588,6 @@ function setup_host {
     local xtrace=$(set +o | grep xtrace)
     set -o xtrace
 
-    # If we will be testing OpenVZ, make sure stack is a member of the vz group
-    if [ "$DEVSTACK_GATE_VIRT_DRIVER" == "openvz" ]; then
-        sudo usermod -a -G vz stack
-    fi
-
     # Ensure that all of the users have the openstack mirror config
     copy_mirror_config
 
