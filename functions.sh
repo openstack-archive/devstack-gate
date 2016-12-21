@@ -833,6 +833,9 @@ function cleanup_host {
     sudo cp $BASE/new/devstacklog.txt $NEWLOGTARGET/
     sudo cp $BASE/new/devstacklog.txt.summary $NEWLOGTARGET/devstacklog.summary.txt
     sudo cp $BASE/new/devstack/localrc $NEWLOGTARGET/localrc.txt
+    if [ -f $BASE/new/devstack/local.conf ]; then
+        sudo cp $BASE/new/devstack/local.conf $NEWLOGTARGET/local.conf.txt
+    fi
     if [ -f $BASE/new/devstack/tempest.log ]; then
         sudo cp $BASE/new/devstack/tempest.log $NEWLOGTARGET/verify_tempest_conf.log
     fi
