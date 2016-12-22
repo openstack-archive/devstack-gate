@@ -272,6 +272,10 @@ function setup_localrc {
         fi
     fi
 
+    if [[ ! -z $USE_PYTHON3 ]] ; then
+        echo "USE_PYTHON3=$USE_PYTHON3" >>"$localrc_file"
+    fi
+
     if [[ "$DEVSTACK_GATE_CEPH" == "1" ]]; then
         echo "CINDER_ENABLED_BACKENDS=ceph:ceph" >>"$localrc_file"
         echo "TEMPEST_STORAGE_PROTOCOL=ceph" >>"$localrc_file"
