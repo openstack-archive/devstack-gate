@@ -272,8 +272,8 @@ function setup_localrc {
         fi
     fi
 
-    if [[ ! -z $USE_PYTHON3 ]] ; then
-        echo "USE_PYTHON3=$USE_PYTHON3" >>"$localrc_file"
+    if [[ ! -z $DEVSTACK_GATE_USE_PYTHON3 ]] ; then
+        echo "USE_PYTHON3=$DEVSTACK_GATE_USE_PYTHON3" >>"$localrc_file"
     fi
 
     if [[ "$DEVSTACK_GATE_CEPH" == "1" ]]; then

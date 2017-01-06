@@ -424,6 +424,11 @@ export DEVSTACK_GATE_TOPOLOGY=${DEVSTACK_GATE_TOPOLOGY:-aio}
 # for jobs that know exactly which repos they need.
 export DEVSTACK_GATE_PROJECTS_OVERRIDE=${DEVSTACK_GATE_PROJECTS_OVERRIDE:-""}
 
+# By default we don't use Python 3
+# NOTE(jlvillal) 6-Jan-2017: Support USE_PYTHON3 for backwards compatibility,
+# but should remove once all jobs have been fixed.
+export DEVSTACK_GATE_USE_PYTHON3=${DEVSTACK_GATE_USE_PYTHON3:-${USE_PYTHON3:-False}}
+
 # Set this to enable remote logging of the console via UDP packets to
 # a specified ipv4 ip:port (note; not hostname -- ip address only).
 # This can be extremely useful if a host is oopsing or dropping off
