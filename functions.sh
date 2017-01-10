@@ -822,7 +822,7 @@ function cleanup_host {
         # over time-stampped files and put the interesting logs back at
         # top-level for easy access
         sudo mkdir -p $BASE/logs/grenade
-        save_file $BASE/logs/grenade.sh.log grenade/grenade.sh
+        save_file $BASE/logs/grenade.sh.log grenade/grenade.sh.log
         save_file $BASE/logs/grenade.sh.log.summary \
             grenade/grenade.sh.summary.log
         sudo rm $BASE/logs/grenade.sh.*
