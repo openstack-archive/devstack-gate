@@ -394,9 +394,6 @@ function setup_localrc {
         localrc_set "$localrc_file" "PUBLIC_BRIDGE_MTU" "$EXTERNAL_BRIDGE_MTU"
     fi
 
-    if [[ "$DEVSTACK_CINDER_SECURE_DELETE" -eq "0" ]]; then
-        localrc_set "$localrc_file" "CINDER_SECURE_DELETE" "False"
-    fi
     localrc_set "$localrc_file" "CINDER_VOLUME_CLEAR" "${DEVSTACK_CINDER_VOLUME_CLEAR}"
 
     if [[ "$DEVSTACK_GATE_TEMPEST_HEAT_SLOW" -eq "1" ]]; then

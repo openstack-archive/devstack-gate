@@ -186,13 +186,6 @@ export DEVSTACK_GATE_SMOKE_SERIAL=${DEVSTACK_GATE_SMOKE_SERIAL:-0}
 # for tempest will be the one chosen by devstack.
 export DEVSTACK_GATE_TEMPEST_DISABLE_TENANT_ISOLATION=${DEVSTACK_GATE_TEMPEST_DISABLE_TENANT_ISOLATION:-0}
 
-# Set to 1 to enable Cinder secure delete.
-# False by default to avoid dd problems on Precise.
-# https://bugs.launchpad.net/ubuntu/+source/linux/+bug/1023755
-# TODO(mriedem): CINDER_SECURE_DELETE is deprecated in devstack as of liberty.
-# Remove after kilo-eol happens in devstack.
-export DEVSTACK_CINDER_SECURE_DELETE=${DEVSTACK_CINDER_SECURE_DELETE:-0}
-
 # Should cinder perform secure deletion of volumes?
 # Defaults to none to avoid bug 1023755. Can also be set to zero or shred.
 # Only applicable to stable/liberty+ devstack.
