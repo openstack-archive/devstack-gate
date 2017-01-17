@@ -880,7 +880,7 @@ function cleanup_host {
         sudo mv $WORKSPACE/dpkg-l.txt.gz $BASE/logs/
     fi
     if [ `command -v rpm` ]; then
-        rpm -qa > $WORKSPACE/rpm-qa.txt
+        rpm -qa | sort > $WORKSPACE/rpm-qa.txt
         gzip -9 rpm-qa.txt
         sudo mv $WORKSPACE/rpm-qa.txt.gz $BASE/logs/
     fi
