@@ -193,8 +193,8 @@ function reproduce {
 #   Note we can and do run devstack-gate on other distros double check
 #   where your job ran (will be recorded in console.html) to reproduce
 #   as accurately as possible.
-# - Must have python-all-dev, build-essential, git, libssl-dev installed
-#   from apt, or their equivalents on other distros.
+# - Must have python-all-dev, build-essential, git, libssl-dev, ntp, ntpdate
+#   installed from apt, or their equivalents on other distros.
 # - Must have virtualenv installed from pip
 # - Must be run as root
 #
