@@ -571,6 +571,19 @@ EOF
 
 }
 
+# This makes the stack user own the $BASE files and also changes the
+# permissions on the logs directory so we can write to the logs when running
+# devstack or grenade. This must be called AFTER setup_localrc.
+function setup_access_for_stack_user {
+    # Make the workspace owned by the stack user
+    # It is not clear if the ansible file module can do this for us
+    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "chown -R stack:stack '$BASE'"
+    # allow us to add logs
+    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "chmod 777 '$WORKSPACE/logs'"
+}
+
 if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
     cd $BASE/old/devstack
     setup_localrc "old" "localrc" "primary"
@@ -626,10 +639,7 @@ EOF
 
     setup_networking "grenade"
 
-    # Make the workspace owned by the stack user
-    # It is not clear if the ansible file module can do this for us
-    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "chown -R stack:stack '$BASE'"
+    setup_access_for_stack_user
 
     echo "Running grenade ..."
     echo "This takes a good 30 minutes or more"
@@ -650,13 +660,7 @@ else
 
     setup_networking
 
-    # Make the workspace owned by the stack user
-    # It is not clear if the ansible file module can do this for us
-    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "chown -R stack:stack '$BASE'"
-    # allow us to add logs
-    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "chmod 777 '$WORKSPACE/logs'"
+    setup_access_for_stack_user
 
     echo "Running devstack"
     echo "... this takes 10 - 15 minutes (logs in logs/devstacklog.txt.gz)"
