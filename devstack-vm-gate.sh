@@ -224,6 +224,22 @@ function setup_networking {
     fi
 }
 
+# Discovers compute nodes (subnodes) and maps them to cells.
+# NOTE(mriedem): We want to remove this if/when nova supports auto-registration
+# of computes with cells, but that's not happening in Ocata.
+function discover_hosts {
+    # We have to run this on the primary node AFTER the subnodes have been
+    # setup. Since discover_hosts is really only needed for Ocata, this checks
+    # to see if the script exists in the devstack installation first.
+    # NOTE(danms): This is ||'d with an assertion that the script does not exist,
+    # so that if we actually failed the script, we'll exit nonzero here instead
+    # of ignoring failures along with the case where there is no script.
+    # TODO(mriedem): Would be nice to do this with wrapped lines.
+    $ANSIBLE primary -f 5 -i "$WORKSPACE/inventory" -m shell \
+        -a "cd $BASE/new/devstack/ && (test -f tools/discover_hosts.sh && sudo -H -u stack DSTOOLS_VERSION=$DSTOOLS_VERSION stdbuf -oL -eL ./tools/discover_hosts.sh) || (! test -f tools/discover_hosts.sh)" \
+        &> "$WORKSPACE/logs/devstack-gate-discover-hosts.txt"
+}
+
 function setup_localrc {
     local localrc_oldnew=$1;
     local localrc_file=$2
@@ -693,6 +709,9 @@ else
     if [[ "$took" -gt 20 ]]; then
         echo "WARNING: devstack run took > 20 minutes, this is a very slow node."
     fi
+
+    # Discover the hosts on a cells v2 deployment.
+    discover_hosts
 
     # provide a check that the right db was running
     # the path are different for fedora and red hat.
