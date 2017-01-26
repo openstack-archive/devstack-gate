@@ -429,7 +429,7 @@ function fix_disk_layout {
     sudo sed -i '/vm.swappiness/d' /etc/sysctl.conf
     # This sets swappiness low; we really don't want to be relying on
     # cloud I/O based swap during our runs
-    sudo sysctl -w vm.swappiness=10
+    sudo sysctl -w vm.swappiness=30
 }
 
 # Set up a project in accordance with the future state proposed by
