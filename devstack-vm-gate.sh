@@ -552,6 +552,28 @@ function setup_localrc {
         fi
     fi
 
+    # If you specify a section of a project-config job with
+    #
+    #   local_conf:
+    #      conf: |
+    #          [[local|localrc]]
+    #          foo=a
+    #          [[post-config|$NEUTRON_CONF]]
+    #          [DEFAULT]
+    #          global_physnet_mtu = 1400
+    #
+    # Then that whole local.conf fragment will get carried through to
+    # this special file, and we'll merge those values into *all*
+    # local.conf files in the job. That includes subnodes, and new &
+    # old in grenade.
+    #
+    # NOTE(sdague): the name of this file should be considered
+    # internal only, and jobs should not write to it directly, they
+    # should only use the project-config stanza.
+    if [[ -e "/tmp/dg-local.conf" ]]; then
+        $DSCONF merge_lc "$localrc_file" "/tmp/dg-local.conf"
+    fi
+
     # a way to pass through arbitrary devstack config options so that
     # we don't need to add new devstack-gate options every time we
     # want to create a new config.
