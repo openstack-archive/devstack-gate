@@ -648,6 +648,10 @@ set -x
 
 $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m shell \
         -a "cd '$BASE/old/devstack' && stdbuf -oL -eL ./stack.sh"
+
+if [[ -e "$BASE/old/devstack/tools/discover_hosts.sh" ]]; then
+    $BASE/old/devstack/tools/discover_hosts.sh
+fi
 EOF
         sudo chmod a+x $BASE/new/grenade/post-stack.sh
     fi
