@@ -16,13 +16,13 @@
 
 ERRORS=0
 
-TEMPEST_FULL_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,n-novnc,n-cauth,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,n-net,placement-api"
+TEMPEST_FULL_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,n-novnc,n-cauth,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,peakmem_tracker,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,n-net,placement-api"
 
-TEMPEST_NEUTRON_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,n-novnc,n-cauth,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-metering,placement-api"
+TEMPEST_NEUTRON_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,n-novnc,n-cauth,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,peakmem_tracker,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-metering,placement-api"
 
-TEMPEST_HEAT_SLOW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,n-novnc,n-cauth,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-metering,placement-api"
+TEMPEST_HEAT_SLOW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,n-novnc,n-cauth,g-api,g-reg,key,horizon,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,peakmem_tracker,tempest,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-metering,placement-api"
 
-GRENADE_NEW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,n-novnc,n-cauth,g-api,g-reg,key,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,n-net,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,placement-api"
+GRENADE_NEW_MASTER="n-api,n-crt,n-obj,n-cpu,n-sch,n-cond,n-novnc,n-cauth,g-api,g-reg,key,c-api,c-vol,c-sch,c-bak,cinder,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,peakmem_tracker,tempest,n-net,ceilometer-acompute,ceilometer-acentral,ceilometer-collector,ceilometer-api,ceilometer-alarm-notifier,ceilometer-alarm-evaluator,ceilometer-anotification,placement-api"
 
 # Utility function for tests
 function assert_list_equal {

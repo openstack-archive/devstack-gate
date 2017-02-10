@@ -60,7 +60,7 @@ branches:
 primary:
   default:
     base:
-      services: [mysql, rabbit, dstat]
+      services: [mysql, rabbit, dstat, peakmem_tracker]
 
   ceilometer:
     base:
@@ -191,7 +191,7 @@ primary:
 subnode:
   default:
     base:
-      services: [dstat]
+      services: [dstat, peakmem_tracker]
 
   ceilometer:
     base:
