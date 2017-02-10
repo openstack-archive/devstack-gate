@@ -1,4 +1,9 @@
 ---
+# this is what prints the facts to the logs
 - debug: var=hostvars[inventory_hostname]
+
 - command: locale
   name: "Gather locale"
+
+- command: cat /proc/cpuinfo
+  name: "Gather kernel cpu info"
