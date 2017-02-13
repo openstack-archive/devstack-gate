@@ -660,6 +660,6 @@ $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m synchronize \
 sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
 
 # Generate ARA report
-/tmp/ansible/bin/ara generate $BASE/logs/ara
+/tmp/ansible/bin/ara generate html $BASE/logs/ara
 
 exit $RETVAL
