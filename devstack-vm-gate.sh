@@ -384,7 +384,7 @@ EOF
 
     if [[ "$DEVSTACK_GATE_VIRT_DRIVER" == "libvirt" ]]; then
         if [[ -n "$DEVSTACK_GATE_LIBVIRT_TYPE" ]]; then
-            echo "LIBVIRT_TYPE=${DEVSTACK_GATE_LIBVIRT_TYPE}" >>localrc
+            echo "LIBVIRT_TYPE=${DEVSTACK_GATE_LIBVIRT_TYPE}" >>"$localrc_file"
         fi
     fi
 
