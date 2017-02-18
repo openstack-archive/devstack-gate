@@ -603,8 +603,15 @@ fi executable=/bin/bash"
 # should be sourced after the environment has been set up.  This is useful for
 # allowing projects to provide a script in their repo that sets some custom
 # environment variables.
+check_for_devstack_gate_settings() {
+    if [ -f $1 ] ; then
+        return 0
+    else
+        return 1
+    fi
+}
 if [ -n "${DEVSTACK_GATE_SETTINGS}" ] ; then
-    if [ -f "${DEVSTACK_GATE_SETTINGS}" ] ; then
+    if check_for_devstack_gate_settings ${DEVSTACK_GATE_SETTINGS} ; then
         source ${DEVSTACK_GATE_SETTINGS}
     else
         echo "WARNING: DEVSTACK_GATE_SETTINGS file does not exist: '${DEVSTACK_GATE_SETTINGS}'"
