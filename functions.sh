@@ -96,27 +96,6 @@ function tsfilter {
     return ${PIPESTATUS[0]}
 }
 
-function _ping_check {
-    local host=$1
-    local times=${2:-20}
-    echo "Testing ICMP connectivity to $host"
-    ping -c $times $host
-}
-
-function _http_check {
-    local url=$1
-    local dl='wget --progress=bar -O /dev/null'
-    if [[ `which curl` ]]; then
-        dl='curl -# -o /dev/null'
-    fi
-
-    # do a pypi http fetch, to make sure that we're good
-    for i in `seq 1 10`; do
-        echo "HTTP check of $url - attempt #$i"
-        $dl $url || /bin/true
-    done
-}
-
 # create the start timer for when the job began
 function start_timer {
     # first make sure the time is right, so we don't go into crazy land
