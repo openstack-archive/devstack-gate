@@ -31,7 +31,18 @@ TOP_DIR=$(cd $(dirname "$0") && pwd)
 # Import common functions
 source $TOP_DIR/functions.sh
 # Get access to iniset and friends
+
+# NOTE(sdague): as soon as we put
+# iniget into dsconf, we can remove this.
 source $BASE/new/devstack/inc/ini-config
+
+# redefine localrc_set to use dsconf
+function localrc_set {
+    local lcfile=$1
+    local key=$2
+    local value=$3
+    $DSCONF setlc "$1" "$2" "$3"
+}
 
 echo $PPID > $WORKSPACE/gate.pid
 source `dirname "$(readlink -f "$0")"`/functions.sh
@@ -548,15 +559,21 @@ function setup_localrc {
         # If we are in a multinode environment, we may want to specify 2
         # different sets of plugins
         if [[ -n "$DEVSTACK_SUBNODE_CONFIG" ]]; then
-            localrc_set "$localrc_file" "$DEVSTACK_SUBNODE_CONFIG" >>"$localrc_file"
+            echo "[[local|localrc]]" > /tmp/ds-subnode-localrc
+            echo $DEVSTACK_SUBNODE_CONFIG >> /tmp/ds-subnode-localrc
+            $DSCONF merge_lc "$localrc_file" /tmp/ds-subnode-localrc
         else
             if [[ -n "$DEVSTACK_LOCAL_CONFIG" ]]; then
-                echo "$DEVSTACK_LOCAL_CONFIG" >>"$localrc_file"
+                echo "[[local|localrc]]" > /tmp/ds-localrc
+                echo $DEVSTACK_LOCAL_CONFIG >> /tmp/ds-localrc
+                $DSCONF merge_lc "$localrc_file" /tmp/ds-localrc
             fi
         fi
     else
         if [[ -n "$DEVSTACK_LOCAL_CONFIG" ]]; then
-            echo "$DEVSTACK_LOCAL_CONFIG" >>"$localrc_file"
+            echo "[[local|localrc]]" > /tmp/ds-localrc
+            echo $DEVSTACK_LOCAL_CONFIG >> /tmp/ds-localrc
+            $DSCONF merge_lc "$localrc_file" /tmp/ds-localrc
         fi
     fi
 
@@ -607,9 +624,9 @@ EOF
     if [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]]; then
         # ensure local.conf exists to remove conditional logic
         if [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
-            localconf_set "devstack.local.conf.base" "post-config" "\$NEUTRON_CONF" \
+            $DSCONF setlc_conf "devstack.local.conf.base" "post-config" "\$NEUTRON_CONF" \
                             "DEFAULT" "global_physnet_mtu" "$EXTERNAL_BRIDGE_MTU"
-            localconf_set "devstack.local.conf.target" "post-config" "\$NEUTRON_CONF" \
+            $DSCONF setlc_conf "devstack.local.conf.target" "post-config" "\$NEUTRON_CONF" \
                             "DEFAULT" "global_physnet_mtu" "$EXTERNAL_BRIDGE_MTU"
         fi
 
@@ -749,7 +766,7 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     # guarantees that tempest should be configured, no matter should
     # tests be executed or not.
     if [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]]; then
-        iniset -sudo $BASE/new/tempest/etc/tempest.conf compute min_compute_nodes 2
+        sudo $DSCONF iniset $BASE/new/tempest/etc/tempest.conf compute min_compute_nodes 2
     fi
 
     # if set, we don't need to run Tempest at all
