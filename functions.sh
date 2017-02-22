@@ -1051,7 +1051,7 @@ function ovs_vxlan_bridge {
         local ovs_package='openvswitch-switch'
         local ovs_service='openvswitch-switch'
     else
-        echo "Unsupported platform, can't determine ntp service"
+        echo "Unsupported platform, can't determine openvswitch service"
         exit 1
     fi
     local install_ovs_deps="source $BASE/new/devstack/functions-common; \
