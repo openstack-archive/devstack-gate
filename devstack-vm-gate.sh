@@ -143,7 +143,7 @@ function setup_multinode_connectivity {
         localrc_set $sub_localconf "MULTI_HOST" "True"
         # and on the master
         localrc_set $localconf "MULTI_HOST" "True"
-    elif [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq '1' ]]; then
+    elif [[ "$DEVSTACK_GATE_NET_OVERLAY" -eq '1' ]]; then
         ovs_vxlan_bridge "br-ex" $primary_node "True" 1 \
                         $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
                         $sub_nodes

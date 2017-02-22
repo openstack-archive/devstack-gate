@@ -222,6 +222,9 @@ fi
 # Set to 1 to run neutron distributed virtual routing
 export DEVSTACK_GATE_NEUTRON_DVR=${DEVSTACK_GATE_NEUTRON_DVR:-0}
 
+# This variable tells devstack-gate to set up an overlay network between the nodes.
+export DEVSTACK_GATE_NET_OVERLAY=${DEVSTACK_GATE_NET_OVERLAY:-$DEVSTACK_GATE_NEUTRON_DVR}
+
 # Set to 1 to run nova in cells mode instead of the default mode
 export DEVSTACK_GATE_CELLS=${DEVSTACK_GATE_CELLS:-0}
 
