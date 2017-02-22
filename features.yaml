@@ -101,7 +101,7 @@ primary:
 
   neutron:
     base:
-      services: [quantum, q-svc, q-agt, q-dhcp, q-l3, q-meta, q-metering]
+      services: [q-svc, q-agt, q-dhcp, q-l3, q-meta, q-metering]
       rm-services: [n-net]
 
   neutron-adv:
