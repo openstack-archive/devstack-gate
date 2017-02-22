@@ -117,32 +117,6 @@ function _http_check {
     done
 }
 
-# do a few network tests to baseline how bad we are
-function network_sanity_check {
-    echo "Performing network sanity check..."
-    PIP_CONFIG_FILE=/etc/pip.conf
-    if [[ -f $PIP_CONFIG_FILE ]]; then
-        line=$(cat $PIP_CONFIG_FILE|grep --max-count 1 index-url)
-        pypi_url=${line#*=}
-        pypi_host=$(echo $pypi_url|grep -Po '.*?//\K.*?(?=/)')
-
-        _ping_check $pypi_host
-        _http_check $pypi_url
-    fi
-
-    if [[ -f /etc/nodepool/provider ]]; then
-        # AFS ubuntu mirror
-        source /etc/nodepool/provider
-        if [[ -n "$NODEPOOL_MIRROR_HOST" || ( -n "$NODEPOOL_REGION" && -n "$NODEPOOL_CLOUD" ) ]]; then
-            NODEPOOL_MIRROR_HOST=${NODEPOOL_MIRROR_HOST:-mirror.$NODEPOOL_REGION.$NODEPOOL_CLOUD.openstack.org}
-            NODEPOOL_MIRROR_HOST=$(echo $NODEPOOL_MIRROR_HOST|tr '[:upper:]' '[:lower:]')
-
-            _ping_check $NODEPOOL_MIRROR_HOST
-            _http_check http://$NODEPOOL_MIRROR_HOST/ubuntu/dists/trusty/Release
-        fi
-    fi
-}
-
 # create the start timer for when the job began
 function start_timer {
     # first make sure the time is right, so we don't go into crazy land
@@ -566,19 +540,6 @@ function setup_workspace {
 
     # copy them to where devstack expects with hardlinks to save space
     find $cache_dir -mindepth 1 -maxdepth 1 -exec cp -l {} $DEST/devstack/files/ \;
-
-    # Disable detailed logging as we return to the main script
-    $xtrace
-}
-
-function setup_host {
-    # Enabled detailed logging, since output of this function is redirected
-    local xtrace=$(set +o | grep xtrace)
-    set -o xtrace
-
-    # perform network sanity check so that we can characterize the
-    # state of the world
-    network_sanity_check
 
     # Disable detailed logging as we return to the main script
     $xtrace

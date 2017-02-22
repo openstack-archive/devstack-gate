@@ -1,0 +1,28 @@
+---
+- name: Get status of file PIP_CONFIG_FILE
+  stat: path={{ PIP_CONFIG_FILE }}
+  register: st
+- block:
+    - name: Set pypi_url variable
+      set_fact: pypi_url={{ lookup('ini', 'index-url section=global file=' + PIP_CONFIG_FILE) }}
+    - name: Set pypi_host variable
+      set_fact: pypi_host={{ pypi_url.split('/')[2] }}
+    - include: ping_check.yaml host={{ pypi_host }}
+    - include: http_check.yaml url={{ pypi_url }}
+  when: st.stat.exists
+- name: Get NODEPOOL_MIRROR_HOST from /etc/nodepool/provider
+  shell: grep NODEPOOL_MIRROR_HOST /etc/nodepool/provider | cut -d "=" -f2
+  register: grep_mirror_host
+  changed_when: False
+- name: Get NODEPOOL_REGION from /etc/nodepool/provider
+  shell: grep NODEPOOL_REGION /etc/nodepool/provider | cut -d "=" -f2
+  register: grep_region
+  changed_when: False
+- name: Get NODEPOOL_CLOUD from /etc/nodepool/provider
+  shell: grep NODEPOOL_CLOUD /etc/nodepool/provider | cut -d "=" -f2
+  register: grep_cloud
+  changed_when: False
+- name: Build NODEPOOL_MIRROR_HOST variable with region and cloud if undefined
+  set_fact: NODEPOOL_MIRROR_HOST={{ grep_mirror_host.stdout|default("mirror." + grep_region.stdout|lower + "." + grep_cloud.stdout + ".openstack.org", true) }}
+- include: ping_check.yaml host={{ NODEPOOL_MIRROR_HOST }}
+- include: http_check.yaml url=http://{{ NODEPOOL_MIRROR_HOST }}/ubuntu/dists/trusty/Release

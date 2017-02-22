@@ -1,0 +1,5 @@
+- name: Perform HTTP check
+  uri: url={{ url }}
+  register: uri_result
+  until: uri_result['status'] == 200
+  retries: "{{ HTTP_TIMES }}"
