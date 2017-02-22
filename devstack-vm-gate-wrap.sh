@@ -263,9 +263,9 @@ export DEVSTACK_PROJECT_FROM_GIT=${DEVSTACK_PROJECT_FROM_GIT:-}
 # for a stable branch we want to both try to upgrade forward n => n+1 as
 # well as upgrade from last n-1 => n.
 #
-# i.e. stable/juno:
-#   pullup means stable/icehouse => stable/juno
-#   forward means stable/juno => master (or stable/kilo if that's out)
+# i.e. stable/ocata:
+#   pullup means stable/newton => stable/ocata
+#   forward means stable/ocata => master (or stable/pike if that's out)
 export DEVSTACK_GATE_GRENADE=${DEVSTACK_GATE_GRENADE:-}
 
 # the branch name for selecting grenade branches
@@ -304,13 +304,7 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
         # forward upgrades are an attempt to migrate up from an
         # existing stable branch to the next release.
         forward)
-            if [[ "$GRENADE_BASE_BRANCH" == "stable/icehouse" ]]; then
-                export GRENADE_OLD_BRANCH="stable/icehouse"
-                export GRENADE_NEW_BRANCH="stable/juno"
-            elif [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
-                export GRENADE_OLD_BRANCH="stable/juno"
-                export GRENADE_NEW_BRANCH="stable/kilo"
-            elif [[ "$GRENADE_BASE_BRANCH" == "stable/kilo" ]]; then
+            if [[ "$GRENADE_BASE_BRANCH" == "stable/kilo" ]]; then
                 export GRENADE_OLD_BRANCH="stable/kilo"
                 export GRENADE_NEW_BRANCH="stable/liberty"
             elif [[ "$GRENADE_BASE_BRANCH" == "stable/liberty" ]]; then
@@ -331,13 +325,7 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
         # pullup upgrades are our normal upgrade test. Can you upgrade
         # to the current patch from the last stable.
         pullup)
-            if [[ "$GRENADE_BASE_BRANCH" == "stable/juno" ]]; then
-                export GRENADE_OLD_BRANCH="stable/icehouse"
-                export GRENADE_NEW_BRANCH="stable/juno"
-            elif [[ "$GRENADE_BASE_BRANCH" == "stable/kilo" ]]; then
-                export GRENADE_OLD_BRANCH="stable/juno"
-                export GRENADE_NEW_BRANCH="stable/kilo"
-            elif [[ "$GRENADE_BASE_BRANCH" == "stable/liberty" ]]; then
+            if [[ "$GRENADE_BASE_BRANCH" == "stable/liberty" ]]; then
                 export GRENADE_OLD_BRANCH="stable/kilo"
                 export GRENADE_NEW_BRANCH="stable/liberty"
             elif [[ "$GRENADE_BASE_BRANCH" == "stable/mitaka" ]]; then

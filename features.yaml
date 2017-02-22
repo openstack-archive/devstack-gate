@@ -6,8 +6,6 @@ config:
     mitaka: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
     liberty: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
     kilo: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
-    juno: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
-    icehouse: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
     # This can be used by functional jobs that only want their dependencies installed
     # and don't need to incur the overhead of installing all services in the process.
     no_services: [default]
@@ -56,8 +54,8 @@ config:
 branches:
   # The value of ""default" is the name of the "trunk" branch
   default: master
-  # Normalized branch names only here, e.g. stable/icehouse => icehouse
-  allowed: [master, ocata, newton, mitaka, liberty, kilo, juno, icehouse]
+  # Normalized branch names only here, e.g. stable/ocata => ocata
+  allowed: [master, ocata, newton, mitaka, liberty, kilo]
 
 primary:
   default:
@@ -83,8 +81,6 @@ primary:
   nova:
     base:
       services: [n-api, n-cauth, n-cond, n-cpu, n-crt, n-net, n-novnc, n-obj, n-sch]
-    icehouse:
-      compute-ext:
 
   nova-md:
     base:
