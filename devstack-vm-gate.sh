@@ -117,17 +117,20 @@ function setup_multinode_connectivity {
     # ``old_or_new`` - should the subnodes be computed on the old side
     # or new side. For grenade where we don't upgrade them, calculate
     # on the old side.
-    local localrc=$BASE/new/devstack/localrc
     local old_or_new="new"
+    local localconf
+    local devstack_dir
     if [[ "$mode" == "grenade" ]]; then
-        localrc=$BASE/new/grenade/devstack.localrc
+        localconf=$BASE/new/grenade/devstack.localrc
         old_or_new="old"
+        devstack_dir=$BASE/$old_or_new/devstack
+    else
+        devstack_dir=$BASE/$old_or_new/devstack
+        localconf=$devstack_dir/local.conf
     fi
     # set explicit paths on all conf files we're writing so that
     # current working directory doesn't introduce subtle bugs.
-    local devstack_dir=$BASE/$old_or_new/devstack
     local sub_localconf=$devstack_dir/sub_local.conf
-    local localconf=$devstack_dir/local.conf
 
     set -x  # for now enabling debug and do not turn it off
     setup_localrc $old_or_new "$sub_localconf" "sub"
@@ -137,7 +140,7 @@ function setup_multinode_connectivity {
     local sub_nodes
     sub_nodes=$(cat /etc/nodepool/sub_nodes_private)
     if [[ "$DEVSTACK_GATE_NEUTRON" -ne '1' ]]; then
-        setup_nova_net_networking $localrc $primary_node $sub_nodes
+        setup_nova_net_networking $localconf $primary_node $sub_nodes
         localrc_set $sub_localconf "FLAT_INTERFACE" "br_flat"
         localrc_set $sub_localconf "PUBLIC_INTERFACE" "br_pub"
         localrc_set $sub_localconf "MULTI_HOST" "True"
@@ -155,25 +158,22 @@ function setup_multinode_connectivity {
         ovs_vxlan_bridge "br_ironic_vxlan" $primary_node "False" 128 \
             $sub_nodes
 
-        cat <<EOF >>"$sub_localrc"
-HOST_TOPOLOGY=multinode
-HOST_TOPOLOGY_ROLE=subnode
-# NOTE(vsaienko) we assume for now that we using only 1 subnode,
-# each subnode should have different switch name (bridge) as it is used
-# by networking-generic-switch to uniquely identify switch.
-IRONIC_VM_NETWORK_BRIDGE=sub1brbm
-OVS_PHYSICAL_BRIDGE=sub1brbm
-ENABLE_TENANT_TUNNELS=False
-IRONIC_KEY_FILE="$BASE/new/.ssh/ironic_key"
-EOF
-        cat <<EOF >>"$localrc"
-HOST_TOPOLOGY=multinode
-HOST_TOPOLOGY_ROLE=primary
-HOST_TOPOLOGY_SUBNODES="$sub_nodes"
-IRONIC_KEY_FILE="$BASE/new/.ssh/ironic_key"
-GENERIC_SWITCH_KEY_FILE="$BASE/new/.ssh/ironic_key"
-ENABLE_TENANT_TUNNELS=False
-EOF
+        localrc_set "$sub_localconf" "HOST_TOPOLOGY" "multinode"
+        localrc_set "$sub_localconf" "HOST_TOPOLOGY_ROLE" "subnode"
+        # NOTE(vsaienko) we assume for now that we using only 1 subnode,
+        # each subnode should have different switch name (bridge) as it is used
+        # by networking-generic-switch to uniquely identify switch.
+        localrc_set "$sub_localconf" "IRONIC_VM_NETWORK_BRIDGE" "sub1brbm"
+        localrc_set "$sub_localconf" "OVS_PHYSICAL_BRIDGE" "sub1brbm"
+        localrc_set "$sub_localconf" "ENABLE_TENANT_TUNNELS" "False"
+        localrc_set "$sub_localconf" "IRONIC_KEY_FILE" "$BASE/new/.ssh/ironic_key"
+
+        localrc_set "$localconf" "HOST_TOPOLOGY" "multinode"
+        localrc_set "$localconf" "HOST_TOPOLOGY_ROLE" "primary"
+        localrc_set "$localconf" "HOST_TOPOLOGY_SUBNODES" "$sub_nodes"
+        localrc_set "$localconf" "IRONIC_KEY_FILE" "$BASE/new/.ssh/ironic_key"
+        localrc_set "$localconf" "GENERIC_SWITCH_KEY_FILE" "$BASE/new/.ssh/ironic_key"
+        localrc_set "$localconf" "ENABLE_TENANT_TUNNELS" "False"
     fi
 
     echo "Preparing cross node connectivity"
