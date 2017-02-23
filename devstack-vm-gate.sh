@@ -559,21 +559,15 @@ function setup_localrc {
         # If we are in a multinode environment, we may want to specify 2
         # different sets of plugins
         if [[ -n "$DEVSTACK_SUBNODE_CONFIG" ]]; then
-            echo "[[local|localrc]]" > /tmp/ds-subnode-localrc
-            echo $DEVSTACK_SUBNODE_CONFIG >> /tmp/ds-subnode-localrc
-            $DSCONF merge_lc "$localrc_file" /tmp/ds-subnode-localrc
+            $DSCONF setlc_raw "$localrc_file" "$DEVSTACK_SUBNODE_CONFIG"
         else
             if [[ -n "$DEVSTACK_LOCAL_CONFIG" ]]; then
-                echo "[[local|localrc]]" > /tmp/ds-localrc
-                echo $DEVSTACK_LOCAL_CONFIG >> /tmp/ds-localrc
-                $DSCONF merge_lc "$localrc_file" /tmp/ds-localrc
+                $DSCONF setlc_raw "$localrc_file" "$DEVSTACK_LOCAL_CONFIG"
             fi
         fi
     else
         if [[ -n "$DEVSTACK_LOCAL_CONFIG" ]]; then
-            echo "[[local|localrc]]" > /tmp/ds-localrc
-            echo $DEVSTACK_LOCAL_CONFIG >> /tmp/ds-localrc
-            $DSCONF merge_lc "$localrc_file" /tmp/ds-localrc
+            $DSCONF setlc_raw "$localrc_file" "$DEVSTACK_LOCAL_CONFIG"
         fi
     fi
 
