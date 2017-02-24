@@ -608,10 +608,10 @@ function process_stackviz {
         cp -r $stackviz_path/build $log_path/stackviz
 
         pushd $project_path
-        if [ -f $BASE/new/dstat-csv.txt ]; then
+        if [ -f $log_path/dstat-csv_log.txt ]; then
             sudo testr last --subunit | stackviz-export \
-                --dstat $BASE/new/dstat-csv.txt \
-                --end --stdin \
+                --dstat $log_path/dstat-csv_log.txt \
+                --env --stdin \
                 $log_path/stackviz/data
         else
             sudo testr last --subunit | stackviz-export \
