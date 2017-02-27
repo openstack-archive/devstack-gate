@@ -29,7 +29,7 @@ GIT_BRANCH=${GIT_BRANCH:-master}
 # possible that new ansible releases can break us. As such we should
 # be very deliberate about which ansible we use.
 ANSIBLE_VERSION=${ANSIBLE_VERSION:-2.2.0.0}
-export DSTOOLS_VERSION=${DSTOOLS_VERSION:-0.2.1}
+export DSTOOLS_VERSION=${DSTOOLS_VERSION:-0.3.0}
 
 # sshd may have been compiled with a default path excluding */sbin
 export PATH=$PATH:/usr/local/sbin:/usr/sbin
