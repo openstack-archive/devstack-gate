@@ -577,6 +577,10 @@ function setup_localrc {
     # a way to pass through arbitrary devstack config options so that
     # we don't need to add new devstack-gate options every time we
     # want to create a new config.
+    #
+    # NOTE(sdague): this assumes these are old school "localrc"
+    # sections, we should probably figure out a way to warn over using
+    # these.
     if [[ "$role" = sub ]]; then
         # If we are in a multinode environment, we may want to specify 2
         # different sets of plugins
@@ -591,6 +595,17 @@ function setup_localrc {
         if [[ -n "$DEVSTACK_LOCAL_CONFIG" ]]; then
             $DSCONF setlc_raw "$localrc_file" "$DEVSTACK_LOCAL_CONFIG"
         fi
+    fi
+
+    # NOTE(sdague): new style local.conf declarations which need to
+    # merge late. Projects like neutron build up a lot of scenarios
+    # based on this, but they have to apply them late.
+    #
+    # TODO(sdague): subnode support.
+    if [[ -n "$DEVSTACK_LOCALCONF" ]]; then
+        local ds_conf_late="/tmp/ds-conf-late.conf"
+        echo "$DEVSTACK_LOCALCONF" > "$ds_conf_late"
+        $DSCONF merge_lc "$localrc_file" "$ds_conf_late"
     fi
 
 }
