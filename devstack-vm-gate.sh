@@ -413,13 +413,13 @@ function setup_localrc {
         if [[ -z "${DEVSTACK_GATE_IRONIC_DRIVER%%agent*}" ]]; then
             localrc_set "$localrc_file" "SWIFT_ENABLE_TEMPURLS" "True"
             localrc_set "$localrc_file" "SWIFT_TEMPURL_KEY" "secretkey"
-            localrc_set "$localrc_file" "IRONIC_ENABLED_DRIVERS" "fake,agent_ssh,agent_ipmitool"
+            localrc_set "$localrc_file" "IRONIC_ENABLED_DRIVERS" "fake,agent_ipmitool"
             # agent driver doesn't support ephemeral volumes yet
             localrc_set "$localrc_file" "IRONIC_VM_EPHEMERAL_DISK" "0"
             # agent CoreOS ramdisk is a little heavy
             localrc_set "$localrc_file" "IRONIC_VM_SPECS_RAM" "1024"
         else
-            localrc_set "$localrc_file" "IRONIC_ENABLED_DRIVERS" "fake,pxe_ssh,pxe_ipmitool"
+            localrc_set "$localrc_file" "IRONIC_ENABLED_DRIVERS" "fake,pxe_ipmitool"
             localrc_set "$localrc_file" "IRONIC_VM_EPHEMERAL_DISK" "1"
         fi
     fi
