@@ -366,6 +366,7 @@ function setup_localrc {
     # Don't reset the requirements.txt files after g-r updates
     localrc_set "$localrc_file" "UNDO_REQUIREMENTS" "False"
     localrc_set "$localrc_file" "CINDER_PERIODIC_INTERVAL" "10"
+    # TODO(mriedem): Remove OS_NO_CACHE after newton-eol for devstack.
     localrc_set "$localrc_file" "export OS_NO_CACHE" "True"
     localrc_set "$localrc_file" "CEILOMETER_BACKEND" "$DEVSTACK_GATE_CEILOMETER_BACKEND"
     localrc_set "$localrc_file" "LIBS_FROM_GIT" "$DEVSTACK_PROJECT_FROM_GIT"
