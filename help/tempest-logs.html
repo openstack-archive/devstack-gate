@@ -27,6 +27,16 @@
     <li><a href="screen-ceilometer-api.txt.gz">screen-ceilometer-api.txt.gz</a>: ceilometer-api
     <li><a href="screen-ceilometer-collector.txt.gz">screen-ceilometer-collector.txt.gz</a>: ceilometer-collector
   </ul>
+  <li> <b>designate</b>
+  <ul>
+    <li><a href="screen-designate-agent.txt.gz">screen-designate-agent.txt.gz</a>: designate-agent
+    <li><a href="screen-designate-api.txt.gz">screen-designate-api.txt.gz</a>: designate-api
+    <li><a href="screen-designate-central.txt.gz">screen-designate-central.txt.gz</a>: designate-central
+    <li><a href="screen-designate-mdns.txt.gz">screen-designate-mdns.txt.gz</a>: designate-mdns
+    <li><a href="screen-designate-pool-manager.txt.gz">screen-designate-pool-manager.txt.gz</a>: designate-pool-manager
+    <li><a href="screen-designate-sink.txt.gz">screen-designate-sink.txt.gz</a>: designate-sink
+    <li><a href="screen-designate-zone-manager.txt.gz">screen-designate-zone-manager.txt.gz</a>: designate-zone-manager
+  </ul>
   <li> <b>glance</b>
   <ul>
     <li><a href="screen-g-api.txt.gz">screen-g-api.txt.gz</a>: glance-api
@@ -144,6 +154,22 @@
       cinder scheduler. Some times there are races in allocating
       resources, and the scheduler will throw a WARNING if it couldn't
       allocate the requested resources.
+  </ul>
+</p>
+<h2>Designate Zone Fails</h2>
+<p>
+  If a DNS Zone fails to reach the DNS Server, the following is
+  typically the most fruitful order to look at things:
+  <ul>
+    <li><a href="screen-designate-pool-manager.txt.gz">screen-designate-pool-manager.txt.gz</a> - the
+      pool manager logs will show if there was an error creating the zone on the
+      server, or if it had issues loading the driver for the DNS Server
+    <li><a href="screen-designate-mdns.txt.gz">screen-designate-mdns.txt.gz</a> - the
+      mini dns server will log if it received a AFXR request, or if the DNS Server has too low a
+      serial number. This shows either a communications problem or a server configuration issue.
+    <li><a href="screen-designate-central.txt.gz">screen-designate-central.txt.gz</a> - designate
+      central will most likely contain the error it it is not in pool manager or mini dns.
+      All of the DB access runs though here, and all of the validation logic is also here.
   </ul>
 </p>
 <h2>About this Help</h2>
