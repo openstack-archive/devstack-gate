@@ -857,5 +857,11 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
         echo "Running tempest smoke tests"
         $TEMPEST_COMMAND -esmoke -- --concurrency=$TEMPEST_CONCURRENCY
     fi
+    # Print the slowest tests at the end of the run
+    if [[ "$DEVSTACK_GATE_TEMPEST_ALL_PLUGINS" -eq "1" ]]; then
+        sudo -H -u tempest .tox/all-plugin/bin/testr slowest
+    else
+        sudo -H -u tempest .tox/tempest/bin/testr slowest
+    fi
 
 fi
