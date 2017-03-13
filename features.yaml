@@ -48,6 +48,10 @@ config:
     features: [tlsproxy]
   cinder_mn_grenade:
     features: [cinder-mn-grenade]
+  cinder_mn_grenade_sub_volschbak:
+    features: [cinder-mn-grenade-sub-volschbak]
+  cinder_mn_grenade_sub_bak:
+    features: [cinder-mn-grenade-sub-bak]
   neutron_dvr:
     features: [neutron-dvr]
 
@@ -122,11 +126,23 @@ primary:
     base:
       services: [cinder, c-api, c-vol, c-sch, c-bak]
 
-  # This will be used to disable c-vol on primary node when running multinode grenade
+  # This will be used to disable c-vol, c-bak on primary node when running multinode grenade
   # job that will test compatibility of new c-api, c-sch (primary) and old c-vol and c-bak (sub).
   cinder-mn-grenade:
     base:
       rm-services: [c-vol, c-bak]
+
+  # This will be used to disable c-vol, c-sch, c-bak on primary node when running multinode grenade
+  # job that will test compatibility of new c-api (primary) and old c-vol, c-sch and c-bak (sub).
+  cinder-mn-grenade-sub-volschbak:
+    base:
+      rm-services: [c-vol, c-sch, c-bak]
+
+  # This will be used to disable c-bak on primary node when running multinode grenade
+  # job that will test compatibility of new c-api, c-sch, c-vol (primary) and old c-bak (sub).
+  cinder-mn-grenade-sub-bak:
+    base:
+      rm-services: [c-bak]
 
   heat:
     base:
@@ -204,6 +220,14 @@ subnode:
   cinder-mn-grenade:
     base:
       services: []
+
+  cinder-mn-grenade-sub-volschbak:
+    base:
+      services: [c-vol, c-sch, c-bak]
+
+  cinder-mn-grenade-sub-bak:
+    base:
+      rm-services: [c-vol]
 
   glance:
     base:
