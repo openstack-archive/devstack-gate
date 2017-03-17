@@ -145,7 +145,8 @@ fi
 if [[ -n "$DEVSTACK_PROJECT_FROM_GIT" ]] ; then
     # We populate the PROJECTS list with any libs that should be installed
     # from source and not pypi assuming that live under openstack/
-    PROCESSED_FROM_GIT=$(echo "openstack/$DEVSTACK_PROJECT_FROM_GIT" | sed -e 's/,/ openstack\//g')
+    TRAILING_COMMA_REMOVED=$(echo "$DEVSTACK_PROJECT_FROM_GIT" | sed -e 's/,$//')
+    PROCESSED_FROM_GIT=$(echo "openstack/$TRAILING_COMMA_REMOVED" | sed -e 's/,/ openstack\//g')
     PROJECTS="$PROCESSED_FROM_GIT $PROJECTS"
 fi
 
