@@ -84,7 +84,7 @@ primary:
 
   nova:
     base:
-      services: [n-api, n-cauth, n-cond, n-cpu, n-crt, n-net, n-novnc, n-obj, n-sch]
+      services: [n-api, n-cauth, n-cond, n-cpu, n-net, n-novnc, n-obj, n-sch]
 
   nova-md:
     base:
