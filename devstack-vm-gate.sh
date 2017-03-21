@@ -200,8 +200,12 @@ function setup_multinode_connectivity {
     for NODE in $sub_nodes; do
         remote_copy_file /tmp/tmp_hosts $NODE:/tmp/tmp_hosts
         remote_command $NODE "cat /tmp/tmp_hosts | sudo tee --append /etc/hosts > /dev/null"
-        cp $sub_localconf /tmp/tmp_sub_localconf
-        localrc_set /tmp/tmp_sub_localconf "HOST_IP" "$NODE"
+        rm -f /tmp/tmp_sub_localconf
+        # Build a custom local.conf for the subnode that has HOST_IP
+        # encoded. We do the HOST_IP add early so that it's a variable
+        # that can be used by other stanzas later.
+        $DSCONF setlc /tmp/tmp_sub_localconf "HOST_IP" "$NODE"
+        $DSCONF merge_lc /tmp/tmp_sub_localconf "$sub_localconf"
         remote_copy_file /tmp/tmp_sub_localconf $NODE:$devstack_dir/local.conf
     done
 
