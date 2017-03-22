@@ -862,6 +862,9 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     elif [[ "$DEVSTACK_GATE_SMOKE_SERIAL" -eq "1" ]] ; then
         echo "Running tempest smoke tests"
         $TEMPEST_COMMAND -esmoke-serial
+    elif [[ "$DEVSTACK_GATE_TEMPEST_SCENARIOS" -eq "1" ]] ; then
+        echo "Running tempest scenario tests"
+        $TEMPEST_COMMAND -escenario -- $DEVSTACK_GATE_TEMPEST_REGEX
     else
         echo "Running tempest smoke tests"
         $TEMPEST_COMMAND -esmoke -- --concurrency=$TEMPEST_CONCURRENCY
