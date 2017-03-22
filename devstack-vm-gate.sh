@@ -859,9 +859,6 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     elif [[ "$DEVSTACK_GATE_TEMPEST_FULL" -eq "1" ]]; then
         echo "Running tempest full test suite"
         $TEMPEST_COMMAND -efull -- --concurrency=$TEMPEST_CONCURRENCY
-    elif [[ "$DEVSTACK_GATE_TEMPEST_STRESS" -eq "1" ]] ; then
-        echo "Running stress tests"
-        $TEMPEST_COMMAND -estress -- $DEVSTACK_GATE_TEMPEST_STRESS_ARGS
     elif [[ "$DEVSTACK_GATE_SMOKE_SERIAL" -eq "1" ]] ; then
         echo "Running tempest smoke tests"
         $TEMPEST_COMMAND -esmoke-serial
