@@ -142,3 +142,8 @@ This is what it all looks like after you run devstack and boot some nodes.
 |   +--------vxlan-tunnel-----------+--------vxlan-tunnel----------+                     |
 |                          |   |                          |   |                          |
 +--------------------------+   +--------------------------+   +--------------------------+
+
+When DVR is enabled, agent_mode in l3_agent.ini for the primary node will be set to "dvr"
+and "dvr_snat" for any remaining subnodes. DVR HA jobs need 3 node setup with this
+configuration, where "dvr_snat" represents the network node with centralized SNAT,
+and "dvr" represents compute nodes. There should be at least 2 "dvr_snat" nodes.

@@ -327,12 +327,12 @@ function setup_localrc {
     fi
 
     if [[ "$DEVSTACK_GATE_NEUTRON_DVR" -eq "1" ]]; then
-        if [[ "$DEVSTACK_GATE_TOPOLOGY" != "aio" ]] && [[ $role = sub ]]; then
-            # The role for L3 agents running on compute nodes is 'dvr'
-            localrc_set $localrc_file "Q_DVR_MODE" "dvr"
-        else
-            # The role for L3 agents running on controller nodes is 'dvr_snat'
+        # The role for L3 agents running on first node is 'dvr' and
+        # other nodes is 'dvr_snat'
+        if [[ "$DEVSTACK_GATE_TOPOLOGY" == "aio" ]] || [[ $role = sub ]]; then
             localrc_set $localrc_file "Q_DVR_MODE" "dvr_snat"
+        else
+            localrc_set $localrc_file "Q_DVR_MODE" "dvr"
         fi
     fi
 
