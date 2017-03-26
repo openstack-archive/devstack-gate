@@ -157,6 +157,9 @@ fi
 # git state.
 PROJECTS=$(echo $PROJECTS | tr '[:space:]' '\n' | sort -u)
 
+echo "The PROJECTS list is:"
+echo $PROJECTS | fold -w 80 -s
+echo "---"
 
 export BASE=/opt/stack
 
@@ -536,6 +539,22 @@ reproduce "$JOB_PROJECTS"
 # Run ansible to do setup_host on all nodes.
 echo "Setting up the hosts"
 
+# This function handles any common exit paths from here on in
+function exit_handler {
+    local status=$1
+
+    # Generate ARA report
+    /tmp/ansible/bin/ara generate html $WORKSPACE/logs/ara
+
+    if [[ $status -ne 0 ]]; then
+        echo "*** FAILED with status: $status"
+    else
+        echo "SUCCESSFULLY FINISHED"
+    fi
+
+    exit $status
+}
+
 # little helper that runs anything passed in under tsfilter
 function run_command {
     local fn="$@"
@@ -556,9 +575,14 @@ EOF
     echo "$cmd"
 }
 
+rc=0
+
 echo "... this takes a few seconds (logs at logs/devstack-gate-setup-host.txt.gz)"
 $ANSIBLE_PLAYBOOK -f 5 -i "$WORKSPACE/inventory" "$WORKSPACE/devstack-gate/playbooks/setup_host.yaml" \
-    &> "$WORKSPACE/logs/devstack-gate-setup-host.txt"
+    &> "$WORKSPACE/logs/devstack-gate-setup-host.txt" || rc=$?
+if [[ $rc -ne 0 ]]; then
+    exit_handler $rc;
+fi
 
 if [ -n "$DEVSTACK_GATE_GRENADE" ]; then
     start=$(date +%s)
@@ -566,16 +590,22 @@ if [ -n "$DEVSTACK_GATE_GRENADE" ]; then
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-new.txt.gz)"
     $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
             -a "$(run_command setup_workspace '$GRENADE_NEW_BRANCH' '$BASE/new')" \
-        &> "$WORKSPACE/logs/devstack-gate-setup-workspace-new.txt"
+        &> "$WORKSPACE/logs/devstack-gate-setup-workspace-new.txt" || rc=$?
+    if [[ $rc -ne 0 ]]; then
+        exit_handler $rc;
+    fi
     echo "Setting up the old (migrate from) workspace ..."
     echo "... this takes 3 - 5 minutes (logs at logs/devstack-gate-setup-workspace-old.txt.gz)"
     $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
         -a "$(run_command setup_workspace '$GRENADE_OLD_BRANCH' '$BASE/old')" \
-        &> "$WORKSPACE/logs/devstack-gate-setup-workspace-old.txt"
+        &> "$WORKSPACE/logs/devstack-gate-setup-workspace-old.txt" || rc=$?
     end=$(date +%s)
     took=$((($end - $start) / 60))
     if [[ "$took" -gt 20 ]]; then
         echo "WARNING: setup of 2 workspaces took > 20 minutes, this is a very slow node."
+    fi
+    if [[ $rc -ne 0 ]]; then
+        exit_handler $rc;
     fi
 else
     echo "Setting up the workspace"
@@ -583,11 +613,14 @@ else
     start=$(date +%s)
     $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
         -a "$(run_command setup_workspace '$OVERRIDE_ZUUL_BRANCH' '$BASE/new')" \
-        &> "$WORKSPACE/logs/devstack-gate-setup-workspace-new.txt"
+        &> "$WORKSPACE/logs/devstack-gate-setup-workspace-new.txt" || rc=$?
     end=$(date +%s)
     took=$((($end - $start) / 60))
     if [[ "$took" -gt 10 ]]; then
         echo "WARNING: setup workspace took > 10 minutes, this is a very slow node."
+    fi
+    if [[ $rc -ne 0 ]]; then
+        exit_handler $rc;
     fi
 fi
 
@@ -659,7 +692,4 @@ $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m synchronize \
     -a "mode=pull src='$BASE/logs/' dest='$BASE/logs/subnode-{{ host_counter }}' copy_links=yes"
 sudo mv $WORKSPACE/devstack-gate-cleanup-host.txt $BASE/logs/
 
-# Generate ARA report
-/tmp/ansible/bin/ara generate html $BASE/logs/ara
-
-exit $RETVAL
+exit_handler $RETVAL
