@@ -25,4 +25,7 @@
 - name: Build NODEPOOL_MIRROR_HOST variable with region and cloud if undefined
   set_fact: NODEPOOL_MIRROR_HOST={{ grep_mirror_host.stdout|default("mirror." + grep_region.stdout|lower + "." + grep_cloud.stdout + ".openstack.org", true) }}
 - include: ping_check.yaml host={{ NODEPOOL_MIRROR_HOST }}
+  ignore_errors: yes
+
 - include: http_check.yaml url=http://{{ NODEPOOL_MIRROR_HOST }}/ubuntu/dists/trusty/Release
+  ignore_errors: yes
