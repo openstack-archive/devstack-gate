@@ -6,7 +6,7 @@
     - name: Set pypi_url variable
       set_fact: pypi_url={{ lookup('ini', 'index-url section=global file=' + PIP_CONFIG_FILE) }}
     - name: Set pypi_host variable
-      set_fact: pypi_host={{ pypi_url.split('/')[2] }}
+      set_fact: pypi_host={{ pypi_url.split('/')[2].split(':')[0] }}
     - include: ping_check.yaml host={{ pypi_host }}
     - include: http_check.yaml url={{ pypi_url }}
   when: st.stat.exists
