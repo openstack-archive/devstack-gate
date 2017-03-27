@@ -148,6 +148,9 @@ if [[ -n "$DEVSTACK_PROJECT_FROM_GIT" ]] ; then
     TRAILING_COMMA_REMOVED=$(echo "$DEVSTACK_PROJECT_FROM_GIT" | sed -e 's/,$//')
     PROCESSED_FROM_GIT=$(echo "openstack/$TRAILING_COMMA_REMOVED" | sed -e 's/,/ openstack\//g')
     PROJECTS="$PROCESSED_FROM_GIT $PROJECTS"
+
+    # hack any known exceptions here until namespaces are unified
+    PROJECTS=$(echo $PROJECTS | sed -e 's|openstack/pbr|openstack-dev/pbr|g')
 fi
 
 # Remove duplicates as they result in errors when managing
