@@ -65,7 +65,6 @@ export DEVSTACK_PROJECT_FROM_GIT=${DEVSTACK_PROJECT_FROM_GIT:-}
 JOB_PROJECTS="$PROJECTS"
 PROJECTS="openstack-infra/devstack-gate $PROJECTS"
 PROJECTS="openstack-dev/devstack $PROJECTS"
-PROJECTS="openstack-dev/pbr $PROJECTS"
 PROJECTS="openstack/ceilometer $PROJECTS"
 PROJECTS="openstack/ceilometermiddleware $PROJECTS"
 PROJECTS="openstack/cinder $PROJECTS"
