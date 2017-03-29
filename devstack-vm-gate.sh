@@ -384,6 +384,9 @@ function setup_localrc {
     # set this until all testing platforms have libvirt >= 1.2.11
     # see bug #1501558
     localrc_set "$localrc_file" "EBTABLES_RACE_FIX" "True"
+    # This will put libvirt coredumps into /var/core
+    #   https://bugs.launchpad.net/nova/+bug/1643911
+    localrc_set "$localrc_file" DEBUG_LIBVIRT_COREDUMPS "True"
 
     if [[ "$DEVSTACK_GATE_TOPOLOGY" == "multinode" ]] && [[ $DEVSTACK_GATE_NEUTRON -eq "1" ]]; then
         # Reduce the MTU on br-ex to match the MTU of underlying tunnels
