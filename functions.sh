@@ -834,6 +834,12 @@ function cleanup_host {
     fi
     save_file /etc/glusterfs/glusterd.vol glusterd.vol
 
+    # gzip and save any coredumps in /var/core
+    if [ -d /var/core ]; then
+        sudo gzip -r /var/core
+        sudo cp -r /var/core $BASE/logs/
+    fi
+
     # Make sure the current user can read all the logs and configs
     sudo chown -RL $USER:$USER $BASE/logs/
     # (note X not x ... execute/search only if the file is a directory
