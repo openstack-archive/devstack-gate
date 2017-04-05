@@ -768,6 +768,14 @@ function cleanup_host {
     save_file $BASE/new/devstack/local.conf ${NEWLOGPREFIX}local.conf.txt
     save_file $BASE/new/devstack/tempest.log ${NEWLOGPREFIX}verify_tempest_conf.log
 
+    # Copy over any devstack systemd unit journals
+    if which journalctl; then
+        local u=""
+        for u in `sudo systemctl list-unit-files | grep devstack | awk '{print $1}'`; do
+            sudo journalctl -o short-precise --unit $u | sudo tee $BASE/logs/$u.log.txt > /dev/null
+        done
+    fi
+
     # Copy failure files if they exist
     if [ $(ls $BASE/status/stack/*.failure | wc -l) -gt 0 ]; then
         sudo mkdir -p $BASE/logs/status
