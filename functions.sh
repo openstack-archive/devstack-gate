@@ -889,7 +889,7 @@ function cleanup_host {
     # append .txt to all config files
     # (there are some /etc/swift .builder and .ring files that get
     # caught up which aren't really text, don't worry about that)
-    find $BASE/logs/sudoers.d $BASE/logs/etc -type f -exec mv '{}' '{}'.txt \;
+    find $BASE/logs/{apache_config,etc,sudoers.d} -type f -exec mv '{}' '{}'.txt \;
 
     # rabbitmq
     if [ -f $BASE/logs/rabbitmq/ ]; then
