@@ -231,7 +231,7 @@ subnode:
 
   glance:
     base:
-      services: []
+      services: [g-api]
 
   horizon:
     base:
