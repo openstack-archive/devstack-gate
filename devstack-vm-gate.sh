@@ -374,6 +374,7 @@ function setup_localrc {
     localrc_set "$localrc_file" "FIXED_NETWORK_SIZE" "4096"
     localrc_set "$localrc_file" "VIRT_DRIVER" "$DEVSTACK_GATE_VIRT_DRIVER"
     localrc_set "$localrc_file" "SWIFT_REPLICAS" "1"
+    localrc_set "$localrc_file" "SWIFT_START_ALL_SERVICES" "False"
     localrc_set "$localrc_file" "LOG_COLOR" "False"
     # Don't reset the requirements.txt files after g-r updates
     localrc_set "$localrc_file" "UNDO_REQUIREMENTS" "False"
