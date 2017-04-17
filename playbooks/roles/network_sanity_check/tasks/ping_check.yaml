@@ -1,3 +1,4 @@
 - name: Perform ping check
-  command: ping -c {{ PING_TIMES }} {{ host }}
+  command: ping -c 1 {{ host }}
   changed_when: False
+  retries: "{{ PING_TIMES }}"
