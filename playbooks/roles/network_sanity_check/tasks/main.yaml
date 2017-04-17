@@ -1,31 +1,20 @@
 ---
-- name: Get status of file PIP_CONFIG_FILE
-  stat: path={{ PIP_CONFIG_FILE }}
+- name: Get status of file MIRROR_INFO_FILE
+  stat: path={{ MIRROR_INFO_FILE }}
   register: st
 - block:
-    - name: Set pypi_url variable
-      set_fact: pypi_url={{ lookup('ini', 'index-url section=global file=' + PIP_CONFIG_FILE) }}
-    - name: Set pypi_host variable
-      set_fact: pypi_host={{ pypi_url.split('/')[2].split(':')[0] }}
-    - include: ping_check.yaml host={{ pypi_host }}
-    - include: http_check.yaml url={{ pypi_url }}
+    # Get the shell parsed values so that we are consistent with what is used
+    # and don't have to do our own parsing.
+    - name: Get NODEPOOL_MIRROR_HOST
+      shell: source {{ MIRROR_INFO_FILE }} && echo $NODEPOOL_MIRROR_HOST
+      register: mirror_host
+      args:
+        executable: /bin/bash
+    - name: Get NODEPOOL_PYPI_MIRROR
+      shell: source {{ MIRROR_INFO_FILE }} && echo $NODEPOOL_PYPI_MIRROR
+      register: pypi_mirror
+      args:
+        executable: /bin/bash
+    - include: ping_check.yaml host={{ mirror_host.stdout }}
+    - include: http_check.yaml url={{ pypi_mirror.stdout }}
   when: st.stat.exists
-- name: Get NODEPOOL_MIRROR_HOST from /etc/nodepool/provider
-  shell: grep NODEPOOL_MIRROR_HOST /etc/nodepool/provider | cut -d "=" -f2
-  register: grep_mirror_host
-  changed_when: False
-- name: Get NODEPOOL_REGION from /etc/nodepool/provider
-  shell: grep NODEPOOL_REGION /etc/nodepool/provider | cut -d "=" -f2
-  register: grep_region
-  changed_when: False
-- name: Get NODEPOOL_CLOUD from /etc/nodepool/provider
-  shell: grep NODEPOOL_CLOUD /etc/nodepool/provider | cut -d "=" -f2
-  register: grep_cloud
-  changed_when: False
-- name: Build NODEPOOL_MIRROR_HOST variable with region and cloud if undefined
-  set_fact: NODEPOOL_MIRROR_HOST={{ grep_mirror_host.stdout|default("mirror." + grep_region.stdout|lower + "." + grep_cloud.stdout + ".openstack.org", true) }}
-- include: ping_check.yaml host={{ NODEPOOL_MIRROR_HOST }}
-  ignore_errors: yes
-
-- include: http_check.yaml url=http://{{ NODEPOOL_MIRROR_HOST }}/ubuntu/dists/trusty/Release
-  ignore_errors: yes
