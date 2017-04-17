@@ -856,7 +856,7 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
         sudo -H -u tempest .tox/all-plugin/bin/tempest list-plugins
     elif [[ "$DEVSTACK_GATE_TEMPEST_ALL" -eq "1" ]]; then
         echo "Running tempest all test suite"
-        $TEMPEST_COMMAND -eall -- --concurrency=$TEMPEST_CONCURRENCY
+        $TEMPEST_COMMAND -eall -- 'tempest' --concurrency=$TEMPEST_CONCURRENCY
     elif [[ "$DEVSTACK_GATE_TEMPEST_DISABLE_TENANT_ISOLATION" -eq "1" ]]; then
         echo "Running tempest full test suite serially"
         $TEMPEST_COMMAND -efull-serial
