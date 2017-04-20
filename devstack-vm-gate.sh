@@ -720,8 +720,14 @@ else
     echo "Running devstack"
     echo "... this takes 10 - 15 minutes (logs in logs/devstacklog.txt.gz)"
     start=$(date +%s)
+    # Note stack.sh eventually redirects its output to
+    # log/devstacklog.txt.gz as it says above; this is usually what's
+    # interesting to a developer.  But before it gets to that point,
+    # there is a non-trivial amount of early setup work that happens
+    # that sometimes we need to debug.  This is why we redirect to
+    # "devstack-early.txt" here.
     $ANSIBLE primary -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "cd '$BASE/new/devstack' && sudo -H -u stack DSTOOLS_VERSION=$DSTOOLS_VERSION stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
+        -a "cd '$BASE/new/devstack' && sudo -H -u stack DSTOOLS_VERSION=$DSTOOLS_VERSION stdbuf -oL -eL ./stack.sh 2>&1 executable=/bin/bash" \
         &> "$WORKSPACE/logs/devstack-early.txt"
     if [ -d "$BASE/data/CA" ] && [ -f "$BASE/data/ca-bundle.pem" ] ; then
         # Sync any data files which include certificates to be used if
@@ -741,7 +747,7 @@ else
     # because services like nova apparently expect to have the controller in
     # place before anything else.
     $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "cd '$BASE/new/devstack' && sudo -H -u stack DSTOOLS_VERSION=$DSTOOLS_VERSION stdbuf -oL -eL ./stack.sh executable=/bin/bash" \
+        -a "cd '$BASE/new/devstack' && sudo -H -u stack DSTOOLS_VERSION=$DSTOOLS_VERSION stdbuf -oL -eL ./stack.sh 2>&1 executable=/bin/bash" \
         &> "$WORKSPACE/logs/devstack-subnodes-early.txt"
     end=$(date +%s)
     took=$((($end - $start) / 60))
