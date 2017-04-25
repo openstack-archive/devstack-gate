@@ -517,8 +517,10 @@ function setup_workspace {
         rm -rf ~/cache/files/
     fi
 
-    # copy them to where devstack expects with hardlinks to save space
-    find $cache_dir -mindepth 1 -maxdepth 1 -exec cp -l {} $DEST/devstack/files/ \;
+    if [ -d $cache_dir ]; then
+        # copy them to where devstack expects with hardlinks to save space
+        find $cache_dir -mindepth 1 -maxdepth 1 -exec cp -l {} $DEST/devstack/files/ \;
+    fi
 
     # Disable detailed logging as we return to the main script
     $xtrace
