@@ -490,6 +490,9 @@ cat > "$WORKSPACE/ansible.cfg" <<EOF
 [defaults]
 callback_plugins = $WORKSPACE/devstack-gate/playbooks/plugins/callback:/tmp/ansible/lib/python2.7/site-packages/ara/plugins/callbacks
 stdout_callback = devstack
+
+# Disable SSH host key checking
+host_key_checking = False
 EOF
 
 # NOTE(clarkb): for simplicity we evaluate all bash vars in ansible commands
