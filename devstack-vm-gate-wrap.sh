@@ -545,11 +545,16 @@ function run_command {
     # new-players that errexit isn't applied if we do "&& tsfilter
     # ..."  and thus we won't pick up any failures in the commands the
     # function runs.
+    #
+    # Note we also send stderr to stdout, otherwise ansible consumes
+    # each separately and outputs them separately.  That doesn't work
+    # well for log files; especially running "xtrace" in bash which
+    # puts tracing on stderr.
     read -r -d '' cmd <<EOF
 source '$WORKSPACE/test_env.sh'
 source '$WORKSPACE/devstack-gate/functions.sh'
 set -o errexit
-tsfilter $fn
+tsfilter $fn 2>&1
 executable=/bin/bash
 EOF
 
