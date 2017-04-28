@@ -768,12 +768,33 @@ function cleanup_host {
     save_file $BASE/new/devstack/local.conf ${NEWLOGPREFIX}local.conf.txt
     save_file $BASE/new/devstack/tempest.log ${NEWLOGPREFIX}verify_tempest_conf.log
 
-    # Copy over any devstack systemd unit journals
+    # Copy over any devstack systemd unit journals. Note, we will no
+    # longer get separate new/old grenade logs when this happens.
     if which journalctl; then
+        local jremote=""
+        if uses_debs; then
+            if ! dpkg -s "systemd-journal-remote" > /dev/null; then
+                apt_get_install systemd-journal-remote
+            fi
+            jremote="/lib/systemd/systemd-journal-remote"
+        elif is_fedora; then
+            if ! rpm --quiet -q "systemd-journal-gateway"; then
+                sudo yum install -y systemd-journal-gateway
+            fi
+            jremote="/usr/lib/systemd/systemd-journal-remote"
+        fi
+
+
         local u=""
+        local name=""
         for u in `sudo systemctl list-unit-files | grep devstack | awk '{print $1}'`; do
-            sudo journalctl -o short-precise --unit $u | sudo tee $BASE/logs/$u.log.txt > /dev/null
+            name=$(echo $u | sed 's/devstack@/screen-/' | sed 's/\.service//')
+            sudo journalctl -o short-precise --unit $u | sudo tee $BASE/logs/$name.txt > /dev/null
         done
+        # export the journal in native format to make it downloadable
+        # for later searching, makes a class of debugging much easier.
+        sudo journalctl -o export --unit "devstack@*-*" | \
+            $jremote -o $BASE/logs/devstack.journal -
     fi
 
     # Copy failure files if they exist
@@ -906,6 +927,7 @@ function cleanup_host {
     sudo find $BASE/logs -iname '*.txt' -execdir gzip -9 {} \+
     sudo find $BASE/logs -iname '*.dat' -execdir gzip -9 {} \+
     sudo find $BASE/logs -iname '*.conf' -execdir gzip -9 {} \+
+    sudo find $BASE/logs -iname '*.journal' -execdir gzip -9 {} \+
 
     # Disable detailed logging as we return to the main script
     $xtrace
