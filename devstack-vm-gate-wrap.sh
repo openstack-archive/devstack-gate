@@ -129,6 +129,8 @@ if [[ -n "$DEVSTACK_PROJECT_FROM_GIT" ]] ; then
 
     # hack any known exceptions here until namespaces are unified
     PROJECTS=$(echo $PROJECTS | sed -e 's|openstack/pbr|openstack-dev/pbr|g')
+    PROJECTS=$(echo $PROJECTS | sed -e 's|openstack/shade|openstack-infra/shade|g')
+    PROJECTS=$(echo $PROJECTS | sed -e 's|openstack/glean|openstack-infra/glean|g')
 fi
 
 # Remove duplicates as they result in errors when managing
