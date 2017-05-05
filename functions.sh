@@ -644,10 +644,14 @@ function cleanup_host {
 
     # No matter what, archive logs and config files
     if which journalctl ; then
-        # the journal gives us syslog() and kernel output, so is like
-        # a concatenation of the above.
-        sudo journalctl --no-pager \
-            --since="$(cat $BASE/log-start-timestamp.txt)" \
+        # The journal contains everything running under systemd, we'll
+        # build an old school version of the syslog with just the
+        # kernel and sudo messages.
+        sudo journalctl \
+             -t kernel \
+             -t sudo \
+             --no-pager \
+             --since="$(cat $BASE/log-start-timestamp.txt)" \
             | sudo tee $BASE/logs/syslog.txt > /dev/null
     else
         # assume rsyslog
@@ -794,8 +798,10 @@ function cleanup_host {
             sudo journalctl -o short-precise --unit $u | sudo tee $BASE/logs/$name.txt > /dev/null
         done
         # export the journal in native format to make it downloadable
-        # for later searching, makes a class of debugging much easier.
-        sudo journalctl -o export --unit "devstack@*-*" | \
+        # for later searching, makes a class of debugging much
+        # easier. This intentionally includes everything, not just
+        # devstack services.
+        sudo journalctl -o export | \
             $jremote -o $BASE/logs/devstack.journal -
     fi
 
