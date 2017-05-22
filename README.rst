@@ -119,39 +119,59 @@ These days Tempest testing is requiring in excess of 2GiB RAM (4 should
 be enough but we typically use 8) and completes within an hour on a
 4-CPU virtual machine.
 
-If you're using a nova provider, it's usually helpful to set up an
-environment variable list you can include into your shell so you don't
-have to feed a bunch of additional options on the nova client command
-line. A provider settings file for Rackspace would look something like::
+If you're using an OpenStack provider, it's usually helpful to set up a
+`clouds.yaml` file. More information on `clouds.yaml` files can be found in the
+`os-client-config documentation <https://docs.openstack.org/developer/os-client-config/#config-files`_.
+A `clouds.yaml` file for Rackspace would look something like::
 
-  export OS_USERNAME=<provider_username>
-  export OS_PASSWORD='<provider_password>'
-  export OS_TENANT_NAME=<provider_tenant>
-  export OS_AUTH_URL=https://identity.api.rackspacecloud.com/v2.0/
-  export OS_REGION_NAME=DFW
-  export FLAVOR='8GB Standard Instance'
+
+  clouds:
+    rackspace:
+      auth:
+        profile: rackspace
+        username: '<provider_username>'
+        password: '<provider_password>'
+        project_name: '<provider_project_name>'
 
 Where provider_username and provider_password are the user / password
-for a valid user in your account, and provider_tenant is the numeric
-id of your account (typically 6 digits).
+for a valid user in your account, and provider_project_name is the project_name
+you want to use (sometimes called 'tenant name' on older clouds)
 
-Note: The image regularly changes as new images are uploaded, for the
-specific image name currently used for tests, see
-`nodepool.yaml <http://git.openstack.org/cgit/openstack-infra/
-project-config/tree/nodepool/nodepool.yaml>`_.
+You can then use the `openstack` command line client (found in the python
+package
+`python-openstackclient <http://pypi.python.org/pypi/python-openstackclient>`_)
+to create a VM on the cloud.
 
-Source the provider settings, upload your image, boot a server named
-"testserver" (chosen arbitrarily for this example) with your SSH key allowed,
-and log into it::
+You can tell `openstack` to use the `DFW` region
+of the `rackspace` cloud you defined either by setting environment variables::
 
-  . provider_settings.sh
+  export OS_CLOUD=rackspace
+  export OS_REGION_NAME=DFW
+  openstack servers list
+
+or command line options:
+
+  openstack --os-cloud=rackspace --os-region-name=DFW servers list
+
+It will be assumed in remaining examples that environment varialbes have been
+set.
+
+If you haven't already, create an SSH keypair "my-keypair" (name it whatever
+you like)::
+
+  openstack keypair create --public-key=$HOME/.ssh/id_rsa.pub my-keypair
+
+Upload your image, boot a server named "testserver" (chosen arbitrarily for
+this example) with your SSH key allowed, and log into it::
+
+  FLAVOR='8GB Standard Instance'
   openstack image create --file devstack-gate.qcow2 devstack-gate
-  nova boot --poll --flavor "$FLAVOR" --image "devstack-gate" \
-    --file /root/.ssh/authorized_keys=$HOME/.ssh/id_rsa.pub testserver
-  nova ssh testserver
+  openstack server create --wait --flavor "$FLAVOR" --image "devstack-gate" \
+    --key-name=my-keypair testserver
+  openstack server ssh testserver
 
 If you get a cryptic error like ``ERROR: 'public'`` then you may need to
-manually look up the IP address with ``nova list --name testserver`` and
+manually look up the IP address with ``openstack server show testserver`` and
 connect by running ``ssh root@<ip_address>`` instead. Once logged in, switch to
 the jenkins user and set up parts of the environment expected by devstack-gate
 testing::
@@ -203,8 +223,8 @@ which branches qualify for the job and whether or not its voting is
 disabled.
 
 After the script completes, investigate any failures. Then log out and
-``nova delete testserver`` or similar to get rid of it once no longer
-needed. It's possible to re-run certain jobs or specific tests on a used
+``openstack server delete testserver`` or similar to get rid of it once no
+longer needed. It's possible to re-run certain jobs or specific tests on a used
 VM (sometimes with a bit of manual clean-up in between runs), but for
 proper testing you'll want to validate your fixes on a completely fresh
 one.
