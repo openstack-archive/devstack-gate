@@ -468,6 +468,9 @@ indent df -h
 # Install ansible
 sudo -H pip install virtualenv
 virtualenv /tmp/ansible
+# Explicitly install pbr first as this will use pip rathat than
+# easy_install. Hope is this is generally more reliable.
+/tmp/ansible/bin/pip install pbr
 # NOTE(emilien): workaround to avoid installing cryptography
 # https://github.com/ansible/ansible/issues/15665
 /tmp/ansible/bin/pip install paramiko==1.16.0 ansible==$ANSIBLE_VERSION \
