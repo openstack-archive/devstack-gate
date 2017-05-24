@@ -101,12 +101,20 @@ throwaway server without the overhead of building other CI
 infrastructure to manage a pool of them. This can be useful to reproduce
 and troubleshoot failures or tease out nondeterministic bugs.
 
-First, it helps if you have access to a virtual machine from one of the
-providers the OpenStack project is using for gating, since their
-performance characteristics and necessary build parameters are already
-known. The same thing can of course be done locally or on another
-provider, but you'll want to make sure you have a basic Ubuntu 14.04 LTS
-(Trusty Tahr) image with sufficient memory and processor count.
+First, you can build an image identical to the images running in the gate using
+`diskimage-builder <https://docs.openstack.org/developer/diskimage-builder>`_.
+The specific operating systems built and DIB elements for each image type are
+defined in `nodepool.yaml <http://git.openstack.org/cgit/openstack-infra/
+project-config/tree/nodepool/nodepool.yaml>`_. There is a handy script
+available in the project-config repo to build this for you::
+
+  git clone git://git.openstack.org/openstack-infra/project-config
+  cd project-config
+  ./tools/build-image.sh
+
+Take a look at the documentation within the `build-image.sh` script for specific
+build options.
+
 These days Tempest testing is requiring in excess of 2GiB RAM (4 should
 be enough but we typically use 8) and completes within an hour on a
 4-CPU virtual machine.
@@ -122,7 +130,6 @@ line. A provider settings file for Rackspace would look something like::
   export OS_AUTH_URL=https://identity.api.rackspacecloud.com/v2.0/
   export OS_REGION_NAME=DFW
   export FLAVOR='8GB Standard Instance'
-  export IMAGE='Ubuntu 14.04 LTS (Trusty Tahr) (PVHVM)'
 
 Where provider_username and provider_password are the user / password
 for a valid user in your account, and provider_tenant is the numeric
@@ -133,38 +140,23 @@ specific image name currently used for tests, see
 `nodepool.yaml <http://git.openstack.org/cgit/openstack-infra/
 project-config/tree/nodepool/nodepool.yaml>`_.
 
-Source the provider settings, boot a server named "testserver" (chosen
-arbitrarily for this example) with your SSH key allowed, and log into
-it::
+Source the provider settings, upload your image, boot a server named
+"testserver" (chosen arbitrarily for this example) with your SSH key allowed,
+and log into it::
 
   . provider_settings.sh
-  nova boot --poll --flavor "$FLAVOR" --image "$IMAGE" \
+  openstack image create --file devstack-gate.qcow2 devstack-gate
+  nova boot --poll --flavor "$FLAVOR" --image "devstack-gate" \
     --file /root/.ssh/authorized_keys=$HOME/.ssh/id_rsa.pub testserver
   nova ssh testserver
 
 If you get a cryptic error like ``ERROR: 'public'`` then you may need to
 manually look up the IP address with ``nova list --name testserver`` and
-connect by running ``ssh root@<ip_address>`` instead.
+connect by running ``ssh root@<ip_address>`` instead. Once logged in, switch to
+the jenkins user and set up parts of the environment expected by devstack-gate
+testing::
 
-As the root user, upgrade the server, install git and pip packages, add tox via
-pip (because the packaged version is too old), set up a "jenkins" account (add
-user "jenkins" to sudoers) and reboot to make sure you're running a current
-kernel::
-
-  apt-get install -y git \
-  && git clone https://git.openstack.org/openstack-infra/system-config \
-  && system-config/install_puppet.sh && system-config/install_modules.sh \
-  && puppet apply \
-  --modulepath=/root/system-config/modules:/etc/puppet/modules \
-  -e "class { openstack_project::single_use_slave: install_users => false,
-  enable_unbound => true, ssh_key => \"$( cat .ssh/id_rsa.pub | awk '{print $2}' )\" }" \
-  && echo "jenkins ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/jenkins \
-  && reboot
-
-Wait a few moments for the reboot to complete, then log back in with
-``nova ssh --login jenkins testserver`` or ``ssh jenkins@<ip_address>``
-and set up parts of the environment expected by devstack-gate testing::
-
+  su - jenkins
   export REPO_URL=https://git.openstack.org
   export ZUUL_URL=/home/jenkins/workspace-cache
   export ZUUL_REF=HEAD
