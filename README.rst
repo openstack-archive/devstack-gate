@@ -128,16 +128,6 @@ Where provider_username and provider_password are the user / password
 for a valid user in your account, and provider_tenant is the numeric
 id of your account (typically 6 digits).
 
-By comparison, a provider settings file for HPCloud::
-
-  export OS_USERNAME=<provider_username>
-  export OS_PASSWORD='<provider_password>'
-  export OS_TENANT_NAME=<provider_tenant>
-  export OS_AUTH_URL=https://region-a.geo-1.identity.hpcloudsvc.com:35357/v2.0
-  export OS_REGION_NAME=az-3.region-a.geo-1
-  export FLAVOR='standard.large'
-  export IMAGE='Ubuntu Server 14.04 LTS (amd64 20140607.1) - Partner Image'
-
 Note: The image regularly changes as new images are uploaded, for the
 specific image name currently used for tests, see
 `nodepool.yaml <http://git.openstack.org/cgit/openstack-infra/
