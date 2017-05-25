@@ -877,10 +877,6 @@ function cleanup_host {
         sudo cp -r /var/core $BASE/logs/
     fi
 
-    # record lvm dumpage to debug cinder lvm issues.
-    sudo -H lvmdump
-    sudo find /root -name 'lvmdump*.tgz' -execdir cp '{}' "$BASE/logs" \;
-
     # Make sure the current user can read all the logs and configs
     sudo chown -RL $USER:$USER $BASE/logs/
     # (note X not x ... execute/search only if the file is a directory
