@@ -80,8 +80,10 @@ function setup_ssh {
     local dest_file=${2:-id_rsa}
     $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m file \
         -a "path='$path' mode=0700 state=directory"
-    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
-        -a "src=/etc/nodepool/id_rsa.pub dest='$path/authorized_keys' mode=0600"
+    # Note that we append to the authorized keys file just in case something
+    # is already authorized to ssh with content in that file.
+    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m lineinfile \
+        -a "line={{ lookup('file', '/etc/nodepool/id_rsa.pub') }} dest='$path/authorized_keys' insertafter=EOF create=yes mode=0600"
     $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
         -a "src=/etc/nodepool/id_rsa.pub dest='$path/${dest_file}.pub' mode=0600"
     $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
