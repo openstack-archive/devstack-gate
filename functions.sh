@@ -934,7 +934,7 @@ function cleanup_host {
     sudo find $BASE/logs -iname '*.txt' -execdir gzip -9 {} \+
     sudo find $BASE/logs -iname '*.dat' -execdir gzip -9 {} \+
     sudo find $BASE/logs -iname '*.conf' -execdir gzip -9 {} \+
-    sudo find $BASE/logs -iname '*.journal' -execdir gzip -9 {} \+
+    sudo find $BASE/logs -iname '*.journal' -execdir xz --threads=0 {} \+
 
     # Disable detailed logging as we return to the main script
     $xtrace
