@@ -528,6 +528,7 @@ function exit_handler {
 
     # Generate ARA report
     /tmp/ansible/bin/ara generate html $WORKSPACE/logs/ara
+    gzip --recursive --best $WORKSPACE/logs/ara
 
     if [[ $status -ne 0 ]]; then
         echo "*** FAILED with status: $status"
