@@ -600,6 +600,8 @@ function process_stackviz {
                 $log_path/stackviz/data
         fi
         sudo chown -R $USER:$USER $log_path/stackviz
+        # Compress the stackviz data as it is quite large.
+        sudo find $log_path/stackviz -iname '*.json' -execdir gzip -9 {} \+
         popd
     fi
 }
