@@ -644,23 +644,6 @@ function cleanup_host {
     # Sleep to give services a chance to flush their log buffers.
     sleep 2
 
-    # No matter what, archive logs and config files
-    if which journalctl ; then
-        # The journal contains everything running under systemd, we'll
-        # build an old school version of the syslog with just the
-        # kernel and sudo messages.
-        sudo journalctl \
-             -t kernel \
-             -t sudo \
-             --no-pager \
-             --since="$(cat $BASE/log-start-timestamp.txt)" \
-            | sudo tee $BASE/logs/syslog.txt > /dev/null
-    else
-        # assume rsyslog
-        save_file /var/log/syslog
-        save_file /var/log/kern.log
-    fi
-
     # apache logs; including wsgi stuff like horizon, keystone, etc.
     if uses_debs; then
         local apache_logs=/var/log/apache2
@@ -801,10 +784,22 @@ function cleanup_host {
         done
         # export the journal in native format to make it downloadable
         # for later searching, makes a class of debugging much
-        # easier. This intentionally includes everything, not just
-        # devstack services.
-        sudo journalctl -o export | \
+        # easier.
+        sudo journalctl -u 'devstack@*' -o export | \
             $jremote -o $BASE/logs/devstack.journal -
+        # The journal contains everything running under systemd, we'll
+        # build an old school version of the syslog with just the
+        # kernel and sudo messages.
+        sudo journalctl \
+             -t kernel \
+             -t sudo \
+             --no-pager \
+             --since="$(cat $BASE/log-start-timestamp.txt)" \
+            | sudo tee $BASE/logs/syslog.txt > /dev/null
+    else
+        # assume rsyslog
+        save_file /var/log/syslog
+        save_file /var/log/kern.log
     fi
 
     # Copy failure files if they exist
