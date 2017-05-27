@@ -283,6 +283,12 @@ function setup_localrc {
             if ! dpkg -s "${PYTHON_NAME}-yaml" > /dev/null; then
                 apt_get_install "${PYTHON_NAME}-yaml"
             fi
+        elif is_suse; then
+            if [ "$PYTHON_NAME" = "python" ] ; then
+                sudo zypper -n install python-PyYAML
+            elif [ "$PYTHON_NAME" = "python3" ] ; then
+                sudo zypper -n install python3-PyYAML
+            fi
         elif is_fedora; then
             if [ "$PYTHON_NAME" = "python" ] ; then
                 if ! rpm --quiet -q "PyYAML"; then

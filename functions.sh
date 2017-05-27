@@ -19,6 +19,13 @@
 SUDO="sudo"
 
 # Distro check functions
+
+function is_suse {
+    . /etc/os-release
+
+    [[ "$NAME" =~ (openSUSE) || "$NAME" == "SUSE LINUX" ]]
+}
+
 function is_fedora {
     # note this is a little mis-named, we consider basically anything
     # using RPM as "is_fedora".  This includes centos7, fedora &
@@ -101,7 +108,7 @@ function start_timer {
     # first make sure the time is right, so we don't go into crazy land
     # later if the system decides to apply an ntp date and we jump forward
     # 4 hrs (which has happened)
-    if is_fedora; then
+    if is_fedora || is_suse; then
         local ntp_service='ntpd'
     elif uses_debs; then
         local ntp_service='ntp'
@@ -645,7 +652,7 @@ function cleanup_host {
     sleep 2
 
     # apache logs; including wsgi stuff like horizon, keystone, etc.
-    if uses_debs; then
+    if uses_debs || is_suse; then
         local apache_logs=/var/log/apache2
     elif is_fedora; then
         local apache_logs=/var/log/httpd
@@ -685,6 +692,10 @@ function cleanup_host {
     if uses_debs; then
         if [[ -d /etc/apache2/sites-enabled ]]; then
             sudo cp /etc/apache2/sites-enabled/* $BASE/logs/apache_config
+        fi
+    elif is_suse; then
+        if [[ -d /etc/apache2/conf.d ]]; then
+            sudo cp /etc/apache2/conf.d/* $BASE/logs/apache_config
         fi
     elif is_fedora; then
         if [[ -d /etc/apache2/httpd/conf.d ]]; then
@@ -762,31 +773,12 @@ function cleanup_host {
     # Copy over any devstack systemd unit journals. Note, we will no
     # longer get separate new/old grenade logs when this happens.
     if which journalctl; then
-        local jremote=""
-        if uses_debs; then
-            if ! dpkg -s "systemd-journal-remote" > /dev/null; then
-                apt_get_install systemd-journal-remote
-            fi
-            jremote="/lib/systemd/systemd-journal-remote"
-        elif is_fedora; then
-            if ! rpm --quiet -q "systemd-journal-gateway"; then
-                sudo yum install -y systemd-journal-gateway
-            fi
-            jremote="/usr/lib/systemd/systemd-journal-remote"
-        fi
-
-
         local u=""
         local name=""
         for u in `sudo systemctl list-unit-files | grep devstack | awk '{print $1}'`; do
             name=$(echo $u | sed 's/devstack@/screen-/' | sed 's/\.service//')
             sudo journalctl -o short-precise --unit $u | sudo tee $BASE/logs/$name.txt > /dev/null
         done
-        # export the journal in native format to make it downloadable
-        # for later searching, makes a class of debugging much
-        # easier.
-        sudo journalctl -u 'devstack@*' -o export | \
-            $jremote -o $BASE/logs/devstack.journal -
         # The journal contains everything running under systemd, we'll
         # build an old school version of the syslog with just the
         # kernel and sudo messages.
@@ -796,6 +788,30 @@ function cleanup_host {
              --no-pager \
              --since="$(cat $BASE/log-start-timestamp.txt)" \
             | sudo tee $BASE/logs/syslog.txt > /dev/null
+
+        # export the journal in native format to make it downloadable
+        # for later searching, makes a class of debugging much
+        # easier.
+        local jremote=""
+        if uses_debs; then
+            if ! dpkg -s "systemd-journal-remote" > /dev/null; then
+                apt_get_install systemd-journal-remote
+            fi
+            jremote="/lib/systemd/systemd-journal-remote"
+        elif is_suse; then
+            # openSUSE Leap currently doesn't provide systemd-journal-remote
+            # see https://bugzilla.suse.com/show_bug.cgi?id=1041122
+            true
+        elif is_fedora; then
+            if ! rpm --quiet -q "systemd-journal-gateway"; then
+                sudo yum install -y systemd-journal-gateway
+            fi
+            jremote="/usr/lib/systemd/systemd-journal-remote"
+        fi
+        if [ -n "$jremote" ]; then
+            sudo journalctl -u 'devstack@*' -o export | \
+                $jremote -o $BASE/logs/devstack.journal -
+        fi
     else
         # assume rsyslog
         save_file /var/log/syslog
@@ -1025,7 +1041,7 @@ function enable_netconsole {
 #   http://www.yet.org/2014/09/openvswitch-troubleshooting/
 #
 function ovs_vxlan_bridge {
-    if is_fedora; then
+    if is_suse || is_fedora; then
         local ovs_package='openvswitch'
         local ovs_service='openvswitch'
     elif uses_debs; then
