@@ -783,6 +783,15 @@ function cleanup_host {
             name=$(echo $u | sed 's/devstack@/screen-/' | sed 's/\.service//')
             sudo journalctl -o short-precise --unit $u | sudo tee $BASE/logs/$name.txt > /dev/null
         done
+
+        # Export the journal in export format to make it downloadable
+        # for later searching. It can then be rewritten to a journal native
+        # format locally using systemd-journal-remote. This makes a class of
+        # debugging much easier. We don't do the native conversion here as
+        # some distros do not package that tooling.
+        sudo journalctl -u 'devstack@*' -o export | \
+            xz --threads=0 - > $BASE/logs/devstack.journal.xz
+
         # The journal contains everything running under systemd, we'll
         # build an old school version of the syslog with just the
         # kernel and sudo messages.
@@ -792,30 +801,6 @@ function cleanup_host {
              --no-pager \
              --since="$(cat $BASE/log-start-timestamp.txt)" \
             | sudo tee $BASE/logs/syslog.txt > /dev/null
-
-        # export the journal in native format to make it downloadable
-        # for later searching, makes a class of debugging much
-        # easier.
-        local jremote=""
-        if uses_debs; then
-            if ! dpkg -s "systemd-journal-remote" > /dev/null; then
-                apt_get_install systemd-journal-remote
-            fi
-            jremote="/lib/systemd/systemd-journal-remote"
-        elif is_suse; then
-            # openSUSE Leap currently doesn't provide systemd-journal-remote
-            # see https://bugzilla.suse.com/show_bug.cgi?id=1041122
-            true
-        elif is_fedora; then
-            if ! rpm --quiet -q "systemd-journal-gateway"; then
-                sudo yum install -y systemd-journal-gateway
-            fi
-            jremote="/usr/lib/systemd/systemd-journal-remote"
-        fi
-        if [ -n "$jremote" ]; then
-            sudo journalctl -u 'devstack@*' -o export | \
-                $jremote -o $BASE/logs/devstack.journal -
-        fi
     else
         # assume rsyslog
         save_file /var/log/syslog
