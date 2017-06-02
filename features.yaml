@@ -54,6 +54,10 @@ config:
     features: [cinder-mn-grenade-sub-bak]
   neutron_dvr:
     features: [neutron-dvr]
+  swift:
+    features: [swift]
+  keystone:
+    features: [keystone]
 
 branches:
   # The value of ""default" is the name of the "trunk" branch
