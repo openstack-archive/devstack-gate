@@ -575,35 +575,39 @@ function process_stackviz {
     local project=$1
     local path_prefix=${2:-new}
 
+    local stackviz_tarball=$BASE/cache/files/stackviz-latest.tar.gz
+    if [ ! -f $stackviz_tarball ]; then
+        echo "Unable to locate cached stackviz tarball, skipping."
+        return
+    fi
+
     local project_path=$BASE/$path_prefix/$project
     local log_path=$BASE/logs
     if [[ "$path_prefix" != "new" ]]; then
         log_path=$BASE/logs/$path_prefix
     fi
+    local stackviz_path=/tmp/stackviz
+    virtualenv $stackviz_path
+    $stackviz_path/bin/pip install -U $stackviz_tarball
 
-    local stackviz_path=/opt/stackviz
-    if [ -d $stackviz_path/build ]; then
-        sudo pip install -U $stackviz_path
+    # static html+js should be prebuilt during image creation
+    cp -r $stackviz_path/share/stackviz-html $log_path/stackviz
 
-        # static html+js should be prebuilt during image creation
-        cp -r $stackviz_path/build $log_path/stackviz
-
-        pushd $project_path
-        if [ -f $log_path/dstat-csv_log.txt ]; then
-            sudo testr last --subunit | stackviz-export \
-                --dstat $log_path/dstat-csv_log.txt \
-                --env --stdin \
-                $log_path/stackviz/data
-        else
-            sudo testr last --subunit | stackviz-export \
-                --env --stdin \
-                $log_path/stackviz/data
-        fi
-        sudo chown -R $USER:$USER $log_path/stackviz
-        # Compress the stackviz data as it is quite large.
-        sudo find $log_path/stackviz -iname '*.json' -execdir gzip -9 {} \+
-        popd
+    pushd $project_path
+    if [ -f $log_path/dstat-csv_log.txt ]; then
+        sudo testr last --subunit | $stackviz_path/bin/stackviz-export \
+            --dstat $log_path/dstat-csv_log.txt \
+            --env --stdin \
+            $log_path/stackviz/data
+    else
+        sudo testr last --subunit | $stackviz_path/bin/stackviz-export \
+            --env --stdin \
+            $log_path/stackviz/data
     fi
+    sudo chown -R $USER:$USER $log_path/stackviz
+    # Compress the stackviz data as it is quite large.
+    sudo find $log_path/stackviz -iname '*.json' -execdir gzip -9 {} \+
+    popd
 }
 
 function save_file {
