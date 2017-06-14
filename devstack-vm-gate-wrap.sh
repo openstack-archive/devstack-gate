@@ -72,7 +72,9 @@ PROJECTS="openstack/glance $PROJECTS"
 PROJECTS="openstack/heat $PROJECTS"
 PROJECTS="openstack/heat-cfntools $PROJECTS"
 PROJECTS="openstack/heat-templates $PROJECTS"
-PROJECTS="openstack/horizon $PROJECTS"
+if [[ "$DEVSTACK_GATE_HORIZON" -eq "1" ]] ; then
+    PROJECTS="openstack/horizon $PROJECTS"
+fi
 PROJECTS="openstack/keystone $PROJECTS"
 PROJECTS="openstack/neutron $PROJECTS"
 PROJECTS="openstack/nova $PROJECTS"

@@ -1,11 +1,11 @@
 config:
   default:
-    master: [default, ceilometer, glance, horizon, nova, placement, swift, cinder, keystone]
-    ocata: [default, ceilometer, glance, horizon, nova, placement, swift, cinder, keystone]
-    newton: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
-    mitaka: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
-    liberty: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
-    kilo: [default, ceilometer, glance, horizon, nova, swift, cinder, keystone]
+    master: [default, ceilometer, glance, nova, placement, swift, cinder, keystone]
+    ocata: [default, ceilometer, glance, nova, placement, swift, cinder, keystone]
+    newton: [default, ceilometer, glance, nova, swift, cinder, keystone]
+    mitaka: [default, ceilometer, glance, nova, swift, cinder, keystone]
+    liberty: [default, ceilometer, glance, nova, swift, cinder, keystone]
+    kilo: [default, ceilometer, glance, nova, swift, cinder, keystone]
     # This can be used by functional jobs that only want their dependencies installed
     # and don't need to incur the overhead of installing all services in the process.
     no_services: [default]
@@ -58,6 +58,8 @@ config:
     features: [swift]
   keystone:
     features: [keystone]
+  horizon:
+    features: [horizon]
 
 branches:
   # The value of ""default" is the name of the "trunk" branch
