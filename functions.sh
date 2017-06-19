@@ -879,6 +879,10 @@ function cleanup_host {
         sudo cp -r /var/core $BASE/logs/
     fi
 
+    # DNS checks
+    save_file /etc/resolv.conf
+    sudo ss -lntup | grep ':53' > $WORKSPACE/listen53.txt
+    save_file $WORKSPACE/listen53.txt
     # unbound
     save_file /var/log/unbound.log
 
