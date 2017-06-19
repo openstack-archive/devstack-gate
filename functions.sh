@@ -879,6 +879,9 @@ function cleanup_host {
         sudo cp -r /var/core $BASE/logs/
     fi
 
+    # unbound
+    save_file /var/log/unbound.log
+
     # Make sure the current user can read all the logs and configs
     sudo chown -RL $USER:$USER $BASE/logs/
     # (note X not x ... execute/search only if the file is a directory
