@@ -838,7 +838,9 @@ function cleanup_host {
         sudo mv $WORKSPACE/rpm-qa.txt.gz $BASE/logs/
     fi
 
-    process_stackviz tempest
+    if [[ "$PROCESS_STACKVIZ" -eq "1" ]] ; then
+        process_stackviz tempest
+    fi
 
     process_testr_artifacts tempest
     process_testr_artifacts tempest old
