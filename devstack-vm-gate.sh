@@ -366,6 +366,13 @@ function setup_localrc {
     # to correctly do testing. Otherwise you are not testing
     # the code you have posted for review.
     localrc_set "$localrc_file" "ERROR_ON_CLONE" "True"
+    # When you enable the tempest service that creates a virtualenv for
+    # tempest. This virtualenv is what we run tests out of. Additionally
+    # devstack installs tempest globally by default. We dont need that
+    # and since the installation process adds to devstack-gate runtime
+    # due to the extra steps and extra packages affecting OSC just don't
+    # install it globally.
+    localrc_set "$localrc_file" "INSTALL_TEMPEST" "False"
     # Since git clone can't be used for novnc in gates, force it to install the packages
     localrc_set "$localrc_file" "NOVNC_FROM_PACKAGE" "True"
     localrc_set "$localrc_file" "ENABLED_SERVICES" "$MY_ENABLED_SERVICES"
