@@ -213,7 +213,7 @@ primary:
 subnode:
   default:
     base:
-      services: [dstat, peakmem_tracker, etcd3]
+      services: [dstat, peakmem_tracker]
 
   ceilometer:
     base:
