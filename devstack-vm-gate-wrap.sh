@@ -72,8 +72,10 @@ PROJECTS="openstack/glance $PROJECTS"
 PROJECTS="openstack/heat $PROJECTS"
 PROJECTS="openstack/heat-cfntools $PROJECTS"
 PROJECTS="openstack/heat-templates $PROJECTS"
-if [[ "$DEVSTACK_GATE_HORIZON" -eq "1" ]] ; then
+if [[ "$DEVSTACK_GATE_HORIZON" -eq "1" || "$DEVSTACK_PROJECT_FROM_GIT" -eq "django_openstack_auth" || "$DEVSTACK_PROJECT_FROM_GIT" -eq "manila-ui" ]] ; then
     PROJECTS="openstack/horizon $PROJECTS"
+    PROJECTS="openstack/django_openstack_auth $PROJECTS"
+    PROJECTS="openstack/manila-ui $PROJECTS"
 fi
 PROJECTS="openstack/keystone $PROJECTS"
 PROJECTS="openstack/neutron $PROJECTS"
@@ -94,12 +96,10 @@ if [[ "$DEVSTACK_GATE_HEAT" -eq "1" ]] ; then
     PROJECTS="openstack/dib-utils $PROJECTS"
     PROJECTS="openstack/diskimage-builder $PROJECTS"
 fi
-PROJECTS="openstack/django_openstack_auth $PROJECTS"
 PROJECTS="openstack/glance_store $PROJECTS"
 PROJECTS="openstack/keystoneauth $PROJECTS"
 PROJECTS="openstack/keystonemiddleware $PROJECTS"
 PROJECTS="openstack/manila $PROJECTS"
-PROJECTS="openstack/manila-ui $PROJECTS"
 PROJECTS="openstack/zaqar $PROJECTS"
 PROJECTS="openstack/neutron-fwaas $PROJECTS"
 PROJECTS="openstack/neutron-lbaas $PROJECTS"
