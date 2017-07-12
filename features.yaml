@@ -33,6 +33,8 @@ config:
     features: [sahara]
   ironic:
     features: [ironic]
+  ironic_inspector:
+    features: [ironic-inspector]
   qpid:
     features: [qpid]
   zeromq:
@@ -156,6 +158,10 @@ primary:
       services: [ir-api, ir-cond]
       rm-services: [cinder, c-api, c-vol, c-sch, c-bak]
 
+  ironic-inspector:
+    base:
+      services: [ironic-inspector,ironic-inspector-dhcp]
+
   sahara:
     base:
       services: [sahara]
@@ -240,6 +246,10 @@ subnode:
     base:
       rm-services: [c-vol, c-bak]
       services: [ir-api, ir-cond]
+
+  ironic-inspector:
+    base:
+      services: []
 
   keystone:
     base:
