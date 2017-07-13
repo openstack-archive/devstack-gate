@@ -1,6 +1,7 @@
 config:
   default:
     master: [default, ceilometer, glance, nova, placement, swift, cinder, keystone]
+    pike: [default, ceilometer, glance, nova, placement, swift, cinder, keystone]
     ocata: [default, ceilometer, glance, nova, placement, swift, cinder, keystone]
     newton: [default, ceilometer, glance, nova, swift, cinder, keystone]
     mitaka: [default, ceilometer, glance, nova, swift, cinder, keystone]
@@ -62,7 +63,7 @@ branches:
   # The value of ""default" is the name of the "trunk" branch
   default: master
   # Normalized branch names only here, e.g. stable/ocata => ocata
-  allowed: [master, ocata, newton, mitaka, liberty, kilo]
+  allowed: [master, pike, ocata, newton, mitaka, liberty, kilo]
 
 primary:
   default:
