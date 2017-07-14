@@ -22,6 +22,11 @@
 # Most of the work of this script is done in functions so that we may
 # easily redirect their stdout / stderr to log files.
 
+# Temporary pip config edit to test pypi reverse proxy cache.
+# We want to run this in real world conditions to collect reliability
+# data with e-r before commiting to this on our images.
+sudo sed -i -e 's#\(index-url = https\?://mirror\..*\.openstack.org\)/#\1:8080/#' /etc/pip.conf
+
 GIT_BASE=${GIT_BASE:-https://git.openstack.org}
 GIT_BRANCH=${GIT_BRANCH:-master}
 
