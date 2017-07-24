@@ -338,6 +338,8 @@ function fix_disk_layout {
             sudo parted ${DEV} --script -- mklabel msdos
             sudo parted ${DEV} --script -- mkpart primary linux-swap 1 ${SWAPSIZE}
             sudo parted ${DEV} --script -- mkpart primary ext2 8192 -1
+            sync
+            sudo partprobe
             sudo mkswap ${DEV}1
             sudo mkfs.ext4 ${DEV}2
             sudo swapon ${DEV}1
