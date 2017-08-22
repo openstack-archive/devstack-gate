@@ -4,6 +4,8 @@
     description: Base devstack job.
     pre-run:
       playbooks/pre
+    post-run:
+      playbooks/post
 
 - job:
     name: devstack-lxc
