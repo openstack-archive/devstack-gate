@@ -1,0 +1,4 @@
+- name: Write job-specific localrc variables
+  copy:
+    dest: /tmp/dg-local.conf
+    content: '{{ devstack_local_conf_contents }}'
