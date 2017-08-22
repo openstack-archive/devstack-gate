@@ -1,0 +1,22 @@
+- name: Create bridge
+  openvswitch_bridge:
+    bridge: "{{ bridge_name }}"
+
+- name: Set bridge MTU
+  command: ip link set mtu {{ ovs_bridge_mtu }} dev {{ bridge_name }}
+
+- when: set_ips
+  block:
+    - name: Verify if the bridge address is set
+      shell: ip addr show dev {{ bridge_name }} | grep -q {{ pub_addr_prefix }}.{{ ovs_starting_offset }}/{{ pub_addr_mask }}
+      register: ip_addr_var
+      failed_when: False
+      changed_when: False
+
+    - name: Set the bridge address
+      command: ip addr add {{ pub_addr_prefix }}.{{ ovs_starting_offset }}/{{ pub_addr_mask }} dev {{ bridge_name }}
+      become: yes
+      when: ip_addr_var.rc == 1
+
+- name: Bring bridge interface up
+  command: ip link set dev {{ bridge_name }} up
