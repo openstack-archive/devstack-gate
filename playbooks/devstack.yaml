@@ -2,4 +2,4 @@
 - hosts: all
   tasks:
     - command: ls /opt/stack
-    - command: cat /tmp/dg-local.conf
+    - command: cat /opt/stack/devstack/local.conf

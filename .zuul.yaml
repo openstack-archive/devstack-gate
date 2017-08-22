@@ -8,6 +8,8 @@
     name: devstack
     parent: multinode
     description: Base devstack job.
+    required-projects:
+      - openstack-dev/devstack
     pre-run:
       playbooks/pre
     post-run:
@@ -18,10 +20,9 @@
     parent: devstack
     description: A job which sets something in local.conf
     vars:
-      devstack_local_conf_contents: |
-        [[local|localrc]]
-        LIBVIRT_TYPE=lxc
-        NOVA_BACKEND=LVM
+      devstack_localrc:
+        LIBVIRT_TYPE: lxc
+        NOVA_BACKEND: LVM
 
 - job:
     name: devstack-legacy
