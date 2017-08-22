@@ -1,3 +1,5 @@
 - hosts: all
   roles:
     - write-devstack-local-conf
+    - setup-devstack-source-dirs
+
