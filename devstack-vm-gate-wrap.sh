@@ -476,9 +476,7 @@ virtualenv /tmp/ansible
 # Explicitly install pbr first as this will use pip rathat than
 # easy_install. Hope is this is generally more reliable.
 /tmp/ansible/bin/pip install pbr
-# NOTE(emilien): workaround to avoid installing cryptography
-# https://github.com/ansible/ansible/issues/15665
-/tmp/ansible/bin/pip install paramiko==1.16.0 ansible==$ANSIBLE_VERSION \
+/tmp/ansible/bin/pip install ansible==$ANSIBLE_VERSION \
                      devstack-tools==$DSTOOLS_VERSION ara
 export ANSIBLE=/tmp/ansible/bin/ansible
 export ANSIBLE_PLAYBOOK=/tmp/ansible/bin/ansible-playbook
