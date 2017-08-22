@@ -1,0 +1,22 @@
+- job:
+    name: devstack
+    parent: base # TODO: multinode
+    description: Base devstack job.
+    pre-run:
+      playbooks/pre
+
+- job:
+    name: devstack-lxc
+    parent: devstack
+    description: A job which sets something in local.conf
+    vars:
+      devstack_local_conf_contents: |
+        [[local|localrc]]
+        LIBVIRT_TYPE=lxc
+        NOVA_BACKEND=LVM
+
+- project:
+    name: openstack-infra/devstack-gate
+    check:
+      jobs:
+        - devstack-lxc
