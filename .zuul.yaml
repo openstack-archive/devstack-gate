@@ -1,6 +1,6 @@
 - job:
     name: devstack
-    parent: base # TODO: multinode
+    parent: multinode
     description: Base devstack job.
     pre-run:
       playbooks/pre
