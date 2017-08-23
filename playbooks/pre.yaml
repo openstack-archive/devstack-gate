@@ -1,5 +1,7 @@
 - hosts: all
   roles:
+    - setup-stack-user
+    - setup-tempest-user
     - setup-devstack-source-dirs
     - setup-devstack-log-dir
     - start-fresh-logging
