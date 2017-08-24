@@ -168,13 +168,11 @@ function setup_multinode_connectivity {
         localrc_set "$sub_localconf" "IRONIC_VM_NETWORK_BRIDGE" "sub1brbm"
         localrc_set "$sub_localconf" "OVS_PHYSICAL_BRIDGE" "sub1brbm"
         localrc_set "$sub_localconf" "ENABLE_TENANT_TUNNELS" "False"
-        localrc_set "$sub_localconf" "IRONIC_KEY_FILE" "$BASE/new/.ssh/ironic_key"
 
         localrc_set "$localconf" "HOST_TOPOLOGY" "multinode"
         localrc_set "$localconf" "HOST_TOPOLOGY_ROLE" "primary"
         localrc_set "$localconf" "HOST_TOPOLOGY_SUBNODES" "$sub_nodes"
-        localrc_set "$localconf" "IRONIC_KEY_FILE" "$BASE/new/.ssh/ironic_key"
-        localrc_set "$localconf" "GENERIC_SWITCH_KEY_FILE" "$BASE/new/.ssh/ironic_key"
+        localrc_set "$localconf" "GENERIC_SWITCH_KEY_FILE" "$BASE/new/.ssh/id_rsa"
         localrc_set "$localconf" "ENABLE_TENANT_TUNNELS" "False"
     fi
 
@@ -210,16 +208,6 @@ function setup_multinode_connectivity {
         $DSCONF merge_lc /tmp/tmp_sub_localconf "$sub_localconf"
         remote_copy_file /tmp/tmp_sub_localconf $NODE:$devstack_dir/local.conf
     done
-
-    # NOTE(vsaienko) we need to have ssh connection among nodes to manage
-    # VMs from ironic-conductor or setup networking from networking-generic-switch
-    if [[ "$DEVSTACK_GATE_IRONIC" -eq '1' ]]; then
-        echo "Copy ironic key among nodes"
-        # NOTE(vsaienko) setup_ssh() set 700 to all parent directories when they doesn't
-        # exist. Keep ironic keys in other directory than /opt/stack/data to avoid setting
-        # 700 on /opt/stack/data
-        setup_ssh $BASE/new/.ssh ironic_key
-    fi
 }
 
 function setup_networking {
