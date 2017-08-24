@@ -414,9 +414,9 @@ function setup_workspace {
             rsync -a ~/src/*/${PROJECT}/ `basename $PROJECT`
             cd `basename $PROJECT`
             if git_has_branch ${PROJECT} $base_branch; then
-                git_checkout ${PROJECT} $base_branch
+                git checkout $base_branch
             else
-                git_checkout ${PROJECT} master
+                git checkout master
             fi
         done
     else

@@ -2,3 +2,4 @@
   copy:
     dest: /tmp/dg-local.conf
     content: '{{ devstack_local_conf_contents }}'
+  when: devstack_local_conf_contents is defined
