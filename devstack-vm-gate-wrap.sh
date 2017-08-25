@@ -482,6 +482,7 @@ virtualenv /tmp/ansible
                      devstack-tools==$DSTOOLS_VERSION ara
 export ANSIBLE=/tmp/ansible/bin/ansible
 export ANSIBLE_PLAYBOOK=/tmp/ansible/bin/ansible-playbook
+export ANSIBLE_CONFIG="$WORKSPACE/ansible.cfg"
 export DSCONF=/tmp/ansible/bin/dsconf
 
 # Write inventory file with groupings
@@ -496,7 +497,7 @@ for SUBNODE in $SUBNODES ; do
 done
 
 # Write ansible config file
-cat > "$WORKSPACE/ansible.cfg" <<EOF
+cat > $ANSIBLE_CONFIG <<EOF
 [defaults]
 callback_plugins = $WORKSPACE/devstack-gate/playbooks/plugins/callback:/tmp/ansible/lib/python2.7/site-packages/ara/plugins/callbacks
 stdout_callback = devstack
