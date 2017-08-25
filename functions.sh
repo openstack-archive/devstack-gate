@@ -339,7 +339,10 @@ function fix_disk_layout {
             sudo parted ${DEV} --script -- mkpart primary linux-swap 1 ${SWAPSIZE}
             sudo parted ${DEV} --script -- mkpart primary ext2 8192 -1
             sync
-            sudo partprobe
+            # Note: there's an issue with trusty that "partprobe" of
+            # all devices fails on the RAX configdrive, which is a raw
+            # iso9660 partition; hence keep the ${DEV} here for now
+            sudo partprobe ${DEV}
             sudo mkswap ${DEV}1
             sudo mkfs.ext4 ${DEV}2
             sudo swapon ${DEV}1
