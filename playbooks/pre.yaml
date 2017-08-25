@@ -2,4 +2,5 @@
   roles:
     - setup-devstack-source-dirs
     - setup-devstack-log-dir
+    - start-fresh-logging
     - write-devstack-local-conf
