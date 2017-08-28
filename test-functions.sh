@@ -544,7 +544,6 @@ zuul-var-setting2"
         echo "The cake is a lie"
     }
     export -f gate_hook
-    JOB_NAME=test-job
     mkdir $WORKSPACE/logs
 
     # execute call and assert
@@ -566,7 +565,6 @@ zuul-var-setting2"
     unset DEVSTACK_VAR_MULTILINE
     unset ZUUL_VAR
     unset ZUUL_VAR_MULTILINE
-    unset JOB_NAME
     unset gate_hook
 }
 
