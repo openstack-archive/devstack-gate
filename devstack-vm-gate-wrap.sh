@@ -487,13 +487,14 @@ export DSCONF=/tmp/ansible/bin/dsconf
 
 # Write inventory file with groupings
 COUNTER=1
+PRIMARY_NODE=$(cat /etc/nodepool/primary_node_private)
 echo "[primary]" > "$WORKSPACE/inventory"
-echo "localhost ansible_connection=local host_counter=$COUNTER" >> "$WORKSPACE/inventory"
+echo "localhost ansible_connection=local host_counter=$COUNTER nodepool='{\"private_ipv4\": \"$PRIMARY_NODE\"}'" >> "$WORKSPACE/inventory"
 echo "[subnodes]" >> "$WORKSPACE/inventory"
 export SUBNODES=$(cat /etc/nodepool/sub_nodes_private)
 for SUBNODE in $SUBNODES ; do
     let COUNTER=COUNTER+1
-    echo "$SUBNODE host_counter=$COUNTER" >> "$WORKSPACE/inventory"
+    echo "$SUBNODE host_counter=$COUNTER nodepool='{\"private_ipv4\": \"$SUBNODE\"}'" >> "$WORKSPACE/inventory"
 done
 
 # Write ansible config file
