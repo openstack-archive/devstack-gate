@@ -504,17 +504,31 @@ function setup_workspace {
     sudo mkdir -p $DEST
     sudo chown -R $USER:$USER $DEST
 
-    # The vm template update job should cache the git repos
-    # Move them to where we expect:
     echo "Using branch: $base_branch"
-    for PROJECT in $PROJECTS; do
-        cd $DEST
-        if [ -d /opt/git/$PROJECT ]; then
-            # Start with a cached git repo if possible
-            rsync -a /opt/git/${PROJECT}/ `basename $PROJECT`
-        fi
-        setup_project $PROJECT $base_branch
-    done
+    if [ -d ~/src ]; then
+        # This is Zuul v3.
+        for PROJECT in $PROJECTS; do
+            cd $DEST
+            rsync -a ~/src/*/${PROJECT}/ `basename $PROJECT`
+            cd `basename $PROJECT`
+            if git_has_branch ${PROJECT} $base_branch; then
+                git_checkout ${PROJECT} $base_branch
+            else
+                git_checkout ${PROJECT} master
+            fi
+        done
+    else
+        # The vm template update job should cache the git repos
+        # Move them to where we expect:
+        for PROJECT in $PROJECTS; do
+            cd $DEST
+            if [ -d /opt/git/$PROJECT ]; then
+                # Start with a cached git repo if possible
+                rsync -a /opt/git/${PROJECT}/ `basename $PROJECT`
+            fi
+            setup_project $PROJECT $base_branch
+        done
+    fi
     # It's important we are back at DEST for the rest of the script
     cd $DEST
 
