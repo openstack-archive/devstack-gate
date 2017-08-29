@@ -98,12 +98,21 @@ function setup_nova_net_networking {
     # We always setup multinode connectivity to work around an
     # issue with nova net configuring br100 to take over eth0
     # by default.
-    # TODO (clarkb): figure out how to make bridge setup sane with ansible.
-    ovs_vxlan_bridge "br_pub" $primary_node "True" 1 \
-                    $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
-                    $sub_nodes
-    ovs_vxlan_bridge "br_flat" $primary_node "False" 128 \
-                    $sub_nodes
+    $ANSIBLE_PLAYBOOK -f 5 -i "$WORKSPACE/inventory" "$WORKSPACE/devstack-gate/playbooks/ovs_vxlan_bridge.yaml" \
+        -e "bridge_name=br_pub" \
+        -e "host_ip=$primary_node" \
+        -e "set_ips=True" \
+        -e "ovs_starting_offset=1" \
+        -e "pub_addr_prefix=$FLOATING_HOST_PREFIX" \
+        -e "pub_addr_mask=$FLOATING_HOST_MASK" \
+        -e "peer_ips=$sub_nodes"
+
+    $ANSIBLE_PLAYBOOK -f 5 -i "$WORKSPACE/inventory" "$WORKSPACE/devstack-gate/playbooks/ovs_vxlan_bridge.yaml" \
+        -e "bridge_name=br_flat" \
+        -e "host_ip=$primary_node" \
+        -e "set_ips=False" \
+        -e "ovs_starting_offset=128" \
+        -e "peer_ips=$sub_nodes"
     localrc_set $localrc "FLAT_INTERFACE" "br_flat"
     localrc_set $localrc "PUBLIC_INTERFACE" "br_pub"
 }
@@ -149,16 +158,25 @@ function setup_multinode_connectivity {
         # and on the master
         localrc_set $localconf "MULTI_HOST" "True"
     elif [[ "$DEVSTACK_GATE_NET_OVERLAY" -eq '1' ]]; then
-        ovs_vxlan_bridge "br-ex" $primary_node "True" 1 \
-                        $FLOATING_HOST_PREFIX $FLOATING_HOST_MASK \
-                        $sub_nodes
+        $ANSIBLE_PLAYBOOK -f 5 -i "$WORKSPACE/inventory" "$WORKSPACE/devstack-gate/playbooks/ovs_vxlan_bridge.yaml" \
+            -e "bridge_name=br-ex" \
+            -e "host_ip=$primary_node" \
+            -e "set_ips=True" \
+            -e "ovs_starting_offset=1" \
+            -e "pub_addr_prefix=$FLOATING_HOST_PREFIX" \
+            -e "pub_addr_mask=$FLOATING_HOST_MASK" \
+            -e "peer_ips=$sub_nodes"
     fi
 
     if [[ "$DEVSTACK_GATE_IRONIC" -eq '1' ]]; then
         # NOTE(vsaienko) Ironic VMs will be connected to this bridge
         # in order to have access to VMs on another nodes.
-        ovs_vxlan_bridge "br_ironic_vxlan" $primary_node "False" 128 \
-            $sub_nodes
+        $ANSIBLE_PLAYBOOK -f 5 -i "$WORKSPACE/inventory" "$WORKSPACE/devstack-gate/playbooks/ovs_vxlan_bridge.yaml" \
+            -e "bridge_name=br_ironic_vxlan" \
+            -e "host_ip=$primary_node" \
+            -e "set_ips=False" \
+            -e "ovs_starting_offset=128" \
+            -e "peer_ips=$sub_nodes"
 
         localrc_set "$sub_localconf" "HOST_TOPOLOGY" "multinode"
         localrc_set "$sub_localconf" "HOST_TOPOLOGY_ROLE" "subnode"

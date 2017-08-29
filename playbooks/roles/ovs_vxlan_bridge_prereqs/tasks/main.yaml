@@ -1,0 +1,13 @@
+---
+- name: Gather OS specific package and service names
+  include_vars: "{{ ansible_os_family }}.yaml"
+
+- name: Install openvswitch package
+  package:
+    name: "{{ ovs_package }}"
+    state: installed
+
+- name: Start openvswitch service
+  service:
+    name: "{{ ovs_service }}"
+    state: started
