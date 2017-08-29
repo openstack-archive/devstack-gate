@@ -183,8 +183,6 @@ EOF
 
     cat >> $WORKSPACE/logs/reproduce.sh <<EOF
 
-mkdir -p workspace/$JOB_NAME
-cd workspace/$JOB_NAME
 export WORKSPACE=\`pwd\`
 
 if [[ ! -e /usr/zuul-env ]]; then
