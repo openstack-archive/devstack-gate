@@ -41,6 +41,9 @@
             parted ${DEV} --script -- mklabel msdos
             parted ${DEV} --script -- mkpart primary linux-swap 1 ${SWAPSIZE}
             parted ${DEV} --script -- mkpart primary ext2 8192 -1
+            sync
+            # We are only interested in scanning $DEV, not all block devices
+            sudo partprobe ${DEV}
 
             # The device partitions might not show up immediately, make sure
             # they are ready and available for use
