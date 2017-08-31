@@ -6,6 +6,7 @@
   roles:
     - gather_host_info
     - fix_etc_hosts
+    - fix_disk_layout
     - create_base_folder
     - start_fresh_logging
     - setup_stack_user

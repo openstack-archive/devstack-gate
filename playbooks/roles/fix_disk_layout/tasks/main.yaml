@@ -1,0 +1,102 @@
+---
+# TODO: Turn this into proper Ansible
+- name: Fix the disk layout
+  become: yes
+  args:
+    executable: /bin/bash
+    creates: /etc/fixed_disk_layout
+  shell: |
+    set -ex
+    # Don't attempt to fix disk layout more than once
+    touch /etc/fixed_disk_layout
+
+    # Ensure virtual machines from different providers all have at least 8GB of
+    # swap.
+    # Use an ephemeral disk if there is one or create and use a swapfile.
+    # Rackspace also doesn't have enough space on / for two devstack installs,
+    # so we partition the disk and mount it on /opt, syncing the previous
+    # contents of /opt over.
+    SWAPSIZE=8192
+    swapcurrent=$(( $(grep SwapTotal /proc/meminfo | awk '{ print $2; }') / 1024 ))
+
+    if [[ $swapcurrent -lt $SWAPSIZE ]]; then
+        if [ -b /dev/xvde ]; then
+            DEV='/dev/xvde'
+        else
+            EPHEMERAL_DEV=$(blkid -L ephemeral0 || true)
+            if [ -n "$EPHEMERAL_DEV" -a -b "$EPHEMERAL_DEV" ]; then
+                DEV=$EPHEMERAL_DEV
+            fi
+        fi
+        if [ -n "$DEV" ]; then
+            # If an ephemeral device is available, use it
+            swap=${DEV}1
+            lvmvol=${DEV}2
+            optdev=${DEV}3
+            if mount | grep ${DEV} > /dev/null; then
+                echo "*** ${DEV} appears to already be mounted"
+                echo "*** ${DEV} unmounting and reformating"
+                umount ${DEV}
+            fi
+            parted ${DEV} --script -- mklabel msdos
+            parted ${DEV} --script -- mkpart primary linux-swap 1 ${SWAPSIZE}
+            parted ${DEV} --script -- mkpart primary ext2 8192 -1
+
+            # The device partitions might not show up immediately, make sure
+            # they are ready and available for use
+            udevadm settle --timeout=0 || echo "Block device not ready yet. Waiting for up to 10 seconds for it to be ready"
+            udevadm settle --timeout=10 --exit-if-exists=${DEV}1
+            udevadm settle --timeout=10 --exit-if-exists=${DEV}2
+
+            mkswap ${DEV}1
+            mkfs.ext4 ${DEV}2
+            swapon ${DEV}1
+            mount ${DEV}2 /mnt
+            find /opt/ -mindepth 1 -maxdepth 1 -exec mv {} /mnt/ \;
+            umount /mnt
+            mount ${DEV}2 /opt
+
+            # Sanity check
+            grep -q ${DEV}1 /proc/swaps || exit 1
+            grep -q ${DEV}2 /proc/mounts || exit 1
+        else
+            # If no ephemeral devices are available, use root filesystem
+            # Don't use sparse device to avoid wedging when disk space and
+            # memory are both unavailable.
+            swapfile='/root/swapfile'
+            touch ${swapfile}
+            swapdiff=$(( $SWAPSIZE - $swapcurrent ))
+
+            if df -T ${swapfile} | grep -q ext ; then
+                fallocate -l ${swapdiff}M ${swapfile}
+            else
+                # Cannot fallocate on filesystems like XFS
+                dd if=/dev/zero of=${swapfile} bs=1M count=${swapdiff}
+            fi
+            chmod 600 ${swapfile}
+            mkswap ${swapfile}
+            swapon ${swapfile}
+
+            # Sanity check
+            grep -q ${swapfile} /proc/swaps || exit 1
+        fi
+    fi
+
+    # dump vm settings for reference (Ubuntu 12 era procps can get
+    # confused with certain proc trigger nodes that are write-only and
+    # return a EPERM; ignore this)
+    sysctl vm || true
+
+    # ensure a standard level of swappiness.  Some platforms
+    # (rax+centos7) come with swappiness of 0 (presumably because the
+    # vm doesn't come with swap setup ... but we just did that above),
+    # which depending on the kernel version can lead to the OOM killer
+    # kicking in on some processes despite swap being available;
+    # particularly things like mysql which have very high ratio of
+    # anonymous-memory to file-backed mappings.
+
+    # make sure reload of sysctl doesn't reset this
+    sed -i '/vm.swappiness/d' /etc/sysctl.conf
+    # This sets swappiness low; we really don't want to be relying on
+    # cloud I/O based swap during our runs
+    sysctl -w vm.swappiness=30
