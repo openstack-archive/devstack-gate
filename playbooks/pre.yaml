@@ -1,5 +1,6 @@
 - hosts: all
   roles:
+    - configure-swap
     - setup-stack-user
     - setup-tempest-user
     - setup-devstack-source-dirs
