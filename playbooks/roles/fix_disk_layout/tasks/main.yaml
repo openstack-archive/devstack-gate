@@ -38,9 +38,10 @@
                 echo "*** ${DEV} unmounting and reformating"
                 umount ${DEV}
             fi
-            parted ${DEV} --script -- mklabel msdos
-            parted ${DEV} --script -- mkpart primary linux-swap 1 ${SWAPSIZE}
-            parted ${DEV} --script -- mkpart primary ext2 8192 -1
+            parted ${DEV} --script -- \
+                mklabel msdos \
+                mkpart primary linux-swap 1 ${SWAPSIZE} \
+                mkpart primary ext2 8192 -1
             sync
             # We are only interested in scanning $DEV, not all block devices
             sudo partprobe ${DEV}
