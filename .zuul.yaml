@@ -10,19 +10,45 @@
     description: Base devstack job.
     required-projects:
       - openstack-dev/devstack
+      - openstack/requirements
+      - openstack/nova
+      - openstack/keystone
+      - openstack/glance
+      - openstack/cinder
+      - openstack/neutron
+    timeout: 7200
+    vars:
+      devstack_localrc:
+        DATABASE_PASSWORD: secretdatabase
+        RABBIT_PASSWORD: secretrabbit
+        ADMIN_PASSWORD: secretadmin
+        SERVICE_PASSWORD: secretservice
+        NETWORK_GATEWAY: 10.1.0.1
+        Q_USE_DEBUG_COMMAND: True
+        FIXED_RANGE: 10.1.0.0/20
+        IPV4_ADDRS_SAFE_TO_USE: 10.1.0.0/20
+        FLOATING_RANGE: 172.24.5.0/24
+        PUBLIC_NETWORK_GATEWAY: 172.24.5.1
+        FLOATING_HOST_PREFIX: 172.24.4
+        FLOATING_HOST_MASK: 23
+        SWIFT_REPLICAS: 1
+        SWIFT_START_ALL_SERVICES: False
+        LOG_COLOR: False
+        VERBOSE: True
+        NETWORK_GATEWAY: 10.1.0.1
+        NOVNC_FROM_PACKAGE: True
+        ERROR_ON_CLONE: True
+        # NOTE(dims): etcd 3.x is not available in debian/ubuntu
+        # etc. As a stop gap measure, devstack uses wget to download
+        # from the location below for all the CI jobs.
+        ETCD_DOWNLOAD_URL: "http://tarballs.openstack.org/etcd/"
+      devstack_services:
+        horizon: False
+        tempest: False
     pre-run:
       playbooks/pre
     post-run:
       playbooks/post
-
-- job:
-    name: devstack-lxc
-    parent: devstack
-    description: A job which sets something in local.conf
-    vars:
-      devstack_localrc:
-        LIBVIRT_TYPE: lxc
-        NOVA_BACKEND: LVM
 
 - job:
     name: devstack-legacy
@@ -106,7 +132,7 @@
     name: openstack-infra/devstack-gate
     check:
       jobs:
-        - devstack-lxc:
+        - devstack:
             files:
               - ^playbooks/pre
               - ^playbooks/post

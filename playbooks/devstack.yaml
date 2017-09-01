@@ -1,5 +1,3 @@
-# A temporary test playbook to aid in job construction.
 - hosts: all
-  tasks:
-    - command: ls /opt/stack
-    - command: cat /opt/stack/devstack/local.conf
+  roles:
+    - run-devstack

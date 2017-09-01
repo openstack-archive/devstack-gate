@@ -27,7 +27,7 @@ class VarGraph(object):
         for k, v in vars.items():
             self._varnames.add(k)
         for k, v in vars.items():
-            self._addVar(k, v)
+            self._addVar(k, str(v))
 
     bash_var_re = re.compile(r'\$\{?(\w+)')
     def getDependencies(self, value):
