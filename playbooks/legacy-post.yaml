@@ -1,0 +1,13 @@
+- hosts: all
+  tasks:
+    - name: Collect legacy devstack logs
+      synchronize:
+        # The remote dir logs/ is a symlink and rsync is running with
+        # --safe-symlinks so it will be ignored unless we dereference
+        # it by appending the trailing / to src.  To ensure that the
+        # devstack logs end up in the logs/ subdirectory, add it to
+        # the dest explicitly.  Yes, that means on disk it's
+        # .../work/logs/logs/.
+        dest: "{{ zuul.executor.log_root }}/logs/"
+        mode: pull
+        src: "logs/"
