@@ -2,7 +2,7 @@
 # This dynamically configures a unique offset for this peer
 - name: Set offset
   set_fact:
-    offset: "{{ ovs_starting_offset | int + 1 + groups['all'].index(inventory_hostname) }}"
+    offset: "{{ ovs_starting_offset | int + 1 + groups['all'].index(inventory_hostname) }}"
 
 - name: Add additional vni offset
   set_fact:
