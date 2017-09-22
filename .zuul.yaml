@@ -33,6 +33,7 @@
         FLOATING_HOST_MASK: 23
         SWIFT_REPLICAS: 1
         SWIFT_START_ALL_SERVICES: False
+        LOGFILE: /opt/stack/logs/devstacklog.txt
         LOG_COLOR: False
         VERBOSE: True
         NETWORK_GATEWAY: 10.1.0.1
