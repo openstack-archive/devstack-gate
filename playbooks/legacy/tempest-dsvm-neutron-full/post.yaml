@@ -9,7 +9,7 @@
         copy_links: true
         verify_host: true
         rsync_opts:
-          - --include="/logs/**"
-          - --include="*/"
-          - --exclude="*"
-          - --prune-empty-dirs
+          - '--include=/logs/**'
+          - '--include=*/'
+          - '--exclude=*'
+          - '--prune-empty-dirs'
