@@ -3,6 +3,16 @@
     name: stack
   become: yes
 
+# NOTE(andreaf) Create a user home_dir is not safe via
+# the user module since it will fail if the containing
+# folder does not exists. If the folder does exists and
+# it's empty, the skeleton is setup and ownership set.
+- name: Create the stack user home folder
+  file:
+    path: '{{ devstack_stack_home_dir }}'
+    state: directory
+  become: yes
+
 - name: Create stack user
   user:
     name: stack
