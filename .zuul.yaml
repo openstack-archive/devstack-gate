@@ -52,82 +52,17 @@
       playbooks/post
 
 - job:
-    name: devstack-legacy
-    parent: base-test
-    description: |
-      Legacy devstack base job
-
-      This job runs devstack-gate with as few changes as possible and
-      may be used by jobs which have been automatically converted as
-      part of the migration to Zuul v3.
-
-    nodes: devstack-single-node
-    required-projects:
-      - openstack-dev/devstack
-      - openstack-infra/devstack-gate
-      - openstack-infra/tripleo-ci
-      - openstack/ceilometer
-      - openstack/ceilometermiddleware
-      - openstack/cinder
-      - openstack/django_openstack_auth
-      - openstack/glance
-      - openstack/glance_store
-      - openstack/heat
-      - openstack/heat-cfntools
-      - openstack/heat-templates
-      - openstack/horizon
-      - openstack/keystone
-      - openstack/keystoneauth
-      - openstack/keystonemiddleware
-      - openstack/manila
-      - openstack/manila-ui
-      - openstack/neutron
-      - openstack/neutron-fwaas
-      - openstack/neutron-lbaas
-      - openstack/neutron-vpnaas
-      - openstack/nova
-      - openstack/octavia
-      - openstack/os-apply-config
-      - openstack/os-brick
-      - openstack/os-client-config
-      - openstack/os-collect-config
-      - openstack/os-net-config
-      - openstack/os-refresh-config
-      - openstack/osc-lib
-      - openstack/requirements
-      - openstack/swift
-      - openstack/tempest
-      - openstack/tempest-lib
-      - openstack/tripleo-heat-templates
-      - openstack/tripleo-image-elements
-      - openstack/tripleo-incubator
-      - openstack/zaqar
-    timeout: 7200
-    pre-run:
-      playbooks/legacy-pre
-    post-run:
-      playbooks/legacy-post
-
-- job:
-    name: devstack-legacy-tempest-dsvm-neutron-full
-    parent: devstack-legacy
+    name: legacy-tempest-dsvm-neutron-full
+    parent: legacy-dsvm-base
+    run: playbooks/legacy/tempest-dsvm-neutron-full/run
+    post-run: playbooks/legacy/tempest-dsvm-neutron-full/post
+    timeout: 10800
     vars:
-      devstack_local_conf_contents: |
-        [[local|localrc]]
-        ENABLE_FILE_INJECTION=True
-      devstack_legacy_shell: |
-        #!/bin/bash -xe
-        export PYTHONUNBUFFERED=true
-        export DEVSTACK_GATE_TEMPEST=1
-        export DEVSTACK_GATE_TEMPEST_FULL=1
-        export DEVSTACK_GATE_NEUTRON=1
-        export DEVSTACK_GATE_TLSPROXY=1
-        export BRANCH_OVERRIDE=default
-        if [ "$BRANCH_OVERRIDE" != "default" ] ; then
-            export OVERRIDE_ZUUL_BRANCH=$BRANCH_OVERRIDE
-        fi
-        cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
-        ./safe-devstack-vm-gate-wrap.sh
+      BUILD_TIMEOUT: '10800000'
+    required-projects:
+      - openstack/neutron
+      - openstack/tempest
+      - openstack-infra/devstack-gate
 
 - project:
     name: openstack-infra/devstack-gate
@@ -139,8 +74,6 @@
               - ^playbooks/post
               - ^playbooks/devstack
               - ^roles/
-        - devstack-legacy-tempest-dsvm-neutron-full:
+        - legacy-tempest-dsvm-neutron-full:
             files:
-              - ^playbooks/legacy-pre
-              - ^playbooks/legacy-post
-              - ^playbooks/devstack-legacy
+              - ^playbooks/legacy/tempest-dsvm-neutron-full/.*
