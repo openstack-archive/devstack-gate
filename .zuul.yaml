@@ -51,19 +51,6 @@
     post-run:
       playbooks/post
 
-- job:
-    name: legacy-tempest-dsvm-neutron-full
-    parent: legacy-dsvm-base
-    run: playbooks/legacy/tempest-dsvm-neutron-full/run
-    post-run: playbooks/legacy/tempest-dsvm-neutron-full/post
-    timeout: 10800
-    vars:
-      BUILD_TIMEOUT: '10800000'
-    required-projects:
-      - openstack/neutron
-      - openstack/tempest
-      - openstack-infra/devstack-gate
-
 - project:
     name: openstack-infra/devstack-gate
     check:
@@ -74,6 +61,3 @@
               - ^playbooks/post
               - ^playbooks/devstack
               - ^roles/
-        - legacy-tempest-dsvm-neutron-full:
-            files:
-              - ^playbooks/legacy/tempest-dsvm-neutron-full/.*
