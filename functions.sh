@@ -413,7 +413,7 @@ function setup_workspace {
             cd $DEST
             rsync -a ~/src/*/${PROJECT}/ `basename $PROJECT`
             cd `basename $PROJECT`
-            if git_has_branch ${PROJECT} $base_branch; then
+            if git branch -a | grep "$base_branch" > /dev/null ; then
                 git checkout $base_branch
             else
                 git checkout master
