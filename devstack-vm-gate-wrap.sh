@@ -476,6 +476,8 @@ virtualenv /tmp/ansible
 # Explicitly install pbr first as this will use pip rathat than
 # easy_install. Hope is this is generally more reliable.
 /tmp/ansible/bin/pip install pbr
+# Workaround for cffi-1.11.1 being released without wheels
+/tmp/ansible/bin/pip install cffi==1.11.0
 /tmp/ansible/bin/pip install ansible==$ANSIBLE_VERSION \
                      devstack-tools==$DSTOOLS_VERSION ara
 export ANSIBLE=/tmp/ansible/bin/ansible
