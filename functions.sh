@@ -393,7 +393,11 @@ function setup_workspace {
     local base_branch=$1
     local DEST=$2
     local xtrace=$(set +o | grep xtrace)
-    local cache_dir=$BASE/cache/files/
+
+    # Note on infra images, this is setup by
+    # project-config:nodepool/elements/cache-devstack
+    # during image builds.
+    local cache_dir=/opt/cache/files/
 
     # Enabled detailed logging, since output of this function is redirected
     set -o xtrace
@@ -434,19 +438,15 @@ function setup_workspace {
     # It's important we are back at DEST for the rest of the script
     cd $DEST
 
-    # Populate the cache for devstack (this will typically be vm images)
-    #
-    # If it's still in home, move it to /opt, this will make sure we
-    # have the artifacts in the same filesystem as devstack.
-    if [ -d ~/cache/files ]; then
-        sudo mkdir -p $cache_dir
-        sudo chown -R $USER:$USER $cache_dir
-        find ~/cache/files/ -mindepth 1 -maxdepth 1 -exec mv {} $cache_dir \;
-        rm -rf ~/cache/files/
-    fi
-
+    # Copy the cache files to where devstack expects.
+    # Use hardlinks to save space.
+    # Protect with if [ -d $cache_dir ] in case there are 3rd parties using
+    # devstack-gate without cache dirs
     if [ -d $cache_dir ]; then
-        # copy them to where devstack expects with hardlinks to save space
+        # We're making hardlinks - so we need to be able to write to the files
+        # in the cache dir.
+        sudo chown -R $USER:$USER $cache_dir
+
         find $cache_dir -mindepth 1 -maxdepth 1 -exec cp -l {} $DEST/devstack/files/ \;
     fi
 
