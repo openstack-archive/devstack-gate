@@ -1,4 +1,0 @@
-- hosts: all
-  roles:
-    - export-devstack-journal
-    - fetch-devstack-log-dir

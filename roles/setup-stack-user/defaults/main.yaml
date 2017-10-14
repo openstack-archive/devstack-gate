@@ -1,2 +1,0 @@
-devstack_base_dir: /opt/stack
-devstack_stack_home_dir: '{{ devstack_base_dir }}'

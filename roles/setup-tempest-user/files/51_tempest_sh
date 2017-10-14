@@ -1,3 +1,0 @@
-tempest ALL=(root) NOPASSWD:/sbin/ip
-tempest ALL=(root) NOPASSWD:/sbin/iptables
-tempest ALL=(root) NOPASSWD:/usr/bin/ovsdb-client
