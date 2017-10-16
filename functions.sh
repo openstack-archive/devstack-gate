@@ -226,7 +226,7 @@ function git_fetch_at_ref {
     fi
 }
 
-function git_checkout {
+function git_checkout_branch {
     local project=$1
     local branch=$2
     local reset_branch=$branch
@@ -243,11 +243,34 @@ function git_checkout {
     fi
 }
 
+function git_checkout_tag {
+    local project=$1
+    local tag=$2
+
+    git checkout $tag
+    git reset --hard $tag
+    if ! git clean -x -f -d -q ; then
+        sleep 1
+        git clean -x -f -d -q
+    fi
+}
+
 function git_has_branch {
     local project=$1 # Project is here for test mocks
     local branch=$2
 
     if git branch -a |grep remotes/origin/$branch>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+function git_has_tag {
+    local project=$1 # Project is here for test mocks
+    local tag=$2
+
+    if git tag -l |grep $tag>/dev/null; then
         return 0
     else
         return 1
@@ -379,12 +402,16 @@ function setup_project {
         git_fetch_at_ref $project $FALLBACK_ZUUL_REF; then
 
         # It's there, so check it out.
-        git_checkout $project FETCH_HEAD
+        git_checkout_branch $project FETCH_HEAD
     else
         if git_has_branch $project $branch; then
-            git_checkout $project $branch
+            git_checkout_branch $project $branch
+        # NOTE(sambetts) If there is no stable/* branch try to checkout the
+        # *-eol tag for that version
+        elif [[ "$branch" == stable/* ]] && git_has_tag $project "${branch#stable/}-eol"; then
+            git_checkout_tag $project $branch
         else
-            git_checkout $project master
+            git_checkout_branch $project master
         fi
     fi
 }
@@ -422,8 +449,8 @@ function setup_workspace {
             elif [[ "$base_branch" == stable/* ]]; then
                 # Look for an eol tag for the stable branch.
                 eol_tag=${base_branch#stable/}-eol
-                if [ $(git tag -l $eol_tag) ]; then
-                    git checkout -q $eol_tag
+                if git_has_tag $PROJECT $eol_tag; then
+                    git_checkout_tag $PROJECT $eol_tag
                 fi
             else
                 git checkout master

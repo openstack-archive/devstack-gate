@@ -25,7 +25,7 @@ LOCAL_AAR_VARS="TEST_GIT_CHECKOUTS TEST_ZUUL_REFS GIT_CLONE_AND_CD_ARG"
 
 # Mock out the checkout function since the refs we're checking out do
 # not exist.
-function git_checkout {
+function git_checkout_branch {
     local project=$1
     local branch=$2
 
