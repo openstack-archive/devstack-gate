@@ -404,10 +404,6 @@ export DEVSTACK_GATE_REMOVE_STACK_SUDO=${DEVSTACK_GATE_REMOVE_STACK_SUDO:-1}
 # dependency-only installation.
 export DEVSTACK_GATE_UNSTACK=${DEVSTACK_GATE_UNSTACK:-0}
 
-# Set Ceilometer backend to override the default one. It could be mysql,
-# postgresql, mongodb.
-export DEVSTACK_GATE_CEILOMETER_BACKEND=${DEVSTACK_GATE_CEILOMETER_BACKEND:-mysql}
-
 # The topology of the system determinates the service distribution
 # among the nodes.
 # aio: `all in one` just only one node used

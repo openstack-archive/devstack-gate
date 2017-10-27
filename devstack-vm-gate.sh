@@ -402,7 +402,6 @@ function setup_localrc {
     localrc_set "$localrc_file" "CINDER_PERIODIC_INTERVAL" "10"
     # TODO(mriedem): Remove OS_NO_CACHE after newton-eol for devstack.
     localrc_set "$localrc_file" "export OS_NO_CACHE" "True"
-    localrc_set "$localrc_file" "CEILOMETER_BACKEND" "$DEVSTACK_GATE_CEILOMETER_BACKEND"
     localrc_set "$localrc_file" "LIBS_FROM_GIT" "$DEVSTACK_PROJECT_FROM_GIT"
 
     # etcd 3.x is not available in debian/ubuntu etc. As a stop gap measure, devstack uses wget to download
