@@ -419,6 +419,12 @@ function setup_workspace {
             cd `basename $PROJECT`
             if git branch -a | grep "$base_branch" > /dev/null ; then
                 git checkout $base_branch
+            elif [[ "$base_branch" == stable/* ]]; then
+                # Look for an eol tag for the stable branch.
+                eol_tag=${base_branch#stable/}-eol
+                if [ $(git tag -l $eol_tag) ]; then
+                    git checkout -q $eol_tag
+                fi
             else
                 git checkout master
             fi
