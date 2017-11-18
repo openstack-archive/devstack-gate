@@ -509,7 +509,9 @@ function process_stackviz {
     local project=$1
     local path_prefix=${2:-new}
 
-    local stackviz_tarball=$BASE/cache/files/stackviz-latest.tar.gz
+    # NOTE: the stackviz tarball is precached on images by the cache-devstack
+    # element. The cache path is fixed: /opt/cache/files
+    local stackviz_tarball=/opt/cache/files/stackviz-latest.tar.gz
     if [ ! -f $stackviz_tarball ]; then
         echo "Unable to locate cached stackviz tarball, skipping."
         return
