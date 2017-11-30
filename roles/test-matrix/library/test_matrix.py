@@ -121,7 +121,7 @@ of environmental feature definitions and flags.
 """
     parser = argparse.ArgumentParser(description=usage)
     parser.add_argument('-f', '--features',
-                        default='features.yaml',
+                        default='roles/test-matrix/files/features.yaml',
                         help="Yaml file describing the features matrix")
     parser.add_argument('-b', '--branch',
                         default="master",
@@ -133,6 +133,15 @@ of environmental feature definitions and flags.
                         default='primary',
                         help="What role this node will have",
                         choices=['primary', 'subnode'])
+    parser.add_argument('-a', '--ansible',
+                        dest='ansible',
+                        help="Behave as an Ansible Module",
+                        action='store_true')
+    parser.add_argument('-n', '--not-ansible',
+                        dest='ansible',
+                        help="Behave as python CLI",
+                        action='store_false')
+    parser.set_defaults(ansible=True)
     return parser.parse_args()
 
 
@@ -140,19 +149,47 @@ def main():
     global GRID
     global ALLOWED_BRANCHES
     opts = get_opts()
-    GRID = parse_features(opts.features)
-    ALLOWED_BRANCHES = GRID['branches']['allowed']
-    branch = normalize_branch(opts.branch)
-    role = opts.role
+    if opts.ansible:
+        ansible_module = get_ansible_module()
+        features = ansible_module.params['features']
+        branch = ansible_module.params['branch']
+        role = ansible_module.params['role']
+        configs = ansible_module.params['configs']
+    else:
+        features = opts.features
+        branch = opts.branch
+        role = opts.role
+        configs = configs_from_env()
 
-    features = calc_features(branch, configs_from_env())
+    GRID = parse_features(features)
+    ALLOWED_BRANCHES = GRID['branches']['allowed']
+    branch = normalize_branch(branch)
+
+    features = calc_features(branch, configs)
     LOG.debug("Features: %s " % features)
 
     services = calc_services(branch, features, role)
     LOG.debug("Services: %s " % services)
 
-    if opts.mode == "services":
-        print(",".join(services))
+    if opts.ansible:
+        ansible_module.exit_json(changed='True', services=services)
+    else:
+        if opts.mode == "services":
+            print(",".join(services))
+
+
+def get_ansible_module():
+
+    from ansible.module_utils.basic import AnsibleModule
+
+    return AnsibleModule(
+        argument_spec=dict(
+            features=dict(type='str'),
+            branch=dict(type='str'),
+            role=dict(type='str'),
+            configs=dict(type='list')
+        )
+    )
 
 
 if __name__ == "__main__":

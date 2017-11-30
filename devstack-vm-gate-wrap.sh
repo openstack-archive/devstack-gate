@@ -149,7 +149,7 @@ export BASE=/opt/stack
 export ZUUL_URL=${ZUUL_URL:-http://zuul.openstack.org/p}
 
 # The feature matrix to select devstack-gate components
-export DEVSTACK_GATE_FEATURE_MATRIX=${DEVSTACK_GATE_FEATURE_MATRIX:-features.yaml}
+export DEVSTACK_GATE_FEATURE_MATRIX=${DEVSTACK_GATE_FEATURE_MATRIX:-roles/test-matrix/files/features.yaml}
 
 # Set to 1 to install, configure and enable the Tempest test suite; more flags may be
 # required to be set to customize the test run, e.g. DEVSTACK_GATE_TEMPEST_STRESS=1

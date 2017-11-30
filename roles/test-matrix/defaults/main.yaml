@@ -1,0 +1,4 @@
+test_matrix_features: files/features.yaml
+test_matrix_branch: "{{ zuul.override_checkout | default(zuul.branch) }}"
+test_matrix_role: primary
+test_matrix_configs: []

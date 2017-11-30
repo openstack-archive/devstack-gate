@@ -3,3 +3,11 @@
     nodes:
       - name: primary
         label: ubuntu-xenial
+
+- project:
+    name: openstack-infra/devstack-gate
+    check:
+      jobs:
+        - devstack:
+            files:
+              - ^roles/

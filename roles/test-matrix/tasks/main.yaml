@@ -1,0 +1,37 @@
+- name: Deploy then features matrix and d-g bash functions
+  copy:
+    src: "{{ test_matrix_features }}"
+    dest: "{{ ansible_user_dir }}"
+
+- name: Ensure virtualenv is installed
+  become: true
+  package:
+    name: virtualenv
+    state: present
+  when: ansible_os_family != 'Darwin'
+
+- name: Install PyYAML to parse the test matrix
+  pip:
+    name: PyYAML
+    virtualenv: "/tmp/.test_matrix_venv"
+
+- name: Append neutron to configs for stable/ocata+
+  set_fact:
+    test_matrix_configs: "{{ test_matrix_configs }} + [ 'neutron' ]"
+  when:
+    - '"neutron" not in test_matrix_configs'
+    - test_matrix_branch | match("^(stable/[o-z].*|master)$")
+
+- name: Run the test matrix
+  test_matrix:
+    features: "{{ ansible_user_dir }}/{{ test_matrix_features | basename }}"
+    branch: "{{ test_matrix_branch }}"
+    role: "{{ test_matrix_role }}"
+    configs: "{{ test_matrix_configs }}"
+  vars:
+    ansible_python_interpreter: "/tmp/.test_matrix_venv/bin/python"
+  register: test_matrix_result
+
+- name: Set the enabled_services fact
+  set_fact:
+    enabled_services: "{{ test_matrix_result.services }}"
