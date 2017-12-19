@@ -16,3 +16,5 @@
         - tempest-full-queens-py3:
             branches: ^(?!driverfixes/).*$
             voting: false
+        - neutron-tempest-plugin-api:
+            voting: false
