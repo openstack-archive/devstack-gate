@@ -404,12 +404,13 @@ function setup_project {
         # It's there, so check it out.
         git_checkout_branch $project FETCH_HEAD
     else
+        eol_tag=${base_branch#stable/}-eol
         if git_has_branch $project $branch; then
             git_checkout_branch $project $branch
         # NOTE(sambetts) If there is no stable/* branch try to checkout the
         # *-eol tag for that version
-        elif [[ "$branch" == stable/* ]] && git_has_tag $project "${branch#stable/}-eol"; then
-            git_checkout_tag $project $branch
+        elif [[ "$branch" == stable/* ]] && git_has_tag $project $eol_tag; then
+            git_checkout_tag $project $eol_tag
         else
             git_checkout_branch $project master
         fi
