@@ -4,21 +4,6 @@
       - name: primary
         label: ubuntu-xenial
 
-- job:
-    name: devstack-gate-tox-run-tests
-    parent: openstack-tox
-    description: |
-      Run tests using ``run-tests`` environment.
-    vars:
-      tox_envlist: run-tests
-
-- job:
-    name: devstack-gate-tox-py3-run-tests
-    parent: openstack-tox
-    description: |
-      Run tests using ``py3-run-tests`` environment.
-    vars:
-      tox_envlist: py3-run-tests
 
 - project:
     name: openstack-infra/devstack-gate
@@ -27,13 +12,3 @@
         - devstack:
             files:
               - ^roles/
-        - openstack-tox-py27
-        - openstack-tox-py35
-        - devstack-gate-tox-run-tests
-        - devstack-gate-tox-py3-run-tests
-    gate:
-      jobs:
-        - openstack-tox-py27
-        - openstack-tox-py35
-        - devstack-gate-tox-run-tests
-        - devstack-gate-tox-py3-run-tests
