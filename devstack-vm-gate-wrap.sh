@@ -83,7 +83,6 @@ PROJECTS="openstack/nova $PROJECTS"
 PROJECTS="openstack/requirements $PROJECTS"
 PROJECTS="openstack/swift $PROJECTS"
 PROJECTS="openstack/tempest $PROJECTS"
-PROJECTS="openstack/tempest-lib $PROJECTS"
 # Everything below this line in the PROJECTS list is for non
 # default devstack runs. Overtime we should remove items from
 # below and add them explicitly to the jobs that need them. The
