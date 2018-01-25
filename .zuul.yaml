@@ -6,7 +6,6 @@
 
 
 - project:
-    name: openstack-infra/devstack-gate
     check:
       jobs:
         - devstack:
