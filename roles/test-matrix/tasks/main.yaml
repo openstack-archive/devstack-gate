@@ -3,12 +3,18 @@
     src: "{{ test_matrix_features }}"
     dest: "{{ ansible_user_dir }}"
 
+- name: Check for virtualenv
+  command: which virtualenv
+  changed_when: false
+  failed_when: false
+  register: virtualenv_available
+
 - name: Ensure virtualenv is installed
-  become: true
-  package:
-    name: virtualenv
-    state: present
-  when: ansible_os_family != 'Darwin'
+  fail:
+    msg: "Please ensure virtualenv is available!"
+  when:
+    - virtualenv_available | failed
+    - ansible_os_family != 'Darwin'
 
 - name: Install PyYAML to parse the test matrix
   pip:
