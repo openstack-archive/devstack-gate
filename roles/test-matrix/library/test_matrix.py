@@ -172,7 +172,7 @@ def main():
     LOG.debug("Services: %s " % services)
 
     if opts.ansible:
-        ansible_module.exit_json(changed='True', services=services)
+        ansible_module.exit_json(changed=True, services=services)
     else:
         if opts.mode == "services":
             print(",".join(services))
