@@ -4,10 +4,15 @@
       - name: primary
         label: ubuntu-xenial
 
-
 - project:
     check:
       jobs:
         - devstack:
             files:
               - ^roles/
+        - tempest-full-queens:
+            branches: ^(?!driverfixes/).*$
+            voting: false
+        - tempest-full-queens-py3:
+            branches: ^(?!driverfixes/).*$
+            voting: false
