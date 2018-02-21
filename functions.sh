@@ -572,13 +572,17 @@ function process_stackviz {
     cp -r $stackviz_path/share/stackviz-html $log_path/stackviz
 
     pushd $project_path
+    TEST_CMD="testr"
+    if [ -d ".stestr" ]; then
+        TEST_CMD="stestr"
+    fi
     if [ -f $log_path/dstat-csv_log.txt ]; then
-        sudo testr last --subunit | $stackviz_path/bin/stackviz-export \
+        sudo $TEST_CMD last --subunit | $stackviz_path/bin/stackviz-export \
             --dstat $log_path/dstat-csv_log.txt \
             --env --stdin \
             $log_path/stackviz/data
     else
-        sudo testr last --subunit | $stackviz_path/bin/stackviz-export \
+        sudo $TEST_CMD last --subunit | $stackviz_path/bin/stackviz-export \
             --env --stdin \
             $log_path/stackviz/data
     fi
