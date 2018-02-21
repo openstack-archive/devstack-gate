@@ -501,7 +501,6 @@ function process_testr_artifacts {
     local path_prefix=${2:-new}
 
     local project_path=$BASE/$path_prefix/$project
-    local repo_path=$project_path/.testrepository
     local log_path=$BASE/logs
     if [[ "$path_prefix" != "new" ]]; then
         log_path=$BASE/logs/$path_prefix
@@ -510,17 +509,32 @@ function process_testr_artifacts {
     if  [[ -f $BASE/devstack.subunit ]]; then
         sudo cp $BASE/devstack.subunit $log_path/testrepository.subunit
     fi
+    pushd $project_path
+    if [ -d ".stestr" ] ; then
+        # Check for an interrupted run first because 0 will always exist
+        if [ -f .stestr/tmp* ]; then
+            # If testr timed out, collect temp file from testr
+            sudo cat .stestr/tmp* >> $WORKSPACE/tempest.subunit
+            archive_test_artifact $WORKSPACE/tempest.subunit
+        elif [ -f ".stestr/0" ] ; then
+            sudo stestr last --subunit > $WORKSPACE/tempest.subunit
+        fi
+    else
+        if [ ! -d ".testrepository" ] ; then
+            return
+        fi
 
-    # Check for an interrupted run first because 0 will always exist
-    if [ -f $repo_path/tmp* ]; then
-        # If testr timed out, collect temp file from testr
-        sudo cat $repo_path/tmp* >> $WORKSPACE/tempest.subunit
-        archive_test_artifact $WORKSPACE/tempest.subunit
-    elif [ -f $repo_path/0 ]; then
-        pushd $project_path
-        sudo testr last --subunit > $WORKSPACE/tempest.subunit
-        popd
+        # Check for an interrupted run first because 0 will always exist
+        if [ -f .testrepository/tmp* ]; then
+            # If testr timed out, collect temp file from testr
+            sudo cat .testrepository/tmp* >> $WORKSPACE/tempest.subunit
+            archive_test_artifact $WORKSPACE/tempest.subunit
+        elif [ -f ".testrepository/0" ] ; then
+            sudo testr last --subunit > $WORKSPACE/tempest.subunit
+        fi
     fi
+    popd
+
     if [[ -f $log_path/testrepository.subunit ]] ; then
         if [[ -f $WORKSPACE/tempest.subunit ]] ; then
             sudo cat $WORKSPACE/tempest.subunit \
