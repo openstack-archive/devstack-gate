@@ -10,6 +10,9 @@
         - devstack:
             files:
               - ^roles/
+        - tempest-full-pike:
+            branches: ^(?!driverfixes/).*$
+            voting: false
         - tempest-full-queens:
             branches: ^(?!driverfixes/).*$
             voting: false
