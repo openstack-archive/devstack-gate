@@ -406,10 +406,6 @@ function setup_localrc {
     localrc_set "$localrc_file" "export OS_NO_CACHE" "True"
     localrc_set "$localrc_file" "LIBS_FROM_GIT" "$DEVSTACK_PROJECT_FROM_GIT"
 
-    # etcd 3.x is not available in debian/ubuntu etc. As a stop gap measure, devstack uses wget to download
-    # from the location below for all the CI jobs.
-    localrc_set "$localrc_file" "ETCD_DOWNLOAD_URL" "http://tarballs.openstack.org/etcd/"
-
     # set this until all testing platforms have libvirt >= 1.2.11
     # see bug #1501558
     localrc_set "$localrc_file" "EBTABLES_RACE_FIX" "True"
