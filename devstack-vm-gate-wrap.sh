@@ -117,7 +117,6 @@ if [[ "$DEVSTACK_GATE_SAHARA" -eq "1" ]] ; then
 fi
 PROJECTS="openstack/tripleo-heat-templates $PROJECTS"
 PROJECTS="openstack/tripleo-image-elements $PROJECTS"
-PROJECTS="openstack/tripleo-incubator $PROJECTS"
 if [[ "$DEVSTACK_GATE_TROVE" -eq "1" ]] ; then
     PROJECTS="openstack/trove $PROJECTS"
 fi
