@@ -191,6 +191,9 @@ export WORKSPACE=\`pwd\`
 
 if [[ ! -e /usr/zuul-env ]]; then
   virtualenv /usr/zuul-env
+fi
+
+if [[ ! -e /usr/zuul-env/bin/zuul-cloner ]]; then
   /usr/zuul-env/bin/pip install zuul
 fi
 
