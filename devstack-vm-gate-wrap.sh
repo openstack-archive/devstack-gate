@@ -477,7 +477,7 @@ virtualenv /tmp/ansible
 # easy_install. Hope is this is generally more reliable.
 /tmp/ansible/bin/pip install pbr
 /tmp/ansible/bin/pip install ansible==$ANSIBLE_VERSION \
-                     devstack-tools==$DSTOOLS_VERSION ara
+                     devstack-tools==$DSTOOLS_VERSION ara 'cmd2<0.9.0'
 export ANSIBLE=/tmp/ansible/bin/ansible
 export ANSIBLE_PLAYBOOK=/tmp/ansible/bin/ansible-playbook
 export ANSIBLE_CONFIG="$WORKSPACE/ansible.cfg"
