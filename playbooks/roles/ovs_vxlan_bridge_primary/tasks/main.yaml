@@ -2,6 +2,40 @@
   openvswitch_bridge:
     bridge: "{{ bridge_name }}"
 
+- when: ovs_bridge_mtu is not defined
+  block:
+    - name: Determine bridge mtu
+      shell: |
+        # Find all interfaces with a permanent mac address type.
+        # Permanent mac addrs imply "real" hardware and not interfaces we have
+        # created through this system. This makes our MTU determination mostly
+        # idempotent allowing us to create multiple overlays without
+        # perpetually smaller MTUs.
+        SMALLEST_MTU=""
+        for X in $(ls /sys/class/net) ; do
+            MAC_TYPE=$(cat "/sys/class/net/${X}/addr_assign_type")
+            if [ "$MAC_TYPE" -ne "0" ] ; then
+                # Type 0 is a permanent address implying a "real"
+                # interface. We ignore other interfaces as that is what we
+                # create here
+                continue
+            fi
+            MTU=$(cat "/sys/class/net/${X}/mtu")
+            if [ -z "$SMALLEST_MTU" ] || [ "$SMALLEST_MTU" -gt "$MTU" ] ; then
+                SMALLEST_MTU=$MTU
+            fi
+        done
+        # 50 byte overhead for vxlan
+        echo $(( SMALLEST_MTU - 50 ))
+      args:
+        executable: /bin/bash
+      environment:
+        PATH: '{{ ansible_env.PATH }}:/bin:/sbin:/usr/sbin'
+      register: mtu_output
+    - name: Set ovs_bridge_mtu
+      set_fact:
+        ovs_bridge_mtu: "{{ mtu_output.stdout }}"
+
 - name: Set bridge MTU
   command: ip link set mtu {{ ovs_bridge_mtu }} dev {{ bridge_name }}
 
