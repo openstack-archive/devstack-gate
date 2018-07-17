@@ -157,9 +157,6 @@ export DEVSTACK_GATE_TEMPEST=${DEVSTACK_GATE_TEMPEST:-0}
 # installed and configured, but the tests will be skipped
 export DEVSTACK_GATE_TEMPEST_NOTESTS=${DEVSTACK_GATE_TEMPEST_NOTESTS:-0}
 
-# Set to 1 to run the devstack exercises
-export DEVSTACK_GATE_EXERCISES=${DEVSTACK_GATE_EXERCISES:-0}
-
 # Set to 1 to run postgresql instead of mysql
 export DEVSTACK_GATE_POSTGRES=${DEVSTACK_GATE_POSTGRES:-0}
 
