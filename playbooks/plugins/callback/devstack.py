@@ -22,7 +22,7 @@ from __future__ import print_function
 
 from ansible import constants as C
 from ansible.plugins.callback import CallbackBase
-from ansible.vars import strip_internal_keys
+from ansible.plugins.callback import strip_internal_keys
 
 import datetime
 import yaml
