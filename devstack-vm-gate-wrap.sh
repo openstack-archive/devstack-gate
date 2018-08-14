@@ -313,6 +313,9 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
                 export GRENADE_NEW_BRANCH="stable/queens"
             elif [[ "$GRENADE_BASE_BRANCH" == "stable/queens" ]]; then
                 export GRENADE_OLD_BRANCH="stable/queens"
+                export GRENADE_NEW_BRANCH="stable/rocky"
+            elif [[ "$GRENADE_BASE_BRANCH" == "stable/rocky" ]]; then
+                export GRENADE_OLD_BRANCH="stable/rocky"
                 export GRENADE_NEW_BRANCH="$GIT_BRANCH"
             fi
             ;;
@@ -338,8 +341,11 @@ if [[ -n "$DEVSTACK_GATE_GRENADE" ]]; then
             elif [[ "$GRENADE_BASE_BRANCH" == "stable/queens" ]]; then
                 export GRENADE_OLD_BRANCH="stable/pike"
                 export GRENADE_NEW_BRANCH="stable/queens"
-            else # master
+            elif [[ "$GRENADE_BASE_BRANCH" == "stable/rocky" ]]; then
                 export GRENADE_OLD_BRANCH="stable/queens"
+                export GRENADE_NEW_BRANCH="stable/rocky"
+            else # master
+                export GRENADE_OLD_BRANCH="stable/rocky"
                 export GRENADE_NEW_BRANCH="$GIT_BRANCH"
             fi
             ;;
