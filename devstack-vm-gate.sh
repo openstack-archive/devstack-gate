@@ -813,12 +813,6 @@ if [[ "$DEVSTACK_GATE_REMOVE_STACK_SUDO" -eq 1 ]]; then
         -a "path=/etc/sudoers.d/50_stack_sh state=absent"
 fi
 
-if [[ "$DEVSTACK_GATE_EXERCISES" -eq "1" ]]; then
-    echo "Running devstack exercises"
-    $ANSIBLE all -f 5 -i "$WORKSPACE/inventory" -m shell \
-        -a "cd '$BASE/new/devstack' && sudo -H -u stack ./exercise.sh"
-fi
-
 if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     # under tempest isolation tempest will need to write .tox dir, log files
     if [[ -d "$BASE/new/tempest" ]]; then
