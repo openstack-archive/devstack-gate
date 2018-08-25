@@ -4,6 +4,14 @@
       - name: primary
         label: ubuntu-xenial
 
+- job:
+    name: devstack-gate-hooks
+    parent: legacy-dsvm-base
+    run: playbooks/devstack-gate-hooks/run.yaml
+    post-run: playbooks/devstack-gate-hooks/post.yaml
+    timeout: 3900
+
+
 - project:
     check:
       jobs:
@@ -21,3 +29,4 @@
             voting: false
         - neutron-tempest-plugin-api:
             voting: false
+        - devstack-gate-hooks
