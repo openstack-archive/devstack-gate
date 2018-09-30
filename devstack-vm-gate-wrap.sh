@@ -133,6 +133,12 @@ if [[ -n "$DEVSTACK_PROJECT_FROM_GIT" ]] ; then
     PROJECTS=$(echo $PROJECTS | sed -e 's|openstack/glean|openstack-infra/glean|g')
 fi
 
+# Include openstack/placement starting in Stein.
+stable_compare="stable/[a-r]"
+if [[ ! "$OVERRIDE_ZUUL_BRANCH" =~ $stable_compare ]] ; then
+    PROJECTS="openstack/placement $PROJECTS"
+fi
+
 # Remove duplicates as they result in errors when managing
 # git state.
 PROJECTS=$(echo $PROJECTS | tr '[:space:]' '\n' | sort -u)
