@@ -78,15 +78,15 @@ function setup_ssh {
     # node and all of the subnodes.
     local path=$1
     local dest_file=${2:-id_rsa}
-    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m file \
+    $ANSIBLE all --become -f 5 -i "$WORKSPACE/inventory" -m file \
         -a "path='$path' mode=0700 state=directory"
     # Note that we append to the authorized keys file just in case something
     # is already authorized to ssh with content in that file.
-    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m lineinfile \
+    $ANSIBLE all --become -f 5 -i "$WORKSPACE/inventory" -m lineinfile \
         -a "line={{ lookup('file', '/etc/nodepool/id_rsa.pub') }} dest='$path/authorized_keys' insertafter=EOF create=yes mode=0600"
-    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
+    $ANSIBLE all --become -f 5 -i "$WORKSPACE/inventory" -m copy \
         -a "src=/etc/nodepool/id_rsa.pub dest='$path/${dest_file}.pub' mode=0600"
-    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
+    $ANSIBLE all --become -f 5 -i "$WORKSPACE/inventory" -m copy \
         -a "src=/etc/nodepool/id_rsa dest='$path/${dest_file}' mode=0400"
 }
 
@@ -212,7 +212,7 @@ function setup_multinode_connectivity {
         ssh-keyscan $HOSTNAME >> /tmp/tmp_ssh_known_hosts
     done
 
-    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m copy \
+    $ANSIBLE all --become -f 5 -i "$WORKSPACE/inventory" -m copy \
             -a "src=/tmp/tmp_ssh_known_hosts dest=/etc/ssh/ssh_known_hosts mode=0444"
 
     for NODE in $sub_nodes; do
@@ -654,10 +654,10 @@ function setup_localrc {
 function setup_access_for_stack_user {
     # Make the workspace owned by the stack user
     # It is not clear if the ansible file module can do this for us
-    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m shell \
+    $ANSIBLE all --become -f 5 -i "$WORKSPACE/inventory" -m shell \
         -a "chown -R stack:stack '$BASE'"
     # allow us to add logs
-    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m shell \
+    $ANSIBLE all --become -f 5 -i "$WORKSPACE/inventory" -m shell \
         -a "chmod 777 '$WORKSPACE/logs'"
 }
 
@@ -754,9 +754,9 @@ else
     if [ -d "$BASE/data/CA" ] && [ -f "$BASE/data/ca-bundle.pem" ] ; then
         # Sync any data files which include certificates to be used if
         # TLS is enabled
-        $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" --sudo -m file \
+        $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" --become -m file \
             -a "path='$BASE/data' state=directory owner=stack group=stack mode=0755"
-        $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" --sudo -m file \
+        $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" --become -m file \
             -a "path='$BASE/data/CA' state=directory owner=stack group=stack mode=0755"
         $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" \
             --sudo -m synchronize \
