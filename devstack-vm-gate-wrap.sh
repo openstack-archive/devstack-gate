@@ -31,6 +31,9 @@ GIT_BRANCH=${GIT_BRANCH:-master}
 ANSIBLE_VERSION=${ANSIBLE_VERSION:-2.5.7}
 export DSTOOLS_VERSION=${DSTOOLS_VERSION:-0.4.0}
 
+# Set to 0 to skip stackviz
+export PROCESS_STACKVIZ=${PROCESS_STACKVIZ:-1}
+
 # sshd may have been compiled with a default path excluding */sbin
 export PATH=$PATH:/usr/local/sbin:/usr/sbin
 # When doing xtrace (set -x / set -o xtrace), provide more debug output
