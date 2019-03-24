@@ -108,7 +108,7 @@ defined in `nodepool.yaml <http://git.openstack.org/cgit/openstack-infra/
 project-config/tree/nodepool/nodepool.yaml>`_. There is a handy script
 available in the project-config repo to build this for you::
 
-  git clone git://git.openstack.org/openstack-infra/project-config
+  git clone https://git.openstack.org/openstack-infra/project-config
   cd project-config
   ./tools/build-image.sh
 
