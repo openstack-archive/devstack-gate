@@ -38,7 +38,7 @@ external dependencies during the run.
 
 The `Nodepool`_ project is used to maintain this pool of machines.
 
-.. _Nodepool: https://git.openstack.org/cgit/openstack-infra/nodepool
+.. _Nodepool: https://opendev.org/zuul/nodepool
 
 How to Debug a Devstack Gate Failure
 ====================================
@@ -104,11 +104,11 @@ and troubleshoot failures or tease out nondeterministic bugs.
 First, you can build an image identical to the images running in the gate using
 `diskimage-builder <https://docs.openstack.org/developer/diskimage-builder>`_.
 The specific operating systems built and DIB elements for each image type are
-defined in `nodepool.yaml <http://git.openstack.org/cgit/openstack-infra/
-project-config/tree/nodepool/nodepool.yaml>`_. There is a handy script
+defined in `nodepool.yaml <https://opendev.org/openstack/project-config/
+src/branch/master/nodepool/nodepool.yaml>`_. There is a handy script
 available in the project-config repo to build this for you::
 
-  git clone https://git.openstack.org/openstack-infra/project-config
+  git clone https://opendev.org/openstack/project-config
   cd project-config
   ./tools/build-image.sh
 
@@ -199,11 +199,11 @@ make sure ``HEAD`` is at the ref you want tested::
 Switch to the workspace and get a copy of devstack-gate::
 
   cd $WORKSPACE \
-  && git clone --depth 1 $REPO_URL/openstack-infra/devstack-gate
+  && git clone --depth 1 $REPO_URL/openstack/devstack-gate
 
 At this point you're ready to set the same environment variables and run
 the same commands/scripts as used in the desired job. The definitions
-for these are found in the openstack-infra/project-config project under
+for these are found in the openstack/project-config project under
 the jenkins/jobs directory in a file named devstack-gate.yaml. It will
 probably look something like::
 
@@ -215,7 +215,7 @@ probably look something like::
 
 If you're trying to figure out which devstack gate jobs run for a given
 project+branch combination, this is encoded in the
-openstack-infra/project-config project under the zuul/ directory in a file
+openstack/project-config project under the zuul/ directory in a file
 named layout.yaml. You'll want to look in the "projects" section for a list
 of jobs run on a given project in the "gate" pipeline, and then consult the
 "jobs" section of the file to see if there are any overrides indicating
@@ -244,10 +244,10 @@ managed in source code repositories just like the code of OpenStack
 itself. If you'd like to contribute, just clone and propose a patch to
 the relevant repository::
 
-    https://git.openstack.org/cgit/openstack-infra/devstack-gate
-    https://git.openstack.org/cgit/openstack-infra/nodepool
-    https://git.openstack.org/cgit/openstack-infra/system-config
-    https://git.openstack.org/cgit/openstack-infra/project-config
+    https://opendev.org/openstack/devstack-gate
+    https://opendev.org/zuul/nodepool
+    https://opendev.org/opendev/system-config
+    https://opendev.org/openstack/project-config
 
 You can file bugs on the storyboard devstack-gate project::
 

@@ -22,7 +22,7 @@
 # Most of the work of this script is done in functions so that we may
 # easily redirect their stdout / stderr to log files.
 
-GIT_BASE=${GIT_BASE:-https://git.openstack.org}
+GIT_BASE=${GIT_BASE:-https://opendev.org}
 GIT_BRANCH=${GIT_BRANCH:-master}
 
 # We're using enough ansible specific features that it's extremely
@@ -66,8 +66,8 @@ export DEVSTACK_PROJECT_FROM_GIT=${DEVSTACK_PROJECT_FROM_GIT:-}
 # below.
 # See: https://bugs.launchpad.net/openstack-gate/+bug/1544827
 JOB_PROJECTS="$PROJECTS"
-PROJECTS="openstack-infra/devstack-gate $PROJECTS"
-PROJECTS="openstack-dev/devstack $PROJECTS"
+PROJECTS="openstack/devstack-gate $PROJECTS"
+PROJECTS="openstack/devstack $PROJECTS"
 PROJECTS="openstack/ceilometer $PROJECTS"
 PROJECTS="openstack/ceilometermiddleware $PROJECTS"
 PROJECTS="openstack/cinder $PROJECTS"
@@ -92,7 +92,7 @@ PROJECTS="openstack/tempest $PROJECTS"
 # reason for this is to reduce job runtimes, every git repo
 # has to be cloned and updated and checked out to the proper ref
 # which is not free.
-PROJECTS="openstack-infra/tripleo-ci $PROJECTS"
+PROJECTS="openstack/tripleo-ci $PROJECTS"
 # The devstack heat plugin uses these repos
 if [[ "$DEVSTACK_GATE_HEAT" -eq "1" ]] ; then
     PROJECTS="openstack/dib-utils $PROJECTS"
@@ -129,11 +129,6 @@ if [[ -n "$DEVSTACK_PROJECT_FROM_GIT" ]] ; then
     TRAILING_COMMA_REMOVED=$(echo "$DEVSTACK_PROJECT_FROM_GIT" | sed -e 's/,$//')
     PROCESSED_FROM_GIT=$(echo "openstack/$TRAILING_COMMA_REMOVED" | sed -e 's/,/ openstack\//g')
     PROJECTS="$PROCESSED_FROM_GIT $PROJECTS"
-
-    # hack any known exceptions here until namespaces are unified
-    PROJECTS=$(echo $PROJECTS | sed -e 's|openstack/pbr|openstack-dev/pbr|g')
-    PROJECTS=$(echo $PROJECTS | sed -e 's|openstack/shade|openstack-infra/shade|g')
-    PROJECTS=$(echo $PROJECTS | sed -e 's|openstack/glean|openstack-infra/glean|g')
 fi
 
 # Include openstack/placement starting in Stein.
@@ -438,7 +433,7 @@ export DEVSTACK_GATE_UNSTACK=${DEVSTACK_GATE_UNSTACK:-0}
 export DEVSTACK_GATE_TOPOLOGY=${DEVSTACK_GATE_TOPOLOGY:-aio}
 
 # Set to a space-separated list of projects to prepare in the
-# workspace, e.g. 'openstack-dev/devstack openstack/neutron'.
+# workspace, e.g. 'openstack/devstack openstack/neutron'.
 # Minimizing the number of targeted projects can reduce the setup cost
 # for jobs that know exactly which repos they need.
 export DEVSTACK_GATE_PROJECTS_OVERRIDE=${DEVSTACK_GATE_PROJECTS_OVERRIDE:-""}

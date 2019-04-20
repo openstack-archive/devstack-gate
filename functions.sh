@@ -199,11 +199,11 @@ fi
 
 cat > clonemap.yaml << IEOF
 clonemap:
-  - name: openstack-infra/devstack-gate
+  - name: openstack/devstack-gate
     dest: devstack-gate
 IEOF
 
-/usr/zuul-env/bin/zuul-cloner -m clonemap.yaml --cache-dir /opt/git https://git.openstack.org openstack-infra/devstack-gate
+/usr/zuul-env/bin/zuul-cloner -m clonemap.yaml --cache-dir /opt/git https://opendev.org openstack/devstack-gate
 
 cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
 ./safe-devstack-vm-gate-wrap.sh
@@ -359,7 +359,7 @@ function git_clone_and_cd {
 #   The tip of the master branch
 #
 # If you would like to use a particular git base for a project other than
-# GIT_BASE or https://git.openstack.org, for example in order to use
+# GIT_BASE or https://opendev.org, for example in order to use
 # a particular repositories for a third party CI, then supply that using
 # variable OVERRIDE_${PROJECT}_GIT_BASE instead.
 # (e.g. OVERRIDE_TEMPEST_GIT_BASE=http://example.com)
@@ -369,7 +369,7 @@ function setup_project {
     local branch=$2
     local short_project
     short_project=$(basename $project)
-    local git_base=${GIT_BASE:-https://git.openstack.org}
+    local git_base=${GIT_BASE:-https://opendev.org}
     # allow for possible project branch override
     local uc_project
     uc_project=$(echo $short_project | tr [:lower:] [:upper:] | tr '-' '_' | sed 's/[^A-Z_]//')

@@ -132,12 +132,12 @@ function test_one_on_master {
     for aar_var in $LOCAL_AAR_VARS; do
         eval `echo "declare -A $aar_var"`
     done
-    local ZUUL_PROJECT='openstack-infra/devstack-gate'
+    local ZUUL_PROJECT='openstack/devstack-gate'
     local ZUUL_BRANCH='master'
     local ZUUL_REF='refs/zuul/master/ZA'
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZA'
 
-    setup_project openstack-infra/devstack-gate $ZUUL_BRANCH
+    setup_project openstack/devstack-gate $ZUUL_BRANCH
 
     assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZA'
 }
@@ -155,7 +155,7 @@ function test_two_on_master {
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZB'
     TEST_ZUUL_REFS[glance]+=' refs/zuul/master/ZB'
 
-    setup_project openstack-infra/devstack-gate $ZUUL_BRANCH
+    setup_project openstack/devstack-gate $ZUUL_BRANCH
     setup_project openstack/glance $ZUUL_BRANCH
 
     assert_equal "${TEST_GIT_CHECKOUTS[devstack-gate]}" 'refs/zuul/master/ZB'
@@ -179,7 +179,7 @@ function test_multi_branch_on_master {
     TEST_ZUUL_REFS[glance]+=' refs/zuul/stable/havana/ZC'
     TEST_ZUUL_REFS[python-glanceclient]+=' refs/zuul/master/ZC'
 
-    setup_project openstack-infra/devstack-gate $ZUUL_BRANCH
+    setup_project openstack/devstack-gate $ZUUL_BRANCH
     setup_project openstack/glance $ZUUL_BRANCH
     setup_project openstack/python-glanceclient $ZUUL_BRANCH
 
@@ -212,7 +212,7 @@ function test_multi_branch_project_override {
     TEST_ZUUL_REFS[python-glanceclient]+=' refs/zuul/master/ZD'
     TEST_ZUUL_REFS[glance]+=' refs/zuul/stable/havana/ZD'
 
-    setup_project openstack-infra/devstack-gate $ZUUL_BRANCH
+    setup_project openstack/devstack-gate $ZUUL_BRANCH
     setup_project openstack/glance $ZUUL_BRANCH
     setup_project openstack/python-glanceclient $ZUUL_BRANCH
     setup_project openstack/tempest $ZUUL_BRANCH
@@ -241,7 +241,7 @@ function test_multi_branch_on_stable {
     TEST_ZUUL_REFS[devstack-gate]+=' refs/zuul/master/ZB'
     TEST_ZUUL_REFS[glance]+=' refs/zuul/stable/havana/ZB'
 
-    setup_project openstack-infra/devstack-gate $ZUUL_BRANCH
+    setup_project openstack/devstack-gate $ZUUL_BRANCH
     setup_project openstack/glance $ZUUL_BRANCH
     setup_project openstack/python-glanceclient $ZUUL_BRANCH
 
@@ -253,7 +253,7 @@ function test_multi_branch_on_stable {
 function test_multi_git_base_project_override {
     # osrg/ryu              https://github.com
     # test/devstack-gate    https://example.com
-    # openstack/keystone    https://git.openstack.org
+    # openstack/keystone    https://opendev.org
     # openstack/glance      http://tarballs.openstack.org
     for aar_var in $LOCAL_AAR_VARS; do
         eval `echo "declare -A $aar_var"`
@@ -263,7 +263,7 @@ function test_multi_git_base_project_override {
     local ZUUL_BRANCH='master'
     local ZUUL_REF='refs/zuul/master/ZA'
     local GIT_BASE=""
-    local GIT_BASE_DEF="https://git.openstack.org"
+    local GIT_BASE_DEF="https://opendev.org"
 
     local OVERRIDE_RYU_GIT_BASE='https://github.com'
     setup_project "osrg/ryu" $ZUUL_BRANCH
@@ -314,7 +314,7 @@ function test_grenade_backward {
     TEST_ZUUL_REFS[keystone]+=' refs/zuul/master/ZE'
     TEST_ZUUL_REFS[glance]+=' refs/zuul/master/ZE'
 
-    setup_project openstack-infra/devstack-gate $GRENADE_OLD_BRANCH
+    setup_project openstack/devstack-gate $GRENADE_OLD_BRANCH
     setup_project openstack/nova $GRENADE_OLD_BRANCH
     setup_project openstack/keystone $GRENADE_OLD_BRANCH
     setup_project openstack/glance $GRENADE_OLD_BRANCH
@@ -330,7 +330,7 @@ function test_grenade_backward {
 
     declare -A TEST_GIT_CHECKOUTS
 
-    setup_project openstack-infra/devstack-gate $GRENADE_NEW_BRANCH
+    setup_project openstack/devstack-gate $GRENADE_NEW_BRANCH
     setup_project openstack/nova $GRENADE_NEW_BRANCH
     setup_project openstack/keystone $GRENADE_NEW_BRANCH
     setup_project openstack/glance $GRENADE_NEW_BRANCH
@@ -379,7 +379,7 @@ function test_grenade_forward {
     TEST_ZUUL_REFS[keystone]+=' refs/zuul/master/ZE'
     TEST_ZUUL_REFS[glance]+=' refs/zuul/stable/havana/ZE'
 
-    setup_project openstack-infra/devstack-gate $GRENADE_OLD_BRANCH
+    setup_project openstack/devstack-gate $GRENADE_OLD_BRANCH
     setup_project openstack/nova $GRENADE_OLD_BRANCH
     setup_project openstack/keystone $GRENADE_OLD_BRANCH
     setup_project openstack/glance $GRENADE_OLD_BRANCH
@@ -395,7 +395,7 @@ function test_grenade_forward {
 
     declare -A TEST_GIT_CHECKOUTS
 
-    setup_project openstack-infra/devstack-gate $GRENADE_NEW_BRANCH
+    setup_project openstack/devstack-gate $GRENADE_NEW_BRANCH
     setup_project openstack/nova $GRENADE_NEW_BRANCH
     setup_project openstack/keystone $GRENADE_NEW_BRANCH
     setup_project openstack/glance $GRENADE_NEW_BRANCH
@@ -419,7 +419,7 @@ function test_branch_override {
     for aar_var in $LOCAL_AAR_VARS; do
         eval `echo "declare -A $aar_var"`
     done
-    local ZUUL_PROJECT='openstack-infra/devstack-gate'
+    local ZUUL_PROJECT='openstack/devstack-gate'
     local ZUUL_BRANCH='master'
     local ZUUL_REF='refs/zuul/master/ZB'
     local OVERRIDE_ZUUL_BRANCH='stable/havana'
@@ -427,7 +427,7 @@ function test_branch_override {
     TEST_ZUUL_REFS[glance]+=' refs/zuul/stable/havana/ZA'
     TEST_ZUUL_REFS[glance]+=' refs/zuul/stable/havana/ZB'
 
-    setup_project openstack-infra/devstack-gate $OVERRIDE_ZUUL_BRANCH
+    setup_project openstack/devstack-gate $OVERRIDE_ZUUL_BRANCH
     setup_project openstack/glance $OVERRIDE_ZUUL_BRANCH
     setup_project openstack/swift $OVERRIDE_ZUUL_BRANCH
     setup_project openstack/python-glanceclient $OVERRIDE_ZUUL_BRANCH
