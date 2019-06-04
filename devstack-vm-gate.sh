@@ -401,6 +401,8 @@ function setup_localrc {
     localrc_set "$localrc_file" "LOG_COLOR" "False"
     # Don't reset the requirements.txt files after g-r updates
     localrc_set "$localrc_file" "UNDO_REQUIREMENTS" "False"
+    # NOTE(rosmaita): change I1ef1fe564123216b19582262726cdb1078b7650e makes
+    # the following line a no-op when used with Train or later devstacks
     localrc_set "$localrc_file" "CINDER_PERIODIC_INTERVAL" "10"
     # TODO(mriedem): Remove OS_NO_CACHE after newton-eol for devstack.
     localrc_set "$localrc_file" "export OS_NO_CACHE" "True"
