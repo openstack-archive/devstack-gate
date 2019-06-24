@@ -11,6 +11,16 @@
     post-run: playbooks/devstack-gate-hooks/post.yaml
     timeout: 3900
 
+- job:
+    name: legacy-tempest-neutron-full-stable
+    parent: legacy-dsvm-base
+    run: playbooks/legacy/tempest-neutron-full/run.yaml
+    post-run: playbooks/legacy/tempest-neutron-full/post.yaml
+    timeout: 10800
+    required-projects:
+      - openstack/devstack-gate
+      - openstack/neutron
+      - openstack/tempest
 
 - project:
     check:
@@ -18,21 +28,9 @@
         - devstack:
             files:
               - ^roles/
-        - tempest-full-pike:
-            branches: ^(?!driverfixes/).*$
-            voting: false
-        - tempest-full-queens:
-            branches: ^(?!driverfixes/).*$
-            voting: false
-        - tempest-full-queens-py3:
-            branches: ^(?!driverfixes/).*$
-            voting: false
-        - tempest-full-rocky:
-            branches: ^(?!driverfixes/).*$
-            voting: false
-        - tempest-full-rocky-py3:
-            branches: ^(?!driverfixes/).*$
-            voting: false
         - neutron-tempest-plugin-api:
+            voting: false
+        - legacy-tempest-neutron-full-stable:
+            branches: ^(?!driverfixes/).*$
             voting: false
         - devstack-gate-hooks
