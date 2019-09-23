@@ -664,8 +664,7 @@ function cleanup_host {
         # deleted
         sudo cp /var/log/postgresql/*log $BASE/logs/postgres.log
     fi
-    save_file /var/log/mysql.err
-    save_file /var/log/mysql.log
+    save_dir /var/log/mysql
 
     # libvirt
     save_dir /var/log/libvirt
