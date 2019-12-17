@@ -28,7 +28,9 @@ GIT_BRANCH=${GIT_BRANCH:-master}
 # We're using enough ansible specific features that it's extremely
 # possible that new ansible releases can break us. As such we should
 # be very deliberate about which ansible we use.
-ANSIBLE_VERSION=${ANSIBLE_VERSION:-2.5.7}
+# NOTE(mriedem): Ansible 2.7.14 is current as of Ubuntu Xenial 16.04.
+# ARA is pinned to <1.0.0 below which affects the required version of Ansible.
+ANSIBLE_VERSION=${ANSIBLE_VERSION:-2.7.14}
 export DSTOOLS_VERSION=${DSTOOLS_VERSION:-0.4.0}
 
 # Set to 0 to skip stackviz
