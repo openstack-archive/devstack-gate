@@ -100,6 +100,8 @@ def calc_services(branch, features, configs, role):
                 grid_feature[branch].get('rm-services', []))
 
     # Finally, calculate any services to add/remove per config.
+    # TODO(mriedem): This is not role-based so any per-config service
+    # modifications are dealt with globally across all nodes.
     # do all the adds first
     for config in configs:
         if config in GRID['config']:

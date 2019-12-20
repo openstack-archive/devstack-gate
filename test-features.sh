@@ -24,6 +24,8 @@ TEMPEST_HEAT_SLOW_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-re
 
 GRENADE_NEW_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,key,c-api,c-vol,c-sch,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,peakmem_tracker,tempest,placement-api"
 
+GRENADE_SUBNODE_MASTER="n-api-meta,n-cpu,g-api,c-vol,dstat,peakmem_tracker,placement-client"
+
 # Utility function for tests
 function assert_list_equal {
     local source
@@ -72,11 +74,18 @@ function test_grenade_new_master {
     assert_list_equal $GRENADE_NEW_MASTER $results
 }
 
+function test_grenade_subnode_master {
+    local results
+    results=$(DEVSTACK_GATE_GRENADE=pullup DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n -r subnode)
+    assert_list_equal $GRENADE_SUBNODE_MASTER $results
+}
+
 test_full_master
 test_full_feature_ec
 test_neutron_master
 test_heat_slow_master
 test_grenade_new_master
+test_grenade_subnode_master
 
 if [[ "$ERRORS" -ne 0 ]]; then
     echo "Errors detected, job failed"
