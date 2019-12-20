@@ -1,6 +1,6 @@
 config:
   default:
-    master: [default, ceilometer, glance, nova, placement, swift, cinder, keystone]
+    master: [default, glance, nova, placement, swift, cinder, keystone]
     train: [default, ceilometer, glance, nova, placement, swift, cinder, keystone]
     stein: [default, ceilometer, glance, nova, placement, swift, cinder, keystone]
     rocky: [default, ceilometer, glance, nova, placement, swift, cinder, keystone]
@@ -94,7 +94,7 @@ primary:
 
   nova:
     base:
-      services: [n-api, n-cauth, n-cond, n-cpu, n-net, n-novnc, n-obj, n-sch, n-api-meta]
+      services: [n-api, n-cond, n-cpu, n-novnc, n-sch, n-api-meta]
 
   nova-cells:
     base:
@@ -276,7 +276,7 @@ subnode:
 
   nova:
     base:
-      services: [n-cpu, n-net, n-api-meta]
+      services: [n-cpu, n-api-meta]
 
   placement:
     base:
