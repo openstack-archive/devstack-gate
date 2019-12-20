@@ -141,6 +141,9 @@ of environmental feature definitions and flags.
                         dest='ansible',
                         help="Behave as python CLI",
                         action='store_false')
+    parser.add_argument('-v', '--verbose',
+                        default=False, action='store_true',
+                        help='Log verbose output')
     parser.set_defaults(ansible=True)
     return parser.parse_args()
 
@@ -149,6 +152,8 @@ def main():
     global GRID
     global ALLOWED_BRANCHES
     opts = get_opts()
+    if opts.verbose:
+        LOG.setLevel(logging.DEBUG)
     if opts.ansible:
         ansible_module = get_ansible_module()
         features = ansible_module.params['features']
