@@ -73,7 +73,7 @@ def configs_from_env():
     return configs
 
 
-def calc_services(branch, features, role):
+def calc_services(branch, features, configs, role):
     LOG.debug('Role: %s', role)
     services = set()
     for feature in features:
@@ -98,6 +98,25 @@ def calc_services(branch, features, role):
         if branch in grid_feature:
             services.difference_update(
                 grid_feature[branch].get('rm-services', []))
+
+    # Finally, calculate any services to add/remove per config.
+    # do all the adds first
+    for config in configs:
+        if config in GRID['config']:
+            add_services = GRID['config'][config].get('services', [])
+            if add_services:
+                LOG.debug('Adding services for config %s: %s',
+                          config, add_services)
+                services.update(add_services)
+
+    # deletes always trump adds
+    for config in configs:
+        if config in GRID['config']:
+            rm_services = GRID['config'][config].get('rm-services', [])
+            if rm_services:
+                LOG.debug('Removing services for config %s: %s',
+                          config, rm_services)
+                services.difference_update(rm_services)
 
     return sorted(list(services))
 
@@ -188,7 +207,7 @@ def main():
     features = calc_features(branch, configs)
     LOG.debug("Features: %s " % features)
 
-    services = calc_services(branch, features, role)
+    services = calc_services(branch, features, configs, role)
     LOG.debug("Services: %s " % services)
 
     if opts.ansible:

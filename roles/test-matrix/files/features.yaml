@@ -22,6 +22,9 @@ config:
   # feature changes for different test matrixes
   grenade:
     rm-features: [trove, sahara, neutron-adv, horizon]
+    # Disable c-bak and etcd3 since they are not used in grenade runs
+    # and just take up resources (iops) which can cause gate failures.
+    rm-services: [c-bak, etcd3]
   tempest:
     features: [tempest]
   cells:

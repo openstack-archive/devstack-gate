@@ -22,7 +22,7 @@ TEMPEST_NEUTRON_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,
 
 TEMPEST_HEAT_SLOW_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,key,c-api,c-vol,c-sch,c-bak,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,peakmem_tracker,etcd3,tempest,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-metering,placement-api"
 
-GRENADE_NEW_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,key,c-api,c-vol,c-sch,c-bak,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,peakmem_tracker,etcd3,tempest,placement-api"
+GRENADE_NEW_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,key,c-api,c-vol,c-sch,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,peakmem_tracker,tempest,placement-api"
 
 # Utility function for tests
 function assert_list_equal {
