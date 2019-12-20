@@ -130,7 +130,7 @@ primary:
 
   cinder:
     base:
-      services: [cinder, c-api, c-vol, c-sch, c-bak]
+      services: [c-api, c-vol, c-sch, c-bak]
 
   # This will be used to disable c-vol, c-bak on primary node when running multinode grenade
   # job that will test compatibility of new c-api, c-sch (primary) and old c-vol and c-bak (sub).
