@@ -74,10 +74,15 @@ def configs_from_env():
 
 
 def calc_services(branch, features, role):
+    LOG.debug('Role: %s', role)
     services = set()
     for feature in features:
         grid_feature = GRID[role][feature]
-        services.update(grid_feature['base'].get('services', []))
+        add_services = grid_feature['base'].get('services', [])
+        if add_services:
+            LOG.debug('Adding services for feature %s: %s',
+                      feature, add_services)
+            services.update(add_services)
         if branch in grid_feature:
             services.update(
                 grid_feature[branch].get('services', []))
@@ -85,12 +90,15 @@ def calc_services(branch, features, role):
     # deletes always trump adds
     for feature in features:
         grid_feature = GRID[role][feature]
-        services.difference_update(
-            grid_feature['base'].get('rm-services', []))
-
+        rm_services = grid_feature['base'].get('rm-services', [])
+        if rm_services:
+            LOG.debug('Removing services for feature %s: %s',
+                      feature, rm_services)
+            services.difference_update(rm_services)
         if branch in grid_feature:
             services.difference_update(
                 grid_feature[branch].get('rm-services', []))
+
     return sorted(list(services))
 
 
@@ -104,13 +112,20 @@ def calc_features(branch, configs=[]):
     # do all the adds first
     for config in configs:
         if config in GRID['config']:
-            features.update(GRID['config'][config].get('features', []))
+            add_features = GRID['config'][config].get('features', [])
+            if add_features:
+                LOG.debug('Adding features for config %s: %s',
+                          config, add_features)
+                features.update(add_features)
 
     # removes always trump
     for config in configs:
         if config in GRID['config']:
-            features.difference_update(
-                GRID['config'][config].get('rm-features', []))
+            rm_features = GRID['config'][config].get('rm-features', [])
+            if rm_features:
+                LOG.debug('Removing features for config %s: %s',
+                          config, rm_features)
+                features.difference_update(rm_features)
     return sorted(list(features))
 
 
