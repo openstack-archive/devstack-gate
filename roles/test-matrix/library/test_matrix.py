@@ -84,8 +84,11 @@ def calc_services(branch, features, configs, role):
                       feature, add_services)
             services.update(add_services)
         if branch in grid_feature:
-            services.update(
-                grid_feature[branch].get('services', []))
+            update_services = grid_feature[branch].get('services', [])
+            if update_services:
+                LOG.debug('Updating branch: %s specific services for '
+                          'feature %s: %s', branch, feature, update_services)
+                services.update(update_services)
 
     # deletes always trump adds
     for feature in features:

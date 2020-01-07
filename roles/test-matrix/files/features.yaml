@@ -98,6 +98,12 @@ primary:
   nova:
     base:
       services: [n-api, n-cond, n-cpu, n-novnc, n-sch, n-api-meta]
+    queens:
+      services: [n-cauth]
+    pike:
+      services: [n-cauth]
+    ocata:
+      services: [n-cauth]
 
   nova-cells:
     base:
