@@ -98,12 +98,14 @@ primary:
   nova:
     base:
       services: [n-api, n-cond, n-cpu, n-novnc, n-sch, n-api-meta]
+    rocky:
+      services: [n-net]
     queens:
-      services: [n-cauth]
+      services: [n-cauth, n-net]
     pike:
-      services: [n-cauth]
+      services: [n-cauth, n-net]
     ocata:
-      services: [n-cauth]
+      services: [n-cauth, n-net]
 
   nova-cells:
     base:
@@ -286,6 +288,14 @@ subnode:
   nova:
     base:
       services: [n-cpu, n-api-meta]
+    rocky:
+      services: [n-net]
+    queens:
+      services: [n-net]
+    pike:
+      services: [n-net]
+    ocata:
+      services: [n-net]
 
   placement:
     base:
