@@ -491,14 +491,23 @@ with $DEVSTACK_GATE_TIMEOUT_BUFFER minutes reserved for cleanup."
 echo "Available disk space on this host:"
 indent df -h
 
+if command -v python3 &>/dev/null; then
+    PIP=pip3
+    PYTHON_VER=$(python3 -c 'import sys; print("%s.%s" % sys.version_info[0:2])')
+else
+    PIP=pip
+    PYTHON_VER=2.7
+fi
+
 # Install ansible
-sudo -H pip install virtualenv
-virtualenv /tmp/ansible
+sudo -H $PIP install virtualenv
+virtualenv -p python${PYTHON_VER} /tmp/ansible
+
 # Explicitly install pbr first as this will use pip rathat than
 # easy_install. Hope is this is generally more reliable.
-/tmp/ansible/bin/pip install pbr
-/tmp/ansible/bin/pip install ansible==$ANSIBLE_VERSION \
-                     devstack-tools==$DSTOOLS_VERSION 'ara<1.0.0' 'cmd2<0.9.0'
+/tmp/ansible/bin/${PIP} install pbr
+/tmp/ansible/bin/${PIP} install ansible==$ANSIBLE_VERSION \
+                devstack-tools==$DSTOOLS_VERSION 'ara<1.0.0' 'cmd2<0.9.0'
 export ANSIBLE=/tmp/ansible/bin/ansible
 export ANSIBLE_PLAYBOOK=/tmp/ansible/bin/ansible-playbook
 export ANSIBLE_CONFIG="$WORKSPACE/ansible.cfg"
@@ -519,7 +528,7 @@ done
 # Write ansible config file
 cat > $ANSIBLE_CONFIG <<EOF
 [defaults]
-callback_plugins = $WORKSPACE/devstack-gate/playbooks/plugins/callback:/tmp/ansible/lib/python2.7/site-packages/ara/plugins/callbacks
+callback_plugins = $WORKSPACE/devstack-gate/playbooks/plugins/callback:/tmp/ansible/lib/python${PYTHON_VER}/site-packages/ara/plugins/callbacks
 stdout_callback = devstack
 
 # Disable SSH host key checking
