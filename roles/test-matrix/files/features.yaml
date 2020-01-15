@@ -99,7 +99,7 @@ primary:
     base:
       services: [n-api, n-cond, n-cpu, n-novnc, n-sch, n-api-meta]
     rocky:
-      services: [n-net]
+      services: [n-cauth, n-net]
     queens:
       services: [n-cauth, n-net]
     pike:
