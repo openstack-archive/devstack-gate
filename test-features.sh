@@ -16,15 +16,15 @@
 
 ERRORS=0
 
-TEMPEST_FULL_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,key,c-api,c-vol,c-sch,c-bak,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,peakmem_tracker,etcd3,tempest,placement-api"
+TEMPEST_FULL_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,key,c-api,c-vol,c-sch,c-bak,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,etcd3,tempest,placement-api"
 
-TEMPEST_NEUTRON_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,key,c-api,c-vol,c-sch,c-bak,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,peakmem_tracker,etcd3,tempest,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-metering,placement-api"
+TEMPEST_NEUTRON_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,key,c-api,c-vol,c-sch,c-bak,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,etcd3,tempest,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-metering,placement-api"
 
-TEMPEST_HEAT_SLOW_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,key,c-api,c-vol,c-sch,c-bak,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,peakmem_tracker,etcd3,tempest,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-metering,placement-api"
+TEMPEST_HEAT_SLOW_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,key,c-api,c-vol,c-sch,c-bak,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,etcd3,tempest,q-svc,q-agt,q-dhcp,q-l3,q-meta,q-metering,placement-api"
 
-GRENADE_NEW_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,key,c-api,c-vol,c-sch,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,peakmem_tracker,tempest,placement-api"
+GRENADE_NEW_MASTER="n-api,n-api-meta,n-cpu,n-sch,n-cond,n-novnc,g-api,g-reg,key,c-api,c-vol,c-sch,s-proxy,s-account,s-container,s-object,mysql,rabbit,dstat,tempest,placement-api"
 
-GRENADE_SUBNODE_MASTER="n-api-meta,n-cpu,g-api,c-vol,dstat,peakmem_tracker,placement-client"
+GRENADE_SUBNODE_MASTER="n-api-meta,n-cpu,g-api,c-vol,dstat,placement-client"
 
 # Utility function for tests
 function assert_list_equal {
