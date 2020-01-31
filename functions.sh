@@ -558,7 +558,6 @@ function process_testr_artifacts {
         sudo /usr/os-testr-env/bin/subunit2html \
             $log_path/testrepository.subunit $log_path/testr_results.html
         archive_test_artifact $log_path/testrepository.subunit
-        archive_test_artifact $log_path/testr_results.html
     fi
 }
 
@@ -602,8 +601,6 @@ function process_stackviz {
             $log_path/stackviz/data
     fi
     sudo chown -R $USER:$USER $log_path/stackviz
-    # Compress the stackviz data as it is quite large.
-    sudo find $log_path/stackviz -iname '*.json' -execdir gzip -9 {} \+
     popd
 }
 
@@ -831,13 +828,11 @@ function cleanup_host {
 
     if [ `command -v dpkg` ]; then
         dpkg -l> $WORKSPACE/dpkg-l.txt
-        gzip -9 dpkg-l.txt
-        sudo mv $WORKSPACE/dpkg-l.txt.gz $BASE/logs/
+        sudo mv $WORKSPACE/dpkg-l.txt $BASE/logs/
     fi
     if [ `command -v rpm` ]; then
         rpm -qa | sort > $WORKSPACE/rpm-qa.txt
-        gzip -9 rpm-qa.txt
-        sudo mv $WORKSPACE/rpm-qa.txt.gz $BASE/logs/
+        sudo mv $WORKSPACE/rpm-qa.txt $BASE/logs/
     fi
 
     if [[ "$PROCESS_STACKVIZ" -eq "1" ]] ; then
@@ -933,10 +928,7 @@ function cleanup_host {
     # final memory usage and process list
     ps -eo user,pid,ppid,lwp,%cpu,%mem,size,rss,cmd > $BASE/logs/ps.txt
 
-    # Compress all text logs
-    sudo find $BASE/logs -iname '*.txt' -execdir gzip -9 {} \+
-    sudo find $BASE/logs -iname '*.dat' -execdir gzip -9 {} \+
-    sudo find $BASE/logs -iname '*.conf' -execdir gzip -9 {} \+
+    # Compress journal
     sudo find $BASE/logs -iname '*.journal' -execdir xz --threads=0 {} \+
 
     # Disable detailed logging as we return to the main script
