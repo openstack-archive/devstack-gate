@@ -859,12 +859,24 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     # something is wrong, to enforce exit on bad test results.
     set -o errexit
 
-    if [[ "${TEMPEST_OS_TEST_TIMEOUT:-}" != "" ]] ; then
-        TEMPEST_COMMAND="sudo -H -u tempest OS_TEST_TIMEOUT=$TEMPEST_OS_TEST_TIMEOUT tox"
+    # NOTE(gmann): Use branch constraint because Tempest is pinned to the branch release
+    # instead of using master. We need to export it via env var UPPER_CONSTRAINTS_FILE
+    # so that initial creation of tempest tox use stable branch constraint
+    # instead of master constraint as defined in tempest/tox.ini
+    stable_for_u_c="stable/[o-r]"
+    if [[ "$ZUUL_BRANCH" =~ $stable_for_u_c  ]] ; then
+        export UPPER_CONSTRAINTS_FILE=$BASE/new/requirements/upper-constraints.txt
     else
-        TEMPEST_COMMAND="sudo -H -u tempest tox"
+        export UPPER_CONSTRAINTS_FILE=https://releases.openstack.org/constraints/upper/master
+    fi
+
+    if [[ "${TEMPEST_OS_TEST_TIMEOUT:-}" != "" ]] ; then
+        TEMPEST_COMMAND="sudo -H -u tempest UPPER_CONSTRAINTS_FILE=$UPPER_CONSTRAINTS_FILE OS_TEST_TIMEOUT=$TEMPEST_OS_TEST_TIMEOUT tox"
+    else
+        TEMPEST_COMMAND="sudo -H -u tempest UPPER_CONSTRAINTS_FILE=$UPPER_CONSTRAINTS_FILE tox"
     fi
     cd $BASE/new/tempest
+
     if [[ "$DEVSTACK_GATE_TEMPEST_REGEX" != "" ]] ; then
         if [[ "$DEVSTACK_GATE_TEMPEST_ALL_PLUGINS" -eq "1" ]]; then
             echo "Running tempest with plugins and a custom regex filter"
