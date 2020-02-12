@@ -500,7 +500,11 @@ else
 fi
 
 # Install ansible
-sudo -H $PIP install virtualenv
+
+# TODO(gmann): virtualenv 20.0.1 is broken, one known issue:
+# https://github.com/pypa/virtualenv/issues/1551
+# Once virtualenv is fixed we can use the latest one.
+sudo -H $PIP install "virtualenv<20.0.0"
 virtualenv -p python${PYTHON_VER} /tmp/ansible
 
 # Explicitly install pbr first as this will use pip rathat than
