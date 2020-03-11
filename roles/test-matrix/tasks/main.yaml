@@ -13,7 +13,7 @@
   fail:
     msg: "Please ensure virtualenv is available!"
   when:
-    - virtualenv_available | failed
+    - virtualenv_available.rc != 0
     - ansible_os_family != 'Darwin'
 
 - name: Install PyYAML to parse the test matrix
