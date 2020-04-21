@@ -860,20 +860,22 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     set -o errexit
 
     # NOTE(gmann): Use branch constraint because Tempest is pinned to the branch release
-    # instead of using master. We need to export it via env var UPPER_CONSTRAINTS_FILE
+    # instead of using master. We need to export it via env var TOX_CONSTRAINTS_FILE
     # so that initial creation of tempest tox use stable branch constraint
     # instead of master constraint as defined in tempest/tox.ini
     stable_for_u_c="stable/[o-r]"
     if [[ "$ZUUL_BRANCH" =~ $stable_for_u_c  ]] ; then
-        export UPPER_CONSTRAINTS_FILE=$BASE/new/requirements/upper-constraints.txt
+        export TOX_CONSTRAINTS_FILE=$BASE/new/requirements/upper-constraints.txt
     else
-        export UPPER_CONSTRAINTS_FILE=https://releases.openstack.org/constraints/upper/master
+        export TOX_CONSTRAINTS_FILE=https://releases.openstack.org/constraints/upper/master
     fi
+    # Older name, keep this for transition
+    export UPPER_CONSTRAINTS_FILE=$TOX_CONSTRAINTS_FILE
 
     if [[ "${TEMPEST_OS_TEST_TIMEOUT:-}" != "" ]] ; then
-        TEMPEST_COMMAND="sudo -H -u tempest UPPER_CONSTRAINTS_FILE=$UPPER_CONSTRAINTS_FILE OS_TEST_TIMEOUT=$TEMPEST_OS_TEST_TIMEOUT tox"
+        TEMPEST_COMMAND="sudo -H -u tempest UPPER_CONSTRAINTS_FILE=$UPPER_CONSTRAINTS_FILE TOX_CONSTRAINTS_FILE=$TOX_CONSTRAINTS_FILE OS_TEST_TIMEOUT=$TEMPEST_OS_TEST_TIMEOUT tox"
     else
-        TEMPEST_COMMAND="sudo -H -u tempest UPPER_CONSTRAINTS_FILE=$UPPER_CONSTRAINTS_FILE tox"
+        TEMPEST_COMMAND="sudo -H -u tempest UPPER_CONSTRAINTS_FILE=$UPPER_CONSTRAINTS_FILE TOX_CONSTRAINTS_FILE=$TOX_CONSTRAINTS_FILE tox"
     fi
     cd $BASE/new/tempest
 
