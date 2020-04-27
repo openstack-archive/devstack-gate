@@ -52,7 +52,7 @@
           # be enough to make sure devstack-gate keep working for
           # stable branch legacy jobs which are not yet migrated
           # to Zuul v3 native jobs.
-          export BRANCH_OVERRIDE=stable/train
+          export BRANCH_OVERRIDE=stable/ussuri
           if [ "$BRANCH_OVERRIDE" != "default" ] ; then
               export OVERRIDE_ZUUL_BRANCH=$BRANCH_OVERRIDE
           fi
