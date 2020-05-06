@@ -3,23 +3,23 @@
     src: "{{ test_matrix_features }}"
     dest: "{{ ansible_user_dir }}"
 
-- name: Check for virtualenv
-  command: which virtualenv
+- name: Check for venv
+  command: python3 -m venv -h
   changed_when: false
   failed_when: false
-  register: virtualenv_available
+  register: venv_available
 
-- name: Ensure virtualenv is installed
+- name: Ensure venv
   fail:
-    msg: "Please ensure virtualenv is available!"
+    msg: Can not find venv module?
   when:
-    - virtualenv_available.rc != 0
-    - ansible_os_family != 'Darwin'
+    - venv_available.rc != 0
 
-- name: Install PyYAML to parse the test matrix
-  pip:
-    name: PyYAML
-    virtualenv: "/tmp/.test_matrix_venv"
+- name: Create testmatrix venv
+  command: python3 -m venv /tmp/.test_matrix_venv
+
+- name: Install PyYAML to venv
+  command: /tmp/.test_matrix_venv/bin/pip install PyYAML
 
 - name: Append neutron to configs for stable/ocata+
   set_fact:
