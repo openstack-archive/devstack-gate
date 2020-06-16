@@ -761,10 +761,10 @@ else
         $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" --become -m file \
             -a "path='$BASE/data/CA' state=directory owner=stack group=stack mode=0755"
         $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" \
-            --sudo -m synchronize \
+            --become -m synchronize \
             -a "mode=push src='$BASE/data/ca-bundle.pem' dest='$BASE/data/ca-bundle.pem'"
         sudo $ANSIBLE subnodes -f 5 -i "$WORKSPACE/inventory" \
-            --sudo -u $USER -m synchronize \
+            --become -u $USER -m synchronize \
             -a "mode=push src='$BASE/data/CA' dest='$BASE/data'"
     fi
     # Run non controller setup after controller is up. This is necessary
@@ -811,7 +811,7 @@ fi
 
 if [[ "$DEVSTACK_GATE_REMOVE_STACK_SUDO" -eq 1 ]]; then
     echo "Removing sudo privileges for devstack user"
-    $ANSIBLE all --sudo -f 5 -i "$WORKSPACE/inventory" -m file \
+    $ANSIBLE all --become -f 5 -i "$WORKSPACE/inventory" -m file \
         -a "path=/etc/sudoers.d/50_stack_sh state=absent"
 fi
 
