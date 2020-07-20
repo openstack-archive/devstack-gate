@@ -531,6 +531,7 @@ function setup_localrc {
             localrc_set "$localrc_file" "GRENADE_PHASE" "target"
         fi
         localrc_set "$localrc_file" "CEILOMETER_USE_MOD_WSGI" "False"
+        localrc_set "$localrc_file" "GLANCE_STANDALONE" "False"
     fi
 
     if [[ "$DEVSTACK_GATE_TEMPEST_LARGE_OPS" -eq "1" ]]; then
