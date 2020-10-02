@@ -25,6 +25,8 @@
 - project:
     check:
       jobs:
+        - openstack-tox-bashate:
+            nodeset: ubuntu-bionic
         - devstack:
             files:
               - ^roles/
