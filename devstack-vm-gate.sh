@@ -864,7 +864,7 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     # instead of using master. We need to export it via env var TOX_CONSTRAINTS_FILE
     # so that initial creation of tempest tox use stable branch constraint
     # instead of master constraint as defined in tempest/tox.ini
-    stable_for_u_c="stable/[o-r]"
+    stable_for_u_c="stable/[o-s]"
     if [[ "$ZUUL_BRANCH" =~ $stable_for_u_c  ]] ; then
         export TOX_CONSTRAINTS_FILE=$BASE/new/requirements/upper-constraints.txt
     else
