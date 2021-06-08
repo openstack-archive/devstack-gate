@@ -1,3 +1,14 @@
+.. warning::
+
+   For very long, we recommended switching your CI jobs to `Zuulv3
+   native jobs`__. In the Xena cycle, we are officially deprecating
+   it. Devstack Gate will support only stable branches until stable/wallaby.
+   From the Xena release onwards, we no longer guarantee it to work. If it
+   fails, we strongly recommend to switch your CI jobs to Zuulv3 native or
+   fork this repo to fix it for your CI.
+
+.. __: https://governance.openstack.org/tc/goals/selected/victoria/native-zuulv3-jobs.html
+
 Devstack Gate
 =============
 
