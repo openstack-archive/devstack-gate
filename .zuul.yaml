@@ -24,7 +24,6 @@
 
 - project:
     templates:
-      - integrated-gate-py3
       - official-openstack-repo-jobs
       - openstack-python35-jobs
     check:
@@ -32,32 +31,19 @@
         - openstack-tox-bashate:
             nodeset: ubuntu-bionic
         - openstack-tox-py27
-        - neutron-grenade
-        - neutron-grenade-multinode
-        - neutron-grenade-dvr-multinode:
-            voting: false
-        - legacy-tempest-dsvm-neutron-full-ocata:
-            voting: false
-        - legacy-tempest-dsvm-neutron-full-centos-7:
-            voting: false
-        - legacy-tempest-dsvm-multinode-full:
-            voting: false
         - devstack:
             files:
               - ^roles/
-        - neutron-tempest-plugin-api:
-            voting: false
         - legacy-tempest-neutron-full-stable:
             branches: ^(?!driverfixes/).*$
-            voting: false
         - devstack-gate-hooks
     gate:
       queue: integrated
       jobs:
         - openstack-tox-py27
-        - neutron-grenade
-        - neutron-grenade-multinode
         - devstack-gate-hooks
+        - legacy-tempest-neutron-full-stable:
+            branches: ^(?!driverfixes/).*$
     experimental:
       jobs:
         - legacy-tempest-dsvm-neutron-dvr-multinode-full
