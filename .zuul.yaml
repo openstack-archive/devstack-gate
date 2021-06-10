@@ -57,6 +57,7 @@
         - openstack-tox-py27
         - neutron-grenade
         - neutron-grenade-multinode
+        - devstack-gate-hooks
     experimental:
       jobs:
         - legacy-tempest-dsvm-neutron-dvr-multinode-full
