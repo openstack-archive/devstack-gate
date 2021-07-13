@@ -77,9 +77,8 @@ PROJECTS="openstack/glance $PROJECTS"
 PROJECTS="openstack/heat $PROJECTS"
 PROJECTS="openstack/heat-cfntools $PROJECTS"
 PROJECTS="openstack/heat-templates $PROJECTS"
-if [[ "$DEVSTACK_GATE_HORIZON" -eq "1" || "$DEVSTACK_PROJECT_FROM_GIT" = "django_openstack_auth" || "$DEVSTACK_PROJECT_FROM_GIT" = "manila-ui" ]] ; then
+if [[ "$DEVSTACK_GATE_HORIZON" -eq "1" || "$DEVSTACK_PROJECT_FROM_GIT" = "manila-ui" ]] ; then
     PROJECTS="openstack/horizon $PROJECTS"
-    PROJECTS="openstack/django_openstack_auth $PROJECTS"
     PROJECTS="openstack/manila-ui $PROJECTS"
 fi
 PROJECTS="openstack/keystone $PROJECTS"
