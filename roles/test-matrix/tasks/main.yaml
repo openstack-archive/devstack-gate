@@ -19,7 +19,8 @@
   command: python3 -m venv /tmp/.test_matrix_venv
 
 - name: Install PyYAML to venv
-  command: /tmp/.test_matrix_venv/bin/pip install PyYAML
+  command: |
+    /tmp/.test_matrix_venv/bin/pip install 'PyYAML<6'
 
 - name: Append neutron to configs for stable/ocata+
   set_fact:
