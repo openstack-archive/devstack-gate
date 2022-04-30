@@ -7,6 +7,9 @@
    fails, we strongly recommend to switch your CI jobs to Zuulv3 native or
    fork this repo to fix it for your CI.
 
+   We will retire it completely once stable/wallaby is in 'Extended Maintenance'
+   state which is 2022-10-14.
+
 .. __: https://governance.openstack.org/tc/goals/selected/victoria/native-zuulv3-jobs.html
 
 Devstack Gate
