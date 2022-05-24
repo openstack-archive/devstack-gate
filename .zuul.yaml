@@ -4,6 +4,12 @@
       - name: primary
         label: ubuntu-xenial
 
+- nodeset:
+    name: legacy-ubuntu-focal
+    nodes:
+      - name: primary
+        label: ubuntu-focal
+
 - job:
     name: devstack-gate-hooks
     parent: legacy-dsvm-base
@@ -17,6 +23,7 @@
     run: playbooks/legacy/tempest-neutron-full/run.yaml
     post-run: playbooks/legacy/tempest-neutron-full/post.yaml
     timeout: 10800
+    nodeset: legacy-ubuntu-focal
     required-projects:
       - openstack/devstack-gate
       - openstack/neutron

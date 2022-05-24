@@ -28,9 +28,9 @@ GIT_BRANCH=${GIT_BRANCH:-master}
 # We're using enough ansible specific features that it's extremely
 # possible that new ansible releases can break us. As such we should
 # be very deliberate about which ansible we use.
-# NOTE(mriedem): Ansible 2.7.14 is current as of Ubuntu Xenial 16.04.
+# NOTE(ykarel): Ansible 2.9.6 is current as of Ubuntu Focal 20.04.
 # ARA is pinned to <1.0.0 below which affects the required version of Ansible.
-ANSIBLE_VERSION=${ANSIBLE_VERSION:-2.7.14}
+ANSIBLE_VERSION=${ANSIBLE_VERSION:-2.9.6}
 export DSTOOLS_VERSION=${DSTOOLS_VERSION:-0.4.0}
 
 # Set to 0 to skip stackviz
@@ -528,7 +528,8 @@ virtualenv -p python${PYTHON_VER} /tmp/ansible
 /tmp/ansible/bin/pip install pbr
 /tmp/ansible/bin/pip install ansible==$ANSIBLE_VERSION \
                 devstack-tools==$DSTOOLS_VERSION 'ara<1.0.0' 'cmd2<0.9.0' \
-                'flask<2.0.0' 'alembic<1.5.0' 'importlib-resources<5.1.3'
+                'flask<2.0.0' 'alembic<1.5.0' 'importlib-resources<5.1.3' \
+                'MarkupSafe<2.1.0'
 export ANSIBLE=/tmp/ansible/bin/ansible
 export ANSIBLE_PLAYBOOK=/tmp/ansible/bin/ansible-playbook
 export ANSIBLE_CONFIG="$WORKSPACE/ansible.cfg"
