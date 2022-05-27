@@ -864,7 +864,10 @@ if [[ "$DEVSTACK_GATE_TEMPEST" -eq "1" ]]; then
     # instead of using master. We need to export it via env var TOX_CONSTRAINTS_FILE
     # so that initial creation of tempest tox use stable branch constraint
     # instead of master constraint as defined in tempest/tox.ini
-    stable_for_u_c="stable/[o-t]"
+    # Hoping we do not need to update these setting anymore as victoria onwards
+    # all jobs are supposed to be migrated to zuulv3 native jobs and does not require
+    # devstack-gate.
+    stable_for_u_c="stable/[o-v]"
     if [[ "$ZUUL_BRANCH" =~ $stable_for_u_c  ]] ; then
         export TOX_CONSTRAINTS_FILE=$BASE/new/requirements/upper-constraints.txt
     else
