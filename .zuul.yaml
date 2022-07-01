@@ -54,4 +54,3 @@
     experimental:
       jobs:
         - legacy-tempest-dsvm-neutron-dvr-multinode-full
-        - neutron-tempest-dvr-ha-multinode-full
