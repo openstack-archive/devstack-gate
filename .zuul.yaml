@@ -33,24 +33,17 @@
     templates:
       - official-openstack-repo-jobs
       - openstack-python35-jobs
+    queue: integrated
     check:
       jobs:
         - openstack-tox-bashate:
             nodeset: ubuntu-bionic
         - openstack-tox-py27
-        - devstack:
-            files:
-              - ^roles/
-        - legacy-tempest-neutron-full-stable:
-            branches: ^(?!driverfixes/).*$
         - devstack-gate-hooks
     gate:
-      queue: integrated
       jobs:
         - openstack-tox-py27
         - devstack-gate-hooks
-        - legacy-tempest-neutron-full-stable:
-            branches: ^(?!driverfixes/).*$
     experimental:
       jobs:
         - legacy-tempest-dsvm-neutron-dvr-multinode-full
