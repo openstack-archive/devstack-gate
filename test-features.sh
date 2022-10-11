@@ -46,37 +46,37 @@ function assert_list_equal {
 
 function test_full_master {
     local results
-    results=$(DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n)
+    results=$(DEVSTACK_GATE_TEMPEST=1 python ./roles/test-matrix/library/test_matrix.py -n)
     assert_list_equal $TEMPEST_FULL_MASTER $results
 }
 
 function test_full_feature_ec {
     local results
-    results=$(DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n -b feature/ec)
+    results=$(DEVSTACK_GATE_TEMPEST=1 python ./roles/test-matrix/library/test_matrix.py -n -b feature/ec)
     assert_list_equal $TEMPEST_FULL_MASTER $results
 }
 
 function test_neutron_master {
     local results
-    results=$(DEVSTACK_GATE_NEUTRON=1 DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n)
+    results=$(DEVSTACK_GATE_NEUTRON=1 DEVSTACK_GATE_TEMPEST=1 python ./roles/test-matrix/library/test_matrix.py -n)
     assert_list_equal $TEMPEST_NEUTRON_MASTER $results
 }
 
 function test_heat_slow_master {
     local results
-    results=$(DEVSTACK_GATE_TEMPEST_HEAT_SLOW=1 DEVSTACK_GATE_NEUTRON=1 DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n)
+    results=$(DEVSTACK_GATE_TEMPEST_HEAT_SLOW=1 DEVSTACK_GATE_NEUTRON=1 DEVSTACK_GATE_TEMPEST=1 python ./roles/test-matrix/library/test_matrix.py -n)
     assert_list_equal $TEMPEST_HEAT_SLOW_MASTER $results
 }
 
 function test_grenade_new_master {
     local results
-    results=$(DEVSTACK_GATE_TEMPEST_HEAT_SLOW=1 DEVSTACK_GATE_GRENADE=pullup DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n)
+    results=$(DEVSTACK_GATE_TEMPEST_HEAT_SLOW=1 DEVSTACK_GATE_GRENADE=pullup DEVSTACK_GATE_TEMPEST=1 python ./roles/test-matrix/library/test_matrix.py -n)
     assert_list_equal $GRENADE_NEW_MASTER $results
 }
 
 function test_grenade_subnode_master {
     local results
-    results=$(DEVSTACK_GATE_GRENADE=pullup DEVSTACK_GATE_TEMPEST=1 ./roles/test-matrix/library/test_matrix.py -n -r subnode)
+    results=$(DEVSTACK_GATE_GRENADE=pullup DEVSTACK_GATE_TEMPEST=1 python ./roles/test-matrix/library/test_matrix.py -n -r subnode)
     assert_list_equal $GRENADE_SUBNODE_MASTER $results
 }
 
