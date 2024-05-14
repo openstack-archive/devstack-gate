@@ -1,3 +1,0 @@
----
-ovs_package: "openvswitch-switch"
-ovs_service: "openvswitch-switch"

@@ -1,6 +1,0 @@
----
-BASE: "{{ lookup('env', 'BASE')|default('/opt/stack', true) }}"
-CI_USER: "{{ lookup('env', 'CI_USER')|default(ansible_user_id, true) }}"
-PING_TIMES: 20
-HTTP_TIMES: 10
-MIRROR_INFO_FILE: "{{ lookup('env', 'MIRROR_INFO_FILE')|default('/etc/ci/mirror_info.sh', true) }}"

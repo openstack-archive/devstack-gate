@@ -1,6 +1,0 @@
-ovs_starting_offset: 1
-ovs_vni_offset: 1000000
-
-# This value can be set to override the dynamic determinication
-# of this value.
-# ovs_bridge_mtu: 1450
